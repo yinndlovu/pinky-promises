@@ -21,13 +21,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         setError('');
         setLoading(true);
         try {
-            // Replace with your actual login endpoint
             const response = await axios.post('http://localhost:5000/api/auth/login', {
                 username,
                 password,
             });
             setLoading(false);
-            // Navigate to the next screen on success
             navigation.navigate('Success', { username });
         } catch (err: any) {
             setError(err.response?.data?.error || 'Login failed');
