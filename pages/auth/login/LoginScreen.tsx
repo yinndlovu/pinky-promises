@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { Feather } from '@expo/vector-icons';
+import { BASE_URL } from '../../../configuration/config';
 
 type Props = NativeStackScreenProps<any>;
 
@@ -21,7 +22,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         setError('');
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/auth/login', {
+            const response = await axios.post(`${BASE_URL}/api/auth/login`, {
                 username,
                 password,
             });
@@ -38,7 +39,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.label}>Login to your account</Text>
             <View style={styles.inputWrapper}>
                 <TextInput
-                    style={[styles.input, {borderWidth: 0, marginBottom: 0}]}
+                    style={[styles.input, { borderWidth: 0, marginBottom: 0 }]}
                     placeholder="Username"
                     placeholderTextColor="#b0b3c6"
                     value={username}
@@ -49,7 +50,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             </View>
             <View style={styles.inputWrapper}>
                 <TextInput
-                    style={[styles.input, { borderWidth: 0, marginBottom: 0 }]}
+                    style={styles.passwordInput}
                     placeholder="Password"
                     placeholderTextColor="#b0b3c6"
                     value={password}
@@ -61,6 +62,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                     <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color="#b0b3c6" />
                 </TouchableOpacity>
             </View>
+
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <TouchableOpacity
                 style={[styles.loginButton, { opacity: loading ? 0.6 : 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }]}
@@ -111,8 +113,15 @@ const styles = StyleSheet.create({
         padding: 10,
         outlineWidth: 0,
     },
+    passwordInput: {
+        flex: 1,
+        fontSize: 16,
+        color: '#fff',
+        borderWidth: 0,
+        padding: 10,
+    },
     eyeButton: {
-        marginRight: 10
+        paddingHorizontal: 10,
     },
     error: {
         color: 'red',

@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Button, StyleSheet, ActivityIn
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { Feather } from '@expo/vector-icons';
+import { BASE_URL } from '../../../configuration/config';
 
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
 
@@ -54,7 +55,7 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
     setError('');
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post(`${BASE_URL}/api/auth/register`, {
         name,
         username,
         password,

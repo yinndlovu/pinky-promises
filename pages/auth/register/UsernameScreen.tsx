@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
+import { BASE_URL } from '../../../configuration/config';
 
 type Props = NativeStackScreenProps<any>;
 
@@ -31,7 +32,7 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/auth/validate-username?username=${encodeURIComponent(username)}`);
+        const res = await axios.get(`${BASE_URL}/api/auth/validate-username?username=${encodeURIComponent(username)}`);
         setAvailable(res.data.available);
         setError('');
       } catch (e) {
