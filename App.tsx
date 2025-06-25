@@ -1,5 +1,5 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator, TransitionPresets } from '@react-navigation/stack';
 import WelcomeScreen from './pages/WelcomeScreen';
 import NameScreen from './pages/auth/register/NameScreen';
 import UsernameScreen from './pages/auth/register/UsernameScreen';
@@ -9,24 +9,117 @@ import LoginScreen from './pages/auth/login/LoginScreen';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Name" component={NameScreen}
-          options={{ headerShown: true, title: '', headerTransparent: true, headerTintColor: '#fff' }} />
-        <Stack.Screen name="Username" component={UsernameScreen}
-          options={{ headerShown: true, title: '', headerTransparent: true, headerTintColor: '#fff' }} />
-        <Stack.Screen name="Password" component={PasswordScreen}
-          options={{ headerShown: true, title: '', headerTransparent: true, headerTintColor: '#fff' }} />
-        <Stack.Screen name="Success" component={SuccessScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Login" component={LoginScreen}
-          options={{ headerShown: true, title: '', headerTransparent: true, headerTintColor: '#fff' }} />
+    <NavigationContainer
+      theme={{
+        dark: true,
+        colors: {
+          primary: '#e03487',
+          background: '#23243a',
+          card: '#23243a',
+          text: '#fff',
+          border: 'transparent',
+          notification: '#e03487',
+        },
+        fonts: {
+          regular: {
+            fontFamily: 'System',
+            fontWeight: '400',
+          },
+          medium: {
+            fontFamily: 'System',
+            fontWeight: '500',
+          },
+          bold: {
+            fontFamily: 'System',
+            fontWeight: '700',
+          },
+          heavy: {
+            fontFamily: 'System',
+            fontWeight: '900',
+          },
+        },
+      }}
+    >
+      <Stack.Navigator
+        initialRouteName="Welcome"
+        screenOptions={{
+          ...TransitionPresets.SlideFromRightIOS,
+          headerShown: false,
+          cardStyle: { backgroundColor: '#23243a' },
+          transitionSpec: {
+            open: { animation: 'timing', config: { duration: 450 } },
+            close: { animation: 'timing', config: { duration: 450 } },
+          },
+        }}
+      >
+        <Stack.Screen
+          name="Welcome"
+          component={WelcomeScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Name"
+          component={NameScreen}
+          options={{
+            headerShown: true,
+            title: '',
+            headerTransparent: true,
+            headerTintColor: '#fff',
+            headerStyle: { backgroundColor: 'transparent' },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="Username"
+          component={UsernameScreen}
+          options={{
+            headerShown: true,
+            title: '',
+            headerTransparent: true,
+            headerTintColor: '#fff',
+            headerStyle: { backgroundColor: 'transparent' },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="Password"
+          component={PasswordScreen}
+          options={{
+            headerShown: true,
+            title: '',
+            headerTransparent: true,
+            headerTintColor: '#fff',
+            headerStyle: { backgroundColor: 'transparent' },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="Success"
+          component={SuccessScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            headerShown: true,
+            title: '',
+            headerTransparent: true,
+            headerTintColor: '#fff',
+            headerStyle: { backgroundColor: 'transparent' },
+            headerShadowVisible: false,
+          }}
+        />
       </Stack.Navigator>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
     </NavigationContainer>
   );
 }
