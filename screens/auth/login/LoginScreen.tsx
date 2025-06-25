@@ -27,7 +27,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 password,
             });
             setLoading(false);
-            navigation.navigate('Success', { username });
+            navigation.navigate('Main', { username });
         } catch (err: any) {
             setError(err.response?.data?.error || 'Login failed');
             setLoading(false);
