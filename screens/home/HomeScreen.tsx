@@ -2,6 +2,7 @@ import React, { useLayoutEffect } from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const dummyUser = {
   name: "Jane Doe",
@@ -13,6 +14,8 @@ const dummyUser = {
 type Props = NativeStackScreenProps<any>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
+
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -35,7 +38,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }, [navigation]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <Text style={styles.partnerLabel}>PARTNER</Text>
       <View style={styles.profileCard}>
         <View style={styles.profileRow}>
           <View style={styles.avatarWrapper}>
@@ -57,11 +61,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#23243a",
     alignItems: "center",
-    justifyContent: "center",
     paddingHorizontal: 16,
   },
+  partnerLabel: {
+    fontSize: 14,
+    color: "#b0b3c6",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginLeft: 16,
+    marginTop: 50,
+    marginBottom: 10,
+    alignSelf: "flex-start",
+  },
   profileCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#1b1c2e",
     borderRadius: 20,
     padding: 32,
     alignItems: "flex-start",
