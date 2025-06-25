@@ -4,10 +4,11 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
+import axios from "axios";
+import { BASE_URL } from "../../configuration/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const dummyUser = {
-  name: "Jane Doe",
-  username: "janedoe123",
   bio: "Lover of pinky promises and surprises. 🎁",
   avatar: "https://randomuser.me/api/portraits/women/44.jpg",
 };
@@ -16,6 +17,30 @@ type Props = NativeStackScreenProps<any>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const [partner, setPartner] = React.useState<any>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchPartner = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const response = await axios.get(`${BASE_URL}/api/partnership/get-partner`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setPartner(response.data.partner);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch partner data");
+      }
+    };
+
+    fetchPartner();
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -55,9 +80,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <Image source={{ uri: dummyUser.avatar }} style={styles.avatar} />
           </View>
           <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{dummyUser.name}</Text>
-            <Text style={styles.username}>@{dummyUser.username}</Text>
+            <Text style={styles.name}>{partner?.name || 'No partner'}</Text>
+            <Text style={styles.username}>@{partner?.username || ''}</Text>
             <Text style={styles.bio}>{dummyUser.bio}</Text>
+            {error && <Text style={{ color: 'red' }}>{error}</Text>}
           </View>
         </View>
       </View>

@@ -61,7 +61,6 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
         password,
       });
 
-      console.log('name' + name + " username " + username + " password " + password);
       setLoading(false);
       navigation.navigate('Success', { username });
     } catch (err: any) {

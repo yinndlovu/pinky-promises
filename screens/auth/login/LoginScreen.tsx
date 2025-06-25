@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { Feather } from '@expo/vector-icons';
 import { BASE_URL } from '../../../configuration/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type Props = NativeStackScreenProps<any>;
 
@@ -26,6 +27,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 username,
                 password,
             });
+
+            await AsyncStorage.setItem('token', response.data.token);
             setLoading(false);
             navigation.navigate('Main', { username });
         } catch (err: any) {
