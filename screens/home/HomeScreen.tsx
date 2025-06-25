@@ -78,6 +78,18 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         </BlurView>
       </View>
+      <View style={styles.upcomingContainer}>
+        <Text style={styles.upcomingLabel}>UPCOMING</Text>
+        <View style={styles.eventCard}>
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+            <Text style={styles.eventName}>No upcoming events</Text>
+            <Text style={styles.eventTimeLeft}>    5 days left</Text>
+          </View>
+          <Text style={styles.eventDescription}>
+            Stay tuned for more exciting events coming soon!
+          </Text>
+        </View>
+      </View>
     </View>
   );
 };
@@ -154,7 +166,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   actionButton: {
-    backgroundColor: 'rgba(194, 58, 124, 0.3)',
+    backgroundColor: "rgba(194, 58, 124, 0.3)",
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
@@ -172,6 +184,46 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     borderRadius: 12,
     overflow: "hidden",
+  },
+  upcomingContainer: {
+    marginTop: 24,
+    width: "100%",
+    paddingHorizontal: 8,
+  },
+  upcomingLabel: {
+    fontSize: 14,
+    color: "#b0b3c6",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginBottom: 8,
+    marginLeft: 16,
+  },
+  eventCard: {
+    backgroundColor: "#23243a",
+    borderRadius: 14,
+    padding: 18,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 1.5,
+  },
+  eventName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+  eventTimeLeft: {
+    fontSize: 14,
+    color: "#b0b3c6",
+    marginLeft: 8,
+    fontWeight: "600",
+    opacity: 0.7,
+  },
+  eventDescription: {
+    fontSize: 15,
+    color: "#b0b3c6",
+    marginTop: 2,
+    opacity: 0.85,
   },
 });
 
