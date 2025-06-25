@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BlurView } from "expo-blur";
 
 const dummyUser = {
   name: "Jane Doe",
@@ -18,6 +19,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Profile")}
+          style={{ marginLeft: 20 }}
+        >
+          <Feather name="search" size={24} color="#fff" />
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <TouchableOpacity
           onPress={() => navigation.navigate("Settings")}
@@ -52,6 +61,23 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </View>
       </View>
+      <View style={styles.buttonRow}>
+        <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.buttonText}>LIPS</Text>
+          </TouchableOpacity>
+        </BlurView>
+        <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.buttonText}>EMB</Text>
+          </TouchableOpacity>
+        </BlurView>
+        <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.buttonText}>MORE...</Text>
+          </TouchableOpacity>
+        </BlurView>
+      </View>
     </View>
   );
 };
@@ -69,7 +95,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: "uppercase",
     marginLeft: 16,
-    marginTop: 50,
+    marginTop: 70,
     marginBottom: 10,
     alignSelf: "flex-start",
   },
@@ -82,7 +108,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
-    marginBottom: 80,
     width: "100%",
   },
   profileRow: {
@@ -120,6 +145,33 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#fff",
     textAlign: "left",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 8,
+    marginTop: 16,
+  },
+  actionButton: {
+    backgroundColor: 'rgba(194, 58, 124, 0.3)',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: "center",
+    width: "100%",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  blurButton: {
+    flex: 1,
+    marginHorizontal: 4,
+    borderRadius: 12,
+    overflow: "hidden",
   },
 });
 
