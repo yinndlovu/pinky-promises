@@ -10,7 +10,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 const dummyUser = {
-  bio: "Lover of pinky promises and surprises. 🎁",
   avatar: "https://randomuser.me/api/portraits/women/44.jpg",
 };
 
@@ -30,9 +29,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           throw new Error("No token found");
         }
 
-        const response = await axios.get(`${BASE_URL}/api/partnership/get-partner`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.get(
+          `${BASE_URL}/api/partnership/get-partner`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         setPartner(response.data.partner);
       } catch (err) {
         console.error(err);
@@ -86,10 +88,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               <Image source={{ uri: dummyUser.avatar }} style={styles.avatar} />
             </View>
             <View style={styles.infoWrapper}>
-              <Text style={styles.name}>{partner?.name || 'No partner'}</Text>
-              <Text style={styles.username}>@{partner?.username || ''}</Text>
-              <Text style={styles.bio}>{dummyUser.bio}</Text>
-              {error && <Text style={{ color: 'red' }}>{error}</Text>}
+              <Text style={styles.name}>{partner?.name || "No partner"}</Text>
+              <Text style={styles.username}>@{partner?.username || ""}</Text>
+              <Text style={styles.bio}>{partner?.bio || ""}</Text>
+              {error && <Text style={{ color: "red" }}>{error}</Text>}
             </View>
           </View>
         </View>
@@ -113,9 +115,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.upcomingContainer}>
           <Text style={styles.upcomingLabel}>UPCOMING</Text>
           <View style={styles.eventCard}>
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 4,
+              }}
+            >
               <Text style={styles.eventName}>No upcoming events</Text>
-              <Text style={styles.eventTimeLeft}>    5 days left</Text>
+              <Text style={styles.eventTimeLeft}> 5 days left</Text>
             </View>
             <Text style={styles.eventDescription}>
               Stay tuned for more exciting events coming soon!
