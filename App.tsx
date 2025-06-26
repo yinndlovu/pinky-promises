@@ -14,31 +14,13 @@ import NavigationBar from "./components/navigation/NavigationBar";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text } from "react-native";
 import SettingsScreen from "./screens/settings/SettingsScreen";
+import ProfileScreen from "./screens/profile/ProfileScreen";
+import FeedScreen from "./screens/feed/FeedScreen";
+import GiftsScreen from "./screens/gifts/GiftsScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function GiftsScreen() {
-  return (
-    <View style={styles.centered}>
-      <Text style={styles.tabText}>Gifts (dummy)</Text>
-    </View>
-  );
-}
-function FeedScreen() {
-  return (
-    <View style={styles.centered}>
-      <Text style={styles.tabText}>Feed (dummy)</Text>
-    </View>
-  );
-}
-function ProfileScreen() {
-  return (
-    <View style={styles.centered}>
-      <Text style={styles.tabText}>Profile (dummy)</Text>
-    </View>
-  );
-}
 
 function MainTabs() {
   return (
