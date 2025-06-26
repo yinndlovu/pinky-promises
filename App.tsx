@@ -50,7 +50,9 @@ function MainTabs() {
           currentRoute={state.routeNames[state.index]}
         />
       )}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+      }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Gifts" component={GiftsScreen} />

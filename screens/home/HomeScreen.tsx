@@ -7,6 +7,7 @@ import { BlurView } from "expo-blur";
 import axios from "axios";
 import { BASE_URL } from "../../configuration/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 const dummyUser = {
   bio: "Lover of pinky promises and surprises. 🎁",
@@ -72,51 +73,57 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }, [navigation]);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Text style={styles.partnerLabel}>PARTNER</Text>
-      <View style={styles.profileCard}>
-        <View style={styles.profileRow}>
-          <View style={styles.avatarWrapper}>
-            <Image source={{ uri: dummyUser.avatar }} style={styles.avatar} />
+    <Animated.View
+      entering={FadeIn.duration(300)}
+      exiting={FadeOut.duration(300)}
+      style={{ flex: 1, backgroundColor: "#23243a" }}
+    >
+      <View style={[styles.container, { paddingTop: insets.top }]}>
+        <Text style={styles.partnerLabel}>PARTNER</Text>
+        <View style={styles.profileCard}>
+          <View style={styles.profileRow}>
+            <View style={styles.avatarWrapper}>
+              <Image source={{ uri: dummyUser.avatar }} style={styles.avatar} />
+            </View>
+            <View style={styles.infoWrapper}>
+              <Text style={styles.name}>{partner?.name || 'No partner'}</Text>
+              <Text style={styles.username}>@{partner?.username || ''}</Text>
+              <Text style={styles.bio}>{dummyUser.bio}</Text>
+              {error && <Text style={{ color: 'red' }}>{error}</Text>}
+            </View>
           </View>
-          <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{partner?.name || 'No partner'}</Text>
-            <Text style={styles.username}>@{partner?.username || ''}</Text>
-            <Text style={styles.bio}>{dummyUser.bio}</Text>
-            {error && <Text style={{ color: 'red' }}>{error}</Text>}
+        </View>
+        <View style={styles.buttonRow}>
+          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+            <TouchableOpacity style={styles.actionButton}>
+              <Text style={styles.buttonText}>LIPS</Text>
+            </TouchableOpacity>
+          </BlurView>
+          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+            <TouchableOpacity style={styles.actionButton}>
+              <Text style={styles.buttonText}>EMB</Text>
+            </TouchableOpacity>
+          </BlurView>
+          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+            <TouchableOpacity style={styles.actionButton}>
+              <Text style={styles.buttonText}>MORE...</Text>
+            </TouchableOpacity>
+          </BlurView>
+        </View>
+        <View style={styles.upcomingContainer}>
+          <Text style={styles.upcomingLabel}>UPCOMING</Text>
+          <View style={styles.eventCard}>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
+              <Text style={styles.eventName}>No upcoming events</Text>
+              <Text style={styles.eventTimeLeft}>    5 days left</Text>
+            </View>
+            <Text style={styles.eventDescription}>
+              Stay tuned for more exciting events coming soon!
+            </Text>
           </View>
         </View>
       </View>
-      <View style={styles.buttonRow}>
-        <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.buttonText}>LIPS</Text>
-          </TouchableOpacity>
-        </BlurView>
-        <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.buttonText}>EMB</Text>
-          </TouchableOpacity>
-        </BlurView>
-        <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.buttonText}>MORE...</Text>
-          </TouchableOpacity>
-        </BlurView>
-      </View>
-      <View style={styles.upcomingContainer}>
-        <Text style={styles.upcomingLabel}>UPCOMING</Text>
-        <View style={styles.eventCard}>
-          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}>
-            <Text style={styles.eventName}>No upcoming events</Text>
-            <Text style={styles.eventTimeLeft}>    5 days left</Text>
-          </View>
-          <Text style={styles.eventDescription}>
-            Stay tuned for more exciting events coming soon!
-          </Text>
-        </View>
-      </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -214,7 +221,6 @@ const styles = StyleSheet.create({
   upcomingContainer: {
     marginTop: 24,
     width: "100%",
-    paddingHorizontal: 8,
   },
   upcomingLabel: {
     fontSize: 14,

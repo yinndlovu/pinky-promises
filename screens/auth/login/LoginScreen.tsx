@@ -30,7 +30,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
             await AsyncStorage.setItem('token', response.data.token);
             setLoading(false);
-            navigation.navigate('Main', { username });
+
+            navigation.reset({
+                index: 0,
+                routes: [{ name: 'Main', params: { username } }],
+            });
         } catch (err: any) {
             setError(err.response?.data?.error || 'Login failed');
             setLoading(false);
@@ -39,7 +43,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>Login to your account</Text>
+            <Text style={styles.label}>Log in to your account</Text>
             <View style={styles.inputWrapper}>
                 <TextInput
                     style={[styles.input, { borderWidth: 0, marginBottom: 0 }]}

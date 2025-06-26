@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import axios from 'axios';
 import { Feather } from '@expo/vector-icons';
 import { BASE_URL } from '../../../configuration/config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
 
@@ -62,6 +63,7 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
       });
 
       setLoading(false);
+      await AsyncStorage.setItem('token', response.data.token);
       navigation.navigate('Success', { username });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed');
@@ -185,4 +187,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PasswordScreen; 
+export default PasswordScreen;
