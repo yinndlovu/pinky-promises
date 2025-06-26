@@ -211,6 +211,10 @@ const ProfileScreen = () => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>Profile</Text>
+            </View>
+
             <View style={styles.profileRow}>
                 <TouchableOpacity style={styles.avatarWrapper} onPress={handleAvatarPress}>
                     <Image
@@ -276,17 +280,19 @@ const ProfileScreen = () => {
                                 )}
                             </View>
                             <View style={styles.editRow}>
+                                <Text style={styles.atSymbol}>@</Text>
                                 <TextInput
-                                    style={styles.input}
-                                    placeholder="@username"
+                                    style={styles.inputWithAt}
+                                    placeholder="username"
                                     value={editUsername}
-                                    onChangeText={setEditUsername}
+                                    onChangeText={text => setEditUsername(text.replace(/^@+/, ""))}
                                     placeholderTextColor="#b0b3c6"
+                                    autoCapitalize="none"
                                 />
                                 {editUsername !== originalUsername && (
                                     <TouchableOpacity
                                         style={styles.tickIcon}
-                                        onPress={() => handleSaveField("username", editUsername)}
+                                        onPress={() => handleSaveField("username", editUsername.replace(/^@/, ""))}
                                         disabled={loadingUsername}
                                     >
                                         {loadingUsername ? (
@@ -337,9 +343,20 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 60,
     },
+    header: {
+        width: "100%",
+        alignItems: "center",
+        marginBottom: 36,
+    },
+    headerTitle: {
+        fontSize: 28,
+        fontWeight: "bold",
+        color: "#fff",
+        letterSpacing: 1,
+    },
     profileRow: {
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: "center",
     },
     avatarWrapper: {
         marginRight: 20,
@@ -373,7 +390,6 @@ const styles = StyleSheet.create({
     },
     editButton: {
         marginLeft: 8,
-        marginTop: 4,
         padding: 8,
         borderRadius: 8,
     },
@@ -401,6 +417,28 @@ const styles = StyleSheet.create({
         color: "#fff",
         marginBottom: 16,
         alignSelf: "center",
+    },
+    atSymbol: {
+        position: "absolute",
+        left: 0,
+        top: "50%",
+        transform: [{ translateY: -10 }],
+        color: "#b0b3c6",
+        fontSize: 16,
+        zIndex: 2,
+        paddingLeft: 2,
+    },
+    inputWithAt: {
+        backgroundColor: "transparent",
+        color: "#fff",
+        borderRadius: 0,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: "#e03487",
+        width: "100%",
+        fontSize: 16,
+        paddingLeft: 18,
+        paddingRight: 36,
     },
     editRow: {
         width: "100%",
