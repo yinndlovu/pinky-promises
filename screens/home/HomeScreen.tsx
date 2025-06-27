@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from "react";
-import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,6 +18,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [error, setError] = React.useState<string | null>(null);
   const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
   const [showError, setShowError] = React.useState(false);
+  const [isActive, setIsActive] = React.useState(true);
 
   React.useEffect(() => {
     if (error) {
@@ -112,69 +113,78 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(300)}
-      exiting={FadeOut.duration(300)}
-      style={{ flex: 1, backgroundColor: "#23243a" }}
-    >
-      <View style={[styles.container, { paddingTop: insets.top }]}>
-        <Text style={styles.partnerLabel}>PARTNER</Text>
-        <View style={styles.profileCard}>
-          <View style={styles.profileRow}>
-            <View style={styles.avatarWrapper}>
-              <Image
-                source={
-                  avatarUri ? { uri: avatarUri }
-                    : require("../../assets/default-avatar-two.png")
-                }
-                style={styles.avatar}
-              />
+    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(300)}
+        >
+          <Text style={styles.headerTitle}>Overview</Text>
+          <Text style={styles.partnerLabel}>PARTNER</Text>
+          <View style={[styles.profileCard, !isActive && styles.profileCardInactive]}>
+            <View style={styles.profileRow}>
+              <View style={styles.avatarWrapper}>
+                <Image
+                  source={
+                    avatarUri ? { uri: avatarUri }
+                      : require("../../assets/default-avatar-two.png")
+                  }
+                  style={styles.avatar}
+                />
+              </View>
+              <View style={styles.infoWrapper}>
+                <Text style={styles.name}>{partner?.name || "No partner"}</Text>
+                <Text style={styles.username}>@{partner?.username || ""}</Text>
+                <Text style={styles.bio}>{partner?.bio || ""}</Text>
+                {error && <Text style={{ color: "red" }}>{error}</Text>}
+              </View>
             </View>
-            <View style={styles.infoWrapper}>
-              <Text style={styles.name}>{partner?.name || "No partner"}</Text>
-              <Text style={styles.username}>@{partner?.username || ""}</Text>
-              <Text style={styles.bio}>{partner?.bio || ""}</Text>
-              {error && <Text style={{ color: "red" }}>{error}</Text>}
+            <View style={styles.statusRow}>
+              <Text style={styles.statusText}>Status: Home</Text>
+              <Text style={styles.statusText}>Mood: Happy</Text>
             </View>
           </View>
-        </View>
-        <View style={styles.buttonRow}>
-          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.buttonText}>LIPS</Text>
-            </TouchableOpacity>
-          </BlurView>
-          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.buttonText}>EMB</Text>
-            </TouchableOpacity>
-          </BlurView>
-          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.buttonText}>MORE...</Text>
-            </TouchableOpacity>
-          </BlurView>
-        </View>
-        <View style={styles.upcomingContainer}>
-          <Text style={styles.upcomingLabel}>UPCOMING</Text>
-          <View style={styles.eventCard}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 4,
-              }}
-            >
-              <Text style={styles.eventName}>No upcoming events</Text>
-              <Text style={styles.eventTimeLeft}> 5 days left</Text>
-            </View>
-            <Text style={styles.eventDescription}>
-              Stay tuned for more exciting events coming soon!
-            </Text>
+          <View style={styles.buttonRow}>
+            <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+              <TouchableOpacity style={styles.actionButton}>
+                <Text style={styles.buttonText}>LIPS</Text>
+              </TouchableOpacity>
+            </BlurView>
+            <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+              <TouchableOpacity style={styles.actionButton}>
+                <Text style={styles.buttonText}>EMB</Text>
+              </TouchableOpacity>
+            </BlurView>
+            <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+              <TouchableOpacity style={styles.actionButton}>
+                <Text style={styles.buttonText}>MORE...</Text>
+              </TouchableOpacity>
+            </BlurView>
           </View>
-        </View>
-      </View>
-    </Animated.View>
+          <View style={styles.upcomingContainer}>
+            <Text style={styles.upcomingLabel}>UPCOMING</Text>
+            <View style={styles.eventCard}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 4,
+                }}
+              >
+                <Text style={styles.eventName}>No upcoming events</Text>
+                <Text style={styles.eventTimeLeft}> 5 days left</Text>
+              </View>
+              <Text style={styles.eventDescription}>
+                Stay tuned for more exciting events coming soon!
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -185,26 +195,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 16,
   },
+  headerTitle: {
+    fontSize: 28,
+    paddingTop: 26,
+    fontWeight: "bold",
+    color: "#fff",
+    letterSpacing: 1,
+    alignSelf: "center",
+  },
   partnerLabel: {
     fontSize: 14,
     color: "#b0b3c6",
     letterSpacing: 1,
     textTransform: "uppercase",
     marginLeft: 16,
-    marginTop: 70,
+    marginTop: 36,
     marginBottom: 10,
     alignSelf: "flex-start",
   },
   profileCard: {
     backgroundColor: "#1b1c2e",
     borderRadius: 20,
-    padding: 32,
+    paddingVertical: 20,
+    paddingHorizontal: 32,
     alignItems: "flex-start",
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
     width: "100%",
+  },
+  profileCardInactive: {
+    opacity: 0.6,
   },
   profileRow: {
     flexDirection: "row",
@@ -230,17 +252,30 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 4,
+    marginBottom: 0,
   },
   username: {
     fontSize: 16,
     color: "#e03487",
     marginBottom: 8,
+    marginLeft: 4
   },
   bio: {
     fontSize: 15,
     color: "#fff",
     textAlign: "left",
+  },
+  statusRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    marginTop: 10,
+  },
+  statusText: {
+    fontSize: 13,
+    color: "#b0b3c6",
+    letterSpacing: 0.5,
   },
   buttonRow: {
     flexDirection: "row",
