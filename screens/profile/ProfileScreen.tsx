@@ -82,6 +82,7 @@ const ProfileScreen = () => {
             const userId = response.data.user.id;
 
             try {
+                console.log("Try to fetch profile picture");
                 const pictureResponse = await axios.get(
                     `${BASE_URL}/api/profile/get-profile-picture/${userId}`, {
                     headers: { Authorization: `Bearer ${token}` },
@@ -92,6 +93,7 @@ const ProfileScreen = () => {
                 const mime = pictureResponse.headers["content-type"] || "image/jpeg";
                 const base64 = `data:${mime};base64,${encode(pictureResponse.data.buffer)}`;
 
+                console.log("avatar uri", base64);
                 setAvatarUri(base64);
             } catch (picErr: any) {
                 if (picErr.response?.status !== 404) {
