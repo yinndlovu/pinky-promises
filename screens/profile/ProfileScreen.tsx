@@ -91,7 +91,8 @@ const ProfileScreen = () => {
                 );
 
                 const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-                const base64 = `data:${mime};base64,${encode(pictureResponse.data.buffer)}`;
+                const base64Data = Buffer.from(pictureResponse.data, "binary").toString("base64");
+                const base64 = `data:${mime};base64,${base64Data}`;
 
                 console.log("avatar uri", base64);
                 setAvatarUri(base64);
