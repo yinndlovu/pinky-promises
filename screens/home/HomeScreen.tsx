@@ -1,5 +1,5 @@
 import React, { useLayoutEffect } from "react";
-import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +19,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
   const [showError, setShowError] = React.useState(false);
   const [isActive, setIsActive] = React.useState(true);
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     if (error) {
@@ -69,6 +70,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         }
       } catch (err) {
         setError("Failed to fetch partner data");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -110,6 +113,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.toastText}>{error}</Text>
       </View>
     )
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#e03487" size="large" />
+      </View>
+    );
   }
 
   return (
@@ -194,6 +205,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#23243a",
     alignItems: "center",
     paddingHorizontal: 16,
+  },
+  centered: {
+    flex: 1,
+    backgroundColor: "#23243a",
+    alignItems: "center",
+    justifyContent: "center",
   },
   headerTitle: {
     fontSize: 28,

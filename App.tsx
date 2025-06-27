@@ -21,7 +21,6 @@ import GiftsScreen from "./screens/gifts/GiftsScreen";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-
 function MainTabs() {
   return (
     <Tab.Navigator

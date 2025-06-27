@@ -239,7 +239,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     if (loading) {
         return (
-            <View style={styles.container}>
+            <View style={styles.centered}>
                 <ActivityIndicator color="#e03487" size="large" />
             </View>
         );
@@ -420,6 +420,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#23243a",
         paddingHorizontal: 16,
         paddingTop: 60,
+    },
+    centered: {
+        flex: 1,
+        backgroundColor: "#23243a",
+        alignItems: "center",
+        justifyContent: "center",
     },
     header: {
         width: "100%",
