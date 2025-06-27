@@ -15,7 +15,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import SettingsScreen from "./screens/settings/SettingsScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
-import FeedScreen from "./screens/feed/FeedScreen";
+import OursScreen from "./screens/feed/OursScreen";
 import GiftsScreen from "./screens/gifts/GiftsScreen";
 
 const Stack = createStackNavigator();
@@ -37,7 +37,7 @@ function MainTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Gifts" component={GiftsScreen} />
-      <Tab.Screen name="Feed" component={FeedScreen} />
+      <Tab.Screen name="Feed" component={OursScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

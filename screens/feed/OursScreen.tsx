@@ -1,9 +1,9 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-const FeedScreen = () => (
+const OursScreen = () => (
   <View style={styles.centered}>
-    <Text style={styles.tabText}>Feed (dummy)</Text>
+    <Text style={styles.tabText}>Ours</Text>
   </View>
 );
 
@@ -21,4 +21,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FeedScreen;
+export default OursScreen;

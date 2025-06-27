@@ -282,6 +282,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
                 <View style={styles.divider} />
 
+                <View style={styles.partnerRow}>
+                    <Text style={styles.partnerText}>
+                        Partner: <Text style={styles.partnerName}>Partner's name</Text>
+                    </Text>
+                </View>
+
                 <StatusMood
                     onAddHome={() => {
                     }}
@@ -484,6 +490,21 @@ const styles = StyleSheet.create({
         backgroundColor: "#393a4a",
         marginVertical: 24,
         opacity: 1,
+    },
+    partnerRow: {
+        marginBottom: 20,
+        marginLeft: 2,
+        alignItems: "center",
+    },
+    partnerText: {
+        color: "#b0b3c6",
+        fontSize: 15,
+        fontWeight: "500",
+        textAlign: "center"
+    },
+    partnerName: {
+        color: "rgb(155, 158, 180)",
+        fontWeight: "bold",
     },
     modalOverlay: {
         ...StyleSheet.absoluteFillObject,

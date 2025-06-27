@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     container: {
         width: "100%",
         marginTop: 32,
-        marginBottom: 12,
+        marginBottom: 50,
     },
     sectionTitle: {
         fontSize: 14,
