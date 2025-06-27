@@ -6,6 +6,7 @@ import { BASE_URL } from "../../configuration/config";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
+import { encode } from 'base64-arraybuffer';
 
 const ProfileScreen = () => {
     const [user, setUser] = React.useState<any>(null);
@@ -88,10 +89,13 @@ const ProfileScreen = () => {
                 }
                 );
 
-                const base64 = `data:${pictureResponse.headers["content-type"]};base64,${Buffer.from(pictureResponse.data, "binary").toString("base64")}`;
+                const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+                const base64 = `data:${mime};base64,${encode(pictureResponse.data.buffer)}`;
+
                 setAvatarUri(base64);
             } catch (picErr: any) {
                 if (picErr.response?.status !== 404) {
+                    console.log("no pp found");
                     setError(picErr.response?.data?.error || picErr.message);
                 }
             }
@@ -143,7 +147,7 @@ const ProfileScreen = () => {
                 ) {
                     setError("Image is too large. Make sure is less than 10 MB.");
                 } else {
-                    setError("Failed to upload profile picture.");
+                    setError("Failed to upload profile picture");
                 }
             } finally {
                 setLoading(false);
