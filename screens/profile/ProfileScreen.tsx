@@ -93,11 +93,9 @@ const ProfileScreen = () => {
                 const mime = pictureResponse.headers["content-type"] || "image/jpeg";
                 const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
 
-                console.log("avatar uri", base64);
                 setAvatarUri(base64);
             } catch (picErr: any) {
                 if (picErr.response?.status !== 404) {
-                    console.log("no pp found");
                     setError(picErr.response?.data?.error || picErr.message);
                 }
             }

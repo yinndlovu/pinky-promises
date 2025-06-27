@@ -8,10 +8,7 @@ import axios from "axios";
 import { BASE_URL } from "../../configuration/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-
-const dummyUser = {
-  avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-};
+import { encode } from 'base64-arraybuffer';
 
 type Props = NativeStackScreenProps<any>;
 
@@ -19,6 +16,19 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const [partner, setPartner] = React.useState<any>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
+  const [showError, setShowError] = React.useState(false);
+
+  React.useEffect(() => {
+    if (error) {
+      setShowError(true);
+      const timer = setTimeout(() => {
+        setShowError(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   React.useEffect(() => {
     const fetchPartner = async () => {
@@ -35,9 +45,28 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setPartner(response.data.partner);
+        const partnerData = response.data.partner;
+        setPartner(partnerData);
+
+        const partnerId = partnerData.id;
+
+        try {
+          const pictureResponse = await axios.get(
+            `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            responseType: "arraybuffer"
+          });
+
+          const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+          const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
+
+          setAvatarUri(base64);
+        } catch (picErr: any) {
+          if (![404, 500].includes(picErr.response?.status)) {
+            setError(picErr.response?.data?.error || picErr.message);
+          }
+        }
       } catch (err) {
-        console.error(err);
         setError("Failed to fetch partner data");
       }
     };
@@ -74,6 +103,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     });
   }, [navigation]);
 
+  {
+    showError && (
+      <View style={styles.toast}>
+        <Text style={styles.toastText}>{error}</Text>
+      </View>
+    )
+  }
+
   return (
     <Animated.View
       entering={FadeIn.duration(300)}
@@ -85,7 +122,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <View style={styles.profileCard}>
           <View style={styles.profileRow}>
             <View style={styles.avatarWrapper}>
-              <Image source={{ uri: dummyUser.avatar }} style={styles.avatar} />
+              <Image
+                source={
+                  avatarUri ? { uri: avatarUri }
+                    : require("../../assets/default-avatar-two.png")
+                }
+                style={styles.avatar}
+              />
             </View>
             <View style={styles.infoWrapper}>
               <Text style={styles.name}>{partner?.name || "No partner"}</Text>
@@ -264,6 +307,27 @@ const styles = StyleSheet.create({
     color: "#b0b3c6",
     marginTop: 2,
     opacity: 0.85,
+  },
+  toast: {
+    position: "absolute",
+    // top: 40
+    bottom: 40,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 
