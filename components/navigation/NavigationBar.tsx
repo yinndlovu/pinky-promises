@@ -8,11 +8,10 @@ import type {
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-// Feather icon names used
 const NAV_ITEMS = [
   { name: "Home", icon: "home" as const },
   { name: "Gifts", icon: "gift" as const },
-  { name: "Feed", icon: "rss" as const },
+  { name: "Ours", icon: "heart" as const },
   { name: "Profile", icon: "user" as const },
 ];
 

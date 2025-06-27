@@ -41,7 +41,7 @@ const StatusMood: React.FC<Props> = ({
             <Text style={styles.moodValue}>{mood}</Text>
             <Text style={styles.moodDescription}> - {moodDescription}</Text>
         </View>
-        
+
     </View>
 );
 
