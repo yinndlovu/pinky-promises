@@ -1,11 +1,40 @@
-import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, StatusBar } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from '@react-navigation/stack';
 
 type SettingsScreenProps = StackScreenProps<any, any>;
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) => {
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (route.params?.passwordChanged) {
+        setSuccess("Password changed successfully!");
+        navigation.setParams({ passwordChanged: undefined });
+      }
+      if (route.params?.emailChanged) {
+        setSuccess("Email address updated successfully!");
+        navigation.setParams({ emailChanged: undefined });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, route.params]);
+
+  useEffect(() => {
+    if (success) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+        setSuccess(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
   const settingsOptions = [
     {
       label: "Change email",
@@ -15,7 +44,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
     {
       label: "Change password",
       icon: "lock",
-      onPress: () => { },
+      onPress: () => navigation.navigate("ChangePassword"),
     },
     {
       label: "Notifications",
@@ -54,13 +83,21 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           style={styles.logoutButton}
           onPress={() => Alert.alert("Log out", "Are you sure you want to log out?", [
             { text: "Cancel", style: "cancel" },
-            { text: "Log out", style: "destructive", onPress: () => {/* handle logout */ } },
+            { text: "Log out", style: "destructive", onPress: () => { } },
           ])}
         >
           <Feather name="log-out" size={20} color="#fff" style={styles.optionIcon} />
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
       </ScrollView>
+      {
+        showSuccess && (
+          <View style={[styles.toast, { backgroundColor: "#4caf50" }]}>
+            <Text style={styles.toastText}>{success}</Text>
+          </View>
+        )
+      }
+
     </View>
   );
 };
@@ -129,6 +166,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 10,
     letterSpacing: 1,
+  },
+  toast: {
+    position: "absolute",
+    top: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 50,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 

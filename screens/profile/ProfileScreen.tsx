@@ -440,7 +440,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             )}
 
             {showSuccess && (
-                <View style={[styles.toast, { backgroundColor: "#e03487" }]}>
+                <View style={[styles.toast, { backgroundColor: "#4caf50" }]}>
                     <Text style={styles.toastText}>{success}</Text>
                 </View>
             )}

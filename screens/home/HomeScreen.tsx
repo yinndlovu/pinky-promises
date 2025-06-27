@@ -135,14 +135,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     });
   }, [navigation]);
 
-  {
-    showError && (
-      <View style={styles.toast}>
-        <Text style={styles.toastText}>{error}</Text>
-      </View>
-    )
-  }
-
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -224,6 +216,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <RecentActivity activities={activities} />
         </Animated.View>
       </ScrollView>
+      {
+        showError && (
+          <View style={styles.toast}>
+            <Text style={styles.toastText}>{error}</Text>
+          </View>
+        )
+      }
     </View>
   );
 };
