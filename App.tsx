@@ -12,7 +12,7 @@ import HomeScreen from "./screens/home/HomeScreen";
 import LoginScreen from "./screens/auth/login/LoginScreen";
 import NavigationBar from "./components/navigation/NavigationBar";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet } from "react-native";
 import SettingsScreen from "./screens/settings/SettingsScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 import FeedScreen from "./screens/feed/FeedScreen";

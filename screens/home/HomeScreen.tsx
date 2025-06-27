@@ -9,6 +9,7 @@ import { BASE_URL } from "../../configuration/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { encode } from 'base64-arraybuffer';
+import RecentActivity from "./RecentActivity";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -20,6 +21,33 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [showError, setShowError] = React.useState(false);
   const [isActive, setIsActive] = React.useState(true);
   const [loading, setLoading] = React.useState(true);
+
+  const activities = [
+    {
+      id: "1",
+      description: "You sent a gift to your partner",
+      date: "2024-06-01",
+      time: "14:30",
+    },
+    {
+      id: "2",
+      description: "You updated your status to 'Home'",
+      date: "2024-05-31",
+      time: "19:10",
+    },
+    {
+      id: "3",
+      description: "You added a new favorite: Sushi",
+      date: "2024-05-30",
+      time: "21:45",
+    },
+    {
+      id: "4",
+      description: "You changed your mood to 'Happy'",
+      date: "2024-05-29",
+      time: "09:15",
+    },
+  ];
 
   React.useEffect(() => {
     if (error) {
@@ -193,6 +221,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
             </View>
           </View>
+          <RecentActivity activities={activities} />
         </Animated.View>
       </ScrollView>
     </View>
@@ -201,9 +230,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     backgroundColor: "#23243a",
-    alignItems: "center",
+    alignItems: "stretch",
     paddingHorizontal: 16,
   },
   centered: {

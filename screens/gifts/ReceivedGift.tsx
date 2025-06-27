@@ -1,0 +1,78 @@
+import React from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
+
+type Props = {
+  giftName: string;
+  receivedAt: string;
+  onClaim?: () => void;
+};
+
+const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim }) => (
+  <View style={styles.card}>
+    <View style={styles.row}>
+      <Feather name="gift" size={22} color="#e03487" style={{ marginRight: 10 }} />
+      <Text style={styles.title}>You received a monthly gift</Text>
+    </View>
+    <Text style={styles.giftName}>{giftName}</Text>
+    <Text style={styles.dateText}>{receivedAt}</Text>
+    <TouchableOpacity style={styles.claimButton} onPress={onClaim}>
+      <Text style={styles.claimButtonText}>Claim</Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#23243a",
+    borderRadius: 14,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginBottom: 24,
+    alignItems: "flex-start",
+    width: "100%",
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  title: {
+    color: "#fff",
+    fontSize: 17,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+  },
+  giftName: {
+    color: "#e03487",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 6,
+    marginLeft: 2,
+  },
+  dateText: {
+    color: "#b0b3c6",
+    fontSize: 13,
+    marginBottom: 16,
+    marginLeft: 2,
+  },
+  claimButton: {
+    backgroundColor: "#e03487",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 28,
+    alignItems: "center",
+    alignSelf: "flex-start",
+  },
+  claimButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    letterSpacing: 1,
+  },
+});
+
+export default ReceivedGift;

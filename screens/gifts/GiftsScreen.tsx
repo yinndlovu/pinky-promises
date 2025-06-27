@@ -1,23 +1,82 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import SetMonthlyGift from "./SetMonthlyGift";
+import ReceivedGift from "./ReceivedGift";
+import PastGiftsList from "./PastGiftsList";
+
+const pastGifts = [
+  {
+    id: "1",
+    giftName: "Chocolate Box",
+    receivedAt: "2024-05-15 13:20",
+    claimedAt: "2024-05-15 14:00",
+  },
+  {
+    id: "2",
+    giftName: "Movie Night",
+    receivedAt: "2024-04-10 18:00",
+    claimedAt: "2024-04-10 18:30",
+  },
+  {
+    id: "3",
+    giftName: "Spa Voucher",
+    receivedAt: "2024-03-12 09:10",
+    claimedAt: "2024-03-12 10:00",
+  },
+  {
+    id: "4",
+    giftName: "Book Set",
+    receivedAt: "2024-02-14 11:45",
+    claimedAt: "2024-02-14 12:10",
+  },
+  {
+    id: "5",
+    giftName: "Coffee Date",
+    receivedAt: "2024-01-20 16:00",
+    claimedAt: "2024-01-20 16:20",
+  },
+  {
+    id: "6",
+    giftName: "Surprise Cake",
+    receivedAt: "2023-12-25 20:00",
+    claimedAt: "2023-12-25 20:30",
+  },
+];
 
 const GiftsScreen = () => (
-  <View style={styles.centered}>
-    <Text style={styles.tabText}>Gifts (dummy)</Text>
+  <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={styles.headerTitle}>Gifts</Text>
+      <SetMonthlyGift giftName="A Surprise Bouquet" onChange={() => { }} />
+      <ReceivedGift
+        giftName="A Surprise Bouquet"
+        receivedAt="2024-06-02 15:45"
+        onClaim={() => {  }}
+      />
+      <PastGiftsList gifts={pastGifts}/>
+    </ScrollView>
   </View>
 );
 
 const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+  container: {
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 32,
+    alignItems: "stretch",
     backgroundColor: "#23243a",
+    minHeight: "100%",
   },
-  tabText: {
-    color: "#fff",
-    fontSize: 22,
+  headerTitle: {
+    fontSize: 28,
     fontWeight: "bold",
+    color: "#fff",
+    letterSpacing: 1,
+    alignSelf: "center",
+    marginBottom: 36,
   },
 });
 
