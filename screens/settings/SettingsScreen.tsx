@@ -1,31 +1,34 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import type { StackScreenProps } from '@react-navigation/stack';
 
-const settingsOptions = [
-  {
-    label: "Change email",
-    icon: "mail",
-    onPress: () => { },
-  },
-  {
-    label: "Change password",
-    icon: "lock",
-    onPress: () => { },
-  },
-  {
-    label: "Notifications",
-    icon: "bell",
-    onPress: () => { },
-  },
-  {
-    label: "About",
-    icon: "info",
-    onPress: () => { },
-  },
-];
+type SettingsScreenProps = StackScreenProps<any, any>;
 
-const SettingsScreen: React.FC = () => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
+  const settingsOptions = [
+    {
+      label: "Change email",
+      icon: "mail",
+      onPress: () => navigation.navigate("ChangeEmail"),
+    },
+    {
+      label: "Change password",
+      icon: "lock",
+      onPress: () => { },
+    },
+    {
+      label: "Notifications",
+      icon: "bell",
+      onPress: () => { },
+    },
+    {
+      label: "About",
+      icon: "info",
+      onPress: () => { },
+    },
+  ];
+
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <ScrollView

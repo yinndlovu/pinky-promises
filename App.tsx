@@ -17,6 +17,8 @@ import SettingsScreen from "./screens/settings/SettingsScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 import OursScreen from "./screens/ours/OursScreen";
 import GiftsScreen from "./screens/gifts/GiftsScreen";
+import ChangeEmailScreen from "./screens/settings/ChangeEmailScreen";
+import VerifyEmailOtpScreen from "./screens/settings/VerifyEmailOtpScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -156,6 +158,30 @@ export default function App() {
           name="Main"
           component={MainTabs}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChangeEmail"
+          component={ChangeEmailScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTransparent: true,
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="VerifyEmailOTP"
+          component={VerifyEmailOtpScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTransparent: true,
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
         />
       </Stack.Navigator>
       <StatusBar style="light" />
