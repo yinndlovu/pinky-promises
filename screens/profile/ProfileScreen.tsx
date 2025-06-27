@@ -13,6 +13,8 @@ import Favorites from "./Favorites";
 import LoveLanguage from "./LoveLanguage";
 import MoreAboutYou from "./MoreAboutYou";
 import type { StackScreenProps } from '@react-navigation/stack';
+import ProfilePictureModal from "./ProfilePictureModal";
+import ProfilePictureViewer from "./ProfilePictureViewer";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -37,6 +39,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const [loadingName, setLoadingName] = React.useState(false);
     const [loadingUsername, setLoadingUsername] = React.useState(false);
     const [loadingBio, setLoadingBio] = React.useState(false);
+
+    const [showPictureModal, setShowPictureModal] = React.useState(false);
+    const [showPictureViewer, setShowPictureViewer] = React.useState(false);
 
     const favoritesData = [
         { label: "Favorite color", value: "Blue" },
@@ -146,7 +151,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         }
     }
 
-    const handleAvatarPress = async () => {
+    const handleAvatarPress = () => {
+        setShowPictureModal(true);
+    };
+
+    const handleViewCurrentPicture = () => {
+        setShowPictureModal(false);
+        setShowPictureViewer(true);
+    };
+
+    const handleSelectNewPicture = async () => {
+        setShowPictureModal(false);
+
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
             allowsEditing: true,
@@ -319,18 +335,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     }}
                 />
 
-                {showError && (
-                    <View style={styles.toast}>
-                        <Text style={styles.toastText}>{error}</Text>
-                    </View>
-                )}
-
-                {showSuccess && (
-                    <View style={[styles.toast, { backgroundColor: "#e03487" }]}>
-                        <Text style={styles.toastText}>{success}</Text>
-                    </View>
-                )}
-
                 <Modal
                     visible={editModalVisible}
                     animationType="fade"
@@ -416,7 +420,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         </BlurView>
                     </View>
                 </Modal>
+                <ProfilePictureModal
+                    visible={showPictureModal}
+                    onClose={() => setShowPictureModal(false)}
+                    onSelectNew={handleSelectNewPicture}
+                    onViewCurrent={handleViewCurrentPicture}
+                />
+
+                <ProfilePictureViewer
+                    visible={showPictureViewer}
+                    imageUri={avatarUri}
+                    onClose={() => setShowPictureViewer(false)}
+                />
             </ScrollView>
+            {showError && (
+                <View style={styles.toast}>
+                    <Text style={styles.toastText}>{error}</Text>
+                </View>
+            )}
+
+            {showSuccess && (
+                <View style={[styles.toast, { backgroundColor: "#e03487" }]}>
+                    <Text style={styles.toastText}>{success}</Text>
+                </View>
+            )}
         </View>
     );
 };
@@ -597,8 +624,8 @@ const styles = StyleSheet.create({
     },
     toast: {
         position: "absolute",
-        // top: 40
-        bottom: 40,
+        top: 50,
+        // bottom: 40,
         left: 20,
         right: 20,
         backgroundColor: "#e03487",
