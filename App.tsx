@@ -12,7 +12,7 @@ import HomeScreen from "./screens/home/HomeScreen";
 import LoginScreen from "./screens/auth/login/LoginScreen";
 import NavigationBar from "./components/navigation/NavigationBar";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
 import SettingsScreen from "./screens/settings/SettingsScreen";
 import ProfileScreen from "./screens/profile/ProfileScreen";
 import OursScreen from "./screens/ours/OursScreen";
@@ -20,6 +20,8 @@ import GiftsScreen from "./screens/gifts/GiftsScreen";
 import ChangeEmailScreen from "./screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./screens/settings/ChangePasswordScreen";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import React, { useState, useEffect } from "react";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -46,7 +48,17 @@ function MainTabs() {
   );
 }
 
-export default function App() {
+function AppContent() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#e03487" size="large" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer
       theme={{
@@ -80,7 +92,7 @@ export default function App() {
       }}
     >
       <Stack.Navigator
-        initialRouteName="Welcome"
+        initialRouteName={isAuthenticated ? "Main" : "Welcome"}
         screenOptions={{
           ...TransitionPresets.SlideFromRightIOS,
           headerShown: false,
@@ -199,6 +211,14 @@ export default function App() {
       </Stack.Navigator>
       <StatusBar style="light" />
     </NavigationContainer>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

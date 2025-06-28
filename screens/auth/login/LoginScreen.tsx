@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Feather } from '@expo/vector-icons';
 import { BASE_URL } from '../../../configuration/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../../contexts/AuthContext';
 
 type Props = NativeStackScreenProps<any>;
 
@@ -14,6 +15,8 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const { login } = useAuth();
 
     const handleLogin = async () => {
         if (!username || !password) {
@@ -28,7 +31,11 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
                 password,
             });
 
-            await AsyncStorage.setItem('token', response.data.token);
+            await login(response.data.token, {
+                id: response.data.userId,
+                username: response.data.username
+            });
+            
             setLoading(false);
 
             navigation.reset({

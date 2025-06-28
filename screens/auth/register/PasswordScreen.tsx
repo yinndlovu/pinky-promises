@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Feather } from '@expo/vector-icons';
 import { BASE_URL } from '../../../configuration/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
 
@@ -20,6 +21,8 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
   const [checking, setChecking] = useState(false);
   const [valid, setValid] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const { login } = useAuth();
 
   useEffect(() => {
     if (!(password && confirmPassword) || password !== confirmPassword
@@ -63,8 +66,16 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
       });
 
       setLoading(false);
-      await AsyncStorage.setItem('token', response.data.token);
-      navigation.navigate('Success', { username });
+
+      await login(response.data.token, {
+        id: response.data.userId,
+        username: response.data.username
+      });
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Main', params: { username } }],
+      });
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed');
       setLoading(false);

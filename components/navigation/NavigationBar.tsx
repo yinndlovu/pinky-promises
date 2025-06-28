@@ -7,6 +7,10 @@ import type {
 } from "@react-navigation/native";
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import { SafeAreaView } from "react-native-safe-area-context";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { BASE_URL } from "../../configuration/config";
+import { encode } from 'base64-arraybuffer';
 
 const NAV_ITEMS = [
   { name: "Home", icon: "home" as const },

@@ -2,12 +2,26 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, StatusBar } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from '@react-navigation/stack';
+import { useAuth } from "../../contexts/AuthContext";
+import LogoutModal from "../../components/modals/LogoutModal";
 
 type SettingsScreenProps = StackScreenProps<any, any>;
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    setShowLogoutModal(false);
+    await logout();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Welcome' }],
+    });
+  };
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -81,10 +95,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) =>
         </View>
         <TouchableOpacity
           style={styles.logoutButton}
-          onPress={() => Alert.alert("Log out", "Are you sure you want to log out?", [
-            { text: "Cancel", style: "cancel" },
-            { text: "Log out", style: "destructive", onPress: () => { } },
-          ])}
+          onPress={() => setShowLogoutModal(true)}
+          activeOpacity={0.8}
         >
           <Feather name="log-out" size={20} color="#fff" style={styles.optionIcon} />
           <Text style={styles.logoutText}>Log out</Text>
@@ -98,6 +110,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) =>
         )
       }
 
+      <LogoutModal
+        visible={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+      />
     </View>
   );
 };
