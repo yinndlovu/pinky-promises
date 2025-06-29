@@ -50,10 +50,10 @@ const GiftsScreen = () => (
       showsVerticalScrollIndicator={false}
     >
       <Text style={styles.headerTitle}>Gifts</Text>
-      <SetMonthlyGift giftName="A Surprise Bouquet" onChange={() => { }} />
+      <SetMonthlyGift giftName="Roses" onChange={() => { }} />
       <ReceivedGift
-        giftName="A Surprise Bouquet"
-        receivedAt="2024-06-02 15:45"
+        giftName="Roses"
+        receivedAt="01 Jun 2025 00:00"
         onClaim={() => {  }}
       />
       <PastGiftsList gifts={pastGifts}/>

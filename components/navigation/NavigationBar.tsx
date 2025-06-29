@@ -1,5 +1,5 @@
-import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, TouchableOpacity, Text, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
   NavigationHelpers,
@@ -30,6 +30,84 @@ const ACTIVE_COLOR = "#e03487";
 const INACTIVE_COLOR = "#b0b3c6";
 
 export default function NavigationBar({ navigation, currentRoute }: Props) {
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserAvatar();
+  }, []);
+
+  const fetchUserAvatar = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const userResponse = await axios.get(
+        `${BASE_URL}/api/profile/get-profile`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const userId = userResponse.data.user.id;
+
+      const pictureResponse = await axios.get(
+        `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "arraybuffer"
+        }
+      );
+
+      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
+
+      setAvatarUri(base64);
+    } catch (error: any) {
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderProfileIcon = () => {
+    if (loading) {
+      return (
+        <View style={styles.avatarContainer}>
+          <ActivityIndicator size={16} color={currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR} />
+        </View>
+      );
+    }
+
+    if (avatarUri) {
+      return (
+        <View style={styles.avatarContainer}>
+          <Image
+            source={{ uri: avatarUri }}
+            style={[
+              styles.avatar,
+              { borderColor: currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR }
+            ]}
+          />
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.avatarContainer}>
+        <Image
+          source={require("../../assets/default-avatar-two.png")}
+          style={[
+            styles.avatar,
+            { borderColor: currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR }
+          ]}
+        />
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView edges={["bottom"]} style={{ backgroundColor: "#23243a" }}>
       <View style={styles.container}>
@@ -42,11 +120,15 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
               onPress={() => navigation.navigate(item.name)}
               activeOpacity={0.7}
             >
-              <Feather
-                name={item.icon}
-                size={26}
-                color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
-              />
+              {item.name === "Profile" ? (
+                renderProfileIcon()
+              ) : (
+                <Feather
+                  name={item.icon}
+                  size={26}
+                  color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
+                />
+              )}
               <Text
                 style={[
                   styles.label,
@@ -81,5 +163,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
     fontWeight: "bold",
+  },
+  avatarContainer: {
+    width: 26,
+    height: 26,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatar: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
   },
 });

@@ -300,15 +300,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
                 <View style={styles.partnerRow}>
                     <Text style={styles.partnerText}>
-                        Partner: <Text style={styles.partnerName}>Partner's name</Text>
+                        Partner: <Text style={styles.partnerName}>Paris</Text>
                     </Text>
                 </View>
 
                 <StatusMood
                     onAddHome={() => {
                     }}
-                    mood="Happy"
-                    moodDescription="description of the mood"
+                    mood="Content"
+                    moodDescription="This just means you're in a chill mood"
                 />
 
                 <Anniversary

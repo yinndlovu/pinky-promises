@@ -5,10 +5,10 @@ import SpecialDates from "./SpecialDates";
 import FavoriteMemories from "./FavoriteMemories";
 
 const specialDates = [
-  { id: "1", label: "Our anniversary", date: "2022-09-22" },
-  { id: "2", label: "Her birthday", date: "1998-05-14" },
-  { id: "3", label: "First date", date: "2021-11-03" },
-  { id: "4", label: "Engagement", date: "2024-02-14" },
+  { id: "1", label: "Our anniversary", date: "22 September 2024" },
+  { id: "2", label: "Her birthday", date: "Not added yet" },
+  { id: "3", label: "Not added yet", date: "-" },
+  { id: "4", label: "Not added yet", date: "-" },
 ];
 
 const favoriteMemories = [

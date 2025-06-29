@@ -25,26 +25,26 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const activities = [
     {
       id: "1",
-      description: "You sent a gift to your partner",
-      date: "2024-06-01",
+      description: "Yin has come home from work",
+      date: "27 Jun 2025",
       time: "14:30",
     },
     {
       id: "2",
-      description: "You updated your status to 'Home'",
-      date: "2024-05-31",
-      time: "19:10",
+      description: "Yin has left for work",
+      date: "27 Jun 2025",
+      time: "08:03",
     },
     {
       id: "3",
-      description: "You added a new favorite: Sushi",
-      date: "2024-05-30",
+      description: "You have updated your mood to 'Happy'",
+      date: "25 Jun 2025",
       time: "21:45",
     },
     {
       id: "4",
       description: "You changed your mood to 'Happy'",
-      date: "2024-05-29",
+      date: "22 May 2025",
       time: "09:15",
     },
   ];
@@ -174,19 +174,19 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
             <View style={styles.statusRow}>
-              <Text style={styles.statusText}>Status: Home</Text>
+              <Text style={styles.statusText}>Status: Unavailable</Text>
               <Text style={styles.statusText}>Mood: Happy</Text>
             </View>
           </View>
           <View style={styles.buttonRow}>
             <BlurView intensity={50} tint="dark" style={styles.blurButton}>
               <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.buttonText}>LIPS</Text>
+                <Text style={styles.buttonText}>HOLD</Text>
               </TouchableOpacity>
             </BlurView>
             <BlurView intensity={50} tint="dark" style={styles.blurButton}>
               <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.buttonText}>EMB</Text>
+                <Text style={styles.buttonText}>CUDDLE</Text>
               </TouchableOpacity>
             </BlurView>
             <BlurView intensity={50} tint="dark" style={styles.blurButton}>
@@ -205,11 +205,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   marginBottom: 4,
                 }}
               >
-                <Text style={styles.eventName}>No upcoming events</Text>
-                <Text style={styles.eventTimeLeft}> 5 days left</Text>
+                <Text style={styles.eventName}>Girlfriend's Day</Text>
+                <Text style={styles.eventTimeLeft}> 1 month 2 days left</Text>
               </View>
               <Text style={styles.eventDescription}>
-                Stay tuned for more exciting events coming soon!
+                This is the 2025 Girlfriend's Day coming in August
               </Text>
             </View>
           </View>

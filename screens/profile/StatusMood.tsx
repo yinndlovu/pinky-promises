@@ -22,14 +22,14 @@ const StatusMood: React.FC<Props> = ({
         </View>
         <View style={styles.statusUnavailableRow}>
             <Text style={styles.statusUnavailable}>
-                Unavailable
+                Home
             </Text>
             <TouchableOpacity style={styles.addButton} onPress={onAddHome}>
                 <Feather name="plus" size={18} color="#fff" />
             </TouchableOpacity>
         </View>
         <Text style={styles.statusUnavailableDescription}>
-            You need to add your home location to see this
+            You're currently at home
         </Text>
         <View style={styles.moodRow}>
             <Text style={styles.moodLabel}>Mood</Text>
