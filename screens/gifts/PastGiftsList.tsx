@@ -18,7 +18,7 @@ const PastGiftsList: React.FC<Props> = ({ gifts }) => (
     <Text style={styles.title}>Past Received Gifts</Text>
     <FlatList
       data={gifts}
-      keyExtractor={item => item.id}
+      keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <View style={styles.row}>
           <Feather name="gift" size={20} color="#e03487" style={styles.icon} />

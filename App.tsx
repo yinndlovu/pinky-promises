@@ -21,7 +21,7 @@ import ChangeEmailScreen from "./screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./screens/settings/ChangePasswordScreen";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();

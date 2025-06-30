@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
 
 type Memory = {
   id: string;
@@ -22,7 +28,7 @@ const FavoriteMemories: React.FC<Props> = ({ memories, onViewAll }) => (
     <View style={styles.memoriesCard}>
       <FlatList
         data={memories}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={styles.memoryItem}>
             <Text style={styles.memoryText}>{item.text}</Text>
@@ -32,7 +38,7 @@ const FavoriteMemories: React.FC<Props> = ({ memories, onViewAll }) => (
         scrollEnabled={false}
       />
     </View>
-    <TouchableOpacity style={styles.addButton} onPress={() => { }}>
+    <TouchableOpacity style={styles.addButton} onPress={() => {}}>
       <Text style={styles.addButtonText}>+ Add new memory</Text>
     </TouchableOpacity>
   </View>

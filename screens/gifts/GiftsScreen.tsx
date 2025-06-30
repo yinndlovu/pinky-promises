@@ -50,13 +50,13 @@ const GiftsScreen = () => (
       showsVerticalScrollIndicator={false}
     >
       <Text style={styles.headerTitle}>Gifts</Text>
-      <SetMonthlyGift giftName="Roses" onChange={() => { }} />
+      <SetMonthlyGift giftName="Roses" onChange={() => {}} />
       <ReceivedGift
         giftName="Roses"
         receivedAt="01 Jun 2025 00:00"
-        onClaim={() => {  }}
+        onClaim={() => {}}
       />
-      <PastGiftsList gifts={pastGifts}/>
+      <PastGiftsList gifts={pastGifts} />
     </ScrollView>
   </View>
 );

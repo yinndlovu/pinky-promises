@@ -1,5 +1,13 @@
 import React, { useLayoutEffect } from "react";
-import { ScrollView, View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import {
+  ScrollView,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,7 +16,7 @@ import axios from "axios";
 import { BASE_URL } from "../../configuration/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
-import { encode } from 'base64-arraybuffer';
+import { encode } from "base64-arraybuffer";
 import RecentActivity from "./RecentActivity";
 
 type Props = NativeStackScreenProps<any>;
@@ -82,10 +90,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
         try {
           const pictureResponse = await axios.get(
-            `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-            responseType: "arraybuffer"
-          });
+            `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+              responseType: "arraybuffer",
+            }
+          );
 
           const mime = pictureResponse.headers["content-type"] || "image/jpeg";
           const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
@@ -96,8 +106,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             setError(picErr.response?.data?.error || picErr.message);
           }
         }
-      } catch (err) {
-        setError("Failed to fetch partner data");
+      } catch (err: any) {
+        if (err.response?.status === 404) {
+          setPartner(null);
+        } else {
+          setError("Failed to fetch partner data");
+        }
       } finally {
         setLoading(false);
       }
@@ -155,12 +169,18 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Text style={styles.headerTitle}>Overview</Text>
           <Text style={styles.partnerLabel}>PARTNER</Text>
-          <View style={[styles.profileCard, !isActive && styles.profileCardInactive]}>
+          <View
+            style={[
+              styles.profileCard,
+              !isActive && styles.profileCardInactive,
+            ]}
+          >
             <View style={styles.profileRow}>
               <View style={styles.avatarWrapper}>
                 <Image
                   source={
-                    avatarUri ? { uri: avatarUri }
+                    avatarUri
+                      ? { uri: avatarUri }
                       : require("../../assets/default-avatar-two.png")
                   }
                   style={styles.avatar}
@@ -170,7 +190,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.name}>{partner?.name || "No partner"}</Text>
                 <Text style={styles.username}>@{partner?.username || ""}</Text>
                 <Text style={styles.bio}>{partner?.bio || ""}</Text>
-                {error && <Text style={{ color: "red" }}>{error}</Text>}
               </View>
             </View>
             <View style={styles.statusRow}>
@@ -216,13 +235,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <RecentActivity activities={activities} />
         </Animated.View>
       </ScrollView>
-      {
-        showError && (
-          <View style={styles.toast}>
-            <Text style={styles.toastText}>{error}</Text>
-          </View>
-        )
-      }
+      {showError && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{error}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -302,7 +319,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#e03487",
     marginBottom: 8,
-    marginLeft: 4
+    marginLeft: 4,
   },
   bio: {
     fontSize: 15,

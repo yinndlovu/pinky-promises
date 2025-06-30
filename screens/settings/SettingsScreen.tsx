@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, StatusBar } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  StatusBar,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
-import type { StackScreenProps } from '@react-navigation/stack';
+import type { StackScreenProps } from "@react-navigation/stack";
 import { useAuth } from "../../contexts/AuthContext";
 import LogoutModal from "../../components/modals/LogoutModal";
 
 type SettingsScreenProps = StackScreenProps<any, any>;
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({
+  navigation,
+  route,
+}) => {
   const [success, setSuccess] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -19,12 +29,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) =>
     await logout();
     navigation.reset({
       index: 0,
-      routes: [{ name: 'Welcome' }],
+      routes: [{ name: "Welcome" }],
     });
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
       if (route.params?.passwordChanged) {
         setSuccess("Password changed successfully!");
         navigation.setParams({ passwordChanged: undefined });
@@ -63,12 +73,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) =>
     {
       label: "Notifications",
       icon: "bell",
-      onPress: () => { },
+      onPress: () => {},
     },
     {
       label: "About",
       icon: "info",
-      onPress: () => { },
+      onPress: () => {},
     },
   ];
 
@@ -87,9 +97,19 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) =>
               onPress={option.onPress}
               activeOpacity={0.7}
             >
-              <Feather name={option.icon as any} size={20} color="#e03487" style={styles.optionIcon} />
+              <Feather
+                name={option.icon as any}
+                size={20}
+                color="#e03487"
+                style={styles.optionIcon}
+              />
               <Text style={styles.optionLabel}>{option.label}</Text>
-              <Feather name="chevron-right" size={20} color="#b0b3c6" style={styles.chevron} />
+              <Feather
+                name="chevron-right"
+                size={20}
+                color="#b0b3c6"
+                style={styles.chevron}
+              />
             </TouchableOpacity>
           ))}
         </View>
@@ -98,17 +118,20 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation, route }) =>
           onPress={() => setShowLogoutModal(true)}
           activeOpacity={0.8}
         >
-          <Feather name="log-out" size={20} color="#fff" style={styles.optionIcon} />
+          <Feather
+            name="log-out"
+            size={20}
+            color="#fff"
+            style={styles.optionIcon}
+          />
           <Text style={styles.logoutText}>Log out</Text>
         </TouchableOpacity>
       </ScrollView>
-      {
-        showSuccess && (
-          <View style={[styles.toast, { backgroundColor: "#4caf50" }]}>
-            <Text style={styles.toastText}>{success}</Text>
-          </View>
-        )
-      }
+      {showSuccess && (
+        <View style={[styles.toast, { backgroundColor: "#4caf50" }]}>
+          <Text style={styles.toastText}>{success}</Text>
+        </View>
+      )}
 
       <LogoutModal
         visible={showLogoutModal}

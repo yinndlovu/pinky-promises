@@ -11,7 +11,12 @@ type Props = {
 const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim }) => (
   <View style={styles.card}>
     <View style={styles.row}>
-      <Feather name="gift" size={22} color="#e03487" style={{ marginRight: 10 }} />
+      <Feather
+        name="gift"
+        size={22}
+        color="#e03487"
+        style={{ marginRight: 10 }}
+      />
       <Text style={styles.title}>You received a monthly gift</Text>
     </View>
     <Text style={styles.giftName}>{giftName}</Text>

@@ -1,8 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import axios from 'axios';
-import { BASE_URL } from '../../../configuration/config';
+import React, { useState, useEffect, useRef } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import axios from "axios";
+import { BASE_URL } from "../../../configuration/config";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -10,20 +17,28 @@ const usernameRegex = /^[a-zA-Z0-9_-]+$/;
 
 const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
   const { name } = route.params || {};
-  const [username, setUsername] = useState('');
-  const [error, setError] = useState('');
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!username || !usernameRegex.test(username) || username.length < 3 || username.length > 20) {
+    if (
+      !username ||
+      !usernameRegex.test(username) ||
+      username.length < 3 ||
+      username.length > 20
+    ) {
       setAvailable(null);
       setError(
-        !username ? '' :
-          username.length < 3 ? 'Username must be at least 3 characters long' :
-            username.length > 20 ? 'Username must not exceed 20 characters' :
-              'Username can only contain letters, numbers, underscores, and hyphens'
+        !username
+          ? ""
+          : username.length < 3
+          ? "Username must be at least 3 characters long"
+          : username.length > 20
+          ? "Username must not exceed 20 characters"
+          : "Username can only contain letters, numbers, underscores, and hyphens"
       );
       return;
     }
@@ -32,12 +47,16 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await axios.get(`${BASE_URL}/api/auth/validate-username?username=${encodeURIComponent(username)}`);
+        const res = await axios.get(
+          `${BASE_URL}/api/auth/validate-username?username=${encodeURIComponent(
+            username
+          )}`
+        );
         setAvailable(res.data.available);
-        setError('');
+        setError("");
       } catch (e) {
         setAvailable(null);
-        setError('Error checking username availability');
+        setError("Error checking username availability");
       } finally {
         setChecking(false);
       }
@@ -51,27 +70,29 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
   const handleNext = () => {
     const trimmedUsername = username.trim();
     if (!trimmedUsername) {
-      setError('Username is required');
+      setError("Username is required");
       return;
     }
     if (trimmedUsername.length < 3) {
-      setError('Username must be at least 3 characters long');
+      setError("Username must be at least 3 characters long");
       return;
     }
     if (trimmedUsername.length > 20) {
-      setError('Username must not exceed 20 characters');
+      setError("Username must not exceed 20 characters");
       return;
     }
     if (!usernameRegex.test(trimmedUsername)) {
-      setError('Username can only contain letters, numbers, underscores, and hyphens');
+      setError(
+        "Username can only contain letters, numbers, underscores, and hyphens"
+      );
       return;
     }
     if (available === false) {
-      setError('Username is already taken');
+      setError("Username is already taken");
       return;
     }
-    setError('');
-    navigation.navigate('Password', { name, username: trimmedUsername });
+    setError("");
+    navigation.navigate("Password", { name, username: trimmedUsername });
   };
 
   return (
@@ -86,7 +107,13 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
         maxLength={20}
         autoCapitalize="none"
       />
-      {checking && <ActivityIndicator size="small" color="#e03487" style={{ marginBottom: 8 }} />}
+      {checking && (
+        <ActivityIndicator
+          size="small"
+          color="#e03487"
+          style={{ marginBottom: 8 }}
+        />
+      )}
       {!checking && available === true && username && (
         <Text style={styles.success}>You can have this username!</Text>
       )}
@@ -95,7 +122,10 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
       )}
       {!checking && error && <Text style={styles.error}>{error}</Text>}
       <TouchableOpacity
-        style={[styles.nextButton, { opacity: checking || available === false ? 0.6 : 1 }]}
+        style={[
+          styles.nextButton,
+          { opacity: checking || available === false ? 0.6 : 1 },
+        ]}
         onPress={handleNext}
         disabled={checking || available === false}
       >
@@ -108,55 +138,55 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#23243a',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#23243a",
     padding: 16,
   },
   label: {
     fontSize: 22,
-    color: '#fff',
+    color: "#fff",
     marginBottom: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   input: {
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: '#b0b3c6',
+    borderColor: "#b0b3c6",
     borderRadius: 14,
     padding: 12,
     marginBottom: 12,
     fontSize: 16,
-    color: '#fff',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    color: "#fff",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 8,
     fontSize: 14,
   },
   success: {
-    color: 'green',
+    color: "green",
     marginBottom: 8,
     fontSize: 14,
   },
   nextButton: {
-    backgroundColor: '#e03487',
+    backgroundColor: "#e03487",
     paddingVertical: 14,
     paddingHorizontal: 60,
     borderRadius: 30,
-    width: '80%',
-    alignItems: 'center',
-    shadowColor: '#000',
+    width: "80%",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
     marginTop: 8,
   },
   nextButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

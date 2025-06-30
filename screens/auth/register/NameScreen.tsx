@@ -1,24 +1,30 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 type Props = NativeStackScreenProps<any>;
 
 const NameScreen: React.FC<Props> = ({ navigation }) => {
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
 
   const handleNext = () => {
     if (name.trim().length === 0) {
-      setError('Name is required');
+      setError("Name is required");
       return;
     }
     if (name.length > 25) {
-      setError('Name must not exceed 25 characters');
+      setError("Name must not exceed 25 characters");
       return;
     }
-    setError('');
-    navigation.navigate('Username', { name });
+    setError("");
+    navigation.navigate("Username", { name });
   };
 
   return (
@@ -43,50 +49,50 @@ const NameScreen: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#23243a',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#23243a",
     padding: 16,
   },
   label: {
     fontSize: 22,
-    color: '#fff',
+    color: "#fff",
     marginBottom: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   input: {
-    width: '100%',
+    width: "100%",
     borderWidth: 1,
-    borderColor: '#b0b3c6',
+    borderColor: "#b0b3c6",
     borderRadius: 14,
     padding: 12,
     marginBottom: 12,
     fontSize: 16,
-    color: '#fff',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    color: "#fff",
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
   error: {
-    color: 'red',
+    color: "red",
     marginBottom: 8,
   },
   nextButton: {
-    backgroundColor: '#e03487',
+    backgroundColor: "#e03487",
     paddingVertical: 14,
     paddingHorizontal: 60,
     borderRadius: 30,
-    width: '80%',
-    alignItems: 'center',
-    shadowColor: '#000',
+    width: "80%",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 2,
     marginTop: 8,
   },
   nextButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 
-export default NameScreen; 
+export default NameScreen;

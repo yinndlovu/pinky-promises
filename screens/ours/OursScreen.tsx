@@ -37,8 +37,8 @@ const OursScreen = () => (
       showsVerticalScrollIndicator={false}
     >
       <Text style={styles.headerTitle}>Ours</Text>
-      <NotesCanvas onView={() => { }} />
-      <SpecialDates dates={specialDates} onViewAll={() => { }} />
+      <NotesCanvas onView={() => {}} />
+      <SpecialDates dates={specialDates} onViewAll={() => {}} />
       <FavoriteMemories memories={favoriteMemories} onViewAll={() => {}} />
     </ScrollView>
   </View>
