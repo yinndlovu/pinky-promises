@@ -84,12 +84,14 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
         password,
       });
 
-      setLoading(false);
+      // loading false was initially here
 
       await login(response.data.token, {
         id: response.data.userId,
         username: response.data.username,
       });
+
+      setLoading(false);
 
       navigation.reset({
         index: 0,
