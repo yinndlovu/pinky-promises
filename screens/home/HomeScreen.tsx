@@ -172,7 +172,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <TouchableOpacity
             activeOpacity={0.80}
             onPress={() => navigation.navigate("PartnerProfile")}
-          /*disabled={!partner}*/
+          /*disabled={!partner}*/ // turned off for testing
           >
             <View
               style={[

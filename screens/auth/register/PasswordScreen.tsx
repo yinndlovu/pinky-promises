@@ -16,6 +16,13 @@ import { useAuth } from "../../../contexts/AuthContext";
 const passwordRegex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
 
+const validateNewPassword = (password: string) => ({
+  length: password.length >= 8,
+  letter: /[a-zA-Z]/.test(password),
+  number: /\d/.test(password),
+  special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+});
+
 type Props = NativeStackScreenProps<any>;
 
 const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
@@ -29,53 +36,20 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
   const [valid, setValid] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const [newPasswordValid, setNewPasswordValid] = useState({
+    length: false,
+    letter: false,
+    number: false,
+    special: false,
+  });
+
   const { login } = useAuth();
 
   useEffect(() => {
-    if (
-      !(password && confirmPassword) ||
-      password !== confirmPassword ||
-      !passwordRegex.test(password) ||
-      password.length < 8
-    ) {
-      setValid(null);
-      setError(
-        !(password && confirmPassword)
-          ? ""
-          : password !== confirmPassword
-          ? "Passwords must match"
-          : password.length < 8
-          ? "Password must be at least 8 characters long"
-          : "Password must contain at least one letter, one number, and one special character"
-      );
-    }
-    return;
-  }, [password]);
+    setNewPasswordValid(validateNewPassword(password));
+  }, [password, confirmPassword]);
 
   const handleRegister = async () => {
-    if (!password) {
-      setError("Password is required");
-      return;
-    }
-
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return;
-    }
-
-    if (!passwordRegex.test(password)) {
-      setError(
-        "Password must contain at least one letter, one number, and one special character"
-      );
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    setError("");
     setLoading(true);
     try {
       const response = await axios.post(`${BASE_URL}/api/auth/register`, {
@@ -103,6 +77,39 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
     }
   };
 
+  const ValidationItem = ({
+    valid,
+    text,
+  }: {
+    valid: boolean;
+    text: string;
+  }) => (
+    <View
+      style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}
+    >
+      <Feather
+        name={valid ? "check" : "x"}
+        size={14}
+        color={valid ? "#4caf50" : "#f44336"}
+      />
+      <Text
+        style={{
+          fontSize: 13,
+          marginLeft: 8,
+          fontWeight: "500",
+          color: valid ? "#4caf50" : "#f44336",
+        }}
+      >
+        {text}
+      </Text>
+    </View>
+  );
+
+  const isFormValid =
+    Object.values(newPasswordValid).every(Boolean) &&
+    password === confirmPassword &&
+    password.length > 0;
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Type matching passwords</Text>
@@ -127,6 +134,18 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
           />
         </TouchableOpacity>
       </View>
+      <View style={{ width: "100%", marginBottom: 8, paddingHorizontal: 8 }}>
+        <ValidationItem
+          valid={newPasswordValid.length}
+          text="At least 8 characters"
+        />
+        <ValidationItem valid={newPasswordValid.letter} text="One letter" />
+        <ValidationItem valid={newPasswordValid.number} text="One number" />
+        <ValidationItem
+          valid={newPasswordValid.special}
+          text="One special character"
+        />
+      </View>
       <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
@@ -148,32 +167,27 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
           />
         </TouchableOpacity>
       </View>
-      {checking && (
-        <ActivityIndicator
-          size="small"
-          color="#e03487"
-          style={{ marginBottom: 8 }}
-        />
+      {confirmPassword.length > 0 && (
+        <View style={{ width: "100%", marginBottom: 8, paddingHorizontal: 8 }}>
+          <ValidationItem
+            valid={password === confirmPassword}
+            text="Passwords match"
+          />
+        </View>
       )}
-      {!checking && valid === true && password && (
-        <Text style={styles.success}>You can have this username!</Text>
-      )}
-      {!checking && valid === false && username && (
-        <Text style={styles.error}>You can't have this username...</Text>
-      )}
-      {!checking && error && <Text style={styles.error}>{error}</Text>}
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <TouchableOpacity
         style={[
           styles.registerButton,
           {
-            opacity: checking || valid === false || loading ? 0.6 : 1,
+            opacity: !isFormValid || loading ? 0.6 : 1,
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
           },
         ]}
         onPress={handleRegister}
-        disabled={checking || valid === false || loading}
+        disabled={!isFormValid || loading}
       >
         <Text style={styles.registerButtonText}>Register</Text>
         {loading && (
