@@ -68,45 +68,70 @@ const PartnerProfileScreen = () => {
   const username = partner?.username || "";
   const bio = partner?.bio || "";
 
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#e03487" size="large" />
+      </View>
+    );
+  }
+
+  if (!partner) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ color: "#fff" }}>No partner data.</Text>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#23243a" }}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Partner Profile</Text>
-      </View>
-      <View style={styles.profileRow}>
-        <View style={styles.avatarWrapper}>
-          <Image
-            source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
-            style={styles.avatar}
-          />
+    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Partner Profile</Text>
         </View>
-        <View style={styles.infoWrapper}>
-          <Text style={styles.name}>{name}</Text>
-          {username ? <Text style={styles.username}>@{username}</Text> : null}
-          {bio ? <Text style={styles.bio}>{bio}</Text> : null}
+        <View style={styles.profileRow}>
+          <View style={styles.avatarWrapper}>
+            <Image
+              source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
+              style={styles.avatar}
+            />
+          </View>
+          <View style={styles.infoWrapper}>
+            <Text style={styles.name}>{name}</Text>
+            {username ? <Text style={styles.username}>@{username}</Text> : null}
+            {bio ? <Text style={styles.bio}>{bio}</Text> : null}
+          </View>
         </View>
-      </View>
-      {loading && (
-        <View style={styles.centered}>
-          <ActivityIndicator color="#5ad1e6" size="large" />
-        </View>
-      )}
-      <View style={styles.divider} />
-    </ScrollView>
+        {loading && (
+          <View style={styles.centered}>
+            <ActivityIndicator color="#5ad1e6" size="large" />
+          </View>
+        )}
+        <View style={styles.divider} />
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#23243a",
+    paddingHorizontal: 16,
+    paddingTop: 60,
+  },
   header: {
     width: "100%",
     alignItems: "center",
     marginBottom: 36,
-    marginTop: 60,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#5ad1e6",
+    color: "#fff",
     letterSpacing: 1,
   },
   profileRow: {
@@ -123,7 +148,7 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 45,
     borderWidth: 2,
-    borderColor: "#5ad1e6",
+    borderColor: "#e03487",
     backgroundColor: "#444",
   },
   infoWrapper: {
@@ -148,18 +173,17 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   divider: {
-    width: "90%",
+    width: "100%",
     height: 1,
     backgroundColor: "#393a4a",
     marginVertical: 24,
-    alignSelf: "center",
     opacity: 1,
   },
   centered: {
     flex: 1,
+    backgroundColor: "#23243a",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 120,
   },
 });
 
