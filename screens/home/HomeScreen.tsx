@@ -169,34 +169,40 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Text style={styles.headerTitle}>Overview</Text>
           <Text style={styles.partnerLabel}>PARTNER</Text>
-          <View
-            style={[
-              styles.profileCard,
-              !isActive && styles.profileCardInactive,
-            ]}
+          <TouchableOpacity
+            activeOpacity={0.80}
+            onPress={() => navigation.navigate("PartnerProfile")}
+          /*disabled={!partner}*/
           >
-            <View style={styles.profileRow}>
-              <View style={styles.avatarWrapper}>
-                <Image
-                  source={
-                    avatarUri
-                      ? { uri: avatarUri }
-                      : require("../../assets/default-avatar-two.png")
-                  }
-                  style={styles.avatar}
-                />
+            <View
+              style={[
+                styles.profileCard,
+                !isActive && styles.profileCardInactive,
+              ]}
+            >
+              <View style={styles.profileRow}>
+                <View style={styles.avatarWrapper}>
+                  <Image
+                    source={
+                      avatarUri
+                        ? { uri: avatarUri }
+                        : require("../../assets/default-avatar-two.png")
+                    }
+                    style={styles.avatar}
+                  />
+                </View>
+                <View style={styles.infoWrapper}>
+                  <Text style={styles.name}>{partner?.name || "No partner"}</Text>
+                  <Text style={styles.username}>@{partner?.username || ""}</Text>
+                  <Text style={styles.bio}>{partner?.bio || ""}</Text>
+                </View>
               </View>
-              <View style={styles.infoWrapper}>
-                <Text style={styles.name}>{partner?.name || "No partner"}</Text>
-                <Text style={styles.username}>@{partner?.username || ""}</Text>
-                <Text style={styles.bio}>{partner?.bio || ""}</Text>
+              <View style={styles.statusRow}>
+                <Text style={styles.statusText}>Status: Unavailable</Text>
+                <Text style={styles.statusText}>Mood: Happy</Text>
               </View>
             </View>
-            <View style={styles.statusRow}>
-              <Text style={styles.statusText}>Status: Unavailable</Text>
-              <Text style={styles.statusText}>Mood: Happy</Text>
-            </View>
-          </View>
+          </TouchableOpacity>
           <View style={styles.buttonRow}>
             <BlurView intensity={50} tint="dark" style={styles.blurButton}>
               <TouchableOpacity style={styles.actionButton}>

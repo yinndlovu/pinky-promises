@@ -21,6 +21,7 @@ import ChangeEmailScreen from "./screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./screens/settings/ChangePasswordScreen";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import PartnerProfileScreen from "./screens/profile/partner/PartnerProfileScreen";
 import React from "react";
 
 const Stack = createStackNavigator();
@@ -203,6 +204,17 @@ function AppContent() {
             headerShown: true,
             title: "",
             headerTransparent: true,
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="PartnerProfile"
+          component={PartnerProfileScreen}
+          options={{
+            headerShown: true,
+            title: "",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

@@ -43,10 +43,10 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
         !(password && confirmPassword)
           ? ""
           : password !== confirmPassword
-          ? "Passwords must match"
-          : password.length < 8
-          ? "Password must be at least 8 characters long"
-          : "Password must contain at least one letter, one number, and one special character"
+            ? "Passwords must match"
+            : password.length < 8
+              ? "Password must be at least 8 characters long"
+              : "Password must contain at least one letter, one number, and one special character"
       );
     }
     return;
@@ -91,10 +91,12 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
         username: response.data.username,
       });
 
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Main", params: { username } }],
-      });
+      setTimeout(() => {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "Main", params: { username } }],
+        });
+      }, 500);
     } catch (err: any) {
       setError(err.response?.data?.error || "Registration failed");
       setLoading(false);

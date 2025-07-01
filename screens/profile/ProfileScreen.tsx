@@ -113,7 +113,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     fetchProfile();
   }, []);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (retries = 5) => {
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -155,7 +155,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         }
       }
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message);
+      if (err.response?.status === 404 && retries > 0) {
+        setTimeout(() => fetchProfile(retries - 1), 500);
+      } else {
+        setError(err.response?.data?.error || err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -328,7 +332,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         </View>
 
         <StatusMood
-          onAddHome={() => {}}
+          onAddHome={() => { }}
           mood="Content"
           moodDescription="This just means you're in a chill mood"
         />
@@ -336,17 +340,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <Anniversary
           anniversaryDate="22 September 2024"
           dayMet="12 September 2024"
-          onEditAnniversary={() => {}}
-          onEditDayMet={() => {}}
+          onEditAnniversary={() => { }}
+          onEditDayMet={() => { }}
         />
 
-        <Favorites favorites={favoritesData} onEdit={() => {}} />
+        <Favorites favorites={favoritesData} onEdit={() => { }} />
 
         <View style={styles.divider} />
 
         <LoveLanguage loveLanguage="Physical touch" />
 
-        <MoreAboutYou about="Stuff about you" onEdit={() => {}} />
+        <MoreAboutYou about="Stuff about you" onEdit={() => { }} />
 
         <Modal
           visible={editModalVisible}
