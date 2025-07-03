@@ -20,7 +20,9 @@ const LoveLanguage: React.FC<Props> = ({
       </TouchableOpacity>
     </View>
     <View style={styles.valueRow}>
-      <Text style={styles.value}>{loveLanguage}</Text>
+      <Text style={loveLanguage ? styles.value : styles.noValue}>
+        {loveLanguage ? loveLanguage : "No love language added"}
+      </Text>
     </View>
   </View>
 );
@@ -63,6 +65,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     alignItems: "center",
     justifyContent: "center",
+  },
+  noValue: {
+    color: "#b0b3c6",
+    fontSize: 16,
+    fontStyle: "italic",
+    textAlign: "center",
   },
 });
 

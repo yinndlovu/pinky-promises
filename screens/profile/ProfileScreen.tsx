@@ -32,6 +32,11 @@ import {
   getUserFavorites,
   updateUserFavorites,
 } from "../../services/favoritesService";
+import UpdateLoveLanguageModal from "../../components/modals/UpdateLoveLanguageModal";
+import {
+  getLoveLanguage,
+  updateLoveLanguage,
+} from "../../services/loveLanguageService";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -88,6 +93,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [mood, setMood] = React.useState<string>();
   const [moodDescription, setMoodDescription] = React.useState<string>();
 
+  const [loveLanguageModalVisible, setLoveLanguageModalVisible] =
+    React.useState(false);
+  const [loveLanguage, setLoveLanguage] = React.useState("");
+
   const FAVORITE_LABELS: { [key: string]: string } = {
     favoriteColor: "Favorite Color",
     favoriteFood: "Favorite Food",
@@ -132,6 +141,28 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       headerShadowVisible: false,
     });
   }, [navigation]);
+
+  React.useEffect(() => {
+    const fetchLoveLanguage = async () => {
+      const token = await AsyncStorage.getItem("token");
+      const userId = user?.id;
+      if (!token || !userId) return;
+      try {
+        const ll = await getLoveLanguage(token, userId);
+        setLoveLanguage(ll);
+      } catch {
+        setLoveLanguage("");
+      }
+    };
+    fetchLoveLanguage();
+  }, [user]);
+
+  const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    await updateLoveLanguage(token, newLoveLanguage);
+    setLoveLanguage(newLoveLanguage);
+  };
 
   React.useEffect(() => {
     const getStatus = async () => {
@@ -469,7 +500,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         <View style={styles.divider} />
 
-        <LoveLanguage loveLanguage="Physical touch" />
+        <LoveLanguage
+          loveLanguage={loveLanguage}
+          onEdit={() => setLoveLanguageModalVisible(true)}
+        />
+        <UpdateLoveLanguageModal
+          visible={loveLanguageModalVisible}
+          initialLoveLanguage={loveLanguage}
+          onClose={() => setLoveLanguageModalVisible(false)}
+          onSave={handleSaveLoveLanguage}
+        />
 
         <MoreAboutYou about="Stuff about you" onEdit={() => {}} />
 
