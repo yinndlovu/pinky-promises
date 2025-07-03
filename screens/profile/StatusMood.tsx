@@ -1,6 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { BASE_URL } from "../../configuration/config";
+import AddLocationModal from "../../components/modals/AddLocationModal";
 
 type Props = {
   onAddHome?: () => void;
@@ -14,32 +18,59 @@ const StatusMood: React.FC<Props> = ({
   mood = "Happy",
   moodDescription = "description of the mood",
   onEdit,
-}) => (
-  <View style={styles.wrapper}>
-    <View style={styles.headerRow}>
-      <Text style={styles.statusLabel}>Status</Text>
+}) => {
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleAddHome = async (location: {
+    latitude: number;
+    longitude: number;
+  }) => {
+    setModalVisible(false);
+
+    await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
+
+    const token = await AsyncStorage.getItem("token");
+    await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  };
+
+  return (
+    <View style={styles.wrapper}>
+      <View style={styles.headerRow}>
+        <Text style={styles.statusLabel}>Status</Text>
+      </View>
+      <View style={styles.statusUnavailableRow}>
+        <Text style={styles.statusUnavailable}>Home</Text>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => setModalVisible(true)}
+        >
+          <Feather name="plus" size={18} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      <Text style={styles.statusUnavailableDescription}>
+        You're currently at home
+      </Text>
+      <View style={styles.moodRow}>
+        <Text style={styles.moodLabel}>Mood</Text>
+        <TouchableOpacity style={styles.editButton} onPress={onEdit}>
+          <Feather name="edit-2" size={18} color="#e03487" />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.moodContentRow}>
+        <Text style={styles.moodValue}>{mood}</Text>
+        <Text style={styles.moodDescription}> - {moodDescription}</Text>
+      </View>
+
+      <AddLocationModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onConfirm={handleAddHome}
+      />
     </View>
-    <View style={styles.statusUnavailableRow}>
-      <Text style={styles.statusUnavailable}>Home</Text>
-      <TouchableOpacity style={styles.addButton} onPress={onAddHome}>
-        <Feather name="plus" size={18} color="#fff" />
-      </TouchableOpacity>
-    </View>
-    <Text style={styles.statusUnavailableDescription}>
-      You're currently at home
-    </Text>
-    <View style={styles.moodRow}>
-      <Text style={styles.moodLabel}>Mood</Text>
-      <TouchableOpacity style={styles.editButton} onPress={onEdit}>
-        <Feather name="edit-2" size={18} color="#e03487" />
-      </TouchableOpacity>
-    </View>
-    <View style={styles.moodContentRow}>
-      <Text style={styles.moodValue}>{mood}</Text>
-      <Text style={styles.moodDescription}> - {moodDescription}</Text>
-    </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   wrapper: {

@@ -65,8 +65,8 @@ const PartnerProfileScreen = () => {
   }, []);
 
   const name = partner?.name || "No partner";
-  const username = partner?.username || "";
-  const bio = partner?.bio || "";
+  const username = partner?.username || "username";
+  const bio = partner?.bio || "small bio";
 
   if (loading) {
     return (
@@ -76,13 +76,15 @@ const PartnerProfileScreen = () => {
     );
   }
 
-  if (!partner) {
+  /*if (!partner) {
     return (
-      <View style={styles.container}>
-        <Text style={{ color: "#fff" }}>No partner data.</Text>
+      <View style={styles.centered}>
+        <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
+          You have no partner
+        </Text>
       </View>
     );
-  }
+  }*/
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -121,7 +123,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#23243a",
     paddingHorizontal: 16,
-    paddingTop: 60,
   },
   header: {
     width: "100%",
@@ -136,9 +137,7 @@ const styles = StyleSheet.create({
   },
   profileRow: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-    marginHorizontal: 16,
+    alignItems: "center"
   },
   avatarWrapper: {
     marginRight: 20,
