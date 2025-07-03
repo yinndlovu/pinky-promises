@@ -27,8 +27,27 @@ import ProfilePictureModal from "./ProfilePictureModal";
 import ProfilePictureViewer from "./ProfilePictureViewer";
 import { fetchUserStatus } from "../../services/userStatusService";
 import { getMood } from "../../services/moodService";
+import UpdateFavoritesModal from "../../components/modals/UpdateFavoritesModal";
+import {
+  getUserFavorites,
+  updateUserFavorites,
+} from "../../services/favoritesService";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
+
+type FavoritesType = {
+  favoriteColor?: string;
+  favoriteFood?: string;
+  favoriteSnack?: string;
+  favoriteActivity?: string;
+  favoriteHoliday?: string;
+  favoriteTimeOfDay?: string;
+  favoriteSeason?: string;
+  favoriteAnimal?: string;
+  favoriteDrink?: string;
+  favoritePet?: string;
+  favoriteShow?: string;
+};
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [user, setUser] = React.useState<any>(null);
@@ -55,6 +74,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [showPictureModal, setShowPictureModal] = React.useState(false);
   const [showPictureViewer, setShowPictureViewer] = React.useState(false);
 
+  const [favoritesModalVisible, setFavoritesModalVisible] =
+    React.useState(false);
+  const [favorites, setFavorites] = React.useState<FavoritesType>({});
+
   const [homeStatus, setHomeStatus] = React.useState<
     "home" | "away" | "unavailable"
   >("unavailable");
@@ -65,17 +88,29 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [mood, setMood] = React.useState<string>();
   const [moodDescription, setMoodDescription] = React.useState<string>();
 
-  const favoritesData = [
-    { label: "Favorite color", value: "Blue" },
-    { label: "Favorite food", value: "Pizza" },
-    { label: "Favorite snack", value: "Chips" },
-    { label: "Favorite activity", value: "Reading" },
-    { label: "Favorite holiday", value: "Christmas" },
-    { label: "Favorite time of day", value: "Evening" },
-    { label: "Favorite season", value: "Spring" },
-    { label: "Favorite animal", value: "Cat" },
-    { label: "Favorite drink", value: "Coffee" },
-  ];
+  const FAVORITE_LABELS: { [key: string]: string } = {
+    favoriteColor: "Favorite Color",
+    favoriteFood: "Favorite Food",
+    favoriteSnack: "Favorite Snack",
+    favoriteActivity: "Favorite Activity",
+    favoriteHoliday: "Favorite Holiday",
+    favoriteTimeOfDay: "Favorite Time of Day",
+    favoriteSeason: "Favorite Season",
+    favoriteAnimal: "Favorite Animal",
+    favoriteDrink: "Favorite Drink",
+    favoritePet: "Favorite Pet",
+    favoriteShow: "Favorite Show",
+  };
+
+  function favoritesObjectToArray(
+    favoritesObj: any
+  ): { label: string; value: string }[] {
+    return Object.entries(FAVORITE_LABELS)
+      .map(([key, label]) =>
+        favoritesObj[key] ? { label, value: favoritesObj[key] } : null
+      )
+      .filter(Boolean) as { label: string; value: string }[];
+  }
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -135,6 +170,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     if (user?.id) {
       getStatus();
     }
+  }, [user]);
+
+  React.useEffect(() => {
+    const fetchFavorites = async () => {
+      const token = await AsyncStorage.getItem("token");
+      const userId = user?.id;
+      if (!token || !userId) return;
+      const favs = await getUserFavorites(token, userId);
+      setFavorites(favs);
+    };
+    fetchFavorites();
   }, [user]);
 
   React.useEffect(() => {
@@ -225,6 +271,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const handleAvatarPress = () => {
     setShowPictureModal(true);
+  };
+
+  const handleSaveFavorites = async (newFavorites: FavoritesType) => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    await updateUserFavorites(token, newFavorites);
+    setFavorites(newFavorites);
   };
 
   const handleViewCurrentPicture = () => {
@@ -403,7 +456,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           onEditDayMet={() => {}}
         />
 
-        <Favorites favorites={favoritesData} onEdit={() => {}} />
+        <Favorites
+          favorites={favoritesObjectToArray(favorites)}
+          onEdit={() => setFavoritesModalVisible(true)}
+        />
+        <UpdateFavoritesModal
+          visible={favoritesModalVisible}
+          initialFavorites={favorites}
+          onClose={() => setFavoritesModalVisible(false)}
+          onSave={handleSaveFavorites}
+        />
 
         <View style={styles.divider} />
 

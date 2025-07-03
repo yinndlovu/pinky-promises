@@ -27,17 +27,21 @@ const Favorites: React.FC<Props> = ({ favorites, onEdit }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.divider} />
-      {rows.map((row, idx) => (
-        <View style={styles.row} key={idx}>
-          {row.map((item, colIdx) => (
-            <View style={styles.item} key={colIdx}>
-              <Text style={styles.label}>{item.label}</Text>
-              <Text style={styles.value}>{item.value}</Text>
-            </View>
-          ))}
-          {row.length === 1 && <View style={styles.item} />}
-        </View>
-      ))}
+      {favorites.length === 0 ? (
+        <Text style={styles.noFavoritesText}>No favorites added</Text>
+      ) : (
+        rows.map((row, idx) => (
+          <View style={styles.row} key={idx}>
+            {row.map((item, colIdx) => (
+              <View style={styles.item} key={colIdx}>
+                <Text style={styles.label}>{item.label}</Text>
+                <Text style={styles.value}>{item.value}</Text>
+              </View>
+            ))}
+            {row.length === 1 && <View style={styles.item} />}
+          </View>
+        ))
+      )}
     </View>
   );
 };
@@ -92,6 +96,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     marginBottom: 2,
+  },
+  noFavoritesText: {
+    color: "#b0b3c6",
+    fontSize: 16,
+    textAlign: "center",
+    marginVertical: 16,
   },
 });
 
