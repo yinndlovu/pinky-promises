@@ -26,6 +26,7 @@ import type { StackScreenProps } from "@react-navigation/stack";
 import ProfilePictureModal from "./ProfilePictureModal";
 import ProfilePictureViewer from "./ProfilePictureViewer";
 import { fetchUserStatus } from "../../services/userStatusService";
+import { getMood } from "../../services/moodService";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -60,6 +61,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [statusDescription, setStatusDescription] = React.useState<string>(
     "You must add your home location to use this feature."
   );
+
+  const [mood, setMood] = React.useState<string>();
+  const [moodDescription, setMoodDescription] = React.useState<string>();
 
   const favoritesData = [
     { label: "Favorite color", value: "Blue" },
@@ -109,21 +113,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         if (status && typeof status.isAtHome === "boolean") {
           if (status.isAtHome) {
             setHomeStatus("home");
-            setStatusDescription("You are currently at home.");
+            setStatusDescription("You are currently at home");
           } else {
             setHomeStatus("away");
-            setStatusDescription("You're currently not home.");
+            setStatusDescription("You're currently not home");
           }
         } else {
           setHomeStatus("unavailable");
           setStatusDescription(
-            "You must add your home location to use this feature."
+            "You must add your home location to use this feature"
           );
         }
       } catch (err: any) {
         setHomeStatus("unavailable");
         setStatusDescription(
-          "You must add your home location to use this feature."
+          "You must add your home location to use this feature"
         );
       }
     };
@@ -132,6 +136,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       getStatus();
     }
   }, [user]);
+
+  React.useEffect(() => {
+    const fetchMood = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const moodData = await getMood(token);
+      setMood(moodData.mood);
+      setMoodDescription(moodData.description);
+    };
+    fetchMood();
+  }, []);
 
   React.useEffect(() => {
     if (success) {
@@ -377,8 +392,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <StatusMood
           status={homeStatus}
           statusDescription={statusDescription}
-          mood={user?.mood}
-          moodDescription={user?.moodDescription}
+          mood={mood}
+          moodDescription={moodDescription}
         />
 
         <Anniversary

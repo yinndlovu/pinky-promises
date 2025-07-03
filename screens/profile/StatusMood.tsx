@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { BASE_URL } from "../../configuration/config";
 import AddLocationModal from "../../components/modals/AddLocationModal";
+import { getMood, updateMood } from "../../services/moodService";
+import UpdateMoodModal from "../../components/modals/UpdateMoodModal";
+import AlertModal from "../../components/modals/AlertModal";
 
 type Props = {
   onAddHome?: () => void;
@@ -17,14 +26,22 @@ type Props = {
 
 const StatusMood: React.FC<Props> = ({
   onAddHome,
-  mood = "Happy",
-  moodDescription = "description of the mood",
+  mood = "No mood",
+  moodDescription = "You haven't added a mood yet",
   onEdit,
   status = "unavailable",
   statusDescription = "You must add your home location to use this feature.",
 }) => {
+  const [moodModalVisible, setMoodModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [currentMood, setCurrentMood] = useState<string | undefined>(mood);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [fetchingMood, setFetchingMood] = useState(false);
+  const [updatingMood, setUpdatingMood] = useState(false);
+  const [currentMoodDescription, setCurrentMoodDescription] = useState<
+    string | undefined
+  >(moodDescription);
   const handleAddHome = async (location: {
     latitude: number;
     longitude: number;
@@ -39,8 +56,51 @@ const StatusMood: React.FC<Props> = ({
     });
   };
 
+  const handleSaveMood = async (mood: string) => {
+    setMoodModalVisible(false);
+    setUpdatingMood(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const moodData = await updateMood(token, mood);
+      setCurrentMood(moodData.mood);
+      setCurrentMoodDescription(moodData.description);
+      setAlertMessage("Mood updated!");
+      setAlertVisible(true);
+    } catch (err) {
+      setAlertMessage("Failed to update mood");
+      setAlertVisible(true);
+    } finally {
+      setUpdatingMood(false);
+    }
+  };
+
+  React.useEffect(() => {
+    const fetchMood = async () => {
+      try {
+        setFetchingMood(true);
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+        const moodData = await getMood(token);
+        setCurrentMood(moodData.mood);
+        setCurrentMoodDescription(moodData.description);
+      } catch (err) {
+        setCurrentMood(undefined);
+        setCurrentMoodDescription("No mood set yet.");
+      } finally {
+        setFetchingMood(false);
+      }
+    };
+    fetchMood();
+  }, []);
+
   return (
     <View style={styles.wrapper}>
+      {updatingMood && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#e03487" />
+        </View>
+      )}
       <View style={styles.headerRow}>
         <Text style={styles.statusLabel}>Status</Text>
       </View>
@@ -73,19 +133,35 @@ const StatusMood: React.FC<Props> = ({
       </Text>
       <View style={styles.moodRow}>
         <Text style={styles.moodLabel}>Mood</Text>
-        <TouchableOpacity style={styles.editButton} onPress={onEdit}>
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => setMoodModalVisible(true)}
+        >
           <Feather name="edit-2" size={18} color="#e03487" />
         </TouchableOpacity>
       </View>
       <View style={styles.moodContentRow}>
-        <Text style={styles.moodValue}>{mood}</Text>
-        <Text style={styles.moodDescription}> - {moodDescription}</Text>
+        <Text style={styles.moodValue}>{currentMood}</Text>
+        <Text style={styles.moodDescription}> - {currentMoodDescription}</Text>
       </View>
 
       <AddLocationModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onConfirm={handleAddHome}
+      />
+
+      <UpdateMoodModal
+        visible={moodModalVisible}
+        onClose={() => setMoodModalVisible(false)}
+        onSave={handleSaveMood}
+        initialMood={currentMood}
+      />
+
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
       />
     </View>
   );
@@ -101,6 +177,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 0,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(35,36,58,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
   },
   statusRow: {
     marginBottom: 0,
@@ -176,6 +259,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     alignItems: "center",
     justifyContent: "center",
+  },
+  toast: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 
