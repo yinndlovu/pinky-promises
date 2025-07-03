@@ -18,6 +18,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { encode } from "base64-arraybuffer";
 import RecentActivity from "./RecentActivity";
+import * as Location from "expo-location";
+import { getHomeLocation } from "../../services/homeLocationService";
+import { updateUserStatus } from "../../services/userStatusService";
+import { getDistance } from "../../utils/locationUtils";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -56,6 +61,41 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       time: "09:15",
     },
   ];
+
+  const checkAndUpdateHomeStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const home = await getHomeLocation(token);
+      if (!home) return;
+
+      const { coords } = await Location.getCurrentPositionAsync({});
+      const distance = getDistance(
+        coords.latitude,
+        coords.longitude,
+        home.latitude,
+        home.longitude
+      );
+      const isAtHome = distance < 100;
+
+      await updateUserStatus(token, isAtHome);
+    } catch (err) {
+      console.log("Error checking/updating home status:", err);
+    }
+  };
+
+  React.useEffect(() => {
+    checkAndUpdateHomeStatus();
+  }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      checkAndUpdateHomeStatus();
+      const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
+      return () => clearInterval(interval);
+    }, [])
+  );
 
   React.useEffect(() => {
     if (error) {
@@ -170,9 +210,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.headerTitle}>Overview</Text>
           <Text style={styles.partnerLabel}>PARTNER</Text>
           <TouchableOpacity
-            activeOpacity={0.80}
+            activeOpacity={0.8}
             onPress={() => navigation.navigate("PartnerProfile")}
-          /*disabled={!partner}*/ // turned off for testing
+            /*disabled={!partner}*/ // turned off for testing
           >
             <View
               style={[
@@ -192,8 +232,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   />
                 </View>
                 <View style={styles.infoWrapper}>
-                  <Text style={styles.name}>{partner?.name || "No partner"}</Text>
-                  <Text style={styles.username}>@{partner?.username || ""}</Text>
+                  <Text style={styles.name}>
+                    {partner?.name || "No partner"}
+                  </Text>
+                  <Text style={styles.username}>
+                    @{partner?.username || ""}
+                  </Text>
                   <Text style={styles.bio}>{partner?.bio || ""}</Text>
                 </View>
               </View>

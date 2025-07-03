@@ -25,6 +25,7 @@ import MoreAboutYou from "./MoreAboutYou";
 import type { StackScreenProps } from "@react-navigation/stack";
 import ProfilePictureModal from "./ProfilePictureModal";
 import ProfilePictureViewer from "./ProfilePictureViewer";
+import { fetchUserStatus } from "../../services/userStatusService";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -52,6 +53,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const [showPictureModal, setShowPictureModal] = React.useState(false);
   const [showPictureViewer, setShowPictureViewer] = React.useState(false);
+
+  const [homeStatus, setHomeStatus] = React.useState<
+    "home" | "away" | "unavailable"
+  >("unavailable");
+  const [statusDescription, setStatusDescription] = React.useState<string>(
+    "You must add your home location to use this feature."
+  );
 
   const favoritesData = [
     { label: "Favorite color", value: "Blue" },
@@ -85,6 +93,45 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       headerShadowVisible: false,
     });
   }, [navigation]);
+
+  React.useEffect(() => {
+    const getStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token || !user?.id) {
+          setHomeStatus("unavailable");
+          setStatusDescription(
+            "You must add your home location to use this feature."
+          );
+          return;
+        }
+        const status = await fetchUserStatus(token, user.id);
+        if (status && typeof status.isAtHome === "boolean") {
+          if (status.isAtHome) {
+            setHomeStatus("home");
+            setStatusDescription("You are currently at home.");
+          } else {
+            setHomeStatus("away");
+            setStatusDescription("You're currently not home.");
+          }
+        } else {
+          setHomeStatus("unavailable");
+          setStatusDescription(
+            "You must add your home location to use this feature."
+          );
+        }
+      } catch (err: any) {
+        setHomeStatus("unavailable");
+        setStatusDescription(
+          "You must add your home location to use this feature."
+        );
+      }
+    };
+
+    if (user?.id) {
+      getStatus();
+    }
+  }, [user]);
 
   React.useEffect(() => {
     if (success) {
@@ -328,9 +375,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         </View>
 
         <StatusMood
-          onAddHome={() => {}}
-          mood="Content"
-          moodDescription="This just means you're in a chill mood"
+          status={homeStatus}
+          statusDescription={statusDescription}
+          mood={user?.mood}
+          moodDescription={user?.moodDescription}
         />
 
         <Anniversary

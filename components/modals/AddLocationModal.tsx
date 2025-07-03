@@ -6,6 +6,7 @@ import {
   Button,
   ActivityIndicator,
   StyleSheet,
+  TouchableOpacity
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -55,13 +56,13 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
-      <View style={styles.container}>
-        <View style={styles.inner}>
-          <Text style={styles.title}>Your current location</Text>
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Your current location</Text>
           {loading ? (
             <ActivityIndicator size="large" color="#e03487" />
           ) : error ? (
-            <Text style={{ color: "red" }}>{error}</Text>
+            <Text style={styles.errorText}>{error}</Text>
           ) : location ? (
             <>
               <MapView
@@ -75,14 +76,34 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
               >
                 <Marker coordinate={location} />
               </MapView>
-              <Text>
+              <Text style={styles.coordsText}>
                 Lat: {location.latitude.toFixed(5)}, Lng:{" "}
                 {location.longitude.toFixed(5)}
               </Text>
-              <Button title="Confirm" onPress={() => onConfirm(location)} />
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={styles.confirmButton}
+                  onPress={() => onConfirm(location)}
+                >
+                  <Text style={styles.confirmButtonText}>Confirm</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={onClose}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </>
           ) : null}
-          <Button title="Cancel" onPress={onClose} color="red" />
+          {!loading && !location && !error && (
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onClose}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </Modal>
@@ -90,21 +111,86 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 3, 12, 0.7)",
     justifyContent: "center",
     alignItems: "center",
   },
-  inner: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
+  modalContent: {
+    backgroundColor: "#23243a",
+    borderRadius: 16,
+    padding: 24,
     alignItems: "center",
     width: "90%",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
   },
-  title: { fontSize: 18, fontWeight: "bold", margin: 10 },
-  map: { width: 300, height: 250, marginVertical: 20 },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 16,
+    alignSelf: "center",
+  },
+  errorText: {
+    color: "#e03487",
+    fontWeight: "bold",
+    marginVertical: 16,
+    textAlign: "center",
+  },
+  map: {
+    width: 300,
+    height: 220,
+    borderRadius: 12,
+    marginVertical: 20,
+    borderWidth: 1,
+    borderColor: "#393a4a",
+    overflow: "hidden",
+  },
+  coordsText: {
+    color: "#b0b3c6",
+    fontSize: 15,
+    marginBottom: 16,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 8,
+  },
+  confirmButton: {
+    backgroundColor: "#e03487",
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    flex: 1,
+    marginRight: 8,
+  },
+  confirmButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  cancelButton: {
+    backgroundColor: "transparent",
+    borderColor: "#e03487",
+    borderWidth: 2,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    flex: 1,
+    marginLeft: 8,
+  },
+  cancelButtonText: {
+    color: "#e03487",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });
 
 export default AddLocationModal;

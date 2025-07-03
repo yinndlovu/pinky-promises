@@ -11,6 +11,8 @@ type Props = {
   mood?: string;
   moodDescription?: string;
   onEdit?: () => void;
+  status?: "home" | "away" | "unavailable";
+  statusDescription?: string;
 };
 
 const StatusMood: React.FC<Props> = ({
@@ -18,6 +20,8 @@ const StatusMood: React.FC<Props> = ({
   mood = "Happy",
   moodDescription = "description of the mood",
   onEdit,
+  status = "unavailable",
+  statusDescription = "You must add your home location to use this feature.",
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -41,7 +45,22 @@ const StatusMood: React.FC<Props> = ({
         <Text style={styles.statusLabel}>Status</Text>
       </View>
       <View style={styles.statusUnavailableRow}>
-        <Text style={styles.statusUnavailable}>Home</Text>
+        <Text
+          style={[
+            styles.statusUnavailable,
+            status === "home"
+              ? { color: "#4caf50" }
+              : status === "away"
+              ? { color: "#e03487" }
+              : { color: "#b0b3c6" },
+          ]}
+        >
+          {status === "home"
+            ? "Home"
+            : status === "away"
+            ? "Away"
+            : "Unavailable"}
+        </Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => setModalVisible(true)}
@@ -50,7 +69,7 @@ const StatusMood: React.FC<Props> = ({
         </TouchableOpacity>
       </View>
       <Text style={styles.statusUnavailableDescription}>
-        You're currently at home
+        {statusDescription}
       </Text>
       <View style={styles.moodRow}>
         <Text style={styles.moodLabel}>Mood</Text>

@@ -22,10 +22,32 @@ import VerifyEmailOtpScreen from "./screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./screens/settings/ChangePasswordScreen";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import PartnerProfileScreen from "./screens/profile/partner/PartnerProfileScreen";
+import * as Location from "expo-location";
+import { LOCATION_TASK_NAME } from "./background/LocationTask";
 import React from "react";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
+async function startBackgroundLocation() {
+  const { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== "granted") return;
+
+  const { status: bgStatus } =
+    await Location.requestBackgroundPermissionsAsync();
+  if (bgStatus !== "granted") return;
+
+  await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+    accuracy: Location.Accuracy.High,
+    timeInterval: 5 * 60 * 1000,
+    distanceInterval: 50,
+    showsBackgroundLocationIndicator: true,
+    foregroundService: {
+      notificationTitle: "Location Service",
+      notificationBody: "Tracking your home status...",
+    },
+  });
+}
 
 function MainTabs() {
   return (
@@ -51,6 +73,10 @@ function MainTabs() {
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+
+  React.useEffect(() => {
+    startBackgroundLocation();
+  }, []);
 
   if (isLoading) {
     return (
