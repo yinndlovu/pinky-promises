@@ -11,6 +11,7 @@ export async function getHomeLocation(token: string) {
   const res = await axios.get(`${BASE_URL}/api/location/get-home-location`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  
   const { homeLocation } = res.data;
   await AsyncStorage.setItem("homeLocation", JSON.stringify(homeLocation));
   return homeLocation;

@@ -164,7 +164,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     navigation.setOptions({
       headerLeft: () => (
         <TouchableOpacity
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => navigation.navigate("Search")}
           style={{ marginLeft: 20 }}
         >
           <Feather name="search" size={24} color="#fff" />

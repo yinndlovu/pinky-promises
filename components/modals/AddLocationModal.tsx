@@ -3,13 +3,13 @@ import {
   Modal,
   View,
   Text,
-  Button,
   ActivityIndicator,
   StyleSheet,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
+import AlertModal from "./AlertModal";
 
 type AddLocationModalProps = {
   visible: boolean;
@@ -27,13 +27,19 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
     longitude: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     if (visible) {
       (async () => {
         setLoading(true);
         setError(null);
+        setSaving(false);
+        setAlertVisible(false);
+        setAlertMessage("");
         try {
           let { status } = await Location.requestForegroundPermissionsAsync();
           if (status !== "granted") {
@@ -53,6 +59,21 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
       })();
     }
   }, [visible]);
+
+  const handleConfirm = async () => {
+    if (!location) return;
+    setSaving(true);
+    try {
+      await onConfirm(location);
+      setAlertMessage("Home location added!");
+      setAlertVisible(true);
+    } catch (e) {
+      setAlertMessage("Failed to add location");
+      setAlertVisible(true);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -83,13 +104,17 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={styles.confirmButton}
-                  onPress={() => onConfirm(location)}
+                  onPress={handleConfirm}
+                  disabled={saving}
                 >
-                  <Text style={styles.confirmButtonText}>Confirm</Text>
+                  <Text style={styles.confirmButtonText}>
+                    {saving ? "Saving..." : "Confirm"}
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.cancelButton}
                   onPress={onClose}
+                  disabled={saving}
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
@@ -100,10 +125,24 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={onClose}
+              disabled={saving}
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           )}
+          {saving && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color="#e03487" />
+            </View>
+          )}
+          <AlertModal
+            visible={alertVisible}
+            message={alertMessage}
+            onClose={() => {
+              setAlertVisible(false);
+              if (alertMessage === "Home location added!") onClose();
+            }}
+          />
         </View>
       </View>
     </Modal>
@@ -190,6 +229,13 @@ const styles = StyleSheet.create({
     color: "#e03487",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(35,36,58,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
   },
 });
 

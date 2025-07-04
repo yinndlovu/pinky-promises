@@ -1,6 +1,14 @@
 import React, { useState } from "react";
-import { Modal, View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import ModalSelector from "react-native-modal-selector";
+import AlertModal from "./AlertModal";
 
 const MOOD_OPTIONS = [
   "Happy",
@@ -30,6 +38,9 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   initialMood = "happy",
 }) => {
   const [selectedMood, setSelectedMood] = useState(initialMood);
+  const [loading, setLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   React.useEffect(() => {
     if (visible) setSelectedMood(initialMood);
@@ -40,38 +51,72 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
     label: mood.charAt(0).toUpperCase() + mood.slice(1),
   }));
 
+  const handleSave = async () => {
+    setLoading(true);
+    try {
+      await onSave(selectedMood);
+      setAlertMessage("Mood updated!");
+      setAlertVisible(true);
+    } catch (err) {
+      setAlertMessage("Failed to update mood");
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Update your mood</Text>
-            <ModalSelector
-              data={data}
-              initValue={
-                selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)
-              }
-              onChange={(option) => setSelectedMood(option.key)}
-              style={styles.selector}
-              selectStyle={styles.selectStyle}
-              selectTextStyle={styles.selectTextStyle}
-              optionTextStyle={styles.optionTextStyle}
-              optionContainerStyle={styles.optionContainerStyle}
-              cancelStyle={styles.cancelStyle}
-              cancelTextStyle={styles.cancelTextStyle}
-              backdropPressToClose={true}
-              animationType="fade"
-            />
+          <ModalSelector
+            data={data}
+            initValue={
+              selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)
+            }
+            onChange={(option) => setSelectedMood(option.key)}
+            style={styles.selector}
+            selectStyle={styles.selectStyle}
+            selectTextStyle={styles.selectTextStyle}
+            optionTextStyle={styles.optionTextStyle}
+            optionContainerStyle={styles.optionContainerStyle}
+            cancelStyle={styles.cancelStyle}
+            cancelTextStyle={styles.cancelTextStyle}
+            backdropPressToClose={true}
+            animationType="fade"
+          />
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={styles.saveButton}
-              onPress={() => onSave(selectedMood)}
+              onPress={handleSave}
+              disabled={loading}
             >
-              <Text style={styles.saveButtonText}>Save</Text>
+              <Text style={styles.saveButtonText}>
+                {loading ? "Saving..." : "Save"}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onClose}
+              disabled={loading}
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
+          {loading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color="#e03487" />
+            </View>
+          )}
+          <AlertModal
+            visible={alertVisible}
+            message={alertMessage}
+            onClose={() => {
+              setAlertVisible(false);
+              if (alertMessage === "Mood updated!") onClose();
+            }}
+          />
         </View>
       </View>
     </Modal>
@@ -170,6 +215,13 @@ const styles = StyleSheet.create({
     color: "#e03487",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(35,36,58,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
   },
 });
 

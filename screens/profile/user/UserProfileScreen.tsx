@@ -14,13 +14,13 @@ import { encode } from "base64-arraybuffer";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
-const PartnerProfileScreen = () => {
-  const [partner, setPartner] = useState<any>(null);
+const UserProfileScreen = () => {
+  const [user, setUser] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPartner = async () => {
+    const fetchUser = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
 
@@ -29,18 +29,18 @@ const PartnerProfileScreen = () => {
         }
 
         const response = await axios.get(
-          `${BASE_URL}/api/partnership/get-partner`,
+          `${BASE_URL}/api/profile/get-profile`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        const partnerData = response.data.partner;
-        setPartner(partnerData);
+        const userData = response.data.partner;
+        setUser(userData);
 
         try {
           const pictureResponse = await axios.get(
-            `${BASE_URL}/api/profile/get-profile-picture/${partnerData.id}`,
+            `${BASE_URL}/api/profile/get-profile-picture/${userData.id}`,
             {
               headers: { Authorization: `Bearer ${token}` },
               responseType: "arraybuffer",
@@ -54,19 +54,19 @@ const PartnerProfileScreen = () => {
           setAvatarUri(null);
         }
       } catch (err) {
-        setPartner(null);
+        setUser(null);
         setAvatarUri(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPartner();
+    fetchUser();
   }, []);
 
-  const name = partner?.name || "No partner";
-  const username = partner?.username || "username";
-  const bio = partner?.bio || "small bio";
+  const name = user?.name || "User";
+  const username = user?.username || "user";
+  const bio = user?.bio || "";
 
   if (loading) {
     return (
@@ -93,7 +93,7 @@ const PartnerProfileScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Partner</Text>
+          <Text style={styles.headerTitle}>User</Text>
         </View>
         <View style={styles.profileRow}>
           <View style={styles.avatarWrapper}>
@@ -186,4 +186,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PartnerProfileScreen;
+export default UserProfileScreen;

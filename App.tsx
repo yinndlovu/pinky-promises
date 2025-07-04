@@ -25,6 +25,8 @@ import PartnerProfileScreen from "./screens/profile/partner/PartnerProfileScreen
 import * as Location from "expo-location";
 import { LOCATION_TASK_NAME } from "./background/LocationTask";
 import React from "react";
+import SearchScreen from "./screens/search/SearchScreen";
+import UserProfileScreen from "./screens/profile/user/UserProfileScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -238,6 +240,28 @@ function AppContent() {
         <Stack.Screen
           name="PartnerProfile"
           component={PartnerProfileScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="Search"
+          component={SearchScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="UserProfile"
+          component={UserProfileScreen}
           options={{
             headerShown: true,
             title: "",

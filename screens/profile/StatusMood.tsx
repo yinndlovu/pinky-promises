@@ -54,24 +54,20 @@ const StatusMood: React.FC<Props> = ({
     await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    setAlertMessage("Home location added!");
+    setAlertVisible(true);
   };
 
   const handleSaveMood = async (mood: string) => {
-    setMoodModalVisible(false);
-    setUpdatingMood(true);
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+      if (!token) throw new Error("No token");
       const moodData = await updateMood(token, mood);
       setCurrentMood(moodData.mood);
       setCurrentMoodDescription(moodData.description);
-      setAlertMessage("Mood updated!");
-      setAlertVisible(true);
     } catch (err) {
-      setAlertMessage("Failed to update mood");
-      setAlertVisible(true);
-    } finally {
-      setUpdatingMood(false);
+      throw err;
     }
   };
 
@@ -85,8 +81,8 @@ const StatusMood: React.FC<Props> = ({
         setCurrentMood(moodData.mood);
         setCurrentMoodDescription(moodData.description);
       } catch (err) {
-        setCurrentMood(undefined);
-        setCurrentMoodDescription("No mood set yet.");
+        setCurrentMood("Neutral");
+        setCurrentMoodDescription("Feeling nothing special");
       } finally {
         setFetchingMood(false);
       }
