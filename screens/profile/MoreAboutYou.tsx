@@ -19,7 +19,11 @@ const MoreAboutYou: React.FC<Props> = ({
       </TouchableOpacity>
     </View>
     <View style={styles.valueRow}>
-      <Text style={styles.value}>{about}</Text>
+      {!about ? (
+        <Text style={styles.noInfoText}>No info added yet</Text>
+      ) : (
+        <Text style={styles.value}>{about}</Text>
+      )}
     </View>
   </View>
 );
@@ -58,6 +62,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#fff",
     fontWeight: "bold",
+  },
+  noInfoText: {
+    color: "#b0b3c6",
+    fontSize: 16,
+    textAlign: "center",
+    marginVertical: 0,
   },
 });
 

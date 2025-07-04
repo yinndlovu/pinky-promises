@@ -37,6 +37,9 @@ import {
   getLoveLanguage,
   updateLoveLanguage,
 } from "../../services/loveLanguageService";
+import UpdateAboutModal from "../../components/modals/UpdateAboutModal";
+import { getAboutUser, updateAboutUser } from "../../services/aboutUserService";
+import { getPartner } from "../../services/partnerService";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -96,6 +99,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loveLanguageModalVisible, setLoveLanguageModalVisible] =
     React.useState(false);
   const [loveLanguage, setLoveLanguage] = React.useState("");
+
+  const [about, setAbout] = React.useState<string>("");
+  const [aboutModalVisible, setAboutModalVisible] = React.useState(false);
+
+  const [partnerName, setPartnerName] = React.useState<string | null>(null);
 
   const FAVORITE_LABELS: { [key: string]: string } = {
     favoriteColor: "Favorite Color",
@@ -164,6 +172,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     setLoveLanguage(newLoveLanguage);
   };
 
+  const handleSaveAbout = async (newAbout: string) => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    await updateAboutUser(token, newAbout);
+    setAbout(newAbout);
+  };
+
   React.useEffect(() => {
     const getStatus = async () => {
       try {
@@ -215,6 +230,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }, [user]);
 
   React.useEffect(() => {
+    const fetchPartnerName = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      try {
+        const partner = await getPartner(token);
+        setPartnerName(partner?.name || null);
+      } catch (err: any) {
+        setPartnerName(null);
+      }
+    };
+    fetchPartnerName();
+  }, [user]);
+
+  React.useEffect(() => {
     const fetchMood = async () => {
       const token = await AsyncStorage.getItem("token");
       if (!token) return;
@@ -224,6 +253,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     };
     fetchMood();
   }, []);
+
+  React.useEffect(() => {
+    const fetchAbout = async () => {
+      const token = await AsyncStorage.getItem("token");
+      const userId = user?.id;
+      if (!token || !userId) return;
+      try {
+        const aboutText = await getAboutUser(token, userId);
+        setAbout(aboutText);
+      } catch {
+        setAbout("");
+      }
+    };
+    if (user?.id) fetchAbout();
+  }, [user]);
 
   React.useEffect(() => {
     if (success) {
@@ -469,7 +513,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         <View style={styles.partnerRow}>
           <Text style={styles.partnerText}>
-            Partner: <Text style={styles.partnerName}>Paris</Text>
+            Partner:{" "}
+            <Text
+              style={
+                partnerName && partnerName !== "No partner"
+                  ? styles.partnerName
+                  : styles.noPartnerName
+              }
+            >
+              {partnerName || "No partner"}
+            </Text>
           </Text>
         </View>
 
@@ -511,7 +564,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           onSave={handleSaveLoveLanguage}
         />
 
-        <MoreAboutYou about="Stuff about you" onEdit={() => {}} />
+        <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
+        <UpdateAboutModal
+          visible={aboutModalVisible}
+          initialAbout={about}
+          onClose={() => setAboutModalVisible(false)}
+          onSave={handleSaveAbout}
+        />
 
         <Modal
           visible={editModalVisible}
@@ -720,6 +779,10 @@ const styles = StyleSheet.create({
   partnerName: {
     color: "rgb(155, 158, 180)",
     fontWeight: "bold",
+  },
+  noPartnerName: {
+    color: "rgb(155, 158, 180)",
+    fontWeight: "normal",
   },
   modalOverlay: {
     ...StyleSheet.absoluteFillObject,
