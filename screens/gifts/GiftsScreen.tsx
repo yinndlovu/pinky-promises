@@ -49,7 +49,7 @@ const GiftsScreen = () => (
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.headerTitle}>Gifts</Text>
+      <Text style={styles.headerTitle}>Presents</Text>
       <SetMonthlyGift giftName="Roses" onChange={() => {}} />
       <ReceivedGift
         giftName="Roses"

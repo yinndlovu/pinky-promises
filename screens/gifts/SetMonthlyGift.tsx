@@ -8,7 +8,7 @@ type Props = {
 
 const SetMonthlyGift: React.FC<Props> = ({ giftName, onChange }) => (
   <View style={styles.card}>
-    <Text style={styles.tip}>YOUR SET MONTHLY GIFT</Text>
+    <Text style={styles.tip}>YOUR SET PRESENT</Text>
     <Text style={styles.giftName}>{giftName}</Text>
     <TouchableOpacity style={styles.changeButton} onPress={onChange}>
       <Text style={styles.changeButtonText}>Change</Text>

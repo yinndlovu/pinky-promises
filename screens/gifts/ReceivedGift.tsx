@@ -17,12 +17,12 @@ const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim }) => (
         color="#e03487"
         style={{ marginRight: 10 }}
       />
-      <Text style={styles.title}>You received a monthly gift</Text>
+      <Text style={styles.title}>You received a present</Text>
     </View>
     <Text style={styles.giftName}>{giftName}</Text>
     <Text style={styles.dateText}>{receivedAt}</Text>
     <TouchableOpacity style={styles.claimButton} onPress={onClaim}>
-      <Text style={styles.claimButtonText}>Claim</Text>
+      <Text style={styles.claimButtonText}>Open</Text>
     </TouchableOpacity>
   </View>
 );

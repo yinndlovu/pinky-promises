@@ -14,7 +14,7 @@ import { encode } from 'base64-arraybuffer';
 
 const NAV_ITEMS = [
   { name: "Home", icon: "home" as const },
-  { name: "Gifts", icon: "gift" as const },
+  { name: "Presents", icon: "gift" as const },
   { name: "Ours", icon: "heart" as const },
   { name: "Profile", icon: "user" as const },
 ];

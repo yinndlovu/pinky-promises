@@ -26,6 +26,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { fetchUserStatus } from "../../services/userStatusService";
 import { getUserMood } from "../../services/moodService";
 import { getUpcomingSpecialDate } from "../../services/specialDateService";
+import { getRecentActivities } from "../../services/recentActivityService";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -42,33 +43,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   >("unavailable");
   const [partnerMood, setPartnerMood] = React.useState<string>("No mood");
   const [upcomingDate, setUpcomingDate] = React.useState<any>(null);
-
-  const activities = [
-    {
-      id: "1",
-      description: "Yin has come home from work",
-      date: "27 Jun 2025",
-      time: "14:30",
-    },
-    {
-      id: "2",
-      description: "Yin has left for work",
-      date: "27 Jun 2025",
-      time: "08:03",
-    },
-    {
-      id: "3",
-      description: "You have updated your mood to 'Happy'",
-      date: "25 Jun 2025",
-      time: "21:45",
-    },
-    {
-      id: "4",
-      description: "You changed your mood to 'Happy'",
-      date: "22 May 2025",
-      time: "09:15",
-    },
-  ];
+  const [activities, setActivities] = React.useState<any[]>([]);
 
   const checkAndUpdateHomeStatus = async () => {
     try {
@@ -170,6 +145,52 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  const fetchRecentActivities = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const activitiesData = await getRecentActivities(token);
+
+      const transformedActivities = activitiesData.map((activity: any) => ({
+        id: activity.id,
+        description: activity.activity,
+        date: formatActivityDate(activity.createdAt),
+        time: formatActivityTime(activity.createdAt),
+      }));
+
+      setActivities(transformedActivities);
+    } catch (error: any) {
+      console.error("Failed to fetch recent activities:", error);
+      setActivities([]);
+    }
+  };
+
+  const formatActivityDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      const day = date.getDate();
+      const month = date.toLocaleDateString("en-US", { month: "short" });
+      const year = date.getFullYear();
+      return `${day} ${month} ${year}`;
+    } catch (error) {
+      return "Unknown date";
+    }
+  };
+
+  const formatActivityTime = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+    } catch (error) {
+      return "Unknown time";
+    }
+  };
+
   React.useEffect(() => {
     if (partner?.id) {
       fetchPartnerStatusAndMood();
@@ -183,7 +204,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     React.useCallback(() => {
       checkAndUpdateHomeStatus();
-      const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
+      const interval = setInterval(checkAndUpdateHomeStatus, 15 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
   );
@@ -253,6 +274,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   React.useEffect(() => {
     fetchUpcomingSpecialDate();
+  }, []);
+
+  React.useEffect(() => {
+    fetchRecentActivities();
   }, []);
 
   useLayoutEffect(() => {

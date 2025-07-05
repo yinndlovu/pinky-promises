@@ -15,7 +15,7 @@ type Props = {
 
 const PastGiftsList: React.FC<Props> = ({ gifts }) => (
   <View style={styles.container}>
-    <Text style={styles.title}>Past Received Gifts</Text>
+    <Text style={styles.title}>Past Received Presents</Text>
     <FlatList
       data={gifts}
       keyExtractor={(item) => item.id}
