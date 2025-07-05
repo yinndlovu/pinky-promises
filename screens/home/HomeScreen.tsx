@@ -382,7 +382,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                     {partner?.name || "No partner"}
                   </Text>
                   <Text style={styles.username}>
-                    @{partner?.username || ""}
+                    @{partner?.username || "nopartner"}
                   </Text>
                   <Text style={styles.bio}>{partner?.bio || ""}</Text>
                 </View>

@@ -17,6 +17,11 @@ type Props = {
 const RecentActivity: React.FC<Props> = ({ activities }) => (
   <View style={styles.container}>
     <Text style={styles.sectionTitle}>RECENT ACTIVITY</Text>
+    {activities.length === 0 ? (
+      <View style={styles.noActivityContainer}>
+        <Text style={styles.noActivityText}>No recent activities</Text>
+      </View>
+    ) : (
     <FlatList
       data={activities}
       keyExtractor={(item) => item.id}
@@ -36,6 +41,7 @@ const RecentActivity: React.FC<Props> = ({ activities }) => (
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       scrollEnabled={false}
     />
+    )}
   </View>
 );
 
@@ -53,6 +59,19 @@ const styles = StyleSheet.create({
     marginLeft: 16,
     marginBottom: 10,
     alignSelf: "flex-start",
+  },
+  noActivityContainer: {
+    borderRadius: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noActivityText: {
+    color: "#b0b3c6",
+    fontSize: 16,
+    fontWeight: "400",
+    textAlign: "center",
   },
   activityRow: {
     flexDirection: "row",

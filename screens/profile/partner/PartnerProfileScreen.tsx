@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -19,10 +20,13 @@ import PartnerLoveLanguage from "./PartnerLoveLanguage";
 import { getLoveLanguage } from "../../../services/loveLanguageService";
 import PartnerMoreAboutYou from "./PartnerMoreAboutYou";
 import { getAboutUser } from "../../../services/aboutUserService";
+import ConfirmationModal from "../../../components/modals/ConfirmationModal";
+import { removePartner } from "../../../services/partnerService";
+import ProfilePictureViewer from "../ProfilePictureViewer";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
-const PartnerProfileScreen = () => {
+const PartnerProfileScreen = ({ navigation }: any) => {
   const [partner, setPartner] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,6 +34,28 @@ const PartnerProfileScreen = () => {
   const [partnerFavorites, setPartnerFavorites] = useState([]);
   const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
   const [partnerAbout, setPartnerAbout] = useState<string>("");
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [removingPartner, setRemovingPartner] = useState(false);
+  const [showPictureViewer, setShowPictureViewer] = useState(false);
+
+  const handleRemovePartner = async () => {
+    setRemovingPartner(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      await removePartner(token);
+      setShowRemoveModal(false);
+
+      navigation.navigate("UserProfile");
+    } catch (error: any) {
+      console.error("Failed to remove partner:", error);
+    } finally {
+      setRemovingPartner(false);
+    }
+  };
 
   const FAVORITE_LABELS: { [key: string]: string } = {
     favoriteColor: "Favorite Color",
@@ -197,16 +223,24 @@ const PartnerProfileScreen = () => {
         </View>
         <View style={styles.profileRow}>
           <View style={styles.avatarWrapper}>
-            <Image
-              source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
-              style={styles.avatar}
-            />
+            <TouchableOpacity onPress={() => setShowPictureViewer(true)}>
+              <Image
+                source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
           </View>
           <View style={styles.infoWrapper}>
             <Text style={styles.name}>{name}</Text>
             {username ? <Text style={styles.username}>@{username}</Text> : null}
             {bio ? <Text style={styles.bio}>{bio}</Text> : null}
           </View>
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => setShowRemoveModal(true)}
+          >
+            <Text style={styles.removeButtonText}>Remove</Text>
+          </TouchableOpacity>
         </View>
         {loading && (
           <View style={styles.centered}>
@@ -235,7 +269,23 @@ const PartnerProfileScreen = () => {
         <PartnerLoveLanguage loveLanguage={partnerLoveLanguage} />
 
         <PartnerMoreAboutYou about={partnerAbout} />
+
+        <ConfirmationModal
+          visible={showRemoveModal}
+          message="Are you sure you want to remove your partner? This action cannot be undone."
+          onConfirm={handleRemovePartner}
+          onCancel={() => setShowRemoveModal(false)}
+          confirmText="Remove"
+          cancelText="Cancel"
+          loading={removingPartner}
+        />
       </ScrollView>
+
+      <ProfilePictureViewer
+        visible={showPictureViewer}
+        imageUri={avatarUri}
+        onClose={() => setShowPictureViewer(false)}
+      />
     </View>
   );
 };
@@ -321,6 +371,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#23243a",
     alignItems: "center",
     justifyContent: "center",
+  },
+  removeButton: {
+    backgroundColor: "#e02222",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+  },
+  removeButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 14,
+    letterSpacing: 0.5,
   },
 });
 
