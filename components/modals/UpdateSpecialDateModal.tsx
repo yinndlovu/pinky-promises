@@ -7,14 +7,16 @@ import {
   StyleSheet,
   TextInput,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
+import AlertModal from "./AlertModal";
 
 type UpdateSpecialDateModalProps = {
   visible: boolean;
   onClose: () => void;
-  onSave: (date: string, title: string, description?: string) => void;
+  onSave: (date: string, title: string, description?: string) => Promise<void>;
   initialDate?: string;
   initialTitle?: string;
   initialDescription?: string;
@@ -30,17 +32,46 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   initialDescription = "",
   isEditing = false,
 }) => {
-  const [date, setDate] = useState<Date>(initialDate ? new Date(initialDate) : new Date());
+  const [date, setDate] = useState<Date>(
+    initialDate ? new Date(initialDate) : new Date()
+  );
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
-  const handleSave = () => {
+  const formatDate = (date: Date): string => {
+    const day = date.getDate();
+    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  };
+
+  const handleSave = async () => {
     if (!title.trim()) return;
-    
-    const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-    onSave(formattedDate, title.trim(), description.trim() || undefined);
-    handleClose();
+
+    setLoading(true);
+    try {
+      const formattedDate = date.toISOString().split("T")[0];
+      await onSave(
+        formattedDate,
+        title.trim(),
+        description.trim() || undefined
+      );
+      setAlertMessage(
+        isEditing ? "Special date updated!" : "Special date created!"
+      );
+      setAlertVisible(true);
+    } catch (error: any) {
+      setAlertMessage(
+        error.response?.data?.error || "Failed to save special date"
+      );
+      setAlertVisible(true);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClose = () => {
@@ -48,11 +79,12 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
     setTitle("");
     setDescription("");
     setShowDatePicker(false);
+    setLoading(false);
     onClose();
   };
 
   const onDateChange = (event: any, selectedDate?: Date) => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === "android") {
       setShowDatePicker(false);
     }
     if (selectedDate) {
@@ -61,7 +93,9 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   };
 
   const showDatePickerModal = () => {
-    setShowDatePicker(true);
+    if (!loading) {
+      setShowDatePicker(true);
+    }
   };
 
   return (
@@ -72,7 +106,11 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
             <Text style={styles.title}>
               {isEditing ? "Edit Special Date" : "Add Special Date"}
             </Text>
-            <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={handleClose}
+              style={styles.closeButton}
+              disabled={loading}
+            >
               <Feather name="x" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -83,10 +121,9 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
               <TouchableOpacity
                 style={styles.dateButton}
                 onPress={showDatePickerModal}
+                disabled={loading}
               >
-                <Text style={styles.dateButtonText}>
-                  {date.toLocaleDateString()}
-                </Text>
+                <Text style={styles.dateButtonText}>{formatDate(date)}</Text>
                 <Feather name="calendar" size={20} color="#e03487" />
               </TouchableOpacity>
             </View>
@@ -100,6 +137,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
                 placeholder="e.g., Anniversary, Day we met"
                 placeholderTextColor="#b0b3c6"
                 maxLength={50}
+                editable={!loading}
               />
             </View>
 
@@ -114,36 +152,64 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
                 multiline
                 numberOfLines={3}
                 maxLength={200}
+                editable={!loading}
               />
             </View>
           </View>
 
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.cancelButton} onPress={handleClose}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleClose}
+              disabled={loading}
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.saveButton, !title.trim() && styles.saveButtonDisabled]}
+              style={[
+                styles.saveButton,
+                (!title.trim() || loading) && styles.saveButtonDisabled,
+              ]}
               onPress={handleSave}
-              disabled={!title.trim()}
+              disabled={!title.trim() || loading}
             >
               <Text style={styles.saveButtonText}>
-                {isEditing ? "Update" : "Save"}
+                {loading ? "Saving..." : isEditing ? "Update" : "Save"}
               </Text>
             </TouchableOpacity>
           </View>
+
+          {loading && (
+            <View style={styles.loadingOverlay}>
+              <ActivityIndicator size="large" color="#e03487" />
+            </View>
+          )}
         </View>
 
         {showDatePicker && (
           <DateTimePicker
             value={date}
             mode="date"
-            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            display={Platform.OS === "ios" ? "spinner" : "default"}
             onChange={onDateChange}
             maximumDate={new Date()}
-            style={Platform.OS === 'ios' ? styles.iosDatePicker : undefined}
+            style={Platform.OS === "ios" ? styles.iosDatePicker : undefined}
           />
         )}
+
+        <AlertModal
+          visible={alertVisible}
+          message={alertMessage}
+          onClose={() => {
+            setAlertVisible(false);
+            if (
+              alertMessage.includes("updated") ||
+              alertMessage.includes("created")
+            ) {
+              handleClose();
+            }
+          }}
+        />
       </View>
     </Modal>
   );
@@ -166,6 +232,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 5,
+    position: "relative",
   },
   header: {
     flexDirection: "row",
@@ -253,6 +320,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(35,36,58,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
   },
   iosDatePicker: {
     backgroundColor: "#23243a",
