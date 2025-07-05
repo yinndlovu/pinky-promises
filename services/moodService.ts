@@ -18,3 +18,12 @@ export async function updateMood(token: string, mood: string) {
 
   return res.data.mood;
 }
+
+export async function getUserMood(token: string, userId: string) {
+  const res = await axios.get(
+    `${BASE_URL}/api/mood/get-user-mood/${userId}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return res.data.mood;
+}

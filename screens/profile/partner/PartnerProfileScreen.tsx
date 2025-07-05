@@ -11,6 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 import { encode } from "base64-arraybuffer";
+import PartnerStatusMood from "./PartnerStatusMood";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
@@ -18,6 +19,7 @@ const PartnerProfileScreen = () => {
   const [partner, setPartner] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPartner = async () => {
@@ -61,12 +63,31 @@ const PartnerProfileScreen = () => {
       }
     };
 
+    const fetchCurrentUser = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+
+        const response = await axios.get(
+          `${BASE_URL}/api/profile/get-profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        setCurrentUserName(response.data.user.name);
+      } catch (err) {
+        console.error("Failed to fetch current user:", err);
+      }
+    };
+
     fetchPartner();
+    fetchCurrentUser();
   }, []);
 
-  const name = partner?.name || "No partner";
-  const username = partner?.username || "username";
-  const bio = partner?.bio || "small bio";
+  const name = partner?.name || "User";
+  const username = partner?.username || "user";
+  const bio = partner?.bio || "";
 
   if (loading) {
     return (
@@ -76,7 +97,7 @@ const PartnerProfileScreen = () => {
     );
   }
 
-  /*if (!partner) {
+  if (!partner) {
     return (
       <View style={styles.centered}>
         <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
@@ -84,7 +105,7 @@ const PartnerProfileScreen = () => {
         </Text>
       </View>
     );
-  }*/
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -114,6 +135,17 @@ const PartnerProfileScreen = () => {
           </View>
         )}
         <View style={styles.divider} />
+
+        <View style={styles.partnerRow}>
+          <Text style={styles.partnerText}>
+            Partner:{" "}
+            <Text style={styles.partnerName}>
+              {currentUserName || "You"}
+            </Text>
+          </Text>
+        </View>
+
+        <PartnerStatusMood partnerId={partner.id} partnerName={name} />
       </ScrollView>
     </View>
   );
@@ -137,7 +169,7 @@ const styles = StyleSheet.create({
   },
   profileRow: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   avatarWrapper: {
     marginRight: 20,
@@ -177,6 +209,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#393a4a",
     marginVertical: 24,
     opacity: 1,
+  },
+  partnerRow: {
+    marginBottom: 20,
+    marginLeft: 2,
+    alignItems: "center",
+  },
+  partnerText: {
+    color: "#b0b3c6",
+    fontSize: 15,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+  partnerName: {
+    color: "rgb(155, 158, 180)",
+    fontWeight: "bold",
   },
   centered: {
     flex: 1,
