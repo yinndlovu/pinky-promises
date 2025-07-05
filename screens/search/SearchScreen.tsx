@@ -15,6 +15,7 @@ import axios from "axios";
 import { BASE_URL } from "../../configuration/config";
 import { encode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AlertModal from "../../components/modals/AlertModal";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -23,6 +24,7 @@ type User = {
   name: string;
   username: string;
   isPartner?: boolean;
+  isUser?: boolean;
 };
 
 export default function SearchScreen({ navigation }: Props) {
@@ -34,6 +36,8 @@ export default function SearchScreen({ navigation }: Props) {
   const [profilePictures, setProfilePictures] = useState<{
     [userId: string]: string;
   }>({});
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const fetchProfilePicture = async (userId: string, token: string) => {
     try {
@@ -49,6 +53,11 @@ export default function SearchScreen({ navigation }: Props) {
     } catch {
       return null;
     }
+  };
+
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setAlertVisible(true);
   };
 
   const handleSearch = async (text: string) => {
@@ -85,7 +94,9 @@ export default function SearchScreen({ navigation }: Props) {
   };
 
   const handleUserPress = (user: User) => {
-    if (user.isPartner) {
+    if (user.isUser) {
+      showAlert("This is you!");
+    } else if (user.isPartner) {
       navigation.navigate("PartnerProfile", { userId: user.id });
     } else {
       navigation.navigate("UserProfile", { userId: user.id });
@@ -93,9 +104,7 @@ export default function SearchScreen({ navigation }: Props) {
   };
 
   return (
-    <View
-      style={{ flex: 1, backgroundColor: "#23243a", paddingTop: 0 }}
-    >
+    <View style={{ flex: 1, backgroundColor: "#23243a", paddingTop: 0 }}>
       <Text style={styles.headerTitle}>Search</Text>
       <TextInput
         style={{
@@ -137,6 +146,11 @@ export default function SearchScreen({ navigation }: Props) {
             </Text>
           ) : null
         }
+      />
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
       />
     </View>
   );

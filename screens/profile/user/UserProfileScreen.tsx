@@ -6,18 +6,40 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 import { encode } from "base64-arraybuffer";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  sendPartnerRequest,
+  checkPendingRequest,
+  cancelPartnerRequest,
+  getIncomingRequest,
+  acceptPartnerRequest,
+} from "../../../services/partnerService";
+import AlertModal from "../../../components/modals/AlertModal";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
-const UserProfileScreen = () => {
+type Props = NativeStackScreenProps<any, "UserProfile">;
+
+type RequestStatus = "none" | "pending" | "incoming";
+
+const UserProfileScreen = ({ route, navigation }: Props) => {
+  const { userId } = route.params as { userId: string };
   const [user, setUser] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sendingRequest, setSendingRequest] = useState(false);
+  const [requestStatus, setRequestStatus] = useState<RequestStatus>("none");
+  const [incomingRequestId, setIncomingRequestId] = useState<string | null>(
+    null
+  );
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,18 +51,18 @@ const UserProfileScreen = () => {
         }
 
         const response = await axios.get(
-          `${BASE_URL}/api/profile/get-profile`,
+          `${BASE_URL}/api/profile/get-user-profile/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
 
-        const userData = response.data.partner;
+        const userData = response.data.profile;
         setUser(userData);
 
         try {
           const pictureResponse = await axios.get(
-            `${BASE_URL}/api/profile/get-profile-picture/${userData.id}`,
+            `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
               responseType: "arraybuffer",
@@ -53,6 +75,8 @@ const UserProfileScreen = () => {
         } catch (picErr: any) {
           setAvatarUri(null);
         }
+
+        await checkRequestStatus(token);
       } catch (err) {
         setUser(null);
         setAvatarUri(null);
@@ -62,7 +86,103 @@ const UserProfileScreen = () => {
     };
 
     fetchUser();
-  }, []);
+  }, [userId]);
+
+  const checkRequestStatus = async (token: string) => {
+    try {
+      const pendingResponse = await checkPendingRequest(token, userId);
+      if (pendingResponse.hasPendingRequest) {
+        setRequestStatus("pending");
+        return;
+      }
+
+      const incomingResponse = await getIncomingRequest(token, userId);
+      if (incomingResponse.hasIncomingRequest) {
+        setRequestStatus("incoming");
+        setIncomingRequestId(incomingResponse.requestId);
+        return;
+      }
+
+      setRequestStatus("none");
+    } catch (err) {
+      setRequestStatus("none");
+    }
+  };
+
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setAlertVisible(true);
+  };
+
+  const handlePartnerAction = async () => {
+    setSendingRequest(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        showAlert("Not authenticated");
+        return;
+      }
+
+      switch (requestStatus) {
+        case "pending":
+          await cancelPartnerRequest(token, userId);
+          setRequestStatus("none");
+          showAlert("Partner request cancelled");
+          break;
+
+        case "incoming":
+          if (incomingRequestId) {
+            await acceptPartnerRequest(token, incomingRequestId);
+            setRequestStatus("none");
+            setIncomingRequestId(null);
+            showAlert("Partner request accepted");
+
+            setTimeout(() => {
+              navigation.replace("PartnerProfile", { userId: userId });
+            }, 1500);
+          }
+          break;
+
+        case "none":
+          await sendPartnerRequest(token, userId);
+          setRequestStatus("pending");
+          showAlert("Partner request sent");
+          break;
+      }
+    } catch (error: any) {
+      showAlert(
+        error.response?.data?.error || "Failed to process partner request"
+      );
+    } finally {
+      setSendingRequest(false);
+    }
+  };
+
+  const getButtonText = () => {
+    switch (requestStatus) {
+      case "pending":
+        return "Cancel request";
+      case "incoming":
+        return "Accept request";
+      case "none":
+        return "Add partner";
+      default:
+        return "Add partner";
+    }
+  };
+
+  const getButtonStyle = () => {
+    switch (requestStatus) {
+      case "pending":
+        return styles.cancelButton;
+      case "incoming":
+        return styles.acceptButton;
+      case "none":
+        return styles.addPartnerButton;
+      default:
+        return styles.addPartnerButton;
+    }
+  };
 
   const name = user?.name || "User";
   const username = user?.username || "user";
@@ -76,15 +196,15 @@ const UserProfileScreen = () => {
     );
   }
 
-  /*if (!partner) {
+  if (!user) {
     return (
       <View style={styles.centered}>
         <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
-          You have no partner
+          User not found
         </Text>
       </View>
     );
-  }*/
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -108,13 +228,30 @@ const UserProfileScreen = () => {
             {bio ? <Text style={styles.bio}>{bio}</Text> : null}
           </View>
         </View>
-        {loading && (
-          <View style={styles.centered}>
-            <ActivityIndicator color="#5ad1e6" size="large" />
-          </View>
-        )}
         <View style={styles.divider} />
+
+        <TouchableOpacity
+          style={[
+            styles.partnerButton,
+            getButtonStyle(),
+            sendingRequest && styles.partnerButtonDisabled,
+          ]}
+          onPress={handlePartnerAction}
+          disabled={sendingRequest}
+        >
+          {sendingRequest ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text style={styles.partnerButtonText}>{getButtonText()}</Text>
+          )}
+        </TouchableOpacity>
       </ScrollView>
+
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 };
@@ -137,7 +274,7 @@ const styles = StyleSheet.create({
   },
   profileRow: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   avatarWrapper: {
     marginRight: 20,
@@ -183,6 +320,43 @@ const styles = StyleSheet.create({
     backgroundColor: "#23243a",
     alignItems: "center",
     justifyContent: "center",
+  },
+  partnerButton: {
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  addPartnerButton: {
+    backgroundColor: "#e03487",
+    shadowColor: "#e03487",
+  },
+  cancelButton: {
+    backgroundColor: "#ff6b6b",
+    shadowColor: "#ff6b6b",
+  },
+  acceptButton: {
+    backgroundColor: "#51cf66",
+    shadowColor: "#51cf66",
+  },
+  partnerButtonDisabled: {
+    backgroundColor: "#666",
+    shadowOpacity: 0.1,
+  },
+  partnerButtonText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
   },
 });
 

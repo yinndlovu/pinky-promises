@@ -40,6 +40,7 @@ import {
 import UpdateAboutModal from "../../components/modals/UpdateAboutModal";
 import { getAboutUser, updateAboutUser } from "../../services/aboutUserService";
 import { getPartner } from "../../services/partnerService";
+import { getReceivedPartnerRequests } from "../../services/partnerService";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -105,6 +106,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const [partnerName, setPartnerName] = React.useState<string | null>(null);
 
+  const [pendingRequestsCount, setPendingRequestsCount] = React.useState(0);
+
   const FAVORITE_LABELS: { [key: string]: string } = {
     favoriteColor: "Favorite Color",
     favoriteFood: "Favorite Food",
@@ -131,6 +134,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("PendingRequests")}
+          style={{ marginLeft: 20, position: "relative" }}
+        >
+          <Feather name="users" size={24} color="#fff" />
+          {pendingRequestsCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      ),
       headerRight: () => (
         <TouchableOpacity
           onPress={() => navigation.navigate("Settings")}
@@ -148,7 +166,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       },
       headerShadowVisible: false,
     });
-  }, [navigation]);
+  }, [navigation, pendingRequestsCount]);
 
   React.useEffect(() => {
     const fetchLoveLanguage = async () => {
@@ -178,6 +196,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     await updateAboutUser(token, newAbout);
     setAbout(newAbout);
   };
+
+  const fetchPendingRequestsCount = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const requests = await getReceivedPartnerRequests(token);
+      const pendingCount = requests.filter(
+        (req: any) => req.status === "pending"
+      ).length;
+      setPendingRequestsCount(pendingCount);
+    } catch (error) {
+      console.error("Failed to fetch pending requests count:", error);
+    }
+  };
+
+  React.useEffect(() => {
+    fetchPendingRequestsCount();
+  }, []);
 
   React.useEffect(() => {
     const getStatus = async () => {
@@ -747,6 +784,24 @@ const styles = StyleSheet.create({
     color: "#e03487",
     marginBottom: 8,
     marginLeft: 4,
+  },
+  badge: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: "#e03487",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#23243a",
+  },
+  badgeText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   bio: {
     fontSize: 15,

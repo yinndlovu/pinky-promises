@@ -27,6 +27,7 @@ import { LOCATION_TASK_NAME } from "./background/LocationTask";
 import React from "react";
 import SearchScreen from "./screens/search/SearchScreen";
 import UserProfileScreen from "./screens/profile/user/UserProfileScreen";
+import PendingRequestsScreen from "./screens/requests/PendingRequestsScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -262,6 +263,17 @@ function AppContent() {
         <Stack.Screen
           name="UserProfile"
           component={UserProfileScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="PendingRequests"
+          component={PendingRequestsScreen}
           options={{
             headerShown: true,
             title: "",
