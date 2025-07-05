@@ -23,6 +23,8 @@ import { getHomeLocation } from "../../services/homeLocationService";
 import { updateUserStatus } from "../../services/userStatusService";
 import { getDistance } from "../../utils/locationUtils";
 import { useFocusEffect } from "@react-navigation/native";
+import { fetchUserStatus } from "../../services/userStatusService";
+import { getUserMood } from "../../services/moodService";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -34,6 +36,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [showError, setShowError] = React.useState(false);
   const [isActive, setIsActive] = React.useState(true);
   const [loading, setLoading] = React.useState(true);
+  const [partnerStatus, setPartnerStatus] = React.useState<
+    "home" | "away" | "unavailable"
+  >("unavailable");
+  const [partnerMood, setPartnerMood] = React.useState<string>("No mood");
 
   const activities = [
     {
@@ -84,6 +90,50 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       console.log("Error checking/updating home status:", err);
     }
   };
+
+  const fetchPartnerStatusAndMood = async () => {
+    if (!partner?.id) return;
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const statusData = await fetchUserStatus(token, partner.id);
+        if (statusData && typeof statusData.isAtHome === "boolean") {
+          if (statusData.isAtHome) {
+            setPartnerStatus("home");
+            setIsActive(true);
+          } else {
+            setPartnerStatus("away");
+            setIsActive(false);
+          }
+        } else {
+          setPartnerStatus("unavailable");
+          setIsActive(true);
+        }
+      } catch (statusErr: any) {
+        setPartnerStatus("unavailable");
+        setIsActive(false);
+      }
+
+      try {
+        const moodData = await getUserMood(token, partner.id);
+        setPartnerMood(moodData.mood);
+      } catch (moodErr: any) {
+        setPartnerMood("No mood");
+      }
+    } catch (error) {
+      console.error("Failed to fetch partner status and mood:", error);
+      setIsActive(false);
+    }
+  };
+
+  React.useEffect(() => {
+    if (partner?.id) {
+      fetchPartnerStatusAndMood();
+    }
+  }, [partner]);
 
   React.useEffect(() => {
     checkAndUpdateHomeStatus();
@@ -197,6 +247,32 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     );
   }
 
+  const getStatusDisplay = () => {
+    switch (partnerStatus) {
+      case "home":
+        return "Home";
+      case "away":
+        return "Away";
+      case "unavailable":
+        return "Unavailable";
+      default:
+        return "Unavailable";
+    }
+  };
+
+  const getStatusColor = () => {
+    switch (partnerStatus) {
+      case "home":
+        return "#4caf50";
+      case "away":
+        return "#e03487";
+      case "unavailable":
+        return "#b0b3c6";
+      default:
+        return "#b0b3c6";
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <ScrollView
@@ -242,8 +318,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
               </View>
               <View style={styles.statusRow}>
-                <Text style={styles.statusText}>Status: Unavailable</Text>
-                <Text style={styles.statusText}>Mood: Happy</Text>
+                <Text style={[styles.statusText, { color: getStatusColor() }]}>
+                  Status: {getStatusDisplay()}
+                </Text>
+                <Text style={styles.statusText}>Mood: {partnerMood}</Text>
               </View>
             </View>
           </TouchableOpacity>
