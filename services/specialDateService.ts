@@ -47,3 +47,13 @@ export async function deleteSpecialDate(token: string, dateId: string) {
   );
   return res.data;
 }
+
+export async function getUpcomingSpecialDate(token: string) {
+  const res = await axios.get(
+    `${BASE_URL}/api/special-dates/upcoming-special-date`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return res.data.upcomingSpecialDate;
+}

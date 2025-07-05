@@ -25,6 +25,7 @@ import { getDistance } from "../../utils/locationUtils";
 import { useFocusEffect } from "@react-navigation/native";
 import { fetchUserStatus } from "../../services/userStatusService";
 import { getUserMood } from "../../services/moodService";
+import { getUpcomingSpecialDate } from "../../services/specialDateService";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -40,6 +41,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     "home" | "away" | "unavailable"
   >("unavailable");
   const [partnerMood, setPartnerMood] = React.useState<string>("No mood");
+  const [upcomingDate, setUpcomingDate] = React.useState<any>(null);
 
   const activities = [
     {
@@ -88,6 +90,45 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       await updateUserStatus(token, isAtHome);
     } catch (err) {
       console.log("Error checking/updating home status:", err);
+    }
+  };
+
+  const fetchUpcomingSpecialDate = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const upcoming = await getUpcomingSpecialDate(token);
+      setUpcomingDate(upcoming);
+    } catch (error: any) {
+      console.log("No upcoming special dates found");
+      setUpcomingDate(null);
+    }
+  };
+
+  const formatTimeLeft = (daysUntil: number): string => {
+    if (daysUntil === 0) return "Today";
+    if (daysUntil === 1) return "1 day left";
+    if (daysUntil < 30) return `${daysUntil} days left`;
+
+    const months = Math.floor(daysUntil / 30);
+    const remainingDays = daysUntil % 30;
+
+    if (months === 1 && remainingDays === 0) return "1 month left";
+    if (months === 1) return `1 month ${remainingDays} days left`;
+    if (remainingDays === 0) return `${months} months left`;
+    return `${months} months ${remainingDays} days left`;
+  };
+
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      const day = date.getDate();
+      const month = date.toLocaleDateString("en-US", { month: "short" });
+      const year = date.getFullYear();
+      return `${day} ${month} ${year}`;
+    } catch (error) {
+      return dateString;
     }
   };
 
@@ -208,6 +249,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     };
 
     fetchPartner();
+  }, []);
+
+  React.useEffect(() => {
+    fetchUpcomingSpecialDate();
   }, []);
 
   useLayoutEffect(() => {
@@ -338,28 +383,36 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </BlurView>
             <BlurView intensity={50} tint="dark" style={styles.blurButton}>
               <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.buttonText}>MORE...</Text>
+                <Text style={styles.buttonText}>MORE</Text>
               </TouchableOpacity>
             </BlurView>
           </View>
-          <View style={styles.upcomingContainer}>
-            <Text style={styles.upcomingLabel}>UPCOMING</Text>
-            <View style={styles.eventCard}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 4,
-                }}
-              >
-                <Text style={styles.eventName}>Girlfriend's Day</Text>
-                <Text style={styles.eventTimeLeft}> 1 month 2 days left</Text>
+          {upcomingDate && (
+            <View style={styles.upcomingContainer}>
+              <Text style={styles.upcomingLabel}>UPCOMING</Text>
+              <View style={styles.eventCard}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Text style={styles.eventName}>{upcomingDate.title}</Text>
+                  <Text style={styles.eventTimeLeft}>
+                    {" "}
+                    {formatTimeLeft(upcomingDate.daysUntil)}
+                  </Text>
+                </View>
+                <Text style={styles.eventDescription}>
+                  {upcomingDate.description ||
+                    `${upcomingDate.title} on ${formatDate(
+                      upcomingDate.nextOccurrence
+                    )}`}
+                </Text>
               </View>
-              <Text style={styles.eventDescription}>
-                This is the 2025 Girlfriend's Day coming in August
-              </Text>
             </View>
-          </View>
+          )}
           <RecentActivity activities={activities} />
         </Animated.View>
       </ScrollView>
