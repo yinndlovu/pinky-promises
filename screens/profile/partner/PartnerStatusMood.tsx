@@ -7,9 +7,10 @@ import { getUserMood } from "../../../services/moodService";
 type Props = {
   partnerId: string;
   partnerName: string;
+  refreshKey?: number;
 };
 
-const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName }) => {
+const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey }) => {
   const [status, setStatus] = useState<"home" | "away" | "unavailable">(
     "unavailable"
   );
@@ -24,7 +25,7 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName }) => {
 
   useEffect(() => {
     fetchPartnerStatusAndMood();
-  }, [partnerId, partnerName]);
+  }, [partnerId, partnerName, refreshKey]);
 
   const fetchPartnerStatusAndMood = async () => {
     try {

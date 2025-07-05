@@ -25,10 +25,13 @@ import { removePartner } from "../../../services/partnerService";
 import ProfilePictureViewer from "../ProfilePictureViewer";
 import { Feather } from "@expo/vector-icons";
 import { useLayoutEffect } from "react";
+import { RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
 const PartnerProfileScreen = ({ navigation }: any) => {
+  const insets = useSafeAreaInsets();
   const [partner, setPartner] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +42,114 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [removingPartner, setRemovingPartner] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const fetchPartner = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const response = await axios.get(
+        `${BASE_URL}/api/partnership/get-partner`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const partnerData = response.data.partner;
+      setPartner(partnerData);
+
+      try {
+        const pictureResponse = await axios.get(
+          `${BASE_URL}/api/profile/get-profile-picture/${partnerData.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            responseType: "arraybuffer",
+          }
+        );
+        const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+        const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
+
+        setAvatarUri(base64);
+      } catch (picErr: any) {
+        setAvatarUri(null);
+      }
+    } catch (err) {
+      setPartner(null);
+      setAvatarUri(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCurrentUser = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const response = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setCurrentUserName(response.data.user.name);
+    } catch (err) {}
+  };
+
+  const fetchPartnerFavorites = async (partnerId: string) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const favorites = await getUserFavorites(token, partnerId);
+      setPartnerFavorites(favorites);
+    } catch (err) {
+      setPartnerFavorites([]);
+    }
+  };
+
+  const fetchPartnerLoveLanguage = async (partnerId: string) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const loveLanguage = await getLoveLanguage(token, partnerId);
+      setPartnerLoveLanguage(loveLanguage);
+    } catch (err) {
+      setPartnerLoveLanguage("");
+    }
+  };
+
+  const fetchPartnerAbout = async (partnerId: string) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const about = await getAboutUser(token, partnerId);
+      setPartnerAbout(about);
+    } catch (err) {
+      setPartnerAbout("");
+    }
+  };
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchPartner();
+      await fetchCurrentUser();
+      if (partner?.id) {
+        await Promise.all([
+          fetchPartnerFavorites(partner.id),
+          fetchPartnerLoveLanguage(partner.id),
+          fetchPartnerAbout(partner.id),
+        ]);
+      }
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, [partner?.id]);
 
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
@@ -53,7 +164,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       navigation.replace("UserProfile", { userId: partner.id });
     } catch (error: any) {
-      console.error("Failed to remove partner:", error);
     } finally {
       setRemovingPartner(false);
     }
@@ -93,111 +203,19 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
   }, [navigation]);
 
-  useEffect(() => {
-    const fetchPartner = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
+  React.useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await fetchPartner();
+      await fetchCurrentUser();
+      setLoading(false);
+    })();
+  }, []);
 
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        const response = await axios.get(
-          `${BASE_URL}/api/partnership/get-partner`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const partnerData = response.data.partner;
-        setPartner(partnerData);
-
-        try {
-          const pictureResponse = await axios.get(
-            `${BASE_URL}/api/profile/get-profile-picture/${partnerData.id}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              responseType: "arraybuffer",
-            }
-          );
-          const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-          const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-          setAvatarUri(base64);
-        } catch (picErr: any) {
-          setAvatarUri(null);
-        }
-      } catch (err) {
-        setPartner(null);
-        setAvatarUri(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    const fetchCurrentUser = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-
-        const response = await axios.get(
-          `${BASE_URL}/api/profile/get-profile`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        setCurrentUserName(response.data.user.name);
-      } catch (err) {
-        console.error("Failed to fetch current user:", err);
-      }
-    };
-
-    fetchPartner();
-    fetchCurrentUser();
-
-    const fetchPartnerFavorites = async (partnerId: string) => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-        const favorites = await getUserFavorites(token, partnerId);
-        setPartnerFavorites(favorites);
-      } catch (err) {
-        setPartnerFavorites([]);
-      }
-    };
-
+  React.useEffect(() => {
     if (partner?.id) {
       fetchPartnerFavorites(partner.id);
-    }
-
-    const fetchPartnerLoveLanguage = async (partnerId: string) => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-        const loveLanguage = await getLoveLanguage(token, partnerId);
-        setPartnerLoveLanguage(loveLanguage);
-      } catch (err) {
-        setPartnerLoveLanguage("");
-      }
-    };
-
-    if (partner?.id) {
       fetchPartnerLoveLanguage(partner.id);
-    }
-
-    const fetchPartnerAbout = async (partnerId: string) => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-        const about = await getAboutUser(token, partnerId);
-        setPartnerAbout(about);
-      } catch (err) {
-        setPartnerAbout("");
-      }
-    };
-
-    if (partner?.id) {
       fetchPartnerAbout(partner.id);
     }
   }, [partner?.id]);
@@ -227,7 +245,16 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#e03487"
+            colors={["#e03487"]}
+            progressBackgroundColor="#23243a"
+          />
+        }
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.profileRow}>
@@ -265,7 +292,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           </Text>
         </View>
 
-        <PartnerStatusMood partnerId={partner.id} partnerName={name} />
+        <PartnerStatusMood partnerId={partner.id}
+        partnerName={name} 
+        refreshKey={refreshKey}
+        />
 
         <PartnerAnniversary partnerId={partner.id} />
 
@@ -281,7 +311,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
         <ConfirmationModal
           visible={showRemoveModal}
-          message="Are you sure you want to remove your partner? This action cannot be undone."
+          message="Are you sure you want to remove your partner?"
           onConfirm={handleRemovePartner}
           onCancel={() => setShowRemoveModal(false)}
           confirmText="Remove"
@@ -317,7 +347,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-    marginTop: 20,
+    marginTop: 0,
   },
   avatarWrapper: {
     marginRight: 20,
@@ -342,7 +372,7 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 16,
-    color: "#5ad1e6",
+    color: "#e03487",
     marginBottom: 8,
     marginLeft: 4,
   },

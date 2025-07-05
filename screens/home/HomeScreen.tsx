@@ -27,6 +27,7 @@ import { fetchUserStatus } from "../../services/userStatusService";
 import { getUserMood } from "../../services/moodService";
 import { getUpcomingSpecialDate } from "../../services/specialDateService";
 import { getRecentActivities } from "../../services/recentActivityService";
+import { RefreshControl } from "react-native";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -44,6 +45,71 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [partnerMood, setPartnerMood] = React.useState<string>("No mood");
   const [upcomingDate, setUpcomingDate] = React.useState<any>(null);
   const [activities, setActivities] = React.useState<any[]>([]);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchPartner(),
+        fetchUpcomingSpecialDate(),
+        fetchRecentActivities(),
+        checkAndUpdateHomeStatus(),
+        fetchPartnerStatusAndMood(),
+      ]);
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
+  const fetchPartner = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("No token found");
+      }
+
+      const response = await axios.get(
+        `${BASE_URL}/api/partnership/get-partner`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      const partnerData = response.data.partner;
+      setPartner(partnerData);
+
+      const partnerId = partnerData.id;
+
+      try {
+        const pictureResponse = await axios.get(
+          `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            responseType: "arraybuffer",
+          }
+        );
+
+        const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+        const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
+
+        setAvatarUri(base64);
+      } catch (picErr: any) {
+        if (![404, 500].includes(picErr.response?.status)) {
+          setError(picErr.response?.data?.error || picErr.message);
+        }
+      }
+    } catch (err: any) {
+      if (err.response?.status === 404) {
+        setPartner(null);
+      } else {
+        setError("Failed to fetch partner data");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const checkAndUpdateHomeStatus = async () => {
     try {
@@ -63,9 +129,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const isAtHome = distance < 100;
 
       await updateUserStatus(token, isAtHome);
-    } catch (err) {
-      console.log("Error checking/updating home status:", err);
-    }
+    } catch (err) {}
   };
 
   const fetchUpcomingSpecialDate = async () => {
@@ -76,7 +140,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const upcoming = await getUpcomingSpecialDate(token);
       setUpcomingDate(upcoming);
     } catch (error: any) {
-      console.log("No upcoming special dates found");
       setUpcomingDate(null);
     }
   };
@@ -140,7 +203,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         setPartnerMood("No mood");
       }
     } catch (error) {
-      console.error("Failed to fetch partner status and mood:", error);
       setIsActive(false);
     }
   };
@@ -161,7 +223,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       setActivities(transformedActivities);
     } catch (error: any) {
-      console.error("Failed to fetch recent activities:", error);
       setActivities([]);
     }
   };
@@ -221,54 +282,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }, [error]);
 
   React.useEffect(() => {
-    const fetchPartner = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-
-        if (!token) {
-          throw new Error("No token found");
-        }
-
-        const response = await axios.get(
-          `${BASE_URL}/api/partnership/get-partner`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        const partnerData = response.data.partner;
-        setPartner(partnerData);
-
-        const partnerId = partnerData.id;
-
-        try {
-          const pictureResponse = await axios.get(
-            `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              responseType: "arraybuffer",
-            }
-          );
-
-          const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-          const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-          setAvatarUri(base64);
-        } catch (picErr: any) {
-          if (![404, 500].includes(picErr.response?.status)) {
-            setError(picErr.response?.data?.error || picErr.message);
-          }
-        }
-      } catch (err: any) {
-        if (err.response?.status === 404) {
-          setPartner(null);
-        } else {
-          setError("Failed to fetch partner data");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPartner();
   }, []);
 
@@ -346,6 +359,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#e03487"
+            colors={["#e03487"]}
+            progressBackgroundColor="#23243a"
+          />
+        }
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >

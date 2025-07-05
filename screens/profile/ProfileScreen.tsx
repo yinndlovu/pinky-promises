@@ -41,6 +41,8 @@ import UpdateAboutModal from "../../components/modals/UpdateAboutModal";
 import { getAboutUser, updateAboutUser } from "../../services/aboutUserService";
 import { getPartner } from "../../services/partnerService";
 import { getReceivedPartnerRequests } from "../../services/partnerService";
+import { RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -59,6 +61,7 @@ type FavoritesType = {
 };
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const [user, setUser] = React.useState<any>(null);
   const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -67,22 +70,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [showError, setShowError] = React.useState(false);
   const [success, setSuccess] = React.useState<string | null>(null);
   const [showSuccess, setShowSuccess] = React.useState(false);
-
   const [editName, setEditName] = React.useState("");
   const [editUsername, setEditUsername] = React.useState("");
   const [editBio, setEditBio] = React.useState("");
-
   const [originalName, setOriginalName] = React.useState("");
   const [originalUsername, setOriginalUsername] = React.useState("");
   const [originalBio, setOriginalBio] = React.useState("");
-
   const [loadingName, setLoadingName] = React.useState(false);
   const [loadingUsername, setLoadingUsername] = React.useState(false);
   const [loadingBio, setLoadingBio] = React.useState(false);
-
   const [showPictureModal, setShowPictureModal] = React.useState(false);
   const [showPictureViewer, setShowPictureViewer] = React.useState(false);
-
   const [favoritesModalVisible, setFavoritesModalVisible] =
     React.useState(false);
   const [favorites, setFavorites] = React.useState<FavoritesType>({});
@@ -96,17 +94,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const [mood, setMood] = React.useState<string>();
   const [moodDescription, setMoodDescription] = React.useState<string>();
-
   const [loveLanguageModalVisible, setLoveLanguageModalVisible] =
     React.useState(false);
   const [loveLanguage, setLoveLanguage] = React.useState("");
-
   const [about, setAbout] = React.useState<string>("");
   const [aboutModalVisible, setAboutModalVisible] = React.useState(false);
-
   const [partnerName, setPartnerName] = React.useState<string | null>(null);
-
   const [pendingRequestsCount, setPendingRequestsCount] = React.useState(0);
+  const [refreshing, setRefreshing] = React.useState(false);
 
   const FAVORITE_LABELS: { [key: string]: string } = {
     favoriteColor: "Favorite Color",
@@ -132,69 +127,70 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       .filter(Boolean) as { label: string; value: string }[];
   }
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("PendingRequests")}
-          style={{ marginLeft: 20, position: "relative" }}
-        >
-          <Feather name="users" size={24} color="#fff" />
-          {pendingRequestsCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Settings")}
-          style={{ marginRight: 20 }}
-        >
-          <Feather name="settings" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-      headerShown: true,
-      title: "",
-      headerTransparent: true,
-      headerTintColor: "#fff",
-      headerStyle: {
-        backgroundColor: "transparent",
-      },
-      headerShadowVisible: false,
-    });
-  }, [navigation, pendingRequestsCount]);
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchLoveLanguage(),
+        fetchProfile(),
+        getStatus(),
+        fetchPendingRequestsCount(),
+        fetchFavorites(),
+        fetchPartnerName(),
+        fetchMood(),
+        fetchAbout(),
+      ]);
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
-  React.useEffect(() => {
-    const fetchLoveLanguage = async () => {
-      const token = await AsyncStorage.getItem("token");
-      const userId = user?.id;
-      if (!token || !userId) return;
-      try {
-        const ll = await getLoveLanguage(token, userId);
-        setLoveLanguage(ll);
-      } catch {
-        setLoveLanguage("");
-      }
-    };
-    fetchLoveLanguage();
-  }, [user]);
-
-  const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
+  const fetchLoveLanguage = async () => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
-    await updateLoveLanguage(token, newLoveLanguage);
-    setLoveLanguage(newLoveLanguage);
+    const userId = user?.id;
+    if (!token || !userId) return;
+    try {
+      const ll = await getLoveLanguage(token, userId);
+      setLoveLanguage(ll);
+    } catch {
+      setLoveLanguage("");
+    }
   };
 
-  const handleSaveAbout = async (newAbout: string) => {
-    const token = await AsyncStorage.getItem("token");
-    if (!token) return;
-    await updateAboutUser(token, newAbout);
-    setAbout(newAbout);
+  const getStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token || !user?.id) {
+        setHomeStatus("unavailable");
+        setStatusDescription(
+          "You must add your home location to use this feature."
+        );
+        return;
+      }
+
+      const status = await fetchUserStatus(token, user.id);
+
+      if (status && typeof status.isAtHome === "boolean") {
+        if (status.isAtHome) {
+          setHomeStatus("home");
+          setStatusDescription("You are currently at home");
+        } else {
+          setHomeStatus("away");
+          setStatusDescription("You're currently not home");
+        }
+      } else {
+        setHomeStatus("unavailable");
+        setStatusDescription(
+          "You must add your home location to use this feature"
+        );
+      }
+    } catch (err: any) {
+      setHomeStatus("unavailable");
+      setStatusDescription(
+        "You must add your home location to use this feature"
+      );
+    }
   };
 
   const fetchPendingRequestsCount = async () => {
@@ -208,130 +204,48 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       ).length;
       setPendingRequestsCount(pendingCount);
     } catch (error) {
-      console.error("Failed to fetch pending requests count:", error);
     }
   };
 
-  React.useEffect(() => {
-    fetchPendingRequestsCount();
-  }, []);
+  const fetchFavorites = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const userId = user?.id;
+    if (!token || !userId) return;
+    const favs = await getUserFavorites(token, userId);
+    setFavorites(favs);
+  };
 
-  React.useEffect(() => {
-    const getStatus = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
-        if (!token || !user?.id) {
-          setHomeStatus("unavailable");
-          setStatusDescription(
-            "You must add your home location to use this feature."
-          );
-          return;
-        }
-        const status = await fetchUserStatus(token, user.id);
-        if (status && typeof status.isAtHome === "boolean") {
-          if (status.isAtHome) {
-            setHomeStatus("home");
-            setStatusDescription("You are currently at home");
-          } else {
-            setHomeStatus("away");
-            setStatusDescription("You're currently not home");
-          }
-        } else {
-          setHomeStatus("unavailable");
-          setStatusDescription(
-            "You must add your home location to use this feature"
-          );
-        }
-      } catch (err: any) {
-        setHomeStatus("unavailable");
-        setStatusDescription(
-          "You must add your home location to use this feature"
-        );
-      }
-    };
-
-    if (user?.id) {
-      getStatus();
+  const fetchPartnerName = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    try {
+      const partner = await getPartner(token);
+      setPartnerName(partner?.name || null);
+    } catch (err: any) {
+      setPartnerName(null);
     }
-  }, [user]);
+  };
 
-  React.useEffect(() => {
-    const fetchFavorites = async () => {
-      const token = await AsyncStorage.getItem("token");
-      const userId = user?.id;
-      if (!token || !userId) return;
-      const favs = await getUserFavorites(token, userId);
-      setFavorites(favs);
-    };
-    fetchFavorites();
-  }, [user]);
+  const fetchMood = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    const moodData = await getMood(token);
+    setMood(moodData.mood);
+    setMoodDescription(moodData.description);
+  };
+  fetchMood();
 
-  React.useEffect(() => {
-    const fetchPartnerName = async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return;
-      try {
-        const partner = await getPartner(token);
-        setPartnerName(partner?.name || null);
-      } catch (err: any) {
-        setPartnerName(null);
-      }
-    };
-    fetchPartnerName();
-  }, [user]);
-
-  React.useEffect(() => {
-    const fetchMood = async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return;
-      const moodData = await getMood(token);
-      setMood(moodData.mood);
-      setMoodDescription(moodData.description);
-    };
-    fetchMood();
-  }, []);
-
-  React.useEffect(() => {
-    const fetchAbout = async () => {
-      const token = await AsyncStorage.getItem("token");
-      const userId = user?.id;
-      if (!token || !userId) return;
-      try {
-        const aboutText = await getAboutUser(token, userId);
-        setAbout(aboutText);
-      } catch {
-        setAbout("");
-      }
-    };
-    if (user?.id) fetchAbout();
-  }, [user]);
-
-  React.useEffect(() => {
-    if (success) {
-      setShowSuccess(true);
-      const timer = setTimeout(() => {
-        setShowSuccess(false);
-        setSuccess(null);
-      }, 3000);
-      return () => clearTimeout(timer);
+  const fetchAbout = async () => {
+    const token = await AsyncStorage.getItem("token");
+    const userId = user?.id;
+    if (!token || !userId) return;
+    try {
+      const aboutText = await getAboutUser(token, userId);
+      setAbout(aboutText);
+    } catch {
+      setAbout("");
     }
-  }, [success]);
-
-  React.useEffect(() => {
-    if (error) {
-      setShowError(true);
-
-      const timer = setTimeout(() => {
-        setShowError(false);
-        setError(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  React.useEffect(() => {
-    fetchProfile();
-  }, []);
+  };
 
   const fetchProfile = async () => {
     try {
@@ -380,6 +294,73 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setLoading(false);
     }
   };
+
+  React.useEffect(() => {
+    fetchLoveLanguage();
+  }, [user]);
+
+  const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    await updateLoveLanguage(token, newLoveLanguage);
+    setLoveLanguage(newLoveLanguage);
+  };
+
+  const handleSaveAbout = async (newAbout: string) => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) return;
+    await updateAboutUser(token, newAbout);
+    setAbout(newAbout);
+  };
+
+  React.useEffect(() => {
+    fetchPendingRequestsCount();
+  }, []);
+
+  React.useEffect(() => {
+    if (user?.id) {
+      getStatus();
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    fetchFavorites();
+  }, [user]);
+
+  React.useEffect(() => {
+    fetchPartnerName();
+  }, [user]);
+
+  React.useEffect(() => {
+    if (user?.id) fetchAbout();
+  }, [user]);
+
+  React.useEffect(() => {
+    if (success) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+        setSuccess(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  React.useEffect(() => {
+    if (error) {
+      setShowError(true);
+
+      const timer = setTimeout(() => {
+        setShowError(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  React.useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleAvatarPress = () => {
     setShowPictureModal(true);
@@ -493,6 +474,42 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   };
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("PendingRequests")}
+          style={{ marginLeft: 20, position: "relative" }}
+        >
+          <Feather name="users" size={24} color="#fff" />
+          {pendingRequestsCount > 0 && (
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      ),
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Settings")}
+          style={{ marginRight: 20 }}
+        >
+          <Feather name="settings" size={24} color="#fff" />
+        </TouchableOpacity>
+      ),
+      headerShown: true,
+      title: "",
+      headerTransparent: true,
+      headerTintColor: "#fff",
+      headerStyle: {
+        backgroundColor: "transparent",
+      },
+      headerShadowVisible: false,
+    });
+  }, [navigation, pendingRequestsCount]);
+
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -512,7 +529,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <ScrollView
-        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#e03487"
+            colors={["#e03487"]}
+            progressBackgroundColor="#23243a"
+          />
+        }
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
@@ -753,6 +779,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#fff",
     letterSpacing: 0,
+    paddingTop: 20
   },
   profileRow: {
     flexDirection: "row",
