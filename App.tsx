@@ -67,7 +67,7 @@ function MainTabs() {
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Gifts" component={GiftsScreen} />
+      <Tab.Screen name="Presents" component={GiftsScreen} />
       <Tab.Screen name="Ours" component={OursScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
