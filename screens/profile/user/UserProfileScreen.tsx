@@ -135,11 +135,8 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
             await acceptPartnerRequest(token, incomingRequestId);
             setRequestStatus("none");
             setIncomingRequestId(null);
-            showAlert("Partner request accepted");
 
-            setTimeout(() => {
-              navigation.replace("PartnerProfile", { userId: userId });
-            }, 1500);
+            navigation.replace("PartnerProfile", { userId: userId });
           }
           break;
 

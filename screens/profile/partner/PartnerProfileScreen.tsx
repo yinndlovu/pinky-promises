@@ -51,7 +51,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       await removePartner(token);
       setShowRemoveModal(false);
 
-      navigation.navigate("UserProfile");
+      navigation.replace("UserProfile", { userId: partner.id });
     } catch (error: any) {
       console.error("Failed to remove partner:", error);
     } finally {
@@ -86,11 +86,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity
-          onPress={() => {
-          }}
-          style={{ marginRight: 20 }}
-        >
+        <TouchableOpacity onPress={() => {}} style={{ marginRight: 20 }}>
           <Feather name="aperture" size={26} color="#fff" />
         </TouchableOpacity>
       ),
@@ -321,7 +317,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-    marginTop: 20
+    marginTop: 20,
   },
   avatarWrapper: {
     marginRight: 20,
