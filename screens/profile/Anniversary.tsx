@@ -149,11 +149,11 @@ const Anniversary: React.FC<Props> = ({
   const dayMetDisplay = getDayMetDisplay();
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.row}>
-        <Text style={styles.label}>Anniversary date</Text>
-      </View>
-      <View style={styles.valueRow}>
+  <View style={styles.wrapper}>
+    <View style={styles.row}>
+      <Text style={styles.label}>Anniversary date</Text>
+    </View>
+    <View style={styles.valueRow}>
         <View style={styles.valueContainer}>
           <Text style={styles.value}>{anniversaryDisplay.date}</Text>
           {anniversaryDisplay.timeInfo && (
@@ -164,13 +164,13 @@ const Anniversary: React.FC<Props> = ({
           style={styles.editButton}
           onPress={handleEditAnniversary}
         >
-          <Text style={styles.editButtonText}>Edit</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.row}>
-        <Text style={styles.label}>Day met</Text>
-      </View>
-      <View style={styles.valueRow}>
+        <Text style={styles.editButtonText}>Edit</Text>
+      </TouchableOpacity>
+    </View>
+    <View style={styles.row}>
+      <Text style={styles.label}>Day met</Text>
+    </View>
+    <View style={styles.valueRow}>
         <View style={styles.valueContainer}>
           <Text style={styles.value}>{dayMetDisplay.date}</Text>
           {dayMetDisplay.timeInfo && (
@@ -178,9 +178,9 @@ const Anniversary: React.FC<Props> = ({
           )}
         </View>
         <TouchableOpacity style={styles.editButton} onPress={handleEditDayMet}>
-          <Text style={styles.editButtonText}>Edit</Text>
-        </TouchableOpacity>
-      </View>
+        <Text style={styles.editButtonText}>Edit</Text>
+      </TouchableOpacity>
+    </View>
 
       <UpdateSpecialDateModal
         visible={modalVisible}
@@ -200,8 +200,8 @@ const Anniversary: React.FC<Props> = ({
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
       />
-    </View>
-  );
+  </View>
+);
 };
 
 const styles = StyleSheet.create({

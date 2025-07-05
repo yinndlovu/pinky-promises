@@ -81,3 +81,14 @@ export async function rejectPartnerRequest(token: string, requestId: string) {
   );
   return res.data;
 }
+
+export async function removePartner(token: string) {
+  const res = await axios.post(
+    `${BASE_URL}/api/partnership/remove-partner`,
+    {},
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return res.data;
+}

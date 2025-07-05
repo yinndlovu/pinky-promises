@@ -12,6 +12,13 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 import { encode } from "base64-arraybuffer";
 import PartnerStatusMood from "./PartnerStatusMood";
+import PartnerAnniversary from "./PartnerAnniversary";
+import { getUserFavorites } from "../../../services/favoritesService";
+import PartnerFavorites from "./PartnerFavorites";
+import PartnerLoveLanguage from "./PartnerLoveLanguage";
+import { getLoveLanguage } from "../../../services/loveLanguageService";
+import PartnerMoreAboutYou from "./PartnerMoreAboutYou";
+import { getAboutUser } from "../../../services/aboutUserService";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
@@ -20,6 +27,33 @@ const PartnerProfileScreen = () => {
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
+  const [partnerFavorites, setPartnerFavorites] = useState([]);
+  const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
+  const [partnerAbout, setPartnerAbout] = useState<string>("");
+
+  const FAVORITE_LABELS: { [key: string]: string } = {
+    favoriteColor: "Favorite Color",
+    favoriteFood: "Favorite Food",
+    favoriteSnack: "Favorite Snack",
+    favoriteActivity: "Favorite Activity",
+    favoriteHoliday: "Favorite Holiday",
+    favoriteTimeOfDay: "Favorite Time of Day",
+    favoriteSeason: "Favorite Season",
+    favoriteAnimal: "Favorite Animal",
+    favoriteDrink: "Favorite Drink",
+    favoritePet: "Favorite Pet",
+    favoriteShow: "Favorite Show",
+  };
+
+  function favoritesObjectToArray(
+    favoritesObj: any
+  ): { label: string; value: string }[] {
+    return Object.entries(FAVORITE_LABELS)
+      .map(([key, label]) =>
+        favoritesObj[key] ? { label, value: favoritesObj[key] } : null
+      )
+      .filter(Boolean) as { label: string; value: string }[];
+  }
 
   useEffect(() => {
     const fetchPartner = async () => {
@@ -83,7 +117,52 @@ const PartnerProfileScreen = () => {
 
     fetchPartner();
     fetchCurrentUser();
-  }, []);
+
+    const fetchPartnerFavorites = async (partnerId: string) => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+        const favorites = await getUserFavorites(token, partnerId);
+        setPartnerFavorites(favorites);
+      } catch (err) {
+        setPartnerFavorites([]);
+      }
+    };
+
+    if (partner?.id) {
+      fetchPartnerFavorites(partner.id);
+    }
+
+    const fetchPartnerLoveLanguage = async (partnerId: string) => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+        const loveLanguage = await getLoveLanguage(token, partnerId);
+        setPartnerLoveLanguage(loveLanguage);
+      } catch (err) {
+        setPartnerLoveLanguage("");
+      }
+    };
+
+    if (partner?.id) {
+      fetchPartnerLoveLanguage(partner.id);
+    }
+
+    const fetchPartnerAbout = async (partnerId: string) => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) return;
+        const about = await getAboutUser(token, partnerId);
+        setPartnerAbout(about);
+      } catch (err) {
+        setPartnerAbout("");
+      }
+    };
+
+    if (partner?.id) {
+      fetchPartnerAbout(partner.id);
+    }
+  }, [partner?.id]);
 
   const name = partner?.name || "User";
   const username = partner?.username || "user";
@@ -139,13 +218,23 @@ const PartnerProfileScreen = () => {
         <View style={styles.partnerRow}>
           <Text style={styles.partnerText}>
             Partner:{" "}
-            <Text style={styles.partnerName}>
-              {currentUserName || "You"}
-            </Text>
+            <Text style={styles.partnerName}>{currentUserName || "You"}</Text>
           </Text>
         </View>
 
         <PartnerStatusMood partnerId={partner.id} partnerName={name} />
+
+        <PartnerAnniversary partnerId={partner.id} />
+
+        <PartnerFavorites
+          favorites={favoritesObjectToArray(partnerFavorites)}
+        />
+
+        <View style={styles.divider} />
+
+        <PartnerLoveLanguage loveLanguage={partnerLoveLanguage} />
+
+        <PartnerMoreAboutYou about={partnerAbout} />
       </ScrollView>
     </View>
   );
@@ -170,6 +259,7 @@ const styles = StyleSheet.create({
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
+    marginBottom: 20,
   },
   avatarWrapper: {
     marginRight: 20,
@@ -207,13 +297,14 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 1,
     backgroundColor: "#393a4a",
-    marginVertical: 24,
+    marginVertical: 0,
     opacity: 1,
   },
   partnerRow: {
     marginBottom: 20,
     marginLeft: 2,
     alignItems: "center",
+    marginTop: 20,
   },
   partnerText: {
     color: "#b0b3c6",

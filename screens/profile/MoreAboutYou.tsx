@@ -31,7 +31,7 @@ const MoreAboutYou: React.FC<Props> = ({
 const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
-    marginBottom: 50,
+    marginBottom: 60,
   },
   headerRow: {
     flexDirection: "row",
