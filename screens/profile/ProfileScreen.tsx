@@ -736,7 +736,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#23243a",
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 20,
   },
   centered: {
     flex: 1,
@@ -750,10 +750,9 @@ const styles = StyleSheet.create({
     marginBottom: 36,
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 20,
     color: "#fff",
-    letterSpacing: 1,
+    letterSpacing: 0,
   },
   profileRow: {
     flexDirection: "row",

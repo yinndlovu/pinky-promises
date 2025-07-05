@@ -463,11 +463,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   headerTitle: {
-    fontSize: 28,
-    paddingTop: 26,
-    fontWeight: "bold",
+    fontSize: 20,
+    paddingTop: 20,
     color: "#fff",
-    letterSpacing: 1,
+    letterSpacing: 0,
     alignSelf: "center",
   },
   partnerLabel: {

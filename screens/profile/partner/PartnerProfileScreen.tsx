@@ -23,6 +23,8 @@ import { getAboutUser } from "../../../services/aboutUserService";
 import ConfirmationModal from "../../../components/modals/ConfirmationModal";
 import { removePartner } from "../../../services/partnerService";
 import ProfilePictureViewer from "../ProfilePictureViewer";
+import { Feather } from "@expo/vector-icons";
+import { useLayoutEffect } from "react";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
@@ -80,6 +82,20 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       )
       .filter(Boolean) as { label: string; value: string }[];
   }
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => {
+          }}
+          style={{ marginRight: 20 }}
+        >
+          <Feather name="aperture" size={26} color="#fff" />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   useEffect(() => {
     const fetchPartner = async () => {
@@ -218,9 +234,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Partner</Text>
-        </View>
         <View style={styles.profileRow}>
           <View style={styles.avatarWrapper}>
             <TouchableOpacity onPress={() => setShowPictureViewer(true)}>
@@ -295,21 +308,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#23243a",
     paddingHorizontal: 16,
   },
-  header: {
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 36,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    letterSpacing: 1,
+  portalIcon: {
+    position: "absolute",
+    top: 16,
+    right: 20,
+    zIndex: 100,
+    backgroundColor: "#23243a",
+    borderRadius: 20,
+    padding: 4,
   },
   profileRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
+    marginTop: 20
   },
   avatarWrapper: {
     marginRight: 20,

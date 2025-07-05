@@ -47,17 +47,16 @@ const OursScreen = () => (
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingBottom: 32,
     alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
   },
   headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
+    fontSize: 20,
     color: "#fff",
-    letterSpacing: 1,
+    letterSpacing: 0,
     alignSelf: "center",
     marginBottom: 36,
   },

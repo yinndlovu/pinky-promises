@@ -243,10 +243,11 @@ function AppContent() {
           component={PartnerProfileScreen}
           options={{
             headerShown: true,
-            title: "",
+            title: "Partner",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
+            headerTitleAlign: "center",
           }}
         />
         <Stack.Screen
