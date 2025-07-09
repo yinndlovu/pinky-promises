@@ -1,8 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import SetMonthlyGift from "./SetMonthlyGift";
 import ReceivedGift from "./ReceivedGift";
 import PastGiftsList from "./PastGiftsList";
+import { getOldestUnclaimedGift } from "../../services/monthlyGiftService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const pastGifts = [
   {
@@ -43,23 +46,74 @@ const pastGifts = [
   },
 ];
 
-const GiftsScreen = () => (
-  <View style={{ flex: 1, backgroundColor: "#23243a" }}>
-    <ScrollView
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={styles.headerTitle}>Presents</Text>
-      <SetMonthlyGift giftName="Roses" onChange={() => {}} />
-      <ReceivedGift
-        giftName="Roses"
-        receivedAt="01 Jun 2025 00:00"
-        onClaim={() => {}}
-      />
-      <PastGiftsList gifts={pastGifts} />
-    </ScrollView>
-  </View>
-);
+const GiftsScreen = () => {
+  const insets = useSafeAreaInsets();
+  const [gift, setGift] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchGift = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const unclaimedGift = await getOldestUnclaimedGift(token);
+      setGift(unclaimedGift);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGift();
+  }, []);
+
+  return (
+    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.headerTitle}>Presents</Text>
+        <SetMonthlyGift giftName="Roses" onChange={() => {}} />
+        {loading ? (
+          <Text style={{ color: "#fff" }}>Loading...</Text>
+        ) : error ? (
+          <Text style={{ color: "red" }}>{error}</Text>
+        ) : gift ? (
+          <ReceivedGift
+            giftName={gift.name}
+            receivedAt={
+              new Date(gift.createdAt).toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              }) +
+              " " +
+              new Date(gift.createdAt).toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
+              })
+            }
+            onClaim={() => {}}
+          />
+        ) : (
+          <Text style={{ color: "#fff" }}>No unclaimed gifts found.</Text>
+        )}
+        <PastGiftsList gifts={pastGifts} />
+      </ScrollView>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -76,6 +130,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     alignSelf: "center",
     marginBottom: 36,
+    paddingTop: 20,
   },
 });
 
