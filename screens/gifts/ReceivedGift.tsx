@@ -1,14 +1,21 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 type Props = {
   giftName: string;
   receivedAt: string;
   onClaim?: () => void;
+  claiming?: boolean;
 };
 
-const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim }) => (
+const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim, claiming }) => (
   <View style={styles.card}>
     <View style={styles.row}>
       <Feather
@@ -21,8 +28,12 @@ const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim }) => (
     </View>
     <Text style={styles.giftName}>{giftName}</Text>
     <Text style={styles.dateText}>{receivedAt}</Text>
-    <TouchableOpacity style={styles.claimButton} onPress={onClaim}>
-      <Text style={styles.claimButtonText}>Open</Text>
+    <TouchableOpacity style={styles.claimButton} onPress={onClaim} disabled={claiming}>
+      {claiming ? (
+        <ActivityIndicator color="#fff" />
+      ) : (
+        <Text style={styles.claimButtonText}>Open</Text>
+      )}
     </TouchableOpacity>
   </View>
 );

@@ -3,9 +3,13 @@ import { View, Text, StyleSheet, ScrollView } from "react-native";
 import SetMonthlyGift from "./SetMonthlyGift";
 import ReceivedGift from "./ReceivedGift";
 import PastGiftsList from "./PastGiftsList";
-import { getOldestUnclaimedGift } from "../../services/monthlyGiftService";
+import {
+  getOldestUnclaimedGift,
+  claimMonthlyGift,
+} from "../../services/monthlyGiftService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import ClaimedGiftModal from "../../components/modals/ClaimedGiftModal";
 
 const pastGifts = [
   {
@@ -51,6 +55,9 @@ const GiftsScreen = () => {
   const [gift, setGift] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [claiming, setClaiming] = useState(false);
+  const [claimedGift, setClaimedGift] = useState<any>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchGift = async () => {
     try {
@@ -69,6 +76,32 @@ const GiftsScreen = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClaim = async () => {
+    if (!gift) {
+      return;
+    }
+
+    try {
+      setClaiming(true);
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("No token found");
+        return;
+      }
+
+      const result = await claimMonthlyGift(token, gift.id);
+      setClaimedGift(result.gift);
+      setModalVisible(true);
+      await fetchGift();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setClaiming(false);
     }
   };
 
@@ -104,13 +137,22 @@ const GiftsScreen = () => {
                 hour12: false,
               })
             }
-            onClaim={() => {}}
+            onClaim={handleClaim}
+            claiming={claiming}
           />
         ) : (
-          <Text style={{ color: "#fff" }}>No unclaimed gifts found.</Text>
+          <Text style={{ color: "#fff" }}>Currently no gift</Text>
         )}
         <PastGiftsList gifts={pastGifts} />
       </ScrollView>
+
+      <ClaimedGiftModal
+        visible={modalVisible}
+        giftName={claimedGift?.name || ""}
+        value={claimedGift?.value || ""}
+        message={claimedGift?.message || ""}
+        onClose={() => setModalVisible(false)}
+      />
     </View>
   );
 };

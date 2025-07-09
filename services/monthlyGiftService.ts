@@ -10,3 +10,14 @@ export async function getOldestUnclaimedGift(token: string) {
   );
   return res.data.gift;
 }
+
+export async function claimMonthlyGift(token: string, giftId: string) {
+  const res = await axios.put(
+    `${BASE_URL}/api/gift/claim-monthly-gift/${giftId}`,
+    {},
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return res.data;
+}
