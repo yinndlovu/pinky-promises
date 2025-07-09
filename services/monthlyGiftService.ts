@@ -21,3 +21,13 @@ export async function claimMonthlyGift(token: string, giftId: string) {
   );
   return res.data;
 }
+
+export async function getLastFiveClaimedGifts(token: string) {
+    const res = await axios.get(
+      `${BASE_URL}/api/gift/get-last-five-claimed-gifts`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res.data.gifts;
+  }

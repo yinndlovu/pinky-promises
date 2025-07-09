@@ -4,14 +4,15 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 type Props = {
   giftName: string;
   onChange?: () => void;
+  buttonText?: string;
 };
 
-const SetMonthlyGift: React.FC<Props> = ({ giftName, onChange }) => (
+const SetMonthlyGift: React.FC<Props> = ({ giftName, onChange, buttonText = "Change" }) => (
   <View style={styles.card}>
-    <Text style={styles.tip}>YOUR SET PRESENT</Text>
+    <Text style={styles.tip}>YOUR FAVORITE PRESENT</Text>
     <Text style={styles.giftName}>{giftName}</Text>
     <TouchableOpacity style={styles.changeButton} onPress={onChange}>
-      <Text style={styles.changeButtonText}>Change</Text>
+      <Text style={styles.changeButtonText}>{buttonText}</Text>
     </TouchableOpacity>
   </View>
 );

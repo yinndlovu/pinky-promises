@@ -1,54 +1,29 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
 import SetMonthlyGift from "./SetMonthlyGift";
 import ReceivedGift from "./ReceivedGift";
 import PastGiftsList from "./PastGiftsList";
 import {
   getOldestUnclaimedGift,
   claimMonthlyGift,
+  getLastFiveClaimedGifts,
 } from "../../services/monthlyGiftService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ClaimedGiftModal from "../../components/modals/ClaimedGiftModal";
-
-const pastGifts = [
-  {
-    id: "1",
-    giftName: "Chocolate Box",
-    receivedAt: "2024-05-15 13:20",
-    claimedAt: "2024-05-15 14:00",
-  },
-  {
-    id: "2",
-    giftName: "Movie Night",
-    receivedAt: "2024-04-10 18:00",
-    claimedAt: "2024-04-10 18:30",
-  },
-  {
-    id: "3",
-    giftName: "Spa Voucher",
-    receivedAt: "2024-03-12 09:10",
-    claimedAt: "2024-03-12 10:00",
-  },
-  {
-    id: "4",
-    giftName: "Book Set",
-    receivedAt: "2024-02-14 11:45",
-    claimedAt: "2024-02-14 12:10",
-  },
-  {
-    id: "5",
-    giftName: "Coffee Date",
-    receivedAt: "2024-01-20 16:00",
-    claimedAt: "2024-01-20 16:20",
-  },
-  {
-    id: "6",
-    giftName: "Surprise Cake",
-    receivedAt: "2023-12-25 20:00",
-    claimedAt: "2023-12-25 20:30",
-  },
-];
+import {
+  getSetMonthlyGift,
+  updateSetMonthlyGift,
+} from "../../services/setMonthlyGiftService";
+import UpdateMonthlyGiftModal from "../../components/modals/UpdateMonthlyGiftModal";
+import { useAuth } from "../../contexts/AuthContext";
+import { RefreshControl } from "react-native";
 
 const GiftsScreen = () => {
   const insets = useSafeAreaInsets();
@@ -58,6 +33,27 @@ const GiftsScreen = () => {
   const [claiming, setClaiming] = useState(false);
   const [claimedGift, setClaimedGift] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [pastGifts, setPastGifts] = useState<any[]>([]);
+  const [setMonthlyGift, setSetMonthlyGift] = useState<string | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  const [monthlyGiftModalVisible, setMonthlyGiftModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const { user } = useAuth();
+  const userId = user?.id;
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchGift(),
+        fetchPastGifts(),
+        fetchSetGift && fetchSetGift(),
+      ]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const fetchGift = async () => {
     try {
@@ -65,17 +61,69 @@ const GiftsScreen = () => {
       setError(null);
 
       const token = await AsyncStorage.getItem("token");
-
       if (!token) {
+        setError("No token found");
+        setGift(null);
         return;
       }
 
       const unclaimedGift = await getOldestUnclaimedGift(token);
       setGift(unclaimedGift);
     } catch (err: any) {
-      setError(err.message);
+      if (err.response && err.response.status === 404) {
+        setGift(null);
+        setError(null);
+      } else {
+        setError(err.message);
+        setGift(null);
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPastGifts = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setPastGifts([]);
+        return;
+      }
+
+      const gifts = await getLastFiveClaimedGifts(token);
+      setPastGifts(
+        gifts.map((gift: any) => ({
+          id: gift.id,
+          giftName: gift.name,
+          receivedAt:
+            new Date(gift.createdAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }) +
+            " " +
+            new Date(gift.createdAt).toLocaleTimeString("en-GB", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }),
+          claimedAt:
+            new Date(gift.claimDate).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }) +
+            " " +
+            new Date(gift.claimDate).toLocaleTimeString("en-GB", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }),
+        }))
+      );
+    } catch {
+      setPastGifts([]);
     }
   };
 
@@ -98,6 +146,7 @@ const GiftsScreen = () => {
       setClaimedGift(result.gift);
       setModalVisible(true);
       await fetchGift();
+      await fetchPastGifts();
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -105,8 +154,45 @@ const GiftsScreen = () => {
     }
   };
 
+  const fetchSetGift = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token || !userId) {
+        return;
+      }
+
+      const result = await getSetMonthlyGift(token, userId);
+      setSetMonthlyGift(result?.setMonthlyGift || null);
+    } catch {
+      setSetMonthlyGift(null);
+    }
+  };
+
+  const handleSaveSetGift = async (giftName: string) => {
+    try {
+      setModalLoading(true);
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      await updateSetMonthlyGift(token, giftName);
+      setSetMonthlyGift(giftName);
+      setMonthlyGiftModalVisible(false);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSetGift();
+  }, []);
+
   useEffect(() => {
     fetchGift();
+    fetchPastGifts();
   }, []);
 
   return (
@@ -114,11 +200,28 @@ const GiftsScreen = () => {
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#e03487"]}
+            tintColor="#e03487"
+            progressBackgroundColor="#23243a"
+          />
+        }
       >
         <Text style={styles.headerTitle}>Presents</Text>
-        <SetMonthlyGift giftName="Roses" onChange={() => {}} />
+        <SetMonthlyGift
+          giftName={setMonthlyGift || "No present set"}
+          onChange={() => setMonthlyGiftModalVisible(true)}
+          buttonText={setMonthlyGift ? "Change" : "Add"}
+        />
         {loading ? (
-          <Text style={{ color: "#fff" }}>Loading...</Text>
+          <View
+            style={{ alignItems: "center", marginTop: 8, marginBottom: 12 }}
+          >
+            <ActivityIndicator size="small" color="#e03487" />
+          </View>
         ) : error ? (
           <Text style={{ color: "red" }}>{error}</Text>
         ) : gift ? (
@@ -141,7 +244,16 @@ const GiftsScreen = () => {
             claiming={claiming}
           />
         ) : (
-          <Text style={{ color: "#fff" }}>Currently no gift</Text>
+          <Text
+            style={{
+              color: "#b0b3c6",
+              textAlign: "center",
+              marginTop: 8,
+              marginBottom: 12,
+            }}
+          >
+            You have not received any present yet
+          </Text>
         )}
         <PastGiftsList gifts={pastGifts} />
       </ScrollView>
@@ -152,6 +264,14 @@ const GiftsScreen = () => {
         value={claimedGift?.value || ""}
         message={claimedGift?.message || ""}
         onClose={() => setModalVisible(false)}
+      />
+
+      <UpdateMonthlyGiftModal
+        visible={monthlyGiftModalVisible}
+        initialGiftName={setMonthlyGift || ""}
+        onClose={() => setMonthlyGiftModalVisible(false)}
+        onSave={handleSaveSetGift}
+        loading={modalLoading}
       />
     </View>
   );

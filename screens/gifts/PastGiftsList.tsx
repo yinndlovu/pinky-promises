@@ -37,6 +37,11 @@ const PastGiftsList: React.FC<Props> = ({ gifts }) => (
       )}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       scrollEnabled={false}
+      ListEmptyComponent={
+        <Text style={{ color: "#b0b3c6", textAlign: "center", marginTop: 8 }}>
+          You haven't opened any presents yet
+        </Text>
+      }
     />
   </View>
 );
