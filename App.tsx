@@ -28,6 +28,7 @@ import React from "react";
 import SearchScreen from "./screens/search/SearchScreen";
 import UserProfileScreen from "./screens/profile/user/UserProfileScreen";
 import PendingRequestsScreen from "./screens/requests/PendingRequestsScreen";
+import NotesScreen from "./screens/ours/NotesScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -275,6 +276,18 @@ function AppContent() {
         <Stack.Screen
           name="PendingRequests"
           component={PendingRequestsScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="NotesScreen"
+          component={NotesScreen}
           options={{
             headerShown: true,
             title: "",

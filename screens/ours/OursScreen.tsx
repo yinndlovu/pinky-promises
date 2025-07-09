@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import NotesCanvas from "./NotesCanvas";
 import SpecialDates from "./SpecialDates";
 import FavoriteMemories from "./FavoriteMemories";
+import { getNotes } from "../../services/notesService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+type Props = NativeStackScreenProps<any>;
 
 const specialDates = [
   { id: "1", label: "Our anniversary", date: "22 September 2024" },
@@ -30,19 +36,46 @@ const favoriteMemories = [
   },
 ];
 
-const OursScreen = () => (
-  <View style={{ flex: 1, backgroundColor: "#23243a" }}>
-    <ScrollView
-      contentContainerStyle={styles.container}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={styles.headerTitle}>Ours</Text>
-      <NotesCanvas onView={() => {}} />
-      <SpecialDates dates={specialDates} onViewAll={() => {}} />
-      <FavoriteMemories memories={favoriteMemories} onViewAll={() => {}} />
-    </ScrollView>
-  </View>
-);
+const OursScreen = ({ navigation }: Props) => {
+  const insets = useSafeAreaInsets();
+  const [notesPreview, setNotesPreview] = useState<string>("");
+  const [notesUpdatedAt, setNotesUpdatedAt] = useState<string | null>(null);
+
+  const fetchNotesPreview = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const notes = await getNotes(token);
+      setNotesPreview(notes.content || "");
+      setNotesUpdatedAt(notes.updatedAt || null);
+    } catch {
+      setNotesPreview("");
+      setNotesUpdatedAt(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotesPreview();
+  }, []);
+
+  return (
+    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.headerTitle}>Ours</Text>
+        <NotesCanvas
+          preview={notesPreview}
+          updatedAt={notesUpdatedAt}
+          onView={() => navigation.navigate("NotesScreen")}
+        />
+        <SpecialDates dates={specialDates} onViewAll={() => {}} />
+        <FavoriteMemories memories={favoriteMemories} onViewAll={() => {}} />
+      </ScrollView>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -56,9 +89,10 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 20,
     color: "#fff",
+    paddingTop: 20,
     letterSpacing: 0,
     alignSelf: "center",
-    marginBottom: 36,
+    marginBottom: 26,
   },
 });
 

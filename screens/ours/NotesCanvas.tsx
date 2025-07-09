@@ -4,9 +4,29 @@ import { Feather } from "@expo/vector-icons";
 
 type Props = {
   onView?: () => void;
+  preview?: string;
+  updatedAt?: string | null;
 };
 
-const NotesCanvas: React.FC<Props> = ({ onView }) => (
+const formatDateTime = (isoString?: string | null) => {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  return (
+    date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }) +
+    " " +
+    date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+  );
+};
+
+const NotesCanvas: React.FC<Props> = ({ onView, preview, updatedAt }) => (
   <View style={styles.wrapper}>
     <View style={styles.headerRow}>
       <Text style={styles.sectionTitle}>Our notes</Text>
@@ -15,9 +35,16 @@ const NotesCanvas: React.FC<Props> = ({ onView }) => (
       </TouchableOpacity>
     </View>
     <View style={styles.canvas}>
-      <Text style={styles.placeholderText}>
-        This is your shared canvas for notes, doodles, or memories.
+    <Text style={styles.placeholderText}>
+        {preview && preview.trim().length > 0
+          ? (preview.length > 120 ? preview.slice(0, 120) + "..." : preview)
+          : "This is your shared canvas for notes, doodles, or memories."}
       </Text>
+      {updatedAt && (
+        <Text style={styles.updatedAt}>
+          Last updated: {formatDateTime(updatedAt)}
+        </Text>
+      )}
     </View>
   </View>
 );
@@ -67,12 +94,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
+    position: "relative"
   },
   placeholderText: {
     color: "#b0b3c6",
     fontSize: 15,
     textAlign: "center",
     opacity: 0.8,
+  },
+  updatedAt: {
+    position: "absolute",
+    right: 12,
+    bottom: 10,
+    color: "#b0b3c6",
+    fontSize: 11,
+    opacity: 0.7,
   },
 });
 
