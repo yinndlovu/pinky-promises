@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  TouchableWithoutFeedback,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -203,8 +204,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         (req: any) => req.status === "pending"
       ).length;
       setPendingRequestsCount(pendingCount);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
   const fetchFavorites = async () => {
@@ -641,10 +641,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           transparent
           onRequestClose={() => setEditModalVisible(false)}
         >
+          <TouchableWithoutFeedback onPress={() => setEditModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <BlurView intensity={0} style={StyleSheet.absoluteFill}>
               <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>Edit Profile</Text>
+                <Text style={styles.modalTitle}>Edit profile</Text>
                 <View style={styles.editRow}>
                   <TextInput
                     style={styles.input}
@@ -729,6 +730,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
               </View>
             </BlurView>
           </View>
+          </TouchableWithoutFeedback>
         </Modal>
         <ProfilePictureModal
           visible={showPictureModal}
@@ -779,7 +781,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#fff",
     letterSpacing: 0,
-    paddingTop: 20
+    paddingTop: 20,
   },
   profileRow: {
     flexDirection: "row",

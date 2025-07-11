@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  TouchableWithoutFeedback
 } from "react-native";
 import AlertModal from "./AlertModal";
 
@@ -48,6 +49,7 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
+      <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.overlay}>
         <View style={styles.content}>
           <Text style={styles.title}>Update Love Language</Text>
@@ -92,6 +94,7 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
           />
         </View>
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

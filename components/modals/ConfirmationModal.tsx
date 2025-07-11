@@ -1,5 +1,13 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableWithoutFeedback,
+} from "react-native";
 
 type ConfirmationModalProps = {
   visible: boolean;
@@ -9,6 +17,7 @@ type ConfirmationModalProps = {
   confirmText?: string;
   cancelText?: string;
   loading?: boolean;
+  onClose: () => void;
 };
 
 const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
@@ -16,36 +25,39 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   message,
   onConfirm,
   onCancel,
+  onClose,
   confirmText = "Confirm",
   cancelText = "Cancel",
   loading = false,
 }) => (
   <Modal visible={visible} transparent animationType="fade">
-    <View style={styles.overlay}>
-      <View style={styles.content}>
-        <Text style={styles.message}>{message}</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-            style={[styles.button, styles.cancelButton]} 
-            onPress={onCancel}
-            disabled={loading}
-          >
-            <Text style={styles.cancelButtonText}>{cancelText}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.button, styles.confirmButton]} 
-            onPress={onConfirm}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <Text style={styles.confirmButtonText}>{confirmText}</Text>
-            )}
-          </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={onClose}>
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          <Text style={styles.message}>{message}</Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.confirmButton]}
+              onPress={onConfirm}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text style={styles.confirmButtonText}>{confirmText}</Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={onCancel}
+              disabled={loading}
+            >
+              <Text style={styles.cancelButtonText}>{cancelText}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   </Modal>
 );
 

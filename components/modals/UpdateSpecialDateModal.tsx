@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -41,6 +41,12 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+
+  useEffect(() => {
+    setDate(initialDate ? new Date(initialDate) : new Date());
+    setTitle(initialTitle);
+    setDescription(initialDescription);
+  }, [initialDate, initialTitle, initialDescription, visible]);
 
   const formatDate = (date: Date): string => {
     const day = date.getDate();
@@ -104,7 +110,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.title}>
-              {isEditing ? "Edit Special Date" : "Add Special Date"}
+              {isEditing ? "Edit special date" : "Add special date"}
             </Text>
             <TouchableOpacity
               onPress={handleClose}
@@ -158,13 +164,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
           </View>
 
           <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={handleClose}
-              disabled={loading}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
+            
             <TouchableOpacity
               style={[
                 styles.saveButton,
@@ -176,6 +176,13 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
               <Text style={styles.saveButtonText}>
                 {loading ? "Saving..." : isEditing ? "Update" : "Save"}
               </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleClose}
+              disabled={loading}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
 

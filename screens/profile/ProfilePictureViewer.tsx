@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Image, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 type Props = {
@@ -19,23 +26,25 @@ const ProfilePictureViewer: React.FC<Props> = ({
     transparent
     onRequestClose={onClose}
   >
-    <View style={styles.modalOverlay}>
-      <TouchableOpacity style={styles.backdrop} onPress={onClose} />
-      <View style={styles.imageContainer}>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Feather name="x" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Image
-          source={
-            imageUri
-              ? { uri: imageUri }
-              : require("../../assets/default-avatar-two.png")
-          }
-          style={styles.fullImage}
-          resizeMode="contain"
-        />
+    <TouchableWithoutFeedback onPress={onClose}>
+      <View style={styles.modalOverlay}>
+        <TouchableOpacity style={styles.backdrop} onPress={onClose} />
+        <View style={styles.imageContainer}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Feather name="x" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Image
+            source={
+              imageUri
+                ? { uri: imageUri }
+                : require("../../assets/default-avatar-two.png")
+            }
+            style={styles.fullImage}
+            resizeMode="contain"
+          />
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   </Modal>
 );
 

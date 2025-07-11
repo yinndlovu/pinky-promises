@@ -9,43 +9,85 @@ import {
 
 type SpecialDate = {
   id: string;
-  label: string;
+  title: string;
   date: string;
+  description: string;
+  extra?: { [key: string]: string };
 };
 
 type Props = {
   dates: SpecialDate[];
-  onViewAll?: () => void;
+  onAdd: () => void;
+  onLongPressDate?: (date: any) => void;
 };
 
-const SpecialDates: React.FC<Props> = ({ dates, onViewAll }) => (
+function formatExtraLabel(key: string): string {
+  const withSpaces = key.replace(/([A-Z])/g, " $1").toLowerCase();
+  return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1) + ":";
+}
+
+const STANDARD_FIELDS = [
+  "id",
+  "date",
+  "title",
+  "description",
+  "userId",
+  "partnerId",
+  "createdAt",
+  "updatedAt",
+];
+
+const SpecialDates: React.FC<Props> = ({ dates, onAdd, onLongPressDate }) => (
   <View style={styles.wrapper}>
-    <View style={styles.headerRow}>
-      <Text style={styles.sectionTitle}>Our special dates</Text>
-      <TouchableOpacity style={styles.viewButton} onPress={onViewAll}>
-        <Text style={styles.viewButtonText}>View all</Text>
-      </TouchableOpacity>
-    </View>
+    <Text style={styles.sectionTitle}>Our special dates</Text>
     <View style={styles.datesCard}>
-      <FlatList
-        data={dates}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.dateRow}>
-            <Text style={styles.dateLabel}>{item.label}</Text>
-            <Text style={styles.dateValue}>{item.date}</Text>
-          </View>
-        )}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        scrollEnabled={false}
-      />
+      {dates.length === 0 ? (
+        <Text style={styles.emptyText}>
+          No special dates yet. Add your first one!
+        </Text>
+      ) : (
+        <FlatList
+          data={dates}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              activeOpacity={0.6}
+              onLongPress={() => onLongPressDate && onLongPressDate(item)}
+              delayLongPress={400}
+            >
+              <View style={styles.dateRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.dateLabel}>{item.title}</Text>
+                  <Text style={styles.dateValue}>{item.date}</Text>
+                  {item.description ? (
+                    <Text style={styles.dateDescription}>
+                      {item.description}
+                    </Text>
+                  ) : null}
+                  {Object.entries(item)
+                    .filter(
+                      ([key, value]) =>
+                        !STANDARD_FIELDS.includes(key) &&
+                        typeof value === "string" &&
+                        value.trim() !== ""
+                    )
+                    .map(([key, value]) =>
+                      typeof value === "string" ? (
+                        <Text style={styles.dateExtra} key={key}>
+                          {formatExtraLabel(key)} {value}
+                        </Text>
+                      ) : null
+                    )}
+                </View>
+              </View>
+            </TouchableOpacity>
+          )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          scrollEnabled={false}
+        />
+      )}
     </View>
-    <TouchableOpacity
-      style={styles.addButton}
-      onPress={() => {
-        /* handle add new date */
-      }}
-    >
+    <TouchableOpacity style={styles.addButton} onPress={onAdd}>
       <Text style={styles.addButtonText}>+ Add new date</Text>
     </TouchableOpacity>
   </View>
@@ -56,31 +98,13 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 32,
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    marginTop: 8,
-  },
   sectionTitle: {
     fontSize: 18,
     color: "#b0b3c6",
     fontWeight: "bold",
     letterSpacing: 1,
     marginLeft: 12,
-  },
-  viewButton: {
-    backgroundColor: "transparent",
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-  },
-  viewButtonText: {
-    color: "#e03487",
-    fontWeight: "bold",
-    fontSize: 15,
-    letterSpacing: 0.5,
+    marginBottom: 14,
   },
   datesCard: {
     backgroundColor: "#1b1c2e",
@@ -100,15 +124,17 @@ const styles = StyleSheet.create({
   },
   dateLabel: {
     color: "#b0b3c6",
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "bold",
     letterSpacing: 0.5,
+    marginBottom: 8,
   },
   dateValue: {
     color: "#fff",
     fontSize: 15,
     fontWeight: "bold",
     letterSpacing: 0.5,
+    marginBottom: 4,
   },
   separator: {
     height: 1,
@@ -133,6 +159,23 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     letterSpacing: 1,
+  },
+  dateDescription: {
+    color: "#aeb1c2",
+    fontSize: 14,
+    marginTop: 2,
+    marginBottom: 3,
+  },
+  dateExtra: {
+    color: "#858794",
+    fontSize: 12,
+    marginTop: 1,
+  },
+  emptyText: {
+    color: "#b0b3c6",
+    fontSize: 15,
+    textAlign: "center",
+    paddingVertical: 24,
   },
 });
 

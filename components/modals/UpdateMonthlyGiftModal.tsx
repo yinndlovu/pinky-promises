@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TextInput,
   ActivityIndicator,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
@@ -33,56 +34,64 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={styles.overlay}>
-        <View style={styles.content}>
-          <View style={styles.header}>
-            <Text style={styles.title}>
-              {initialGiftName ? "Edit your favorite present" : "Add your favorite present"}
-            </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton} disabled={loading}>
-              <Feather name="x" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.form}>
-            <Text style={styles.label}>Present name</Text>
-            <TextInput
-              style={styles.input}
-              value={giftName}
-              onChangeText={setGiftName}
-              placeholder="e.g., Spotify gift card"
-              placeholderTextColor="#b0b3c6"
-              maxLength={50}
-              editable={!loading}
-            />
-          </View>
-          <View style={styles.actions}>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={onClose}
-              disabled={loading}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.saveButton,
-                (!giftName.trim() || loading) && styles.saveButtonDisabled,
-              ]}
-              onPress={() => onSave(giftName.trim())}
-              disabled={!giftName.trim() || loading}
-            >
-              <Text style={styles.saveButtonText}>
-                {loading ? "Saving..." : initialGiftName ? "Update" : "Save"}
+      <TouchableWithoutFeedback onPress={onClose}>
+        <View style={styles.overlay}>
+          <View style={styles.content}>
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                {initialGiftName
+                  ? "Edit your favorite present"
+                  : "Add your favorite present"}
               </Text>
-            </TouchableOpacity>
-          </View>
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#e03487" />
+              <TouchableOpacity
+                onPress={onClose}
+                style={styles.closeButton}
+                disabled={loading}
+              >
+                <Feather name="x" size={24} color="#fff" />
+              </TouchableOpacity>
             </View>
-          )}
+            <View style={styles.form}>
+              <Text style={styles.label}>Present name</Text>
+              <TextInput
+                style={styles.input}
+                value={giftName}
+                onChangeText={setGiftName}
+                placeholder="e.g., Spotify gift card"
+                placeholderTextColor="#b0b3c6"
+                maxLength={50}
+                editable={!loading}
+              />
+            </View>
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={onClose}
+                disabled={loading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.saveButton,
+                  (!giftName.trim() || loading) && styles.saveButtonDisabled,
+                ]}
+                onPress={() => onSave(giftName.trim())}
+                disabled={!giftName.trim() || loading}
+              >
+                <Text style={styles.saveButtonText}>
+                  {loading ? "Saving..." : initialGiftName ? "Update" : "Save"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#e03487" />
+              </View>
+            )}
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  TouchableWithoutFeedback
 } from "react-native";
 import AlertModal from "./AlertModal";
 
@@ -48,6 +49,7 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
+      <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.overlay}>
         <View style={styles.content}>
           <Text style={styles.title}>Update more about you</Text>
@@ -95,6 +97,7 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
           />
         </View>
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

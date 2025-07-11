@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  TouchableWithoutFeedback
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 import AlertModal from "./AlertModal";
@@ -67,6 +68,7 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
+      <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Update your mood</Text>
@@ -119,6 +121,7 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
           />
         </View>
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };

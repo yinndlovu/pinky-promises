@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Modal, TouchableWithoutFeedback } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 type Props = {
@@ -19,6 +19,7 @@ const LogoutModal: React.FC<Props> = ({
         transparent
         onRequestClose={onClose}
     >
+        <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.modalOverlay}>
             <TouchableOpacity style={styles.backdrop} onPress={onClose} />
             <View style={styles.modalContent}>
@@ -44,6 +45,7 @@ const LogoutModal: React.FC<Props> = ({
                 </View>
             </View>
         </View>
+        </TouchableWithoutFeedback>
     </Modal>
 );
 

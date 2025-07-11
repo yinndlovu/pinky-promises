@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 
 type ClaimedGiftModalProps = {
   visible: boolean;
@@ -15,23 +17,48 @@ const ClaimedGiftModal: React.FC<ClaimedGiftModalProps> = ({
   value,
   message,
   onClose,
-}) => (
-  <Modal visible={visible} transparent animationType="fade">
-    <View style={styles.overlay}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Gift successfully claimed</Text>
-        <Text style={styles.giftName}>{giftName}</Text>
-        <View style={styles.valueContainer}>
-          <Text style={styles.valueText}>{value}</Text>
+}) => {
+  const [showToast, setShowToast] = useState(false);
+
+  const handleCopy = async () => {
+    await Clipboard.setStringAsync(value);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 1800);
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          {showToast && (
+            <View style={styles.toast}>
+              <Text style={styles.toastText}>Copied!</Text>
+            </View>
+          )}
+          <MaterialCommunityIcons
+            name="gift"
+            size={54}
+            color="#e03487"
+            style={{ marginBottom: 10 }}
+          />
+          <Text style={styles.giftName}>{giftName}</Text>
+          <TouchableOpacity
+            style={styles.valueContainer}
+            onLongPress={handleCopy}
+            delayLongPress={300}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.valueText}>{value}</Text>
+          </TouchableOpacity>
+          <Text style={styles.message}>{message}</Text>
+          <TouchableOpacity style={styles.okButton} onPress={onClose}>
+            <Text style={styles.okButtonText}>OK</Text>
+          </TouchableOpacity>
         </View>
-        <Text style={styles.message}>{message}</Text>
-        <TouchableOpacity style={styles.okButton} onPress={onClose}>
-          <Text style={styles.okButtonText}>OK</Text>
-        </TouchableOpacity>
       </View>
-    </View>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 const styles = StyleSheet.create({
   overlay: {
@@ -52,15 +79,8 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-  title: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
-    textAlign: "center",
-  },
   giftName: {
-    color: "#e03487",
+    color: "#fcfafa",
     fontSize: 17,
     fontWeight: "bold",
     marginBottom: 10,
@@ -96,6 +116,27 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  toast: {
+    position: "absolute",
+    top: 10,
+    left: 120,
+    right: 120,
+    backgroundColor: "#e03487",
+    padding: 5,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+    alignSelf: "center",
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 12,
   },
 });
 
