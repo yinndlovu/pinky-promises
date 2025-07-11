@@ -292,9 +292,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           </Text>
         </View>
 
-        <PartnerStatusMood partnerId={partner.id}
-        partnerName={name} 
-        refreshKey={refreshKey}
+        <PartnerStatusMood
+          partnerId={partner.id}
+          partnerName={name}
+          refreshKey={refreshKey}
         />
 
         <PartnerAnniversary partnerId={partner.id} />
@@ -316,6 +317,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           onCancel={() => setShowRemoveModal(false)}
           confirmText="Remove"
           cancelText="Cancel"
+          onClose={() => setShowRemoveModal(false)}
           loading={removingPartner}
         />
       </ScrollView>

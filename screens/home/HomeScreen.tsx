@@ -28,6 +28,7 @@ import { getUserMood } from "../../services/moodService";
 import { getUpcomingSpecialDate } from "../../services/specialDateService";
 import { getRecentActivities } from "../../services/recentActivityService";
 import { RefreshControl } from "react-native";
+import ActionsModal from "../../components/modals/ActionsModal";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -46,6 +47,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [upcomingDate, setUpcomingDate] = React.useState<any>(null);
   const [activities, setActivities] = React.useState<any[]>([]);
   const [refreshing, setRefreshing] = React.useState(false);
+  const [actionsModalVisible, setActionsModalVisible] = React.useState(false);
 
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -62,6 +64,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       setRefreshing(false);
     }
   }, []);
+
+  const handleAction = () => {
+    // Do something with the action (e.g., show a toast, send to backend, etc.)
+    setActionsModalVisible(false);
+  };
 
   const fetchPartner = async () => {
     try {
@@ -429,10 +436,18 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               </TouchableOpacity>
             </BlurView>
             <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => setActionsModalVisible(true)}
+              >
                 <Text style={styles.buttonText}>MORE</Text>
               </TouchableOpacity>
             </BlurView>
+            <ActionsModal
+              visible={actionsModalVisible}
+              onClose={() => setActionsModalVisible(false)}
+              onAction={handleAction}
+            />
           </View>
           {upcomingDate && (
             <View style={styles.upcomingContainer}>
