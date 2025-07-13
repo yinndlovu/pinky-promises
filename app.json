@@ -21,8 +21,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "windowSoftInputMode": "adjustResize",
-      "package": "com.yinn.pinkypromises"
+      "package": "com.yinn.pinkypromises",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"

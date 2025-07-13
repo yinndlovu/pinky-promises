@@ -11,6 +11,7 @@ export async function registerForPushNotificationsAsync() {
   if (Device.isDevice) {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
+
     let finalStatus = existingStatus;
 
     if (existingStatus !== "granted") {
@@ -24,16 +25,23 @@ export async function registerForPushNotificationsAsync() {
       return;
     }
 
-    token = (await Notifications.getExpoPushTokenAsync()).data;
-    const authToken = await AsyncStorage.getItem("token");
+    try {
+      const tokenObj = await Notifications.getExpoPushTokenAsync();
+      const token = tokenObj.data;
 
-    if (authToken) {
-      await axios.post(
-        `${BASE_URL}/api/push-token/save`,
-        { token },
-        { headers: { Authorization: `Bearer ${authToken}` } }
-      );
-    }
+      const authToken = await AsyncStorage.getItem("token");
+
+      if (authToken) {
+        try {
+          await axios.post(
+            `${BASE_URL}/api/push-token/save`,
+            { token },
+            { headers: { Authorization: `Bearer ${authToken}` } }
+          );
+        } catch (error) {}
+      } else {
+      }
+    } catch (err) {}
   } else {
     alert("Must use physical device for Push Notifications");
   }
