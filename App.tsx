@@ -35,10 +35,6 @@ import { registerForPushNotificationsAsync } from "./utils/notifications";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-useEffect(() => {
-  registerForPushNotificationsAsync();
-}, []);
-
 async function startBackgroundLocation() {
   const { status } = await Location.requestForegroundPermissionsAsync();
   if (status !== "granted") return;
@@ -86,6 +82,10 @@ function AppContent() {
 
   React.useEffect(() => {
     startBackgroundLocation();
+  }, []);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
   }, []);
 
   if (isLoading) {
