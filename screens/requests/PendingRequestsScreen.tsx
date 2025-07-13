@@ -6,18 +6,19 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Image,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getReceivedPartnerRequests,
   acceptPartnerRequest,
-  rejectPartnerRequest
+  rejectPartnerRequest,
 } from "../../services/partnerService";
 import AlertModal from "../../components/modals/AlertModal";
 import { encode } from "base64-arraybuffer";
 import axios from "axios";
 import { BASE_URL } from "../../configuration/config";
+import { Image } from "expo-image";
+import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 
 const fallbackAvatar = require("../../assets/default-avatar-two.png");
 
@@ -41,6 +42,9 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   }>({});
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<{
+    [userId: string]: Date;
+  }>({});
 
   useEffect(() => {
     fetchRequests();
@@ -61,6 +65,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       setRequests(pendingRequests);
 
       const pics: { [userId: string]: string } = {};
+      const updatedAts: { [userId: string]: Date } = {};
       await Promise.all(
         requestsData.map(async (req: PendingRequest) => {
           if (req.sender) {
@@ -75,16 +80,42 @@ const PendingRequestsScreen = ({ navigation }: any) => {
               const mime = response.headers["content-type"] || "image/jpeg";
               const base64 = `data:${mime};base64,${encode(response.data)}`;
               pics[req.sender.id] = base64;
+
+              const lastModified = response.headers["last-modified"];
+              updatedAts[req.sender.id] = lastModified
+                ? new Date(lastModified)
+                : new Date();
             } catch (err) {}
           }
         })
       );
       setProfilePictures(pics);
+      setProfilePicUpdatedAt(updatedAts);
     } catch (error: any) {
       showAlert(error.response?.data?.error || "Failed to fetch requests");
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderProfileImage = (userId: string) => {
+    if (profilePictures[userId] && profilePicUpdatedAt[userId]) {
+      const cachedImageUrl = buildCachedImageUrl(
+        userId,
+        profilePicUpdatedAt[userId]
+      );
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+    return (
+      <Image source={fallbackAvatar} style={styles.avatar} contentFit="cover" />
+    );
   };
 
   const showAlert = (message: string) => {
@@ -147,21 +178,14 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     return (
       <View style={styles.requestItem}>
         <View style={styles.userInfo}>
-          <Image
-            source={
-              profilePictures[item.sender.id]
-                ? { uri: profilePictures[item.sender.id] }
-                : fallbackAvatar
-            }
-            style={styles.avatar}
-          />
+          {renderProfileImage(item.sender.id)}
           <View style={styles.userDetails}>
             <Text style={styles.username}>@{item.sender.username}</Text>
             <Text style={styles.requestText}>wants to be your partner</Text>
           </View>
         </View>
         <View style={styles.actions}>
-        <TouchableOpacity
+          <TouchableOpacity
             style={[styles.actionButton, styles.acceptButton]}
             onPress={() => handleAcceptRequest(item.id, item.sender!.id)}
             disabled={isProcessing}

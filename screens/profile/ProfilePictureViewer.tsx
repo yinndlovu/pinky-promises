@@ -1,13 +1,13 @@
 import React from "react";
 import {
   View,
-  Image,
   StyleSheet,
   TouchableOpacity,
   Modal,
   TouchableWithoutFeedback,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { Image } from "expo-image";
 
 type Props = {
   visible: boolean;
@@ -34,13 +34,10 @@ const ProfilePictureViewer: React.FC<Props> = ({
             <Feather name="x" size={24} color="#fff" />
           </TouchableOpacity>
           <Image
-            source={
-              imageUri
-                ? { uri: imageUri }
-                : require("../../assets/default-avatar-two.png")
-            }
+            source={imageUri || require("../../assets/default-avatar-two.png")}
             style={styles.fullImage}
-            resizeMode="contain"
+            contentFit="contain"
+            transition={200}
           />
         </View>
       </View>

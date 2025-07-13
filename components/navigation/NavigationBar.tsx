@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Image, ActivityIndicator } from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
   NavigationHelpers,
@@ -11,6 +11,8 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../../configuration/config";
 import { encode } from 'base64-arraybuffer';
+import { Image } from 'expo-image';
+import { buildCachedImageUrl } from '../../utils/imageCacheUtils';
 
 const NAV_ITEMS = [
   { name: "Home", icon: "home" as const },
@@ -32,6 +34,8 @@ const INACTIVE_COLOR = "#b0b3c6";
 export default function NavigationBar({ navigation, currentRoute }: Props) {
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
     fetchUserAvatar();
@@ -53,6 +57,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       );
 
       const userId = userResponse.data.user.id;
+      setUserId(userId);
 
       const pictureResponse = await axios.get(
         `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
@@ -66,6 +71,9 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
 
       setAvatarUri(base64);
+
+      const lastModified = pictureResponse.headers['last-modified'];
+      setProfilePicUpdatedAt(lastModified ? new Date(lastModified) : new Date());
     } catch (error: any) {
     } finally {
       setLoading(false);
@@ -81,15 +89,18 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       );
     }
 
-    if (avatarUri) {
+    if (avatarUri && profilePicUpdatedAt && userId) {
+      const cachedImageUrl = buildCachedImageUrl(userId.toString(), profilePicUpdatedAt);
       return (
         <View style={styles.avatarContainer}>
           <Image
-            source={{ uri: avatarUri }}
+            source={cachedImageUrl}
             style={[
               styles.avatar,
               { borderColor: currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR }
             ]}
+            contentFit="cover"
+            transition={200}
           />
         </View>
       );
@@ -103,6 +114,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
             styles.avatar,
             { borderColor: currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR }
           ]}
+          contentFit="cover"
         />
       </View>
     );

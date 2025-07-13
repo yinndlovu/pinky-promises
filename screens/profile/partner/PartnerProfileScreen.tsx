@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ActivityIndicator,
   ScrollView,
@@ -27,6 +26,8 @@ import { Feather } from "@expo/vector-icons";
 import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
@@ -44,6 +45,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [showPictureViewer, setShowPictureViewer] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
+    null
+  );
 
   const fetchPartner = async () => {
     try {
@@ -75,6 +79,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
 
         setAvatarUri(base64);
+
+        const lastModified = pictureResponse.headers["last-modified"];
+        setProfilePicUpdatedAt(
+          lastModified ? new Date(lastModified) : new Date()
+        );
       } catch (picErr: any) {
         setAvatarUri(null);
       }
@@ -84,6 +93,35 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderProfileImage = () => {
+    if (avatarUri && profilePicUpdatedAt && partner) {
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id,
+        profilePicUpdatedAt
+      );
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={
+          avatarUri
+            ? avatarUri
+            : require("../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        contentFit="cover"
+      />
+    );
   };
 
   const fetchCurrentUser = async () => {
@@ -260,10 +298,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         <View style={styles.profileRow}>
           <View style={styles.avatarWrapper}>
             <TouchableOpacity onPress={() => setShowPictureViewer(true)}>
-              <Image
-                source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
-                style={styles.avatar}
-              />
+              {renderProfileImage()}
             </TouchableOpacity>
           </View>
           <View style={styles.infoWrapper}>
@@ -324,7 +359,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       <ProfilePictureViewer
         visible={showPictureViewer}
-        imageUri={avatarUri}
+        imageUri={
+          partner && profilePicUpdatedAt
+            ? buildCachedImageUrl(partner.id, profilePicUpdatedAt)
+            : null
+        }
         onClose={() => setShowPictureViewer(false)}
       />
     </View>

@@ -1,5 +1,7 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Image } from 'expo-image';
+import { buildCachedImageUrl } from '../../utils/imageCacheUtils';
 
 type User = {
   id: string;
@@ -8,9 +10,14 @@ type User = {
   isPartner?: boolean;
 };
 
+type ProfilePictureInfo = {
+  uri: string;
+  updatedAt: Date;
+};
+
 type UserListItemProps = {
   user: User;
-  profilePicture?: string;
+  profilePicture?: ProfilePictureInfo;
   onPress: (user: User) => void;
 };
 
@@ -19,16 +26,31 @@ export default function UserListItem({
   profilePicture,
   onPress,
 }: UserListItemProps) {
+  const renderProfileImage = () => {
+    if (profilePicture) {
+      const cachedImageUrl = buildCachedImageUrl(user.id, profilePicture.updatedAt);
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+    
+    return (
+      <Image
+        source={require("../../assets/default-avatar-two.png")}
+        style={styles.avatar}
+        contentFit="cover"
+      />
+    );
+  };
+
   return (
     <TouchableOpacity style={styles.container} onPress={() => onPress(user)}>
-      <Image
-        source={
-          profilePicture
-            ? { uri: profilePicture }
-            : require("../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-      />
+      {renderProfileImage()}
       <View style={styles.info}>
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.username}>@{user.username}</Text>

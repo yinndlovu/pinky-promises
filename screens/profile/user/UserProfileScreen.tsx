@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   ActivityIndicator,
   ScrollView,
@@ -21,6 +20,8 @@ import {
   acceptPartnerRequest,
 } from "../../../services/partnerService";
 import AlertModal from "../../../components/modals/AlertModal";
+import { Image } from 'expo-image';
+import { buildCachedImageUrl } from '../../../utils/imageCacheUtils';
 
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
@@ -40,6 +41,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   );
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -72,6 +74,9 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
           const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
 
           setAvatarUri(base64);
+
+          const lastModified = pictureResponse.headers['last-modified'];
+          setProfilePicUpdatedAt(lastModified ? new Date(lastModified) : new Date());
         } catch (picErr: any) {
           setAvatarUri(null);
         }
@@ -87,6 +92,32 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
     fetchUser();
   }, [userId]);
+
+  const renderProfileImage = () => {
+    if (avatarUri && profilePicUpdatedAt) {
+      const cachedImageUrl = buildCachedImageUrl(userId, profilePicUpdatedAt);
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+    
+    return (
+      <Image
+        source={
+          avatarUri
+            ? avatarUri
+            : fallbackAvatar
+        }
+        style={styles.avatar}
+        contentFit="cover"
+      />
+    );
+  };
 
   const checkRequestStatus = async (token: string) => {
     try {
@@ -214,10 +245,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
         </View>
         <View style={styles.profileRow}>
           <View style={styles.avatarWrapper}>
-            <Image
-              source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
-              style={styles.avatar}
-            />
+            {renderProfileImage()}
           </View>
           <View style={styles.infoWrapper}>
             <Text style={styles.name}>{name}</Text>

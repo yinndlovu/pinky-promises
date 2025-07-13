@@ -27,15 +27,20 @@ type User = {
   isUser?: boolean;
 };
 
+type ProfilePictureInfo = {
+  [userId: string]: {
+    uri: string;
+    updatedAt: Date;
+  };
+};
+
 export default function SearchScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [profilePictures, setProfilePictures] = useState<{
-    [userId: string]: string;
-  }>({});
+  const [profilePictures, setProfilePictures] = useState<ProfilePictureInfo>({});
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -49,7 +54,15 @@ export default function SearchScreen({ navigation }: Props) {
         }
       );
       const mime = response.headers["content-type"] || "image/jpeg";
-      return `data:${mime};base64,${encode(response.data)}`;
+      const base64 = `data:${mime};base64,${encode(response.data)}`;
+      
+      const lastModified = response.headers['last-modified'];
+      const updatedAt = lastModified ? new Date(lastModified) : new Date();
+      
+      return {
+        uri: base64,
+        updatedAt
+      };
     } catch {
       return null;
     }
@@ -69,6 +82,7 @@ export default function SearchScreen({ navigation }: Props) {
     }
     setLoading(true);
     setError("");
+    
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -79,7 +93,7 @@ export default function SearchScreen({ navigation }: Props) {
       const results = await searchUsers(token, text);
       setUsers(results);
 
-      const pics: { [userId: string]: string } = {};
+      const pics: ProfilePictureInfo = {};
       await Promise.all(
         results.map(async (user: User) => {
           const pic = await fetchProfilePicture(user.id, token);
@@ -92,6 +106,7 @@ export default function SearchScreen({ navigation }: Props) {
     }
     setLoading(false);
   };
+
 
   const handleUserPress = (user: User) => {
     if (user.isUser) {

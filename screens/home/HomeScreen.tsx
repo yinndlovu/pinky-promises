@@ -3,7 +3,6 @@ import {
   ScrollView,
   View,
   Text,
-  Image,
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
@@ -29,6 +28,8 @@ import { getUpcomingSpecialDate } from "../../services/specialDateService";
 import { getRecentActivities } from "../../services/recentActivityService";
 import { RefreshControl } from "react-native";
 import ActionsModal from "../../components/modals/ActionsModal";
+import { Image } from "expo-image";
+import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -37,6 +38,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [partner, setPartner] = React.useState<any>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] =
+    React.useState<Date | null>(null);
   const [showError, setShowError] = React.useState(false);
   const [isActive, setIsActive] = React.useState(true);
   const [loading, setLoading] = React.useState(true);
@@ -102,6 +105,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
 
         setAvatarUri(base64);
+
+        const lastModified = pictureResponse.headers["last-modified"];
+        setProfilePicUpdatedAt(
+          lastModified ? new Date(lastModified) : new Date()
+        );
       } catch (picErr: any) {
         if (![404, 500].includes(picErr.response?.status)) {
           setError(picErr.response?.data?.error || picErr.message);
@@ -116,6 +124,35 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderPartnerImage = () => {
+    if (avatarUri && profilePicUpdatedAt && partner) {
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id,
+        profilePicUpdatedAt
+      );
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={
+          avatarUri
+            ? avatarUri
+            : require("../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        contentFit="cover"
+      />
+    );
   };
 
   const checkAndUpdateHomeStatus = async () => {
@@ -397,14 +434,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             >
               <View style={styles.profileRow}>
                 <View style={styles.avatarWrapper}>
-                  <Image
-                    source={
-                      avatarUri
-                        ? { uri: avatarUri }
-                        : require("../../assets/default-avatar-two.png")
-                    }
-                    style={styles.avatar}
-                  />
+                  {renderPartnerImage()}
                 </View>
                 <View style={styles.infoWrapper}>
                   <Text style={styles.name}>

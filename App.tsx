@@ -29,9 +29,15 @@ import SearchScreen from "./screens/search/SearchScreen";
 import UserProfileScreen from "./screens/profile/user/UserProfileScreen";
 import PendingRequestsScreen from "./screens/requests/PendingRequestsScreen";
 import NotesScreen from "./screens/ours/NotesScreen";
+import { useEffect } from "react";
+import { registerForPushNotificationsAsync } from "./utils/notifications";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+
+useEffect(() => {
+  registerForPushNotificationsAsync();
+}, []);
 
 async function startBackgroundLocation() {
   const { status } = await Location.requestForegroundPermissionsAsync();
