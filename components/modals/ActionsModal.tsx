@@ -23,6 +23,7 @@ const ACTIONS = [
   { key: "nudge", label: "NUDGE" },
   { key: "caress", label: "CARESS" },
   { key: "embrace", label: "EMBRACE" },
+  { key: "wink", label: "WINK AT"}
 ];
 
 const ActionsModal: React.FC<ActionsModalProps> = ({
@@ -35,7 +36,7 @@ const ActionsModal: React.FC<ActionsModalProps> = ({
       <View style={styles.overlay}>
         <TouchableWithoutFeedback onPress={() => {}}>
           <View style={styles.actionsContainer}>
-            <Text style={styles.title}>Choose an action</Text>
+            <Text style={styles.title}>What do you want to do?</Text>
             <View style={styles.grid}>
               {ACTIONS.map((action) => (
                 <BlurView

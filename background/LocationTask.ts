@@ -9,20 +9,29 @@ const LOCATION_TASK_NAME = "background-location-task";
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   if (error) {
-    console.error("Location task error:", error);
     return;
   }
+
   if (data) {
     const { locations } = data as any;
     const location = locations[0];
-    if (!location) return;
+
+    if (!location) {
+      return;
+    }
 
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const home = await getHomeLocation(token);
-      if (!home) return;
+
+      if (!home) {
+        return;
+      }
 
       const distance = getDistance(
         location.coords.latitude,
@@ -33,9 +42,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       const isAtHome = distance < 100;
 
       await updateUserStatus(token, isAtHome);
-    } catch (err) {
-      console.log("Background location error:", err);
-    }
+    } catch (err) {}
   }
 });
 

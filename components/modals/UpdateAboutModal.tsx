@@ -30,7 +30,9 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
-    if (visible) setAbout(initialAbout || "");
+    if (visible) {
+      setAbout(initialAbout || "");
+    }
   }, [visible, initialAbout]);
 
   const handleSave = async () => {

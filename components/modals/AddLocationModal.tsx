@@ -42,11 +42,14 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
         setAlertMessage("");
         try {
           let { status } = await Location.requestForegroundPermissionsAsync();
+
           if (status !== "granted") {
             setError("Permission to access location was denied");
             setLoading(false);
+            
             return;
           }
+
           let loc = await Location.getCurrentPositionAsync({});
           setLocation({
             latitude: loc.coords.latitude,
