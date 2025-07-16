@@ -44,6 +44,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   const fetchUserAvatar = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
+      
       if (!token) {
         setLoading(false);
         return;

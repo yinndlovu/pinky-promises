@@ -9,8 +9,12 @@ type Props = {
 };
 
 const formatDateTime = (isoString?: string | null) => {
-  if (!isoString) return "";
+  if (!isoString) {
+    return "";
+  }
+
   const date = new Date(isoString);
+  
   return (
     date.toLocaleDateString("en-GB", {
       day: "numeric",

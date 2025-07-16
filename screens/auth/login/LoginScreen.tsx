@@ -29,6 +29,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       setError("Username and password are required");
       return;
     }
+    
     setError("");
     setLoading(true);
     try {

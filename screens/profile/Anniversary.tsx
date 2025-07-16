@@ -69,12 +69,14 @@ const Anniversary: React.FC<Props> = ({
   const fetchSpecialDates = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const dates = await getSpecialDates(token);
       setSpecialDates(dates);
     } catch (error) {
-      console.error("Failed to fetch special dates:", error);
     }
   };
 

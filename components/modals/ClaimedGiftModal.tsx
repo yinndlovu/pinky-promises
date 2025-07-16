@@ -22,6 +22,7 @@ const ClaimedGiftModal: React.FC<ClaimedGiftModalProps> = ({
 
   const handleCopy = async () => {
     await Clipboard.setStringAsync(value);
+    
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1800);
   };

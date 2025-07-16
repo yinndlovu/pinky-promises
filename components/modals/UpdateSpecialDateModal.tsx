@@ -56,11 +56,14 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   };
 
   const handleSave = async () => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      return;
+    }
 
     setLoading(true);
     try {
       const formattedDate = date.toISOString().split("T")[0];
+      
       await onSave(
         formattedDate,
         title.trim(),

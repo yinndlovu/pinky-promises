@@ -44,7 +44,11 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
     }
 
     setChecking(true);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await axios.get(
@@ -52,6 +56,7 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
             username
           )}`
         );
+
         setAvailable(res.data.available);
         setError("");
       } catch (e) {
@@ -63,35 +68,43 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
     }, 500);
 
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
     };
   }, [username]);
 
   const handleNext = () => {
     const trimmedUsername = username.trim();
+
     if (!trimmedUsername) {
       setError("Username is required");
       return;
     }
+
     if (trimmedUsername.length < 3) {
       setError("Username must be at least 3 characters long");
       return;
     }
+
     if (trimmedUsername.length > 20) {
       setError("Username must not exceed 20 characters");
       return;
     }
+
     if (!usernameRegex.test(trimmedUsername)) {
       setError(
         "Username can only contain letters, numbers, underscores, and hyphens"
       );
       return;
     }
+
     if (available === false) {
       setError("Username is already taken");
       return;
     }
     setError("");
+    
     navigation.navigate("Password", { name, username: trimmedUsername });
   };
 

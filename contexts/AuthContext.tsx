@@ -28,6 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const validateToken = async (): Promise<boolean> => {
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
         return false;
       }
@@ -40,6 +41,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (response.status === 200) {
         setUser(response.data.user);
+
         return true;
       }
       return false;
@@ -52,9 +54,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const checkAuthStatus = async () => {
     try {
       const isValid = await validateToken();
+
       setIsAuthenticated(isValid);
     } catch (error) {
-      console.log("Error checking auth status:", error);
       setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
@@ -63,6 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = async (token: string, userData?: any) => {
     await AsyncStorage.setItem("token", token);
+
     if (userData) {
       setUser(userData);
     }
@@ -71,6 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     await AsyncStorage.removeItem("token");
+
     setUser(null);
     setIsAuthenticated(false);
   };
@@ -93,8 +97,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+  
   return context;
 };

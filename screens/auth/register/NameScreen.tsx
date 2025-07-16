@@ -19,11 +19,13 @@ const NameScreen: React.FC<Props> = ({ navigation }) => {
       setError("Name is required");
       return;
     }
+    
     if (name.length > 25) {
       setError("Name must not exceed 25 characters");
       return;
     }
     setError("");
+
     navigation.navigate("Username", { name });
   };
 

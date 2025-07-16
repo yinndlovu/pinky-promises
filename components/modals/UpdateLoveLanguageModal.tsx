@@ -30,13 +30,16 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
-    if (visible) setLoveLanguage(initialLoveLanguage || "");
+    if (visible) {
+      setLoveLanguage(initialLoveLanguage || "");
+    }
   }, [visible, initialLoveLanguage]);
 
   const handleSave = async () => {
     setLoading(true);
     try {
       await onSave(loveLanguage);
+
       setAlertMessage("Love language updated!");
       setAlertVisible(true);
     } catch (err) {
@@ -52,7 +55,7 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
       <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.overlay}>
         <View style={styles.content}>
-          <Text style={styles.title}>Update Love Language</Text>
+          <Text style={styles.title}>Update love language</Text>
           <TextInput
             style={styles.input}
             value={loveLanguage}
