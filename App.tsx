@@ -37,11 +37,17 @@ const Tab = createBottomTabNavigator();
 
 async function startBackgroundLocation() {
   const { status } = await Location.requestForegroundPermissionsAsync();
-  if (status !== "granted") return;
+  
+  if (status !== "granted") {
+    return;
+  }
 
   const { status: bgStatus } =
     await Location.requestBackgroundPermissionsAsync();
-  if (bgStatus !== "granted") return;
+  
+  if (bgStatus !== "granted") {
+    return;
+  }
 
   await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
     accuracy: Location.Accuracy.High,
@@ -85,11 +91,8 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log("isAuthenticated, registering for push notifications");
-      registerForPushNotificationsAsync();
-    }
-  }, [isAuthenticated]);
+    registerForPushNotificationsAsync();
+  }, []);
 
   if (isLoading) {
     return (
