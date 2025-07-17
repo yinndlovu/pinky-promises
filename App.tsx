@@ -91,8 +91,10 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    registerForPushNotificationsAsync();
-  }, []);
+    if (isAuthenticated) {
+      registerForPushNotificationsAsync();
+    }
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return (
