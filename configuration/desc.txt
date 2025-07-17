@@ -1,4 +1,1 @@
-this directory takes config.ts file
-the config.ts file contains the following line:
 
-export const BASE_URL = 'http://x.x.x.x:5000';
