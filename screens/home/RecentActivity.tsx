@@ -1,4 +1,3 @@
-// screens/home/RecentActivity.tsx
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { Feather } from "@expo/vector-icons";
