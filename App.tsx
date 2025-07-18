@@ -85,11 +85,8 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log("isAuthenticated, registering for push notifications");
-      registerForPushNotificationsAsync();
-    }
-  }, [isAuthenticated]);
+    registerForPushNotificationsAsync();
+  }, []);
 
   if (isLoading) {
     return (
