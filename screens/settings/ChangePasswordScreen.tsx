@@ -117,8 +117,6 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.headerTitle}>Change password</Text>
-
         <View style={styles.contentWrapper}>
           <View style={styles.inputSection}>
             <Text style={styles.sectionLabel}>Current password</Text>
@@ -252,19 +250,11 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 150,
     paddingBottom: 32,
     alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    letterSpacing: 1,
-    alignSelf: "center",
-    marginBottom: 40,
   },
   contentWrapper: {
     flex: 1,
@@ -323,8 +313,8 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: "#e03487",
     borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 48,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -340,7 +330,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-    letterSpacing: 1,
   },
   toast: {
     position: "absolute",

@@ -88,7 +88,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.headerTitle}>Settings</Text>
         <View style={styles.optionsWrapper}>
           {settingsOptions.map((option, idx) => (
             <TouchableOpacity
@@ -145,19 +144,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 18,
     paddingBottom: 32,
     alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    letterSpacing: 1,
-    alignSelf: "center",
-    marginBottom: 36,
   },
   optionsWrapper: {
     backgroundColor: "#1b1c2e",

@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#e03487",
     borderRadius: 8,
     paddingVertical: 10,
-    paddingHorizontal: 28,
+    paddingHorizontal: 16,
     shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 8,
@@ -158,7 +158,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
-    letterSpacing: 1,
   },
   dateDescription: {
     color: "#aeb1c2",

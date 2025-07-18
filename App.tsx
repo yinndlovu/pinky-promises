@@ -155,10 +155,11 @@ function AppContent() {
           component={SettingsScreen}
           options={{
             headerShown: true,
-            title: "",
+            title: "Settings",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
+            headerTitleAlign: "center",
           }}
         />
         <Stack.Screen
@@ -224,11 +225,12 @@ function AppContent() {
           component={ChangeEmailScreen}
           options={{
             headerShown: true,
-            title: "",
+            title: "Change email address",
             headerTransparent: true,
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
+            headerTitleAlign: "center"
           }}
         />
         <Stack.Screen
@@ -248,11 +250,12 @@ function AppContent() {
           component={ChangePasswordScreen}
           options={{
             headerShown: true,
-            title: "",
+            title: "Change password",
             headerTransparent: true,
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
+            headerTitleAlign: "center"
           }}
         />
         <Stack.Screen
@@ -272,10 +275,11 @@ function AppContent() {
           component={SearchScreen}
           options={{
             headerShown: true,
-            title: "",
+            title: "Search",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
+            headerTitleAlign: "center"
           }}
         />
         <Stack.Screen
@@ -294,7 +298,7 @@ function AppContent() {
           component={PendingRequestsScreen}
           options={{
             headerShown: true,
-            title: "",
+            title: "Partner requests",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

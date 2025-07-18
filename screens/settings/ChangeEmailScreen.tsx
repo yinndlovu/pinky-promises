@@ -51,7 +51,6 @@ const ChangeEmailScreen: React.FC<ChangeEmailScreenProps> = ({
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <View style={styles.container}>
-        <Text style={styles.headerTitle}>Change email address</Text>
         <View style={styles.contentWrapper}>
           <View style={styles.currentEmailSection}>
             <Text style={styles.sectionLabel}>Current email address</Text>
@@ -99,20 +98,11 @@ const ChangeEmailScreen: React.FC<ChangeEmailScreenProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     paddingHorizontal: 16,
-    paddingTop: 60,
+    paddingTop: 150,
     justifyContent: "center",
     paddingBottom: 32,
     backgroundColor: "#23243a",
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    letterSpacing: 1,
-    alignSelf: "center",
-    marginBottom: 40,
   },
   contentWrapper: {
     justifyContent: "center",
@@ -174,8 +164,8 @@ const styles = StyleSheet.create({
   saveButton: {
     backgroundColor: "#e03487",
     borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 48,
+    paddingVertical: 12,
+    paddingHorizontal: 26,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -190,7 +180,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
-    letterSpacing: 1,
   },
 });
 

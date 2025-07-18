@@ -22,27 +22,17 @@ import {
 } from "../../services/specialDateService";
 import ConfirmationModal from "../../components/modals/ConfirmationModal";
 import AlertModal from "../../components/modals/AlertModal";
+import {
+  getFavoriteMemoryById,
+  getAllFavoriteMemories,
+  createFavoriteMemory,
+  updateFavoriteMemory,
+  deleteFavoriteMemory,
+} from "../../services/favoriteMemoriesService";
+import UpdateFavoriteMemoryModal from "../../components/modals/UpdateFavoriteMemoryModal";
+import FavoriteMemoryDetailsModal from "../../components/modals/FavoriteMemoryDetailsModal";
 
 type Props = NativeStackScreenProps<any>;
-
-const favoriteMemories = [
-  {
-    id: "1",
-    text: "That time we got lost in the city and ended up finding the most amazing little café. We spent hours talking and laughing, completely forgetting about time. The owner even gave us free dessert because he said we reminded him of when he first met his wife.",
-  },
-  {
-    id: "2",
-    text: "The rainy day when we stayed in bed all day watching movies and ordering takeout. You fell asleep on my shoulder and I didn't want to move for hours, just listening to you breathe.",
-  },
-  {
-    id: "3",
-    text: "Our first road trip together - we drove for hours with no destination, just exploring and stopping wherever looked interesting. We found that beautiful lake and spent the sunset there, it was perfect.",
-  },
-  {
-    id: "4",
-    text: "The night we cooked dinner together and everything went wrong - the pasta was overcooked, the sauce was too spicy, but we laughed so much and ended up ordering pizza. It was still one of the best nights ever.",
-  },
-];
 
 const OursScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
@@ -58,6 +48,16 @@ const OursScreen = ({ navigation }: Props) => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [memories, setMemories] = useState<any[]>([]);
+  const [showAllMemories, setShowAllMemories] = useState(false);
+  const [memoriesLoading, setMemoriesLoading] = useState(false);
+  const [memoryModalVisible, setMemoryModalVisible] = useState(false);
+  const [editingMemory, setEditingMemory] = useState<any | null>(null);
+  const [memoryModalLoading, setMemoryModalLoading] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string>("");
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [detailsMemory, setDetailsMemory] = useState<any>(null);
 
   const fetchNotesPreview = async () => {
     try {
@@ -92,6 +92,24 @@ const OursScreen = ({ navigation }: Props) => {
       setSpecialDates([]);
     } finally {
       setLoadingDates(false);
+    }
+  };
+
+  const fetchMemories = async (all = false) => {
+    setMemoriesLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const data = await getAllFavoriteMemories(token);
+      setMemories(data || []);
+    } catch {
+      setMemories([]);
+    } finally {
+      setMemoriesLoading(false);
     }
   };
 
@@ -168,14 +186,93 @@ const OursScreen = ({ navigation }: Props) => {
     setSelectedDate(null);
     setAlertMessage("Special date deleted");
     setAlertVisible(true);
-    
+
     await fetchSpecialDates();
+  };
+
+  const handleAddMemory = () => {
+    setEditingMemory(null);
+    setMemoryModalVisible(true);
+  };
+
+  const handleEditMemory = (memory: any) => {
+    setEditingMemory(memory);
+    setMemoryModalVisible(true);
+  };
+
+  const handleDeleteMemory = async (memory: any) => {
+    setMemoryModalLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      await deleteFavoriteMemory(token, memory.id);
+      await fetchMemories(showAllMemories);
+    } catch {}
+    setMemoryModalLoading(false);
+  };
+
+  const handleSaveMemory = async (memoryText: string, date: string) => {
+    setMemoryModalLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setAlertMessage("You are not authorized. Try re-logging in.");
+        setAlertVisible(true);
+        setMemoryModalLoading(false);
+        return;
+      }
+
+      if (editingMemory) {
+        await updateFavoriteMemory(token, editingMemory.id, memoryText, date);
+        setAlertMessage("Favorite memory updated");
+      } else {
+        await createFavoriteMemory(token, memoryText, date);
+        setAlertMessage("Favorite memory added");
+      }
+
+      setMemoryModalVisible(false);
+      setAlertVisible(true);
+      await fetchMemories(showAllMemories);
+    } catch (err) {
+      setAlertMessage(
+        "Failed to save memory."
+      );
+      setAlertVisible(true);
+    }
+    setMemoryModalLoading(false);
+  };
+
+  const handleViewMemoryDetails = async (memoryId: string) => {
+    setDetailsLoading(true);
+    setDetailsModalVisible(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const memory = await getFavoriteMemoryById(token, memoryId);
+      setDetailsMemory(memory);
+    } catch (e) {
+      setDetailsMemory(null);
+    }
+    setDetailsLoading(false);
   };
 
   useEffect(() => {
     fetchNotesPreview();
     fetchSpecialDates();
   }, []);
+
+  useEffect(() => {
+    fetchMemories(showAllMemories);
+  }, [showAllMemories]);
 
   {
     deleting && (
@@ -202,9 +299,35 @@ const OursScreen = ({ navigation }: Props) => {
           onAdd={() => setAddModalVisible(true)}
           onLongPressDate={handleLongPressDate}
         />
-        <FavoriteMemories memories={favoriteMemories} onViewAll={() => {}} />
+        {memoriesLoading ? (
+          <ActivityIndicator
+            size="large"
+            color="#e03487"
+            style={{ marginVertical: 24 }}
+          />
+        ) : (
+          <FavoriteMemories
+            memories={memories}
+            currentUserId={currentUserId}
+            onViewAll={() => setShowAllMemories(true)}
+            onViewDetails={handleViewMemoryDetails}
+            onAdd={handleAddMemory}
+            onEdit={handleEditMemory}
+            onDelete={handleDeleteMemory}
+            showAll={showAllMemories}
+          />
+        )}
       </ScrollView>
 
+      <UpdateFavoriteMemoryModal
+        visible={memoryModalVisible}
+        onClose={() => setMemoryModalVisible(false)}
+        onSave={handleSaveMemory}
+        initialMemory={editingMemory?.memory}
+        initialDate={editingMemory?.date}
+        isEditing={!!editingMemory}
+        loading={memoryModalLoading}
+      />
       <UpdateSpecialDateModal
         visible={addModalVisible}
         onClose={() => setAddModalVisible(false)}
@@ -247,6 +370,13 @@ const OursScreen = ({ navigation }: Props) => {
         visible={alertVisible}
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
+      />
+
+      <FavoriteMemoryDetailsModal
+        visible={detailsModalVisible}
+        onClose={() => setDetailsModalVisible(false)}
+        memory={detailsMemory}
+        loading={detailsLoading}
       />
     </View>
   );

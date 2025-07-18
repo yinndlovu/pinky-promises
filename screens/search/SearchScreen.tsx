@@ -40,7 +40,9 @@ export default function SearchScreen({ navigation }: Props) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [profilePictures, setProfilePictures] = useState<ProfilePictureInfo>({});
+  const [profilePictures, setProfilePictures] = useState<ProfilePictureInfo>(
+    {}
+  );
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -55,13 +57,13 @@ export default function SearchScreen({ navigation }: Props) {
       );
       const mime = response.headers["content-type"] || "image/jpeg";
       const base64 = `data:${mime};base64,${encode(response.data)}`;
-      
-      const lastModified = response.headers['last-modified'];
+
+      const lastModified = response.headers["last-modified"];
       const updatedAt = lastModified ? new Date(lastModified) : new Date();
-      
+
       return {
         uri: base64,
-        updatedAt
+        updatedAt,
       };
     } catch {
       return null;
@@ -82,7 +84,7 @@ export default function SearchScreen({ navigation }: Props) {
     }
     setLoading(true);
     setError("");
-    
+
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -107,7 +109,6 @@ export default function SearchScreen({ navigation }: Props) {
     setLoading(false);
   };
 
-
   const handleUserPress = (user: User) => {
     if (user.isUser) {
       showAlert("This is you!");
@@ -120,7 +121,6 @@ export default function SearchScreen({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a", paddingTop: 0 }}>
-      <Text style={styles.headerTitle}>Search</Text>
       <TextInput
         style={{
           backgroundColor: "#1b1c2e",
@@ -130,6 +130,7 @@ export default function SearchScreen({ navigation }: Props) {
           paddingVertical: 12,
           marginHorizontal: 16,
           marginBottom: 12,
+          marginTop: 12,
         }}
         placeholder="Search users..."
         placeholderTextColor="#b0b3c6"
@@ -171,13 +172,4 @@ export default function SearchScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#fff",
-    letterSpacing: 1,
-    alignSelf: "center",
-    paddingBottom: 28,
-  },
-});
+const styles = StyleSheet.create({});

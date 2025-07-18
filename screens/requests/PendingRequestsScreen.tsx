@@ -127,6 +127,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     setProcessingAccept(requestId);
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
         showAlert("Not authenticated");
         return;
@@ -136,11 +137,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
 
-      showAlert("Partner request accepted");
-
-      setTimeout(() => {
-        navigation.replace("PartnerProfile", { userId: senderId });
-      }, 1500);
+      navigation.replace("PartnerProfile", { userId: senderId });
     } catch (error: any) {
       showAlert(error.response?.data?.error || "Failed to accept request");
     } finally {
@@ -222,10 +219,6 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Partner Requests</Text>
-      </View>
-
       <FlatList
         data={requests}
         keyExtractor={(item) => item.id}
@@ -251,17 +244,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#23243a",
-  },
-  header: {
-    paddingBottom: 20,
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#393a4a",
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
   },
   listContainer: {
     padding: 16,
