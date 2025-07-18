@@ -30,10 +30,14 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
   const fetchPartnerStatusAndMood = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       try {
         const statusData = await fetchUserStatus(token, partnerId);
+
         if (statusData && typeof statusData.isAtHome === "boolean") {
           if (statusData.isAtHome) {
             setStatus("home");
@@ -53,6 +57,7 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
 
       try {
         const moodData = await getUserMood(token, partnerId);
+        
         setMood(moodData.mood);
         setMoodDescription(moodData.description);
       } catch (moodErr: any) {

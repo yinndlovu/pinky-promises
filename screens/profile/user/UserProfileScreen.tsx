@@ -122,12 +122,14 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const checkRequestStatus = async (token: string) => {
     try {
       const pendingResponse = await checkPendingRequest(token, userId);
+
       if (pendingResponse.hasPendingRequest) {
         setRequestStatus("pending");
         return;
       }
 
       const incomingResponse = await getIncomingRequest(token, userId);
+
       if (incomingResponse.hasIncomingRequest) {
         setRequestStatus("incoming");
         setIncomingRequestId(incomingResponse.requestId);
@@ -147,8 +149,10 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
   const handlePartnerAction = async () => {
     setSendingRequest(true);
+
     try {
       const token = await AsyncStorage.getItem("token");
+      
       if (!token) {
         showAlert("Not authenticated");
         return;

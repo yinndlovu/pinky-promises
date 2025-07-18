@@ -30,7 +30,9 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
     dateString: string,
     timeInfo?: string
   ): { date: string; timeInfo?: string } => {
-    if (!dateString || dateString === "Not set") return { date: "Not set" };
+    if (!dateString || dateString === "Not set") {
+      return { date: "Not set" };
+    }
 
     try {
       const date = new Date(dateString);
@@ -39,7 +41,9 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
       const year = date.getFullYear();
       const formattedDate = `${day} ${month} ${year}`;
 
-      return { date: formattedDate, timeInfo };
+      return { 
+        date: formattedDate, timeInfo 
+      };
     } catch (error) {
       return { date: dateString };
     }
@@ -48,9 +52,13 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
   const fetchSpecialDates = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const dates = await getSpecialDates(token);
+
       setSpecialDates(dates);
     } catch (error) {
       console.error("Failed to fetch special dates:", error);
@@ -67,7 +75,9 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
     if (anniversary) {
       return formatDisplayDate(anniversary.date, anniversary.togetherFor);
     }
-    return { date: "Not set" };
+    return { 
+      date: "Not set" 
+    };
   };
 
   const getDayMetDisplay = () => {
@@ -78,7 +88,9 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
     if (dayMet) {
       return formatDisplayDate(dayMet.date, dayMet.knownFor);
     }
-    return { date: "Not set" };
+    return { 
+      date: "Not set" 
+    };
   };
 
   const anniversaryDisplay = getAnniversaryDisplay();

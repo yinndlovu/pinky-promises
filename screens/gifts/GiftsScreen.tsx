@@ -61,9 +61,11 @@ const GiftsScreen = () => {
       setError(null);
 
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
         setError("No token found");
         setGift(null);
+
         return;
       }
 
@@ -145,6 +147,7 @@ const GiftsScreen = () => {
       const result = await claimMonthlyGift(token, gift.id);
       setClaimedGift(result.gift);
       setModalVisible(true);
+      
       await fetchGift();
       await fetchPastGifts();
     } catch (err: any) {

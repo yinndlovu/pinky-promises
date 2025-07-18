@@ -62,8 +62,13 @@ const OursScreen = ({ navigation }: Props) => {
   const fetchNotesPreview = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
+
       const notes = await getNotes(token);
+
       setNotesPreview(notes.content || "");
       setNotesUpdatedAt(notes.updatedAt || null);
     } catch {
@@ -124,28 +129,46 @@ const OursScreen = ({ navigation }: Props) => {
     title: string,
     description?: string
   ) => {
-    if (!selectedDate) return;
+    if (!selectedDate) {
+      return;
+    }
+
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+
+    if (!token) {
+      return;
+    }
+
     await updateSpecialDate(token, selectedDate.id, date, title, description);
+
     setEditModalVisible(false);
     setSelectedDate(null);
     setAlertMessage("Special date updated");
     setAlertVisible(true);
+
     await fetchSpecialDates();
   };
 
   const handleDeleteSpecialDate = async () => {
-    if (!selectedDate) return;
+    if (!selectedDate) {
+      return;
+    }
     setDeleting(true);
+
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+
+    if (!token) {
+      return;
+    }
+
     await deleteSpecialDate(token, selectedDate.id);
+
     setDeleting(false);
     setDeleteModalVisible(false);
     setSelectedDate(null);
     setAlertMessage("Special date deleted");
     setAlertVisible(true);
+    
     await fetchSpecialDates();
   };
 

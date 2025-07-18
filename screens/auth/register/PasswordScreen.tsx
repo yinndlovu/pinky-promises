@@ -51,6 +51,7 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
 
   const handleRegister = async () => {
     setLoading(true);
+    
     try {
       const response = await axios.post(`${BASE_URL}/api/auth/register`, {
         name,

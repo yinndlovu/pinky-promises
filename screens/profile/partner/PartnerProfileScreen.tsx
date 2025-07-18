@@ -127,7 +127,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const fetchCurrentUser = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const response = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -140,8 +143,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const fetchPartnerFavorites = async (partnerId: string) => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
+
       const favorites = await getUserFavorites(token, partnerId);
+
       setPartnerFavorites(favorites);
     } catch (err) {
       setPartnerFavorites([]);
@@ -151,8 +159,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const fetchPartnerLoveLanguage = async (partnerId: string) => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
+
       const loveLanguage = await getLoveLanguage(token, partnerId);
+
       setPartnerLoveLanguage(loveLanguage);
     } catch (err) {
       setPartnerLoveLanguage("");
@@ -162,8 +175,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const fetchPartnerAbout = async (partnerId: string) => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
+
       const about = await getAboutUser(token, partnerId);
+
       setPartnerAbout(about);
     } catch (err) {
       setPartnerAbout("");
@@ -175,6 +193,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     try {
       await fetchPartner();
       await fetchCurrentUser();
+
       if (partner?.id) {
         await Promise.all([
           fetchPartnerFavorites(partner.id),
@@ -182,6 +201,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           fetchPartnerAbout(partner.id),
         ]);
       }
+
       setRefreshKey((k) => k + 1);
     } catch (e) {
     } finally {
@@ -193,6 +213,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     setRemovingPartner(true);
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
         throw new Error("No token found");
       }
@@ -244,8 +265,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   React.useEffect(() => {
     (async () => {
       setLoading(true);
+
       await fetchPartner();
       await fetchCurrentUser();
+
       setLoading(false);
     })();
   }, []);

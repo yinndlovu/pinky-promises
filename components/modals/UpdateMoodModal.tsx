@@ -44,7 +44,9 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
 
   React.useEffect(() => {
-    if (visible) setSelectedMood(initialMood);
+    if (visible) {
+      setSelectedMood(initialMood);
+    }
   }, [visible, initialMood]);
 
   const data = MOOD_OPTIONS.map((mood) => ({
@@ -56,6 +58,7 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
     setLoading(true);
     try {
       await onSave(selectedMood);
+      
       setAlertMessage("Mood updated!");
       setAlertVisible(true);
     } catch (err) {

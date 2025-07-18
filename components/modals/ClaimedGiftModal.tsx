@@ -22,6 +22,7 @@ const ClaimedGiftModal: React.FC<ClaimedGiftModalProps> = ({
 
   const handleCopy = async () => {
     await Clipboard.setStringAsync(value);
+    
     setShowToast(true);
     setTimeout(() => setShowToast(false), 1800);
   };
@@ -32,7 +33,7 @@ const ClaimedGiftModal: React.FC<ClaimedGiftModalProps> = ({
         <View style={styles.content}>
           {showToast && (
             <View style={styles.toast}>
-              <Text style={styles.toastText}>Copied!</Text>
+              <Text style={styles.toastText}>Copied</Text>
             </View>
           )}
           <MaterialCommunityIcons
@@ -52,7 +53,7 @@ const ClaimedGiftModal: React.FC<ClaimedGiftModalProps> = ({
           </TouchableOpacity>
           <Text style={styles.message}>{message}</Text>
           <TouchableOpacity style={styles.okButton} onPress={onClose}>
-            <Text style={styles.okButtonText}>OK</Text>
+            <Text style={styles.okButtonText}>Yay</Text>
           </TouchableOpacity>
         </View>
       </View>

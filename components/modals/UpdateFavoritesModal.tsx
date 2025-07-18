@@ -37,7 +37,9 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
-    if (visible) setFavorites(initialFavorites || {});
+    if (visible) {
+      setFavorites(initialFavorites || {});
+    }
   }, [visible, initialFavorites]);
 
   const handleChange = (key: string, value: string) => {
@@ -48,7 +50,7 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
     setLoading(true);
     try {
       await onSave(favorites);
-      setAlertMessage("Favorites updated!");
+      setAlertMessage("Favorites updated");
       setAlertVisible(true);
     } catch (err) {
       setAlertMessage("Failed to update favorites");
@@ -62,7 +64,7 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
     <Modal visible={visible} animationType="slide" transparent>
       <View style={styles.overlay}>
         <View style={styles.content}>
-          <Text style={styles.title}>Update Favorites</Text>
+          <Text style={styles.title}>Update your favorites</Text>
           <ScrollView style={{ width: "100%" }} contentContainerStyle={{ paddingBottom: 16 }}>
             {FAVORITE_FIELDS.map((field) => (
               <View key={field.key} style={styles.inputGroup}>
@@ -95,7 +97,7 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
             message={alertMessage}
             onClose={() => {
               setAlertVisible(false);
-              if (alertMessage === "Favorites updated!") onClose();
+              if (alertMessage === "Favorites updated") onClose();
             }}
           />
         </View>

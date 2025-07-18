@@ -69,7 +69,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }, []);
 
   const handleAction = () => {
-    // Do something with the action (e.g., show a toast, send to backend, etc.)
     setActionsModalVisible(false);
   };
 
@@ -158,10 +157,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const checkAndUpdateHomeStatus = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const home = await getHomeLocation(token);
-      if (!home) return;
+
+      if (!home) {
+        return;
+      }
 
       const { coords } = await Location.getCurrentPositionAsync({});
       const distance = getDistance(
@@ -179,7 +184,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const fetchUpcomingSpecialDate = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const upcoming = await getUpcomingSpecialDate(token);
       setUpcomingDate(upcoming);
@@ -189,16 +197,33 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const formatTimeLeft = (daysUntil: number): string => {
-    if (daysUntil === 0) return "Today";
-    if (daysUntil === 1) return "1 day left";
-    if (daysUntil < 30) return `${daysUntil} days left`;
+    if (daysUntil === 0) {
+      return "Today";
+    }
+
+    if (daysUntil === 1) {
+      return "1 day left";
+    }
+
+    if (daysUntil < 30) {
+      return `${daysUntil} days left`;
+    }
 
     const months = Math.floor(daysUntil / 30);
     const remainingDays = daysUntil % 30;
 
-    if (months === 1 && remainingDays === 0) return "1 month left";
-    if (months === 1) return `1 month ${remainingDays} days left`;
-    if (remainingDays === 0) return `${months} months left`;
+    if (months === 1 && remainingDays === 0) {
+      return "1 month left";
+    }
+
+    if (months === 1) {
+      return `1 month ${remainingDays} days left`;
+    }
+
+    if (remainingDays === 0) {
+      return `${months} months left`;
+    }
+
     return `${months} months ${remainingDays} days left`;
   };
 
@@ -208,6 +233,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const day = date.getDate();
       const month = date.toLocaleDateString("en-US", { month: "short" });
       const year = date.getFullYear();
+
       return `${day} ${month} ${year}`;
     } catch (error) {
       return dateString;
@@ -215,14 +241,20 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const fetchPartnerStatusAndMood = async () => {
-    if (!partner?.id) return;
+    if (!partner?.id) {
+      return;
+    }
 
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       try {
         const statusData = await fetchUserStatus(token, partner.id);
+
         if (statusData && typeof statusData.isAtHome === "boolean") {
           if (statusData.isAtHome) {
             setPartnerStatus("home");
@@ -254,7 +286,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const fetchRecentActivities = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const activitiesData = await getRecentActivities(token);
 
@@ -277,6 +312,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const day = date.getDate();
       const month = date.toLocaleDateString("en-US", { month: "short" });
       const year = date.getFullYear();
+
       return `${day} ${month} ${year}`;
     } catch (error) {
       return "Unknown date";
@@ -286,6 +322,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const formatActivityTime = (dateString: string): string => {
     try {
       const date = new Date(dateString);
+      
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",

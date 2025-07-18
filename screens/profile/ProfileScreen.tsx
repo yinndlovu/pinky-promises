@@ -154,9 +154,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const fetchLoveLanguage = async () => {
     const token = await AsyncStorage.getItem("token");
     const userId = user?.id;
-    if (!token || !userId) return;
+
+    if (!token || !userId) {
+      return;
+    }
+
     try {
       const ll = await getLoveLanguage(token, userId);
+
       setLoveLanguage(ll);
     } catch {
       setLoveLanguage("");
@@ -166,6 +171,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const getStatus = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
+      
       if (!token || !user?.id) {
         setHomeStatus("unavailable");
         setStatusDescription(
