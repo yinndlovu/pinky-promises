@@ -31,20 +31,22 @@ import PendingRequestsScreen from "./screens/requests/PendingRequestsScreen";
 import NotesScreen from "./screens/ours/NotesScreen";
 import { useEffect } from "react";
 import { registerForPushNotificationsAsync } from "./utils/notifications";
+import { NotificationProvider } from "./contexts/NotificationContext";
+import { useNotification } from "./contexts/NotificationContext";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 async function startBackgroundLocation() {
   const { status } = await Location.requestForegroundPermissionsAsync();
-  
+
   if (status !== "granted") {
     return;
   }
 
   const { status: bgStatus } =
     await Location.requestBackgroundPermissionsAsync();
-  
+
   if (bgStatus !== "granted") {
     return;
   }
@@ -318,9 +320,11 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <NotificationProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </NotificationProvider>
   );
 }
 
