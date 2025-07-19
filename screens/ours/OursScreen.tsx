@@ -4,7 +4,9 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import NotesCanvas from "./NotesCanvas";
 import SpecialDates from "./SpecialDates";
@@ -31,11 +33,18 @@ import {
 } from "../../services/favoriteMemoriesService";
 import UpdateFavoriteMemoryModal from "../../components/modals/UpdateFavoriteMemoryModal";
 import FavoriteMemoryDetailsModal from "../../components/modals/FavoriteMemoryDetailsModal";
+import { useAuth } from "../../contexts/AuthContext";
+import { Feather } from "@expo/vector-icons";
 
 type Props = NativeStackScreenProps<any>;
 
 const OursScreen = ({ navigation }: Props) => {
+  const HEADER_HEIGHT = 60;
+
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
+
   const [notesPreview, setNotesPreview] = useState<string>("");
   const [notesUpdatedAt, setNotesUpdatedAt] = useState<string | null>(null);
   const [specialDates, setSpecialDates] = useState<any[]>([]);
@@ -54,10 +63,20 @@ const OursScreen = ({ navigation }: Props) => {
   const [memoryModalVisible, setMemoryModalVisible] = useState(false);
   const [editingMemory, setEditingMemory] = useState<any | null>(null);
   const [memoryModalLoading, setMemoryModalLoading] = useState(false);
-  const [currentUserId, setCurrentUserId] = useState<string>("");
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      fetchNotesPreview(),
+      fetchSpecialDates(),
+      fetchMemories(showAllMemories),
+    ]);
+    setRefreshing(false);
+  };
 
   const fetchNotesPreview = async () => {
     try {
@@ -239,9 +258,7 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertVisible(true);
       await fetchMemories(showAllMemories);
     } catch (err) {
-      setAlertMessage(
-        "Failed to save memory."
-      );
+      setAlertMessage("Failed to save memory.");
       setAlertVisible(true);
     }
     setMemoryModalLoading(false);
@@ -284,11 +301,59 @@ const OursScreen = ({ navigation }: Props) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <View
+        style={{
+          backgroundColor: "#23243a",
+          paddingTop: insets.top,
+          height: HEADER_HEIGHT + insets.top,
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            color: "#fff",
+            letterSpacing: 0,
+            fontWeight: "bold",
+          }}
+        >
+          Ours
+        </Text>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            right: 18,
+            zIndex: 10,
+            backgroundColor: "#2d2e4a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 2,
+          }}
+          onPress={() => navigation.navigate("ChatScreen")}
+        >
+          <Feather name="message-circle" size={22} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#e03487"
+            colors={["#e03487"]}
+            progressBackgroundColor="#23243a"
+          />
+        }
       >
-        <Text style={styles.headerTitle}>Ours</Text>
         <NotesCanvas
           preview={notesPreview}
           updatedAt={notesUpdatedAt}
@@ -328,6 +393,7 @@ const OursScreen = ({ navigation }: Props) => {
         isEditing={!!editingMemory}
         loading={memoryModalLoading}
       />
+
       <UpdateSpecialDateModal
         visible={addModalVisible}
         onClose={() => setAddModalVisible(false)}

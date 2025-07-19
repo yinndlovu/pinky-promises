@@ -1,5 +1,12 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  TouchableWithoutFeedback,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 type Props = {
@@ -16,12 +23,16 @@ type Props = {
 };
 
 const formatDate = (dateStr?: string) => {
-  if (!dateStr) return "";
+  if (!dateStr) {
+    return "";
+  }
+
   const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
     month: "short",
-    day: "numeric",
+    year: "numeric",
   });
 };
 
@@ -32,45 +43,50 @@ const FavoriteMemoryDetailsModal: React.FC<Props> = ({
   loading = false,
 }) => (
   <Modal visible={visible} transparent animationType="fade">
-    <View style={styles.overlay}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Favorite Memory Details</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Feather name="x" size={24} color="#fff" />
-          </TouchableOpacity>
+    <TouchableWithoutFeedback onPress={onClose}>
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Favorite memory</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Feather name="x" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          {loading ? (
+            <Text style={styles.loadingText}>Loading...</Text>
+          ) : memory ? (
+            <>
+              {/* Date at the top */}
+              <Text style={styles.memoryDateText}>
+                this happened on {formatDate(memory.date)}
+              </Text>
+
+              {/* Memory text */}
+              <Text style={styles.memoryText}>{memory.memory}</Text>
+
+              {/* Author below memory text */}
+              <Text style={styles.memoryAuthorText}>
+                {memory.author
+                  ? `${memory.author} wrote this`
+                  : "Unknown author"}
+              </Text>
+
+              {/* Created and updated at the bottom, side by side */}
+              <View style={styles.bottomRow}>
+                <Text style={styles.bottomMeta}>
+                  Created: {formatDate(memory.createdAt)}
+                </Text>
+                <Text style={styles.bottomMeta}>
+                  Last updated: {formatDate(memory.updatedAt)}
+                </Text>
+              </View>
+            </>
+          ) : (
+            <Text style={styles.loadingText}>No memory found.</Text>
+          )}
         </View>
-        {loading ? (
-          <Text style={styles.loadingText}>Loading...</Text>
-        ) : memory ? (
-          <>
-            <Text style={styles.memoryText}>{memory.memory}</Text>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>By:</Text>
-              <Text style={styles.metaValue}>{memory.author || "Unknown"}</Text>
-            </View>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Memory Date:</Text>
-              <Text style={styles.metaValue}>{formatDate(memory.date)}</Text>
-            </View>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Created:</Text>
-              <Text style={styles.metaValue}>
-                {formatDate(memory.createdAt)}
-              </Text>
-            </View>
-            <View style={styles.metaRow}>
-              <Text style={styles.metaLabel}>Last Updated:</Text>
-              <Text style={styles.metaValue}>
-                {formatDate(memory.updatedAt)}
-              </Text>
-            </View>
-          </>
-        ) : (
-          <Text style={styles.loadingText}>No memory found.</Text>
-        )}
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   </Modal>
 );
 
@@ -109,11 +125,36 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     padding: 4,
   },
+  memoryDateText: {
+    color: "#b0b3c6",
+    fontSize: 13,
+    textAlign: "center",
+    marginBottom: 14,
+  },
   memoryText: {
     color: "#fff",
     fontSize: 16,
     marginBottom: 18,
     lineHeight: 22,
+    textAlign: "center",
+  },
+  memoryAuthorText: {
+    color: "#b0b3c6",
+    fontSize: 13,
+    textAlign: "center",
+    marginBottom: 18,
+  },
+  bottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+    gap: 8,
+  },
+  bottomMeta: {
+    color: "#7c7e8a",
+    fontSize: 12,
+    flex: 1,
+    textAlign: "center",
   },
   metaRow: {
     flexDirection: "row",

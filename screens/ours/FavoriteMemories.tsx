@@ -66,6 +66,20 @@ const FavoriteMemories: React.FC<Props> = ({
     setSelectedMemory(null);
   };
 
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) {
+      return "";
+    }
+
+    const date = new Date(dateStr);
+
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
@@ -98,7 +112,7 @@ const FavoriteMemories: React.FC<Props> = ({
                   <Text style={styles.metaText}>
                     {item.author ? `By ${item.author}` : "By Unknown"}
                   </Text>
-                  <Text style={styles.metaText}>{item.date}</Text>
+                  <Text style={styles.metaText}>{formatDate(item.date)}</Text>
                 </View>
               </TouchableOpacity>
             )}
