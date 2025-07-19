@@ -33,6 +33,7 @@ import { useEffect } from "react";
 import { registerForPushNotificationsAsync } from "./utils/notifications";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { useNotification } from "./contexts/NotificationContext";
+import ChatScreen from "./screens/chat/ChatScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -230,7 +231,7 @@ function AppContent() {
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
-            headerTitleAlign: "center"
+            headerTitleAlign: "center",
           }}
         />
         <Stack.Screen
@@ -255,7 +256,7 @@ function AppContent() {
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
-            headerTitleAlign: "center"
+            headerTitleAlign: "center",
           }}
         />
         <Stack.Screen
@@ -279,7 +280,7 @@ function AppContent() {
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
-            headerTitleAlign: "center"
+            headerTitleAlign: "center",
           }}
         />
         <Stack.Screen
@@ -314,6 +315,18 @@ function AppContent() {
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="ChatScreen"
+          component={ChatScreen}
+          options={{
+            headerShown: true,
+            title: "Lily",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
           }}
         />
       </Stack.Navigator>
