@@ -27,6 +27,8 @@ import { RefreshControl } from "react-native";
 
 const GiftsScreen = () => {
   const insets = useSafeAreaInsets();
+  const HEADER_HEIGHT = 60;
+
   const [gift, setGift] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +149,7 @@ const GiftsScreen = () => {
       const result = await claimMonthlyGift(token, gift.id);
       setClaimedGift(result.gift);
       setModalVisible(true);
-      
+
       await fetchGift();
       await fetchPastGifts();
     } catch (err: any) {
@@ -200,6 +202,27 @@ const GiftsScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <View
+        style={{
+          backgroundColor: "#23243a",
+          paddingTop: insets.top,
+          height: HEADER_HEIGHT + insets.top,
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            color: "#fff",
+            letterSpacing: 0,
+          }}
+        >
+          Presents
+        </Text>
+      </View>
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
@@ -213,7 +236,6 @@ const GiftsScreen = () => {
           />
         }
       >
-        <Text style={styles.headerTitle}>Presents</Text>
         <SetMonthlyGift
           giftName={setMonthlyGift || "No present set"}
           onChange={() => setMonthlyGiftModalVisible(true)}
@@ -288,14 +310,6 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
-  },
-  headerTitle: {
-    fontSize: 20,
-    color: "#fff",
-    letterSpacing: 0,
-    alignSelf: "center",
-    marginBottom: 36,
-    paddingTop: 20,
   },
 });
 

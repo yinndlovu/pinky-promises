@@ -64,6 +64,8 @@ type FavoritesType = {
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const HEADER_HEIGHT = 60;
+
   const [user, setUser] = React.useState<any>(null);
   const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
@@ -171,7 +173,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const getStatus = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      
+
       if (!token || !user?.id) {
         setHomeStatus("unavailable");
         setStatusDescription(
@@ -569,6 +571,81 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <View
+        style={{
+          backgroundColor: "#23243a",
+          paddingTop: insets.top,
+          height: HEADER_HEIGHT + insets.top,
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            color: "#fff",
+            letterSpacing: 0,
+          }}
+        >
+          Profile
+        </Text>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            left: 18,
+            zIndex: 10,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }}
+          onPress={() => navigation.navigate("PendingRequests")}
+        >
+          <Feather name="users" size={22} color="#fff" />
+          {pendingRequestsCount > 0 && (
+            <View
+              style={{
+                position: "absolute",
+                top: -4,
+                right: -4,
+                backgroundColor: "#e03487",
+                borderRadius: 10,
+                paddingHorizontal: 5,
+                paddingVertical: 1,
+                minWidth: 20,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "bold" }}>
+                {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            right: 18,
+            zIndex: 10,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }}
+          onPress={() => navigation.navigate("Settings")}
+        >
+          <Feather name="settings" size={22} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <ScrollView
         refreshControl={
           <RefreshControl
@@ -582,10 +659,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
-        </View>
-
         <View style={styles.profileRow}>
           <TouchableOpacity
             style={styles.avatarWrapper}
@@ -809,17 +882,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#23243a",
     alignItems: "center",
     justifyContent: "center",
-  },
-  header: {
-    width: "100%",
-    alignItems: "center",
-    marginBottom: 36,
-  },
-  headerTitle: {
-    fontSize: 20,
-    color: "#fff",
-    letterSpacing: 0,
-    paddingTop: 20,
   },
   profileRow: {
     flexDirection: "row",

@@ -317,7 +317,6 @@ const OursScreen = ({ navigation }: Props) => {
             fontSize: 20,
             color: "#fff",
             letterSpacing: 0,
-            fontWeight: "bold",
           }}
         >
           Ours
@@ -328,13 +327,12 @@ const OursScreen = ({ navigation }: Props) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             right: 18,
             zIndex: 10,
-            backgroundColor: "#2d2e4a",
+            backgroundColor: "#23243a",
             borderRadius: 20,
             padding: 8,
             shadowColor: "#000",
             shadowOpacity: 0.1,
             shadowRadius: 4,
-            elevation: 2,
           }}
           onPress={() => navigation.navigate("ChatScreen")}
         >
@@ -451,19 +449,10 @@ const OursScreen = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
-    paddingTop: 20,
     paddingBottom: 32,
     alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
-  },
-  headerTitle: {
-    fontSize: 20,
-    color: "#fff",
-    paddingTop: 20,
-    letterSpacing: 0,
-    alignSelf: "center",
-    marginBottom: 26,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

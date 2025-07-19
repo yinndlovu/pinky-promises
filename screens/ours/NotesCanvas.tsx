@@ -42,7 +42,7 @@ const NotesCanvas: React.FC<Props> = ({ onView, preview, updatedAt }) => (
     <Text style={styles.placeholderText}>
         {preview && preview.trim().length > 0
           ? (preview.length > 120 ? preview.slice(0, 120) + "..." : preview)
-          : "This is your shared canvas for notes, doodles, or memories."}
+          : "This is your shared canvas for notes or memories."}
       </Text>
       {updatedAt && (
         <Text style={styles.updatedAt}>
@@ -63,13 +63,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 10,
-    marginTop: 8,
   },
   sectionTitle: {
     fontSize: 18,
     color: "#b0b3c6",
     fontWeight: "bold",
-    letterSpacing: 1,
+    letterSpacing: 0,
     marginLeft: 12,
   },
   viewButton: {

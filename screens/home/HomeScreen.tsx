@@ -35,6 +35,8 @@ type Props = NativeStackScreenProps<any>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const HEADER_HEIGHT = 60;
+
   const [partner, setPartner] = React.useState<any>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
@@ -144,9 +146,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <Image
         source={
-          avatarUri
-            ? avatarUri
-            : require("../../assets/default-avatar-two.png")
+          avatarUri ? avatarUri : require("../../assets/default-avatar-two.png")
         }
         style={styles.avatar}
         contentFit="cover"
@@ -322,7 +322,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const formatActivityTime = (dateString: string): string => {
     try {
       const date = new Date(dateString);
-      
+
       return date.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
@@ -374,35 +374,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     fetchRecentActivities();
   }, []);
 
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Search")}
-          style={{ marginLeft: 20 }}
-        >
-          <Feather name="search" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Settings")}
-          style={{ marginRight: 20 }}
-        >
-          <Feather name="settings" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-      headerShown: true,
-      title: "",
-      headerTransparent: true,
-      headerTintColor: "#fff",
-      headerStyle: {
-        backgroundColor: "transparent",
-      },
-      headerShadowVisible: false,
-    });
-  }, [navigation]);
-
   if (loading) {
     return (
       <View style={styles.centered}>
@@ -439,6 +410,61 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <View
+        style={{
+          backgroundColor: "#23243a",
+          paddingTop: insets.top,
+          height: HEADER_HEIGHT + insets.top,
+          justifyContent: "center",
+          alignItems: "center",
+          position: "relative",
+          zIndex: 2,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            color: "#fff",
+            letterSpacing: 0,
+          }}
+        >
+          Overview
+        </Text>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            left: 18,
+            zIndex: 10,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }}
+          onPress={() => navigation.navigate("Search")}
+        >
+          <Feather name="search" size={22} color="#fff" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            right: 18,
+            zIndex: 10,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }}
+          onPress={() => navigation.navigate("Settings")}
+        >
+          <Feather name="settings" size={22} color="#fff" />
+        </TouchableOpacity>
+      </View>
       <ScrollView
         refreshControl={
           <RefreshControl
@@ -449,14 +475,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             progressBackgroundColor="#23243a"
           />
         }
-        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
+        contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View
-          entering={FadeIn.duration(300)}
-          exiting={FadeOut.duration(300)}
-        >
-          <Text style={styles.headerTitle}>Overview</Text>
           <Text style={styles.partnerLabel}>PARTNER</Text>
           <TouchableOpacity
             activeOpacity={0.8}
@@ -470,9 +491,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               ]}
             >
               <View style={styles.profileRow}>
-                <View style={styles.avatarWrapper}>
-                  {renderPartnerImage()}
-                </View>
+                <View style={styles.avatarWrapper}>{renderPartnerImage()}</View>
                 <View style={styles.infoWrapper}>
                   <Text style={styles.name}>
                     {partner?.name || "No partner"}
@@ -543,7 +562,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           )}
           <RecentActivity activities={activities} />
-        </Animated.View>
       </ScrollView>
       {showError && (
         <View style={styles.toast}>
@@ -566,20 +584,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  headerTitle: {
-    fontSize: 20,
-    paddingTop: 20,
-    color: "#fff",
-    letterSpacing: 0,
-    alignSelf: "center",
-  },
   partnerLabel: {
     fontSize: 14,
     color: "#b0b3c6",
     letterSpacing: 1,
     textTransform: "uppercase",
     marginLeft: 16,
-    marginTop: 36,
+    marginTop: 20,
     marginBottom: 10,
     alignSelf: "flex-start",
   },
