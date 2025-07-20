@@ -1,7 +1,9 @@
+// external
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
+// types
 type PastGift = {
   id: string;
   giftName: string;

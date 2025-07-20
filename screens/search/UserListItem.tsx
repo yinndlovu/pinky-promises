@@ -1,8 +1,12 @@
+// external
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Image } from 'expo-image';
+
+// internal
 import { buildCachedImageUrl } from '../../utils/imageCacheUtils';
 
+// types
 type User = {
   id: string;
   name: string;
@@ -26,6 +30,8 @@ export default function UserListItem({
   profilePicture,
   onPress,
 }: UserListItemProps) {
+
+  // render user profile picture
   const renderProfileImage = () => {
     if (profilePicture) {
       const cachedImageUrl = buildCachedImageUrl(user.id, profilePicture.updatedAt);

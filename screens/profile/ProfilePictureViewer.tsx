@@ -1,3 +1,4 @@
+// external
 import React from "react";
 import {
   View,
@@ -9,6 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 
+// types
 type Props = {
   visible: boolean;
   imageUri: string | null;

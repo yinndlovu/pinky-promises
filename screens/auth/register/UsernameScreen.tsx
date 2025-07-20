@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
@@ -9,6 +10,8 @@ import {
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
+
+// internal
 import { BASE_URL } from "../../../configuration/config";
 
 type Props = NativeStackScreenProps<any>;
@@ -16,13 +19,19 @@ type Props = NativeStackScreenProps<any>;
 const usernameRegex = /^[a-zA-Z0-9_-]+$/;
 
 const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
+  // variables
   const { name } = route.params || {};
+
+  // use states
   const [username, setUsername] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
+
+  // use refs
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
+  // use effects
   useEffect(() => {
     if (
       !username ||
@@ -74,6 +83,7 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
     };
   }, [username]);
 
+  // handlers
   const handleNext = () => {
     const trimmedUsername = username.trim();
 

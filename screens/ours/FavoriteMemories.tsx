@@ -1,3 +1,4 @@
+// external
 import React, { useState } from "react";
 import {
   View,
@@ -6,8 +7,11 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+
+// screen content
 import ConfirmationModal from "../../components/modals/ConfirmationModal";
 
+// types
 type Memory = {
   id: string;
   memory: string;
@@ -37,10 +41,14 @@ const FavoriteMemories: React.FC<Props> = ({
   onDelete,
   showAll = false,
 }) => {
+  // variables
   const displayMemories = showAll ? memories : memories.slice(0, 5);
+
+  // use states
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);
 
+  // handlers
   const handleLongPress = (item: Memory) => {
     if (item.userId === currentUserId) {
       setSelectedMemory(item);
@@ -66,6 +74,7 @@ const FavoriteMemories: React.FC<Props> = ({
     setSelectedMemory(null);
   };
 
+  // helpers
   const formatDate = (dateStr?: string) => {
     if (!dateStr) {
       return "";

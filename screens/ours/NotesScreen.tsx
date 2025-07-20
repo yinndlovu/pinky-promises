@@ -1,3 +1,4 @@
+// external
 import React, { useEffect, useState, useRef } from "react";
 import {
   View,
@@ -7,18 +8,25 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getNotes, updateNotes } from "../../services/notesService";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
+// internal
+import { getNotes, updateNotes } from "../../services/notesService";
+
+// variables
 const AUTO_SAVE_DELAY = 1000;
 
 const NotesScreen: React.FC = () => {
+  // use states
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // use refs
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // use effects
   useEffect(() => {
     const fetchNotes = async () => {
       setLoading(true);

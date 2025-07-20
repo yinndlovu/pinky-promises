@@ -1,7 +1,9 @@
+// external
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
+// types
 type Props = NativeStackScreenProps<any>;
 
 const WelcomeScreen: React.FC<Props> = ({ navigation }) => {

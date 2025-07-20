@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -10,6 +11,8 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { Feather } from "@expo/vector-icons";
+
+// internal
 import { BASE_URL } from "../../../configuration/config";
 import { useAuth } from "../../../contexts/AuthContext";
 
@@ -26,6 +29,7 @@ const validateNewPassword = (password: string) => ({
 type Props = NativeStackScreenProps<any>;
 
 const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
+  // use states
   const { name, username } = route.params || {};
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,7 +39,6 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
   const [checking, setChecking] = useState(false);
   const [valid, setValid] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
-
   const [newPasswordValid, setNewPasswordValid] = useState({
     length: false,
     letter: false,
@@ -43,12 +46,15 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
     special: false,
   });
 
+  // variables
   const { login } = useAuth();
 
+  // use effects
   useEffect(() => {
     setNewPasswordValid(validateNewPassword(password));
   }, [password, confirmPassword]);
 
+  // handlers
   const handleRegister = async () => {
     setLoading(true);
     

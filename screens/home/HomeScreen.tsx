@@ -1,4 +1,5 @@
-import React, { useLayoutEffect } from "react";
+// external
+import React, { useState, useEffect, useCallback } from "react";
 import {
   ScrollView,
   View,
@@ -6,54 +7,62 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import axios from "axios";
-import { BASE_URL } from "../../configuration/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { encode } from "base64-arraybuffer";
-import RecentActivity from "./RecentActivity";
 import * as Location from "expo-location";
+import { useFocusEffect } from "@react-navigation/native";
+import { Image } from "expo-image";
+
+// internal
+import { BASE_URL } from "../../configuration/config";
 import { getHomeLocation } from "../../services/homeLocationService";
 import { updateUserStatus } from "../../services/userStatusService";
 import { getDistance } from "../../utils/locationUtils";
-import { useFocusEffect } from "@react-navigation/native";
 import { fetchUserStatus } from "../../services/userStatusService";
 import { getUserMood } from "../../services/moodService";
 import { getUpcomingSpecialDate } from "../../services/specialDateService";
 import { getRecentActivities } from "../../services/recentActivityService";
-import { RefreshControl } from "react-native";
-import ActionsModal from "../../components/modals/ActionsModal";
-import { Image } from "expo-image";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 
+// screen content
+import RecentActivity from "./RecentActivity";
+import ActionsModal from "../../components/modals/ActionsModal";
+
+// types
 type Props = NativeStackScreenProps<any>;
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
+  // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
 
-  const [partner, setPartner] = React.useState<any>(null);
-  const [error, setError] = React.useState<string | null>(null);
-  const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] =
-    React.useState<Date | null>(null);
-  const [showError, setShowError] = React.useState(false);
-  const [isActive, setIsActive] = React.useState(true);
-  const [loading, setLoading] = React.useState(true);
-  const [partnerStatus, setPartnerStatus] = React.useState<
+  // use states
+  const [partner, setPartner] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
+    null
+  );
+  const [showError, setShowError] = useState(false);
+  const [isActive, setIsActive] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [partnerStatus, setPartnerStatus] = useState<
     "home" | "away" | "unavailable"
   >("unavailable");
-  const [partnerMood, setPartnerMood] = React.useState<string>("No mood");
-  const [upcomingDate, setUpcomingDate] = React.useState<any>(null);
-  const [activities, setActivities] = React.useState<any[]>([]);
-  const [refreshing, setRefreshing] = React.useState(false);
-  const [actionsModalVisible, setActionsModalVisible] = React.useState(false);
+  const [partnerMood, setPartnerMood] = useState<string>("No mood");
+  const [upcomingDate, setUpcomingDate] = useState<any>(null);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [actionsModalVisible, setActionsModalVisible] = useState(false);
 
+  // refresh screen
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     try {
@@ -70,10 +79,39 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   }, []);
 
+  // handlers
   const handleAction = () => {
     setActionsModalVisible(false);
   };
 
+  const checkAndUpdateHomeStatus = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const home = await getHomeLocation(token);
+
+      if (!home) {
+        return;
+      }
+
+      const { coords } = await Location.getCurrentPositionAsync({});
+      const distance = getDistance(
+        coords.latitude,
+        coords.longitude,
+        home.latitude,
+        home.longitude
+      );
+      const isAtHome = distance < 100;
+
+      await updateUserStatus(token, isAtHome);
+    } catch (err) {}
+  };
+
+  // fetch functions
   const fetchPartner = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -127,60 +165,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const renderPartnerImage = () => {
-    if (avatarUri && profilePicUpdatedAt && partner) {
-      const cachedImageUrl = buildCachedImageUrl(
-        partner.id,
-        profilePicUpdatedAt
-      );
-      return (
-        <Image
-          source={cachedImageUrl}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri ? avatarUri : require("../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
-  };
-
-  const checkAndUpdateHomeStatus = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const home = await getHomeLocation(token);
-
-      if (!home) {
-        return;
-      }
-
-      const { coords } = await Location.getCurrentPositionAsync({});
-      const distance = getDistance(
-        coords.latitude,
-        coords.longitude,
-        home.latitude,
-        home.longitude
-      );
-      const isAtHome = distance < 100;
-
-      await updateUserStatus(token, isAtHome);
-    } catch (err) {}
-  };
-
   const fetchUpcomingSpecialDate = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -193,50 +177,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       setUpcomingDate(upcoming);
     } catch (error: any) {
       setUpcomingDate(null);
-    }
-  };
-
-  const formatTimeLeft = (daysUntil: number): string => {
-    if (daysUntil === 0) {
-      return "Today";
-    }
-
-    if (daysUntil === 1) {
-      return "1 day left";
-    }
-
-    if (daysUntil < 30) {
-      return `${daysUntil} days left`;
-    }
-
-    const months = Math.floor(daysUntil / 30);
-    const remainingDays = daysUntil % 30;
-
-    if (months === 1 && remainingDays === 0) {
-      return "1 month left";
-    }
-
-    if (months === 1) {
-      return `1 month ${remainingDays} days left`;
-    }
-
-    if (remainingDays === 0) {
-      return `${months} months left`;
-    }
-
-    return `${months} months ${remainingDays} days left`;
-  };
-
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      const day = date.getDate();
-      const month = date.toLocaleDateString("en-US", { month: "short" });
-      const year = date.getFullYear();
-
-      return `${day} ${month} ${year}`;
-    } catch (error) {
-      return dateString;
     }
   };
 
@@ -306,6 +246,78 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  // helpers
+  const renderPartnerImage = () => {
+    if (avatarUri && profilePicUpdatedAt && partner) {
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id,
+        profilePicUpdatedAt
+      );
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={
+          avatarUri ? avatarUri : require("../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        contentFit="cover"
+      />
+    );
+  };
+
+  const formatTimeLeft = (daysUntil: number): string => {
+    if (daysUntil === 0) {
+      return "Today";
+    }
+
+    if (daysUntil === 1) {
+      return "1 day left";
+    }
+
+    if (daysUntil < 30) {
+      return `${daysUntil} days left`;
+    }
+
+    const months = Math.floor(daysUntil / 30);
+    const remainingDays = daysUntil % 30;
+
+    if (months === 1 && remainingDays === 0) {
+      return "1 month left";
+    }
+
+    if (months === 1) {
+      return `1 month ${remainingDays} days left`;
+    }
+
+    if (remainingDays === 0) {
+      return `${months} months left`;
+    }
+
+    return `${months} months ${remainingDays} days left`;
+  };
+
+  const formatDate = (dateString: string): string => {
+    try {
+      const date = new Date(dateString);
+      const day = date.getDate();
+      const month = date.toLocaleDateString("en-US", { month: "short" });
+      const year = date.getFullYear();
+
+      return `${day} ${month} ${year}`;
+    } catch (error) {
+      return dateString;
+    }
+  };
+
   const formatActivityDate = (dateString: string): string => {
     try {
       const date = new Date(dateString);
@@ -333,55 +345,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  React.useEffect(() => {
-    if (partner?.id) {
-      fetchPartnerStatusAndMood();
-    }
-  }, [partner]);
-
-  React.useEffect(() => {
-    checkAndUpdateHomeStatus();
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      checkAndUpdateHomeStatus();
-      const interval = setInterval(checkAndUpdateHomeStatus, 15 * 60 * 1000);
-      return () => clearInterval(interval);
-    }, [])
-  );
-
-  React.useEffect(() => {
-    if (error) {
-      setShowError(true);
-      const timer = setTimeout(() => {
-        setShowError(false);
-        setError(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  React.useEffect(() => {
-    fetchPartner();
-  }, []);
-
-  React.useEffect(() => {
-    fetchUpcomingSpecialDate();
-  }, []);
-
-  React.useEffect(() => {
-    fetchRecentActivities();
-  }, []);
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
-      </View>
-    );
-  }
-
   const getStatusDisplay = () => {
     switch (partnerStatus) {
       case "home":
@@ -407,6 +370,50 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return "#b0b3c6";
     }
   };
+
+  // use effects
+  useEffect(() => {
+    if (partner?.id) {
+      fetchPartnerStatusAndMood();
+    }
+  }, [partner]);
+
+  useEffect(() => {
+    checkAndUpdateHomeStatus();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      checkAndUpdateHomeStatus();
+      const interval = setInterval(checkAndUpdateHomeStatus, 15 * 60 * 1000);
+      return () => clearInterval(interval);
+    }, [])
+  );
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+      const timer = setTimeout(() => {
+        setShowError(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    fetchPartner();
+    fetchUpcomingSpecialDate();
+    fetchRecentActivities();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#e03487" size="large" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -478,90 +485,88 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-          <Text style={styles.partnerLabel}>PARTNER</Text>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate("PartnerProfile")}
-            /*disabled={!partner}*/ // turned off for testing
+        <Text style={styles.partnerLabel}>PARTNER</Text>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate("PartnerProfile")}
+          /*disabled={!partner}*/ // turned off for testing
+        >
+          <View
+            style={[
+              styles.profileCard,
+              !isActive && styles.profileCardInactive,
+            ]}
           >
-            <View
-              style={[
-                styles.profileCard,
-                !isActive && styles.profileCardInactive,
-              ]}
-            >
-              <View style={styles.profileRow}>
-                <View style={styles.avatarWrapper}>{renderPartnerImage()}</View>
-                <View style={styles.infoWrapper}>
-                  <Text style={styles.name}>
-                    {partner?.name || "No partner"}
-                  </Text>
-                  <Text style={styles.username}>
-                    @{partner?.username || "nopartner"}
-                  </Text>
-                  <Text style={styles.bio}>{partner?.bio || ""}</Text>
-                </View>
-              </View>
-              <View style={styles.statusRow}>
-                <Text style={[styles.statusText, { color: getStatusColor() }]}>
-                  Status: {getStatusDisplay()}
+            <View style={styles.profileRow}>
+              <View style={styles.avatarWrapper}>{renderPartnerImage()}</View>
+              <View style={styles.infoWrapper}>
+                <Text style={styles.name}>{partner?.name || "No partner"}</Text>
+                <Text style={styles.username}>
+                  @{partner?.username || "nopartner"}
                 </Text>
-                <Text style={styles.statusText}>Mood: {partnerMood}</Text>
+                <Text style={styles.bio}>{partner?.bio || ""}</Text>
               </View>
             </View>
-          </TouchableOpacity>
-          <View style={styles.buttonRow}>
-            <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-              <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.buttonText}>HOLD</Text>
-              </TouchableOpacity>
-            </BlurView>
-            <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-              <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.buttonText}>CUDDLE</Text>
-              </TouchableOpacity>
-            </BlurView>
-            <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => setActionsModalVisible(true)}
-              >
-                <Text style={styles.buttonText}>MORE</Text>
-              </TouchableOpacity>
-            </BlurView>
-            <ActionsModal
-              visible={actionsModalVisible}
-              onClose={() => setActionsModalVisible(false)}
-              onAction={handleAction}
-            />
+            <View style={styles.statusRow}>
+              <Text style={[styles.statusText, { color: getStatusColor() }]}>
+                Status: {getStatusDisplay()}
+              </Text>
+              <Text style={styles.statusText}>Mood: {partnerMood}</Text>
+            </View>
           </View>
-          {upcomingDate && (
-            <View style={styles.upcomingContainer}>
-              <Text style={styles.upcomingLabel}>UPCOMING</Text>
-              <View style={styles.eventCard}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 4,
-                  }}
-                >
-                  <Text style={styles.eventName}>{upcomingDate.title}</Text>
-                  <Text style={styles.eventTimeLeft}>
-                    {" "}
-                    {formatTimeLeft(upcomingDate.daysUntil)}
-                  </Text>
-                </View>
-                <Text style={styles.eventDescription}>
-                  {upcomingDate.description ||
-                    `${upcomingDate.title} on ${formatDate(
-                      upcomingDate.nextOccurrence
-                    )}`}
+        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+            <TouchableOpacity style={styles.actionButton}>
+              <Text style={styles.buttonText}>HOLD</Text>
+            </TouchableOpacity>
+          </BlurView>
+          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+            <TouchableOpacity style={styles.actionButton}>
+              <Text style={styles.buttonText}>CUDDLE</Text>
+            </TouchableOpacity>
+          </BlurView>
+          <BlurView intensity={50} tint="dark" style={styles.blurButton}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => setActionsModalVisible(true)}
+            >
+              <Text style={styles.buttonText}>MORE</Text>
+            </TouchableOpacity>
+          </BlurView>
+          <ActionsModal
+            visible={actionsModalVisible}
+            onClose={() => setActionsModalVisible(false)}
+            onAction={handleAction}
+          />
+        </View>
+        {upcomingDate && (
+          <View style={styles.upcomingContainer}>
+            <Text style={styles.upcomingLabel}>UPCOMING</Text>
+            <View style={styles.eventCard}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 4,
+                }}
+              >
+                <Text style={styles.eventName}>{upcomingDate.title}</Text>
+                <Text style={styles.eventTimeLeft}>
+                  {" "}
+                  {formatTimeLeft(upcomingDate.daysUntil)}
                 </Text>
               </View>
+              <Text style={styles.eventDescription}>
+                {upcomingDate.description ||
+                  `${upcomingDate.title} on ${formatDate(
+                    upcomingDate.nextOccurrence
+                  )}`}
+              </Text>
             </View>
-          )}
-          <RecentActivity activities={activities} />
+          </View>
+        )}
+        <RecentActivity activities={activities} />
       </ScrollView>
       {showError && (
         <View style={styles.toast}>

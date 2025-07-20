@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -5,30 +6,38 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  RefreshControl,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// screen content
 import SetMonthlyGift from "./SetMonthlyGift";
 import ReceivedGift from "./ReceivedGift";
 import PastGiftsList from "./PastGiftsList";
+import ClaimedGiftModal from "../../components/modals/ClaimedGiftModal";
+import UpdateMonthlyGiftModal from "../../components/modals/UpdateMonthlyGiftModal";
+
+// internal
 import {
   getOldestUnclaimedGift,
   claimMonthlyGift,
   getLastFiveClaimedGifts,
 } from "../../services/monthlyGiftService";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import ClaimedGiftModal from "../../components/modals/ClaimedGiftModal";
 import {
   getSetMonthlyGift,
   updateSetMonthlyGift,
 } from "../../services/setMonthlyGiftService";
-import UpdateMonthlyGiftModal from "../../components/modals/UpdateMonthlyGiftModal";
 import { useAuth } from "../../contexts/AuthContext";
-import { RefreshControl } from "react-native";
 
 const GiftsScreen = () => {
+  // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
+  const { user } = useAuth();
+  const userId = user?.id;
 
+  // use states
   const [gift, setGift] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +50,7 @@ const GiftsScreen = () => {
   const [monthlyGiftModalVisible, setMonthlyGiftModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const { user } = useAuth();
-  const userId = user?.id;
-
+  // refresh screen
   const onRefresh = async () => {
     setRefreshing(true);
     try {
@@ -57,6 +64,7 @@ const GiftsScreen = () => {
     }
   };
 
+  // fetch functions
   const fetchGift = async () => {
     try {
       setLoading(true);
@@ -131,6 +139,22 @@ const GiftsScreen = () => {
     }
   };
 
+  const fetchSetGift = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token || !userId) {
+        return;
+      }
+
+      const result = await getSetMonthlyGift(token, userId);
+      setSetMonthlyGift(result?.setMonthlyGift || null);
+    } catch {
+      setSetMonthlyGift(null);
+    }
+  };
+
+  // handlers
   const handleClaim = async () => {
     if (!gift) {
       return;
@@ -159,21 +183,6 @@ const GiftsScreen = () => {
     }
   };
 
-  const fetchSetGift = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token || !userId) {
-        return;
-      }
-
-      const result = await getSetMonthlyGift(token, userId);
-      setSetMonthlyGift(result?.setMonthlyGift || null);
-    } catch {
-      setSetMonthlyGift(null);
-    }
-  };
-
   const handleSaveSetGift = async (giftName: string) => {
     try {
       setModalLoading(true);
@@ -191,6 +200,7 @@ const GiftsScreen = () => {
     }
   };
 
+  // use effects
   useEffect(() => {
     fetchSetGift();
   }, []);

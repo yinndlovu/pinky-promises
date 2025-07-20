@@ -1,6 +1,8 @@
+// external
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
+// types
 type Props = {
   about?: string;
 };

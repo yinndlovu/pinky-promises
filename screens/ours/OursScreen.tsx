@@ -1,3 +1,4 @@
+// external
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,22 +9,19 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import NotesCanvas from "./NotesCanvas";
-import SpecialDates from "./SpecialDates";
-import FavoriteMemories from "./FavoriteMemories";
-import { getNotes } from "../../services/notesService";
+import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import UpdateSpecialDateModal from "../../components/modals/UpdateSpecialDateModal";
+
+// internal
+import { getNotes } from "../../services/notesService";
 import {
   getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
   deleteSpecialDate,
 } from "../../services/specialDateService";
-import ConfirmationModal from "../../components/modals/ConfirmationModal";
-import AlertModal from "../../components/modals/AlertModal";
 import {
   getFavoriteMemoryById,
   getAllFavoriteMemories,
@@ -31,20 +29,28 @@ import {
   updateFavoriteMemory,
   deleteFavoriteMemory,
 } from "../../services/favoriteMemoriesService";
+import { useAuth } from "../../contexts/AuthContext";
+
+// screen content
 import UpdateFavoriteMemoryModal from "../../components/modals/UpdateFavoriteMemoryModal";
 import FavoriteMemoryDetailsModal from "../../components/modals/FavoriteMemoryDetailsModal";
-import { useAuth } from "../../contexts/AuthContext";
-import { Feather } from "@expo/vector-icons";
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import AlertModal from "../../components/modals/AlertModal";
+import NotesCanvas from "./NotesCanvas";
+import SpecialDates from "./SpecialDates";
+import FavoriteMemories from "./FavoriteMemories";
+import UpdateSpecialDateModal from "../../components/modals/UpdateSpecialDateModal";
 
 type Props = NativeStackScreenProps<any>;
 
 const OursScreen = ({ navigation }: Props) => {
+  // variables
   const HEADER_HEIGHT = 60;
-
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const currentUserId = user?.id;
 
+  // use states
   const [notesPreview, setNotesPreview] = useState<string>("");
   const [notesUpdatedAt, setNotesUpdatedAt] = useState<string | null>(null);
   const [specialDates, setSpecialDates] = useState<any[]>([]);
@@ -68,6 +74,7 @@ const OursScreen = ({ navigation }: Props) => {
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  // refresh screen
   const onRefresh = async () => {
     setRefreshing(true);
     await Promise.all([
@@ -78,6 +85,7 @@ const OursScreen = ({ navigation }: Props) => {
     setRefreshing(false);
   };
 
+  // fetch functions
   const fetchNotesPreview = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -132,6 +140,7 @@ const OursScreen = ({ navigation }: Props) => {
     }
   };
 
+  // handlers
   const handleAddSpecialDate = async (
     date: string,
     title: string,
@@ -282,6 +291,7 @@ const OursScreen = ({ navigation }: Props) => {
     setDetailsLoading(false);
   };
 
+  // use effects
   useEffect(() => {
     fetchNotesPreview();
     fetchSpecialDates();

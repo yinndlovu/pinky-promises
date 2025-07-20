@@ -1,6 +1,8 @@
+// external
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
+// types
 type Props = {
   giftName: string;
   onChange?: () => void;

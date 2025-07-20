@@ -1,3 +1,4 @@
+// external
 import React, { useState } from "react";
 import {
   View,
@@ -10,20 +11,25 @@ import {
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { Feather } from "@expo/vector-icons";
+
+// internal
 import { BASE_URL } from "../../../configuration/config";
 import { useAuth } from "../../../contexts/AuthContext";
 
 type Props = NativeStackScreenProps<any>;
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+  // use states
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // variables
   const { login } = useAuth();
 
+  // handlers
   const handleLogin = async () => {
     if (!username || !password) {
       setError("Username and password are required");
@@ -105,7 +111,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         onPress={handleLogin}
         disabled={loading}
       >
-        <Text style={styles.loginButtonText}>Login</Text>
+        <Text style={styles.loginButtonText}>Log in</Text>
         {loading && (
           <ActivityIndicator
             size="small"

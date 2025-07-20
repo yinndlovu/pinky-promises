@@ -1,3 +1,4 @@
+// external
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,9 +10,11 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { BASE_URL } from "../../../configuration/config";
 import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { Image } from "expo-image";
+
+// internal
 import {
   sendPartnerRequest,
   checkPendingRequest,
@@ -19,18 +22,25 @@ import {
   getIncomingRequest,
   acceptPartnerRequest,
 } from "../../../services/partnerService";
-import AlertModal from "../../../components/modals/AlertModal";
-import { Image } from 'expo-image';
-import { buildCachedImageUrl } from '../../../utils/imageCacheUtils';
+import { BASE_URL } from "../../../configuration/config";
+import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 
+// screen content
+import AlertModal from "../../../components/modals/AlertModal";
+
+// variables
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
+// types
 type Props = NativeStackScreenProps<any, "UserProfile">;
 
 type RequestStatus = "none" | "pending" | "incoming";
 
 const UserProfileScreen = ({ route, navigation }: Props) => {
+  // variables
   const { userId } = route.params as { userId: string };
+
+  // use states
   const [user, setUser] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -41,8 +51,11 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   );
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(null);
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
+    null
+  );
 
+  // use effects
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -75,8 +88,10 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
           setAvatarUri(base64);
 
-          const lastModified = pictureResponse.headers['last-modified'];
-          setProfilePicUpdatedAt(lastModified ? new Date(lastModified) : new Date());
+          const lastModified = pictureResponse.headers["last-modified"];
+          setProfilePicUpdatedAt(
+            lastModified ? new Date(lastModified) : new Date()
+          );
         } catch (picErr: any) {
           setAvatarUri(null);
         }
@@ -93,66 +108,13 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     fetchUser();
   }, [userId]);
 
-  const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt) {
-      const cachedImageUrl = buildCachedImageUrl(userId, profilePicUpdatedAt);
-      return (
-        <Image
-          source={cachedImageUrl}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-    
-    return (
-      <Image
-        source={
-          avatarUri
-            ? avatarUri
-            : fallbackAvatar
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
-  };
-
-  const checkRequestStatus = async (token: string) => {
-    try {
-      const pendingResponse = await checkPendingRequest(token, userId);
-
-      if (pendingResponse.hasPendingRequest) {
-        setRequestStatus("pending");
-        return;
-      }
-
-      const incomingResponse = await getIncomingRequest(token, userId);
-
-      if (incomingResponse.hasIncomingRequest) {
-        setRequestStatus("incoming");
-        setIncomingRequestId(incomingResponse.requestId);
-        return;
-      }
-
-      setRequestStatus("none");
-    } catch (err) {
-      setRequestStatus("none");
-    }
-  };
-
-  const showAlert = (message: string) => {
-    setAlertMessage(message);
-    setAlertVisible(true);
-  };
-
+  // handlers
   const handlePartnerAction = async () => {
     setSendingRequest(true);
 
     try {
       const token = await AsyncStorage.getItem("token");
-      
+
       if (!token) {
         showAlert("Not authenticated");
         return;
@@ -190,6 +152,57 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     }
   };
 
+  // helpers
+  const renderProfileImage = () => {
+    if (avatarUri && profilePicUpdatedAt) {
+      const cachedImageUrl = buildCachedImageUrl(userId, profilePicUpdatedAt);
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={avatarUri ? avatarUri : fallbackAvatar}
+        style={styles.avatar}
+        contentFit="cover"
+      />
+    );
+  };
+
+  const checkRequestStatus = async (token: string) => {
+    try {
+      const pendingResponse = await checkPendingRequest(token, userId);
+
+      if (pendingResponse.hasPendingRequest) {
+        setRequestStatus("pending");
+        return;
+      }
+
+      const incomingResponse = await getIncomingRequest(token, userId);
+
+      if (incomingResponse.hasIncomingRequest) {
+        setRequestStatus("incoming");
+        setIncomingRequestId(incomingResponse.requestId);
+        return;
+      }
+
+      setRequestStatus("none");
+    } catch (err) {
+      setRequestStatus("none");
+    }
+  };
+
+  const showAlert = (message: string) => {
+    setAlertMessage(message);
+    setAlertVisible(true);
+  };
+
   const getButtonText = () => {
     switch (requestStatus) {
       case "pending":
@@ -216,6 +229,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     }
   };
 
+  // declarations
   const name = user?.name || "User";
   const username = user?.username || "user";
   const bio = user?.bio || "";
@@ -248,9 +262,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
           <Text style={styles.headerTitle}>User</Text>
         </View>
         <View style={styles.profileRow}>
-          <View style={styles.avatarWrapper}>
-            {renderProfileImage()}
-          </View>
+          <View style={styles.avatarWrapper}>{renderProfileImage()}</View>
           <View style={styles.infoWrapper}>
             <Text style={styles.name}>{name}</Text>
             {username ? <Text style={styles.username}>@{username}</Text> : null}

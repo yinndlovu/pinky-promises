@@ -1,3 +1,4 @@
+// external
 import React from "react";
 import {
   View,
@@ -8,6 +9,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
+// types
 type Props = {
   giftName: string;
   receivedAt: string;

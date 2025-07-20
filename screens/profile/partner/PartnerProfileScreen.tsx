@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// external
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,27 +10,29 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { BASE_URL } from "../../../configuration/config";
 import { encode } from "base64-arraybuffer";
-import PartnerStatusMood from "./PartnerStatusMood";
-import PartnerAnniversary from "./PartnerAnniversary";
-import { getUserFavorites } from "../../../services/favoritesService";
-import PartnerFavorites from "./PartnerFavorites";
-import PartnerLoveLanguage from "./PartnerLoveLanguage";
-import { getLoveLanguage } from "../../../services/loveLanguageService";
-import PartnerMoreAboutYou from "./PartnerMoreAboutYou";
-import { getAboutUser } from "../../../services/aboutUserService";
-import ConfirmationModal from "../../../components/modals/ConfirmationModal";
-import { removePartner } from "../../../services/partnerService";
-import ProfilePictureViewer from "../ProfilePictureViewer";
 import { Feather } from "@expo/vector-icons";
 import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+
+// internal
+import { getUserFavorites } from "../../../services/favoritesService";
+import { getLoveLanguage } from "../../../services/loveLanguageService";
+import { getAboutUser } from "../../../services/aboutUserService";
+import { removePartner } from "../../../services/partnerService";
+import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 
-const fallbackAvatar = require("../../../assets/default-avatar-two.png");
+// screen content
+import ConfirmationModal from "../../../components/modals/ConfirmationModal";
+import PartnerMoreAboutYou from "./PartnerMoreAboutYou";
+import ProfilePictureViewer from "../ProfilePictureViewer";
+import PartnerFavorites from "./PartnerFavorites";
+import PartnerLoveLanguage from "./PartnerLoveLanguage";
+import PartnerStatusMood from "./PartnerStatusMood";
+import PartnerAnniversary from "./PartnerAnniversary";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
@@ -48,6 +51,28 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
     null
   );
+
+  // refresh screen
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchPartner();
+      await fetchCurrentUser();
+
+      if (partner?.id) {
+        await Promise.all([
+          fetchPartnerFavorites(partner.id),
+          fetchPartnerLoveLanguage(partner.id),
+          fetchPartnerAbout(partner.id),
+        ]);
+      }
+
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, [partner?.id]);
 
   const fetchPartner = async () => {
     try {
@@ -188,27 +213,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   };
 
-  const onRefresh = React.useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await fetchPartner();
-      await fetchCurrentUser();
-
-      if (partner?.id) {
-        await Promise.all([
-          fetchPartnerFavorites(partner.id),
-          fetchPartnerLoveLanguage(partner.id),
-          fetchPartnerAbout(partner.id),
-        ]);
-      }
-
-      setRefreshKey((k) => k + 1);
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [partner?.id]);
-
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
     try {
@@ -242,6 +246,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     favoriteShow: "Favorite Show",
   };
 
+  // helpers
   function favoritesObjectToArray(
     favoritesObj: any
   ): { label: string; value: string }[] {
@@ -252,6 +257,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       .filter(Boolean) as { label: string; value: string }[];
   }
 
+  // use layouts
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -262,7 +268,8 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
   }, [navigation]);
 
-  React.useEffect(() => {
+  // use effects
+  useEffect(() => {
     (async () => {
       setLoading(true);
 
@@ -273,7 +280,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     })();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (partner?.id) {
       fetchPartnerFavorites(partner.id);
       fetchPartnerLoveLanguage(partner.id);
@@ -281,6 +288,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   }, [partner?.id]);
 
+  // declarations
   const name = partner?.name || "User";
   const username = partner?.username || "user";
   const bio = partner?.bio || "";

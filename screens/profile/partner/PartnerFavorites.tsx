@@ -1,6 +1,8 @@
+// external
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
+// types
 type FavoriteItem = {
   label: string;
   value: string;

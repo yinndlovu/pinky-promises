@@ -1,8 +1,12 @@
+// external
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// internal
 import { getSpecialDates } from "../../../services/specialDateService";
 
+// types
 type Props = {
   partnerId: string;
 };
@@ -19,13 +23,16 @@ type SpecialDate = {
 };
 
 const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
+  // use states
   const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // use effects
   useEffect(() => {
     fetchSpecialDates();
   }, [partnerId]);
 
+  // helpers
   const formatDisplayDate = (
     dateString: string,
     timeInfo?: string
@@ -41,14 +48,42 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
       const year = date.getFullYear();
       const formattedDate = `${day} ${month} ${year}`;
 
-      return { 
-        date: formattedDate, timeInfo 
+      return {
+        date: formattedDate,
+        timeInfo,
       };
     } catch (error) {
       return { date: dateString };
     }
   };
 
+  const getAnniversaryDisplay = () => {
+    const anniversary = specialDates.find((date) =>
+      date.title.toLowerCase().includes("anniversary")
+    );
+
+    if (anniversary) {
+      return formatDisplayDate(anniversary.date, anniversary.togetherFor);
+    }
+    return {
+      date: "Not set",
+    };
+  };
+
+  const getDayMetDisplay = () => {
+    const dayMet = specialDates.find((date) =>
+      date.title.toLowerCase().includes("met")
+    );
+
+    if (dayMet) {
+      return formatDisplayDate(dayMet.date, dayMet.knownFor);
+    }
+    return {
+      date: "Not set",
+    };
+  };
+
+  // fetch functions
   const fetchSpecialDates = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -67,32 +102,7 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
     }
   };
 
-  const getAnniversaryDisplay = () => {
-    const anniversary = specialDates.find((date) =>
-      date.title.toLowerCase().includes("anniversary")
-    );
-
-    if (anniversary) {
-      return formatDisplayDate(anniversary.date, anniversary.togetherFor);
-    }
-    return { 
-      date: "Not set" 
-    };
-  };
-
-  const getDayMetDisplay = () => {
-    const dayMet = specialDates.find((date) =>
-      date.title.toLowerCase().includes("met")
-    );
-
-    if (dayMet) {
-      return formatDisplayDate(dayMet.date, dayMet.knownFor);
-    }
-    return { 
-      date: "Not set" 
-    };
-  };
-
+  // declarations
   const anniversaryDisplay = getAnniversaryDisplay();
   const dayMetDisplay = getDayMetDisplay();
 
@@ -113,7 +123,10 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
         <View style={styles.valueContainer}>
           <Text style={styles.value}>{anniversaryDisplay.date}</Text>
           {anniversaryDisplay.timeInfo && (
-            <Text style={styles.timeInfo}>  ({anniversaryDisplay.timeInfo})</Text>
+            <Text style={styles.timeInfo}>
+              {" "}
+              ({anniversaryDisplay.timeInfo})
+            </Text>
           )}
         </View>
       </View>
@@ -124,7 +137,7 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
         <View style={styles.valueContainer}>
           <Text style={styles.value}>{dayMetDisplay.date}</Text>
           {dayMetDisplay.timeInfo && (
-            <Text style={styles.timeInfo}>  ({dayMetDisplay.timeInfo})</Text>
+            <Text style={styles.timeInfo}> ({dayMetDisplay.timeInfo})</Text>
           )}
         </View>
       </View>

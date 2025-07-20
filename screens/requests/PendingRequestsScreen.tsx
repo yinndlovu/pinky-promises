@@ -1,3 +1,4 @@
+// external
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,20 +9,26 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { encode } from "base64-arraybuffer";
+import axios from "axios";
+import { Image } from "expo-image";
+
+// internal
 import {
   getReceivedPartnerRequests,
   acceptPartnerRequest,
   rejectPartnerRequest,
 } from "../../services/partnerService";
-import AlertModal from "../../components/modals/AlertModal";
-import { encode } from "base64-arraybuffer";
-import axios from "axios";
 import { BASE_URL } from "../../configuration/config";
-import { Image } from "expo-image";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 
+// screen content
+import AlertModal from "../../components/modals/AlertModal";
+
+// variables
 const fallbackAvatar = require("../../assets/default-avatar-two.png");
 
+// types
 type PendingRequest = {
   id: string;
   sender: {
@@ -33,6 +40,7 @@ type PendingRequest = {
 };
 
 const PendingRequestsScreen = ({ navigation }: any) => {
+  // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [processingAccept, setProcessingAccept] = useState<string | null>(null);
@@ -46,10 +54,12 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     [userId: string]: Date;
   }>({});
 
+  // use effects
   useEffect(() => {
     fetchRequests();
   }, []);
 
+  // fetch functions
   const fetchRequests = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -98,6 +108,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     }
   };
 
+  // helpers
   const renderProfileImage = (userId: string) => {
     if (profilePictures[userId] && profilePicUpdatedAt[userId]) {
       const cachedImageUrl = buildCachedImageUrl(
@@ -123,6 +134,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     setAlertVisible(true);
   };
 
+  // handlers
   const handleAcceptRequest = async (requestId: string, senderId: string) => {
     setProcessingAccept(requestId);
     try {
@@ -165,8 +177,12 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       setProcessingReject(null);
     }
   };
+
+  // render the requests
   const renderRequest = ({ item }: { item: PendingRequest }) => {
-    if (!item.sender) return null;
+    if (!item.sender) {
+      return null;
+    }
 
     const isAccepting = processingAccept === item.id;
     const isRejecting = processingReject === item.id;

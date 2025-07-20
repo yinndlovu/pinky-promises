@@ -1,4 +1,5 @@
-import React, { useLayoutEffect, useState } from "react";
+// external
+import React, { useLayoutEffect, useState, useEffect } from "react";
 import {
   ScrollView,
   View,
@@ -9,22 +10,20 @@ import {
   Modal,
   TextInput,
   TouchableWithoutFeedback,
+  RefreshControl,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BASE_URL } from "../../configuration/config";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import { encode } from "base64-arraybuffer";
-import StatusMood from "./StatusMood";
-import Anniversary from "./Anniversary";
-import Favorites from "./Favorites";
-import LoveLanguage from "./LoveLanguage";
-import MoreAboutYou from "./MoreAboutYou";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Image } from "expo-image";
+
 import type { StackScreenProps } from "@react-navigation/stack";
-import ProfilePictureModal from "./ProfilePictureModal";
-import ProfilePictureViewer from "./ProfilePictureViewer";
+
+// internal
 import { fetchUserStatus } from "../../services/userStatusService";
 import { getMood } from "../../services/moodService";
 import UpdateFavoritesModal from "../../components/modals/UpdateFavoritesModal";
@@ -32,20 +31,28 @@ import {
   getUserFavorites,
   updateUserFavorites,
 } from "../../services/favoritesService";
-import UpdateLoveLanguageModal from "../../components/modals/UpdateLoveLanguageModal";
+import { BASE_URL } from "../../configuration/config";
 import {
   getLoveLanguage,
   updateLoveLanguage,
 } from "../../services/loveLanguageService";
-import UpdateAboutModal from "../../components/modals/UpdateAboutModal";
 import { getAboutUser, updateAboutUser } from "../../services/aboutUserService";
 import { getPartner } from "../../services/partnerService";
 import { getReceivedPartnerRequests } from "../../services/partnerService";
-import { RefreshControl } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 
+// screen content
+import UpdateAboutModal from "../../components/modals/UpdateAboutModal";
+import UpdateLoveLanguageModal from "../../components/modals/UpdateLoveLanguageModal";
+import ProfilePictureModal from "./ProfilePictureModal";
+import ProfilePictureViewer from "./ProfilePictureViewer";
+import StatusMood from "./StatusMood";
+import Anniversary from "./Anniversary";
+import Favorites from "./Favorites";
+import LoveLanguage from "./LoveLanguage";
+import MoreAboutYou from "./MoreAboutYou";
+
+// types
 type ProfileScreenProps = StackScreenProps<any, any>;
 
 type FavoritesType = {
@@ -63,53 +70,57 @@ type FavoritesType = {
 };
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
+  // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
 
-  const [user, setUser] = React.useState<any>(null);
-  const [avatarUri, setAvatarUri] = React.useState<string | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
-  const [editModalVisible, setEditModalVisible] = React.useState(false);
-  const [showError, setShowError] = React.useState(false);
-  const [success, setSuccess] = React.useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = React.useState(false);
-  const [editName, setEditName] = React.useState("");
-  const [editUsername, setEditUsername] = React.useState("");
-  const [editBio, setEditBio] = React.useState("");
-  const [originalName, setOriginalName] = React.useState("");
-  const [originalUsername, setOriginalUsername] = React.useState("");
-  const [originalBio, setOriginalBio] = React.useState("");
-  const [loadingName, setLoadingName] = React.useState(false);
-  const [loadingUsername, setLoadingUsername] = React.useState(false);
-  const [loadingBio, setLoadingBio] = React.useState(false);
-  const [showPictureModal, setShowPictureModal] = React.useState(false);
-  const [showPictureViewer, setShowPictureViewer] = React.useState(false);
-  const [favoritesModalVisible, setFavoritesModalVisible] =
-    React.useState(false);
-  const [favorites, setFavorites] = React.useState<FavoritesType>({});
-
-  const [homeStatus, setHomeStatus] = React.useState<
-    "home" | "away" | "unavailable"
-  >("unavailable");
-  const [statusDescription, setStatusDescription] = React.useState<string>(
-    "You must add your home location to use this feature."
-  );
-
-  const [mood, setMood] = React.useState<string>();
-  const [moodDescription, setMoodDescription] = React.useState<string>();
-  const [loveLanguageModalVisible, setLoveLanguageModalVisible] =
-    React.useState(false);
-  const [loveLanguage, setLoveLanguage] = React.useState("");
-  const [about, setAbout] = React.useState<string>("");
-  const [aboutModalVisible, setAboutModalVisible] = React.useState(false);
-  const [partnerName, setPartnerName] = React.useState<string | null>(null);
-  const [pendingRequestsCount, setPendingRequestsCount] = React.useState(0);
-  const [refreshing, setRefreshing] = React.useState(false);
+  // use states
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [loadingName, setLoadingName] = useState(false);
+  const [loadingUsername, setLoadingUsername] = useState(false);
+  const [loadingBio, setLoadingBio] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
     null
   );
 
+  // use states (modals)
+  const [showPictureModal, setShowPictureModal] = useState(false);
+  const [showPictureViewer, setShowPictureViewer] = useState(false);
+  const [favoritesModalVisible, setFavoritesModalVisible] = useState(false);
+  const [loveLanguageModalVisible, setLoveLanguageModalVisible] =
+    useState(false);
+  const [aboutModalVisible, setAboutModalVisible] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
+  const [editBio, setEditBio] = useState("");
+  const [originalName, setOriginalName] = useState("");
+  const [originalUsername, setOriginalUsername] = useState("");
+  const [originalBio, setOriginalBio] = useState("");
+
+  // use states (screen content)
+  const [user, setUser] = useState<any>(null);
+  const [favorites, setFavorites] = useState<FavoritesType>({});
+  const [homeStatus, setHomeStatus] = useState<"home" | "away" | "unavailable">(
+    "unavailable"
+  );
+  const [statusDescription, setStatusDescription] = useState<string>(
+    "You must add your home location to use this feature."
+  );
+  const [mood, setMood] = useState<string>();
+  const [moodDescription, setMoodDescription] = useState<string>();
+  const [loveLanguage, setLoveLanguage] = useState("");
+  const [about, setAbout] = React.useState<string>("");
+  const [partnerName, setPartnerName] = useState<string | null>(null);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+
+  // arrays
   const FAVORITE_LABELS: { [key: string]: string } = {
     favoriteColor: "Favorite Color",
     favoriteFood: "Favorite Food",
@@ -134,6 +145,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       .filter(Boolean) as { label: string; value: string }[];
   }
 
+  // refresh screen
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     try {
@@ -153,6 +165,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   }, []);
 
+  // fetch functions
   const fetchLoveLanguage = async () => {
     const token = await AsyncStorage.getItem("token");
     const userId = user?.id;
@@ -312,6 +325,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   };
 
+  // helpers
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt) {
       const cachedImageUrl = buildCachedImageUrl(user.id, profilePicUpdatedAt);
@@ -338,10 +352,61 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     );
   };
 
-  React.useEffect(() => {
+  // use effects
+  useEffect(() => {
     fetchLoveLanguage();
   }, [user]);
 
+  useEffect(() => {
+    fetchPendingRequestsCount();
+  }, []);
+
+  useEffect(() => {
+    if (user?.id) {
+      getStatus();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, [user]);
+
+  useEffect(() => {
+    fetchPartnerName();
+  }, [user]);
+
+  useEffect(() => {
+    if (user?.id) fetchAbout();
+  }, [user]);
+
+  useEffect(() => {
+    if (success) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+        setSuccess(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+
+      const timer = setTimeout(() => {
+        setShowError(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
     const token = await AsyncStorage.getItem("token");
     if (!token) return;
@@ -355,55 +420,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     await updateAboutUser(token, newAbout);
     setAbout(newAbout);
   };
-
-  React.useEffect(() => {
-    fetchPendingRequestsCount();
-  }, []);
-
-  React.useEffect(() => {
-    if (user?.id) {
-      getStatus();
-    }
-  }, [user]);
-
-  React.useEffect(() => {
-    fetchFavorites();
-  }, [user]);
-
-  React.useEffect(() => {
-    fetchPartnerName();
-  }, [user]);
-
-  React.useEffect(() => {
-    if (user?.id) fetchAbout();
-  }, [user]);
-
-  React.useEffect(() => {
-    if (success) {
-      setShowSuccess(true);
-      const timer = setTimeout(() => {
-        setShowSuccess(false);
-        setSuccess(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
-
-  React.useEffect(() => {
-    if (error) {
-      setShowError(true);
-
-      const timer = setTimeout(() => {
-        setShowError(false);
-        setError(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  React.useEffect(() => {
-    fetchProfile();
-  }, []);
 
   const handleAvatarPress = () => {
     setShowPictureModal(true);
@@ -516,42 +532,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       if (field === "bio") setLoadingBio(false);
     }
   };
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("PendingRequests")}
-          style={{ marginLeft: 20, position: "relative" }}
-        >
-          <Feather name="users" size={24} color="#fff" />
-          {pendingRequestsCount > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
-                {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      ),
-      headerRight: () => (
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Settings")}
-          style={{ marginRight: 20 }}
-        >
-          <Feather name="settings" size={24} color="#fff" />
-        </TouchableOpacity>
-      ),
-      headerShown: true,
-      title: "",
-      headerTransparent: true,
-      headerTintColor: "#fff",
-      headerStyle: {
-        backgroundColor: "transparent",
-      },
-      headerShadowVisible: false,
-    });
-  }, [navigation, pendingRequestsCount]);
 
   if (loading) {
     return (

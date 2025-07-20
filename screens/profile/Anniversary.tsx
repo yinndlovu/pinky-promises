@@ -1,15 +1,21 @@
+// external
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// internal
 import {
   getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
 } from "../../services/specialDateService";
+
+// screen content
 import UpdateSpecialDateModal from "../../components/modals/UpdateSpecialDateModal";
 import AlertModal from "../../components/modals/AlertModal";
 
+// types
 type Props = {
   anniversaryDate?: string;
   dayMet?: string;
@@ -28,12 +34,8 @@ type SpecialDate = {
   nextMetDayIn?: string;
 };
 
-const Anniversary: React.FC<Props> = ({
-  anniversaryDate = "Not set",
-  dayMet = "Not set",
-  onEditAnniversary,
-  onEditDayMet,
-}) => {
+const Anniversary: React.FC<Props> = () => {
+  // use states
   const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingDate, setEditingDate] = useState<SpecialDate | null>(null);
@@ -43,15 +45,21 @@ const Anniversary: React.FC<Props> = ({
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // use effects
   useEffect(() => {
     fetchSpecialDates();
   }, []);
 
+  // helpers
   const formatDisplayDate = (
     dateString: string,
     timeInfo?: string
   ): { date: string; timeInfo?: string } => {
-    if (!dateString || dateString === "Not set") return { date: "Not set" };
+    if (!dateString || dateString === "Not set") {
+      return {
+        date: "Not set",
+      };
+    }
 
     try {
       const date = new Date(dateString);
@@ -60,12 +68,44 @@ const Anniversary: React.FC<Props> = ({
       const year = date.getFullYear();
       const formattedDate = `${day} ${month} ${year}`;
 
-      return { date: formattedDate, timeInfo };
+      return {
+        date: formattedDate,
+        timeInfo,
+      };
     } catch (error) {
-      return { date: dateString };
+      return {
+        date: dateString,
+      };
     }
   };
 
+  const getAnniversaryDisplay = () => {
+    const anniversary = specialDates.find((date) =>
+      date.title.toLowerCase().includes("anniversary")
+    );
+
+    if (anniversary) {
+      return formatDisplayDate(anniversary.date, anniversary.togetherFor);
+    }
+    return {
+      date: "Not set",
+    };
+  };
+
+  const getDayMetDisplay = () => {
+    const dayMet = specialDates.find((date) =>
+      date.title.toLowerCase().includes("met")
+    );
+
+    if (dayMet) {
+      return formatDisplayDate(dayMet.date, dayMet.knownFor);
+    }
+    return {
+      date: "Not set",
+    };
+  };
+
+  // fetch functions
   const fetchSpecialDates = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -76,10 +116,10 @@ const Anniversary: React.FC<Props> = ({
 
       const dates = await getSpecialDates(token);
       setSpecialDates(dates);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
+  // handlers
   const handleEditAnniversary = () => {
     const anniversary = specialDates.find((date) =>
       date.title.toLowerCase().includes("anniversary")
@@ -114,7 +154,10 @@ const Anniversary: React.FC<Props> = ({
     description?: string
   ) => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) throw new Error("No token");
+
+    if (!token) {
+      throw new Error("No token");
+    }
 
     if (editingDate) {
       await updateSpecialDate(token, editingDate.id, date, title, description);
@@ -122,67 +165,49 @@ const Anniversary: React.FC<Props> = ({
       await createSpecialDate(token, date, title, description);
     }
 
-    fetchSpecialDates();
+    await fetchSpecialDates();
   };
 
-  const getAnniversaryDisplay = () => {
-    const anniversary = specialDates.find((date) =>
-      date.title.toLowerCase().includes("anniversary")
-    );
-
-    if (anniversary) {
-      return formatDisplayDate(anniversary.date, anniversary.togetherFor);
-    }
-    return { date: "Not set" };
-  };
-
-  const getDayMetDisplay = () => {
-    const dayMet = specialDates.find((date) =>
-      date.title.toLowerCase().includes("met")
-    );
-
-    if (dayMet) {
-      return formatDisplayDate(dayMet.date, dayMet.knownFor);
-    }
-    return { date: "Not set" };
-  };
-
+  // declarations
   const anniversaryDisplay = getAnniversaryDisplay();
   const dayMetDisplay = getDayMetDisplay();
 
   return (
-  <View style={styles.wrapper}>
-    <View style={styles.row}>
-      <Text style={styles.label}>Anniversary date</Text>
-    </View>
-    <View style={styles.valueRow}>
+    <View style={styles.wrapper}>
+      <View style={styles.row}>
+        <Text style={styles.label}>Anniversary date</Text>
+      </View>
+      <View style={styles.valueRow}>
         <View style={styles.valueContainer}>
           <Text style={styles.value}>{anniversaryDisplay.date}</Text>
           {anniversaryDisplay.timeInfo && (
-            <Text style={styles.timeInfo}>  ({anniversaryDisplay.timeInfo})</Text>
+            <Text style={styles.timeInfo}>
+              {" "}
+              ({anniversaryDisplay.timeInfo})
+            </Text>
           )}
         </View>
         <TouchableOpacity
           style={styles.editButton}
           onPress={handleEditAnniversary}
         >
-        <Text style={styles.editButtonText}>Edit</Text>
-      </TouchableOpacity>
-    </View>
-    <View style={styles.row}>
-      <Text style={styles.label}>Day met</Text>
-    </View>
-    <View style={styles.valueRow}>
+          <Text style={styles.editButtonText}>Edit</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.row}>
+        <Text style={styles.label}>Day met</Text>
+      </View>
+      <View style={styles.valueRow}>
         <View style={styles.valueContainer}>
           <Text style={styles.value}>{dayMetDisplay.date}</Text>
           {dayMetDisplay.timeInfo && (
-            <Text style={styles.timeInfo}>  ({dayMetDisplay.timeInfo})</Text>
+            <Text style={styles.timeInfo}> ({dayMetDisplay.timeInfo})</Text>
           )}
         </View>
         <TouchableOpacity style={styles.editButton} onPress={handleEditDayMet}>
-        <Text style={styles.editButtonText}>Edit</Text>
-      </TouchableOpacity>
-    </View>
+          <Text style={styles.editButtonText}>Edit</Text>
+        </TouchableOpacity>
+      </View>
 
       <UpdateSpecialDateModal
         visible={modalVisible}
@@ -202,8 +227,8 @@ const Anniversary: React.FC<Props> = ({
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
       />
-  </View>
-);
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({

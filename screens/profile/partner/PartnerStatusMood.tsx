@@ -1,9 +1,13 @@
+// external
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// internal
 import { fetchUserStatus } from "../../../services/userStatusService";
 import { getUserMood } from "../../../services/moodService";
 
+// types
 type Props = {
   partnerId: string;
   partnerName: string;
@@ -11,6 +15,7 @@ type Props = {
 };
 
 const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey }) => {
+  // use states
   const [status, setStatus] = useState<"home" | "away" | "unavailable">(
     "unavailable"
   );
@@ -23,10 +28,12 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
   );
   const [loading, setLoading] = useState(true);
 
+  // use effects
   useEffect(() => {
     fetchPartnerStatusAndMood();
   }, [partnerId, partnerName, refreshKey]);
 
+  // fetch functions
   const fetchPartnerStatusAndMood = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -65,7 +72,6 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
         setMoodDescription(`${partnerName} hasn't set a mood yet`);
       }
     } catch (error) {
-      console.error("Failed to fetch partner status and mood:", error);
     } finally {
       setLoading(false);
     }

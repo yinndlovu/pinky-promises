@@ -1,3 +1,4 @@
+// external
 import React, { useState } from "react";
 import {
   View,
@@ -11,9 +12,11 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 type Props = NativeStackScreenProps<any>;
 
 const NameScreen: React.FC<Props> = ({ navigation }) => {
+  // use states
   const [name, setName] = useState("");
   const [error, setError] = useState("");
 
+  // handlers
   const handleNext = () => {
     if (name.trim().length === 0) {
       setError("Name is required");

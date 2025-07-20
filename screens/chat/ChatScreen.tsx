@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -11,22 +12,26 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// internal
 import { getPartner } from "../../services/partnerService";
 import { getSpecialDates } from "../../services/specialDateService";
 import { useAuth } from "../../contexts/AuthContext";
 import { DEEPSEEK_KEY } from "../../configuration/config";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getAllFavoriteMemories } from "../../services/favoriteMemoriesService";
+import { getNotes } from "../../services/notesService";
+import { getLoveLanguage } from "../../services/loveLanguageService";
+import { getUserFavorites } from "../../services/favoritesService";
+import { getAboutUser } from "../../services/aboutUserService";
+
+// chats database
 import {
   createTable,
   fetchMessages,
   saveMessage,
   deleteOldMessages,
 } from "../../database/chatdb";
-import { getAllFavoriteMemories } from "../../services/favoriteMemoriesService";
-import { getNotes } from "../../services/notesService";
-import { getLoveLanguage } from "../../services/loveLanguageService";
-import { getUserFavorites } from "../../services/favoritesService";
-import { getAboutUser } from "../../services/aboutUserService";
 
 type Message = {
   id: string;
@@ -36,6 +41,7 @@ type Message = {
 };
 
 export default function ChatScreen() {
+  // variables
   const { user } = useAuth();
   const userId = user?.id;
   const insets = useSafeAreaInsets();

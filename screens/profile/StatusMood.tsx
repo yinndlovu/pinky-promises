@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// external
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,12 +10,17 @@ import {
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+
+// internal
 import { BASE_URL } from "../../configuration/config";
-import AddLocationModal from "../../components/modals/AddLocationModal";
 import { getMood, updateMood } from "../../services/moodService";
+
+// screen content
+import AddLocationModal from "../../components/modals/AddLocationModal";
 import UpdateMoodModal from "../../components/modals/UpdateMoodModal";
 import AlertModal from "../../components/modals/AlertModal";
 
+// types
 type Props = {
   onAddHome?: () => void;
   mood?: string;
@@ -25,13 +31,12 @@ type Props = {
 };
 
 const StatusMood: React.FC<Props> = ({
-  onAddHome,
   mood = "No mood",
   moodDescription = "You haven't added a mood yet",
-  onEdit,
   status = "unavailable",
   statusDescription = "You must add your home location to use this feature.",
 }) => {
+  // use states
   const [moodModalVisible, setMoodModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentMood, setCurrentMood] = useState<string | undefined>(mood);
@@ -42,6 +47,8 @@ const StatusMood: React.FC<Props> = ({
   const [currentMoodDescription, setCurrentMoodDescription] = useState<
     string | undefined
   >(moodDescription);
+
+  // handlers
   const handleAddHome = async (location: {
     latitude: number;
     longitude: number;
@@ -71,22 +78,25 @@ const StatusMood: React.FC<Props> = ({
     }
   };
 
-  React.useEffect(() => {
-    const fetchMood = async () => {
-      try {
-        setFetchingMood(true);
-        const token = await AsyncStorage.getItem("token");
-        if (!token) return;
-        const moodData = await getMood(token);
-        setCurrentMood(moodData.mood);
-        setCurrentMoodDescription(moodData.description);
-      } catch (err) {
-        setCurrentMood("Neutral");
-        setCurrentMoodDescription("Feeling nothing special");
-      } finally {
-        setFetchingMood(false);
-      }
-    };
+  // fetch functions
+  const fetchMood = async () => {
+    try {
+      setFetchingMood(true);
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      const moodData = await getMood(token);
+      setCurrentMood(moodData.mood);
+      setCurrentMoodDescription(moodData.description);
+    } catch (err) {
+      setCurrentMood("Neutral");
+      setCurrentMoodDescription("Feeling nothing special");
+    } finally {
+      setFetchingMood(false);
+    }
+  };
+
+  // use effects
+  useEffect(() => {
     fetchMood();
   }, []);
 

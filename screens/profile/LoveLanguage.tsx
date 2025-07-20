@@ -1,8 +1,10 @@
+// external
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
+// types
 type Props = {
   loveLanguage?: string;
   onEdit?: () => void;

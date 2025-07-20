@@ -1,3 +1,4 @@
+// external
 import React, { useState } from "react";
 import {
   View,
@@ -8,15 +9,20 @@ import {
   Text,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import UserListItem from "./UserListItem";
-import { searchUsers } from "../../services/searchService";
+import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
-import { BASE_URL } from "../../configuration/config";
-import { encode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import AlertModal from "../../components/modals/AlertModal";
 
+// internal
+import { searchUsers } from "../../services/searchService";
+import { BASE_URL } from "../../configuration/config";
+
+// screen content
+import AlertModal from "../../components/modals/AlertModal";
+import UserListItem from "./UserListItem";
+
+// types
 type Props = NativeStackScreenProps<any>;
 
 type User = {
@@ -35,7 +41,10 @@ type ProfilePictureInfo = {
 };
 
 export default function SearchScreen({ navigation }: Props) {
+  // variables
   const insets = useSafeAreaInsets();
+
+  // use states
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -46,6 +55,7 @@ export default function SearchScreen({ navigation }: Props) {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // fetch functions
   const fetchProfilePicture = async (userId: string, token: string) => {
     try {
       const response = await axios.get(
@@ -70,11 +80,13 @@ export default function SearchScreen({ navigation }: Props) {
     }
   };
 
+  // helpers
   const showAlert = (message: string) => {
     setAlertMessage(message);
     setAlertVisible(true);
   };
 
+  // handlers
   const handleSearch = async (text: string) => {
     setQuery(text);
     if (text.length < 2) {

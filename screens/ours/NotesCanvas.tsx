@@ -1,12 +1,15 @@
+// external
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
+// types
 type Props = {
   onView?: () => void;
   preview?: string;
   updatedAt?: string | null;
 };
 
+// helpers
 const formatDateTime = (isoString?: string | null) => {
   if (!isoString) {
     return "";

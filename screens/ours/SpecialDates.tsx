@@ -1,3 +1,4 @@
+// external
 import React from "react";
 import {
   View,
@@ -7,6 +8,7 @@ import {
   FlatList,
 } from "react-native";
 
+// types
 type SpecialDate = {
   id: string;
   title: string;
@@ -21,11 +23,13 @@ type Props = {
   onLongPressDate?: (date: any) => void;
 };
 
+// helpers
 function formatExtraLabel(key: string): string {
   const withSpaces = key.replace(/([A-Z])/g, " $1").toLowerCase();
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1) + ":";
 }
 
+// variables
 const STANDARD_FIELDS = [
   "id",
   "date",
