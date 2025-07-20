@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  ScrollView,
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";

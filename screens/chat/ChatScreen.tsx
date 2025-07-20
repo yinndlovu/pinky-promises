@@ -22,6 +22,11 @@ import {
   saveMessage,
   deleteOldMessages,
 } from "../../database/chatdb";
+import { getAllFavoriteMemories } from "../../services/favoriteMemoriesService";
+import { getNotes } from "../../services/notesService";
+import { getLoveLanguage } from "../../services/loveLanguageService";
+import { getUserFavorites } from "../../services/favoritesService";
+import { getAboutUser } from "../../services/aboutUserService";
 
 type Message = {
   id: string;
@@ -32,16 +37,28 @@ type Message = {
 
 export default function ChatScreen() {
   const { user } = useAuth();
+  const userId = user?.id;
   const insets = useSafeAreaInsets();
   const EXTRA_KEYBOARD_PADDING = 50;
   const LAST_CLEANUP_KEY = "lastCleanupDate";
 
   // use states
   const [partnerName, setPartnerName] = useState<string>("");
+  const [partnerId, setPartnerId] = useState<string>("");
   const [specialDates, setSpecialDates] = useState<any[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [isSending, setIsSending] = useState(false);
+  const [favoriteMemories, setFavoriteMemories] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
+  const [loveLanguage, setLoveLanguage] = useState<string>("");
+  const [aboutUser, setAboutUser] = useState<string>("");
+  const [favorites, setFavorites] = useState<any[]>([]);
+
+  // use states (partner data)
+  const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
+  const [partnerFavorites, setPartnerFavorites] = useState<any[]>([]);
+  const [aboutPartner, setAboutPartner] = useState<string>("");
 
   const runCleanupOncePerDay = async () => {
     try {
@@ -57,6 +74,7 @@ export default function ChatScreen() {
     } catch (error) {}
   };
 
+  // fetch context
   const fetchContext = async () => {
     const token = await AsyncStorage.getItem("token");
 
@@ -67,12 +85,60 @@ export default function ChatScreen() {
     try {
       const partner = await getPartner(token);
       setPartnerName(partner?.name || "");
+      setPartnerId(partner?.id || "");
     } catch {}
 
     try {
       const dates = await getSpecialDates(token);
-
       setSpecialDates(dates || []);
+    } catch {}
+
+    try {
+      const memories = await getAllFavoriteMemories(token);
+      setFavoriteMemories(memories || []);
+    } catch {}
+
+    try {
+      const notesData = await getNotes(token);
+      setNotes(notesData || []);
+    } catch {}
+
+    try {
+      const loveLang = await getLoveLanguage(token, userId);
+      setLoveLanguage(loveLang || "");
+    } catch {}
+
+    try {
+      const userAbout = await getAboutUser(token, userId);
+      setAboutUser(userAbout || "");
+    } catch {}
+
+    try {
+      const favs = await getUserFavorites(token, userId);
+      setFavorites(favs || []);
+    } catch {}
+  };
+
+  const fetchPartnerData = async () => {
+    const token = await AsyncStorage.getItem("token");
+
+    if (!token || !partnerId) {
+      return;
+    }
+
+    try {
+      const partnerLoveLang = await getLoveLanguage(token, partnerId);
+      setPartnerLoveLanguage(partnerLoveLang || "");
+    } catch {}
+
+    try {
+      const partnerFavs = await getUserFavorites(token, partnerId);
+      setPartnerFavorites(partnerFavs || []);
+    } catch {}
+
+    try {
+      const partnerAbout = await getAboutUser(token, partnerId);
+      setAboutPartner(partnerAbout || "");
     } catch {}
   };
 
@@ -82,11 +148,18 @@ export default function ChatScreen() {
   }, []);
 
   useEffect(() => {
+    if (partnerId) {
+      fetchPartnerData();
+    }
+  }, [partnerId]);
+
+  useEffect(() => {
     createTable();
     runCleanupOncePerDay();
     fetchMessages().then(setMessages);
   }, []);
 
+  // helpers
   const getFormattedSpecialDates = useCallback(() => {
     if (!specialDates.length) {
       return "None set";
@@ -117,14 +190,82 @@ export default function ChatScreen() {
       : "Not set";
   }, [specialDates]);
 
+  const getFormattedFavoriteMemories = useCallback(() => {
+    if (!favoriteMemories.length) {
+      return "None set";
+    }
+
+    return favoriteMemories.map((m) => m.title).join(", ");
+  }, [favoriteMemories]);
+
+  const getFormattedNotes = useCallback(() => {
+    if (!notes.length) {
+      return "None set";
+    }
+
+    return notes.map((n) => n.content).join(" | ");
+  }, [notes]);
+
+  const getFormattedLoveLanguage = useCallback(() => {
+    return loveLanguage || "Not set";
+  }, [loveLanguage]);
+
+  const getFormattedAboutUser = useCallback(() => {
+    return aboutUser || "Not set";
+  }, [aboutUser]);
+
+  const getFormattedFavorites = useCallback(() => {
+    if (!favorites.length) {
+      return "None set";
+    }
+
+    return favorites.map((f) => f.name).join(", ");
+  }, [favorites]);
+
+  // helpers (partner)
+  const getFormattedPartnerLoveLanguage = useCallback(() => {
+    return partnerLoveLanguage || "Not set";
+  }, [partnerLoveLanguage]);
+
+  const getFormattedPartnerFavorites = useCallback(() => {
+    if (!partnerFavorites.length) {
+      return "None set";
+    }
+
+    return partnerFavorites.map((f) => f.name).join(", ");
+  }, [partnerFavorites]);
+
+  const getFormattedAboutPartner = useCallback(() => {
+    return aboutPartner || "Not set";
+  }, [aboutPartner]);
+
+  // AI call
   const getBotResponse = async (message: string) => {
     const systemPrompt = `
-You are a helpful assistant for ${user?.name || "User"} and ${
+    Your name is Lily, and a helpful assistant (more like a mascot) for ${
+      user?.name || "User"
+    }. Their partner's name is ${
       partnerName || "Partner"
-    }, a couple using the Pinky Promises app.
-Their anniversary is ${getFormattedAnniversary()}.
-Special dates: ${getFormattedSpecialDates()}.
-Answer questions about their relationship, memories, and special dates. Be warm, personal, and supportive.
+    }, they are a couple using the Pinky Promises app.
+    Text them back in lowercase letters only.
+    Show excitement by adding extra letters where necessary, like "heyyy"
+    Make your texts as short as possible.
+    Sound human, like their best friend rather than an AI.
+    Their anniversary is ${getFormattedAnniversary()}.
+    Special dates: ${getFormattedSpecialDates()}.
+    Favorite memories: ${getFormattedFavoriteMemories()}.
+    Notes: ${getFormattedNotes()}.
+    Love language for : ${getFormattedLoveLanguage()}.
+    Favorites: ${getFormattedFavorites()}.
+    Love language for ${
+      partnerName || "Partner"
+    }: ${getFormattedPartnerLoveLanguage()}.
+    Favorites for ${partnerName || "Partner"}: ${getFormattedPartnerFavorites()}.
+    More about ${user?.name || "User"}: ${getFormattedAboutUser()}.
+    More about ${partnerName || "Partner"}: ${getFormattedAboutPartner()}
+    Answer questions about their relationship, memories, special dates, favorites, love langauges, and more. 
+    Be warm, personal, and supportive.
+    Keep your messages short and as human as possible.
     `.trim();
 
     const history = [...messages].reverse().map((m) => ({
@@ -161,6 +302,7 @@ Answer questions about their relationship, memories, and special dates. Be warm,
     }
   };
 
+  // handlers
   const handleSend = async () => {
     if (inputText.trim() === "") {
       return;
