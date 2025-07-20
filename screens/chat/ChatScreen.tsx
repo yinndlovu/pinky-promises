@@ -59,12 +59,39 @@ export default function ChatScreen() {
   const [notes, setNotes] = useState<any[]>([]);
   const [loveLanguage, setLoveLanguage] = useState<string>("");
   const [aboutUser, setAboutUser] = useState<string>("");
-  const [favorites, setFavorites] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any>({});
 
   // use states (partner data)
   const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
-  const [partnerFavorites, setPartnerFavorites] = useState<any[]>([]);
+  const [partnerFavorites, setPartnerFavorites] = useState<any>({});
   const [aboutPartner, setAboutPartner] = useState<string>("");
+
+  // mapping
+  const FAVORITE_LABELS: { [key: string]: string } = {
+    favoriteColor: "Favorite Color",
+    favoriteFood: "Favorite Food",
+    favoriteSnack: "Favorite Snack",
+    favoriteActivity: "Favorite Activity",
+    favoriteHoliday: "Favorite Holiday",
+    favoriteTimeOfDay: "Favorite Time of Day",
+    favoriteSeason: "Favorite Season",
+    favoriteAnimal: "Favorite Animal",
+    favoriteDrink: "Favorite Drink",
+    favoritePet: "Favorite Pet",
+    favoriteShow: "Favorite Show",
+  };
+
+  function favoritesObjectToArray(
+    favoritesObj: any
+  ): { label: string; value: string }[] {
+    return Object.entries(FAVORITE_LABELS)
+      .map(([key, label]) =>
+        favoritesObj && favoritesObj[key]
+          ? { label, value: favoritesObj[key] }
+          : null
+      )
+      .filter(Boolean) as { label: string; value: string }[];
+  }
 
   const runCleanupOncePerDay = async () => {
     try {
@@ -201,7 +228,7 @@ export default function ChatScreen() {
       return "None set";
     }
 
-    return favoriteMemories.map((m) => m.title).join(", ");
+    return favoriteMemories.map((m) => m.memory).join(", ");
   }, [favoriteMemories]);
 
   const getFormattedNotes = useCallback(() => {
@@ -221,11 +248,12 @@ export default function ChatScreen() {
   }, [aboutUser]);
 
   const getFormattedFavorites = useCallback(() => {
-    if (!favorites.length) {
+    const favArr = favoritesObjectToArray(favorites);
+    if (!favArr.length) {
       return "None set";
     }
 
-    return favorites.map((f) => f.name).join(", ");
+    return favArr.map((f) => `${f.label}: ${f.value}`).join(", ");
   }, [favorites]);
 
   // helpers (partner)
@@ -234,11 +262,12 @@ export default function ChatScreen() {
   }, [partnerLoveLanguage]);
 
   const getFormattedPartnerFavorites = useCallback(() => {
-    if (!partnerFavorites.length) {
+    const favArr = favoritesObjectToArray(partnerFavorites);
+    if (!favArr.length) {
       return "None set";
     }
-
-    return partnerFavorites.map((f) => f.name).join(", ");
+    
+    return favArr.map((f) => `${f.label}: ${f.value}`).join(", ");
   }, [partnerFavorites]);
 
   const getFormattedAboutPartner = useCallback(() => {
@@ -422,7 +451,7 @@ export default function ChatScreen() {
             const prevMsg = messages[index + 1];
             const prevDay = prevMsg ? getDayLabel(prevMsg.timestamp) : null;
             const showDayLabel = currentDay !== prevDay;
-  
+
             return (
               <View style={{ marginBottom: 2 }}>
                 {showDayLabel && (
@@ -443,10 +472,14 @@ export default function ChatScreen() {
                   </Text>
                 )}
                 <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
-                  <Text style={item.sender === "You" ? styles.user : styles.bot}>
+                  <Text
+                    style={item.sender === "You" ? styles.user : styles.bot}
+                  >
                     {item.text}
                   </Text>
-                  <Text style={styles.timeLabel}>{getTimeLabel(item.timestamp)}</Text>
+                  <Text style={styles.timeLabel}>
+                    {getTimeLabel(item.timestamp)}
+                  </Text>
                 </View>
               </View>
             );

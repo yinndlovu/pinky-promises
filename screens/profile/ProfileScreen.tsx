@@ -694,6 +694,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           favorites={favoritesObjectToArray(favorites)}
           onEdit={() => setFavoritesModalVisible(true)}
         />
+        
         <UpdateFavoritesModal
           visible={favoritesModalVisible}
           initialFavorites={favorites}
