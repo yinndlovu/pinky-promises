@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -10,11 +11,15 @@ import {
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 
+// internal
+
+// types
 type ChangePasswordScreenProps = StackScreenProps<any, any>;
 
 const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   navigation,
 }) => {
+  // use states
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -24,7 +29,6 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
-
   const [newPasswordValid, setNewPasswordValid] = useState({
     length: false,
     letter: false,
@@ -33,6 +37,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   });
   const [confirmPasswordValid, setConfirmPasswordValid] = useState(false);
 
+  // validators
   const validateNewPassword = (password: string) => {
     return {
       length: password.length >= 8,
@@ -46,6 +51,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
     return confirm === newPassword && confirm.length > 0;
   };
 
+  // use effects
   useEffect(() => {
     setNewPasswordValid(validateNewPassword(newPassword));
   }, [newPassword]);
@@ -53,6 +59,13 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   useEffect(() => {
     setConfirmPasswordValid(validateConfirmPassword(confirmPassword));
   }, [confirmPassword, newPassword]);
+
+  const isFormValid = () => {
+    const newPasswordAllValid = Object.values(newPasswordValid).every(Boolean);
+    return (
+      currentPassword.length > 0 && newPasswordAllValid && confirmPasswordValid
+    );
+  };
 
   useEffect(() => {
     if (error) {
@@ -65,15 +78,11 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
     }
   }, [error]);
 
-  const isFormValid = () => {
-    const newPasswordAllValid = Object.values(newPasswordValid).every(Boolean);
-    return (
-      currentPassword.length > 0 && newPasswordAllValid && confirmPasswordValid
-    );
-  };
-
+  // handlers
   const handleSave = async () => {
-    if (!isFormValid()) return;
+    if (!isFormValid()) {
+      return;
+    }
 
     setLoading(true);
     try {
