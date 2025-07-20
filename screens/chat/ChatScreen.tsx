@@ -340,6 +340,7 @@ export default function ChatScreen() {
     love langauges, and more. 
     Be warm, personal, and supportive.
     Keep your messages short and as human as possible.
+    Key details recorded: ${getFormattedKeyDetails()}
     If the user shares a new key detail (like a favorite, special date, or 
     relationship milestone, essentially something worth remembering), respond as normal, 
     but also include a JSON object at the end of your response with the format:
