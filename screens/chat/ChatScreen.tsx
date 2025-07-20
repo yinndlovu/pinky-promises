@@ -370,6 +370,40 @@ export default function ChatScreen() {
     return messages[index + 1]?.sender !== messages[index].sender;
   };
 
+  // utils
+  const getDayLabel = (timestamp: number) => {
+    const now = new Date();
+    const msgDate = new Date(timestamp);
+    const diffTime = now.setHours(0, 0, 0, 0) - msgDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) {
+      return "Today";
+    }
+
+    if (diffDays === 1) {
+      return "Yesterday";
+    }
+
+    if (diffDays > 1 && diffDays < 8) {
+      return `${diffDays} days ago`;
+    }
+
+    return msgDate.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  const getTimeLabel = (timestamp: number) => {
+    const msgDate = new Date(timestamp);
+    return msgDate.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#23243a" }}>
       <KeyboardAvoidingView
@@ -382,25 +416,41 @@ export default function ChatScreen() {
           inverted
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingTop: 24, paddingBottom: 60 }}
-          renderItem={({ item, index }) => (
-            <View style={{ marginBottom: 2 }}>
-              {shouldShowSender(index) && (
-                <Text
-                  style={[
-                    styles.senderLabel,
-                    item.sender === "You"
-                      ? styles.senderLabelUser
-                      : styles.senderLabelBot,
-                  ]}
-                >
-                  {item.sender}
-                </Text>
-              )}
-              <Text style={item.sender === "You" ? styles.user : styles.bot}>
-                {item.text}
-              </Text>
-            </View>
-          )}
+          renderItem={({ item, index }) => {
+            // Check if this message is the first of a new day
+            const currentDay = getDayLabel(item.timestamp);
+            const prevMsg = messages[index + 1];
+            const prevDay = prevMsg ? getDayLabel(prevMsg.timestamp) : null;
+            const showDayLabel = currentDay !== prevDay;
+  
+            return (
+              <View style={{ marginBottom: 2 }}>
+                {showDayLabel && (
+                  <View style={styles.dayLabelWrapper}>
+                    <Text style={styles.dayLabel}>{currentDay}</Text>
+                  </View>
+                )}
+                {shouldShowSender(index) && (
+                  <Text
+                    style={[
+                      styles.senderLabel,
+                      item.sender === "You"
+                        ? styles.senderLabelUser
+                        : styles.senderLabelBot,
+                    ]}
+                  >
+                    {item.sender}
+                  </Text>
+                )}
+                <View style={{ flexDirection: "row", alignItems: "flex-end" }}>
+                  <Text style={item.sender === "You" ? styles.user : styles.bot}>
+                    {item.text}
+                  </Text>
+                  <Text style={styles.timeLabel}>{getTimeLabel(item.timestamp)}</Text>
+                </View>
+              </View>
+            );
+          }}
         />
         {isSending && (
           <View style={styles.typingIndicatorWrapper}>
@@ -507,6 +557,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     padding: 10,
     margin: 4,
+    marginBottom: 10,
     borderRadius: 14,
     maxWidth: "80%",
   },
@@ -519,9 +570,9 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   senderLabelUser: {
-    alignSelf: "flex-end",
+    alignSelf: "flex-start",
     color: "#e03487",
-    marginRight: 12,
+    marginLeft: 12,
     fontWeight: "bold",
   },
   senderLabelBot: {
@@ -547,5 +598,26 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  dayLabelWrapper: {
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  dayLabel: {
+    backgroundColor: "#393a4a",
+    color: "#fff",
+    paddingHorizontal: 12,
+    paddingVertical: 3,
+    borderRadius: 12,
+    fontSize: 13,
+    fontWeight: "bold",
+    opacity: 0.85,
+  },
+  timeLabel: {
+    color: "#b0b3c6",
+    fontSize: 11,
+    marginLeft: 6,
+    marginBottom: 10,
+    alignSelf: "flex-end",
   },
 });
