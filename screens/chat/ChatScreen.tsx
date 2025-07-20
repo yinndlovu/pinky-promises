@@ -24,6 +24,10 @@ import { getNotes } from "../../services/notesService";
 import { getLoveLanguage } from "../../services/loveLanguageService";
 import { getUserFavorites } from "../../services/favoritesService";
 import { getAboutUser } from "../../services/aboutUserService";
+import {
+  saveKeyDetail,
+  fetchKeyDetails,
+} from "../../services/ai/aiKeyDetailsService";
 
 // chats database
 import {
@@ -60,6 +64,7 @@ export default function ChatScreen() {
   const [loveLanguage, setLoveLanguage] = useState<string>("");
   const [aboutUser, setAboutUser] = useState<string>("");
   const [favorites, setFavorites] = useState<any>({});
+  const [keyDetails, setKeyDetails] = useState<any[]>([]);
 
   // use states (partner data)
   const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
@@ -192,7 +197,23 @@ export default function ChatScreen() {
     fetchMessages().then(setMessages);
   }, []);
 
+  useEffect(() => {
+    if (userId) {
+      fetchKeyDetails(userId)
+        .then(setKeyDetails)
+        .catch(() => setKeyDetails([]));
+    }
+  }, [userId]);
+
   // helpers
+  const getFormattedKeyDetails = useCallback(() => {
+    if (!keyDetails.length) {
+      return "None recorded.";
+    }
+
+    return keyDetails.map((d) => `${d.type}: ${d.key} = ${d.value}`).join("; ");
+  }, [keyDetails]);
+
   const getFormattedSpecialDates = useCallback(() => {
     if (!specialDates.length) {
       return "None set";
@@ -266,7 +287,7 @@ export default function ChatScreen() {
     if (!favArr.length) {
       return "None set";
     }
-    
+
     return favArr.map((f) => `${f.label}: ${f.value}`).join(", ");
   }, [partnerFavorites]);
 
@@ -276,12 +297,20 @@ export default function ChatScreen() {
 
   // AI call
   const getBotResponse = async (message: string) => {
+    const todayString = new Date().toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+
     const systemPrompt = `
     Your name is Lily, and a helpful assistant (more like a mascot) for ${
       user?.name || "User"
     }. Their partner's name is ${
       partnerName || "Partner"
     }, they are a couple using the Pinky Promises app.
+    Today is: ${todayString}
     Currently, you're talking to just ${
       user?.name || "User"
     }, so avoid addressing this 
@@ -307,9 +336,15 @@ export default function ChatScreen() {
     }: ${getFormattedPartnerFavorites()}.
     More about ${user?.name || "User"}: ${getFormattedAboutUser()}.
     More about ${partnerName || "Partner"}: ${getFormattedAboutPartner()}
-    Answer questions about their relationship, memories, special dates, favorites, love langauges, and more. 
+    Answer questions about their relationship, memories, special dates, favorites, 
+    love langauges, and more. 
     Be warm, personal, and supportive.
     Keep your messages short and as human as possible.
+    If the user shares a new key detail (like a favorite, special date, or 
+    relationship milestone, essentially something worth remembering), respond as normal, 
+    but also include a JSON object at the end of your response with the format:
+    {"record": {"type": "...", "key": "...", "value": "..."}}
+    If there's nothing to record, do not include this object.
     `.trim();
 
     const history = [...messages].reverse().map((m) => ({
@@ -372,6 +407,17 @@ export default function ChatScreen() {
 
     const aiText = await getBotResponse(inputText);
 
+    let record = null;
+    let messageText = aiText;
+    try {
+      const match = aiText.match(/\{[\s\S]*"record"[\s\S]*\}/);
+      if (match) {
+        const json = JSON.parse(match[0]);
+        record = json.record;
+        messageText = aiText.replace(match[0], "").trim();
+      }
+    } catch (e) {}
+
     const botTimestamp = Date.now();
     const botReply: Message = {
       id: (botTimestamp + 1).toString(),
@@ -389,6 +435,21 @@ export default function ChatScreen() {
       botReply.sender,
       botReply.timestamp
     );
+
+    const token = await AsyncStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    if (record && partnerId && token) {
+      await saveKeyDetail({ ...record, userId, partnerId, token });
+
+      try {
+        const details = await fetchKeyDetails(token);
+        setKeyDetails(details);
+      } catch {}
+    }
   };
 
   const shouldShowSender = (index: number) => {
