@@ -422,7 +422,7 @@ export default function ChatScreen() {
     const botTimestamp = Date.now();
     const botReply: Message = {
       id: (botTimestamp + 1).toString(),
-      text: aiText || "sorry, i didn’t quite get that. please try again.",
+      text: messageText || "sorry, i didn’t quite get that. please try again.",
       sender: "Lily",
       timestamp: botTimestamp,
     };

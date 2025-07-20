@@ -1,6 +1,14 @@
 // external
-import React from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import React, { useRef } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Animated,
+  TouchableWithoutFeedback,
+  TouchableOpacity,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 // types
@@ -15,6 +23,44 @@ type Props = {
   activities: Activity[];
 };
 
+type AnimatedActivityItemProps = {
+  item: Activity;
+  children: React.ReactNode;
+};
+
+const AnimatedActivityItem: React.FC<AnimatedActivityItemProps> = ({ item, children }) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.96,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 10,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      useNativeDriver: true,
+      speed: 50,
+      bounciness: 10,
+    }).start();
+  };
+
+  return (
+    <TouchableWithoutFeedback
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+    >
+      <Animated.View style={{ transform: [{ scale }] }}>
+        {children}
+      </Animated.View>
+    </TouchableWithoutFeedback>
+  );
+};
+
 const RecentActivity: React.FC<Props> = ({ activities }) => (
   <View style={styles.container}>
     <Text style={styles.sectionTitle}>RECENT ACTIVITY</Text>
@@ -23,25 +69,27 @@ const RecentActivity: React.FC<Props> = ({ activities }) => (
         <Text style={styles.noActivityText}>No recent activities</Text>
       </View>
     ) : (
-    <FlatList
-      data={activities}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <View style={styles.activityRow}>
-          <View style={styles.iconWrapper}>
-            <Feather name="activity" size={20} color="#e03487" />
-          </View>
-          <View style={styles.textWrapper}>
-            <Text style={styles.description}>{item.description}</Text>
-            <Text style={styles.datetime}>
-              {item.date} • {item.time}
-            </Text>
-          </View>
-        </View>
-      )}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-      scrollEnabled={false}
-    />
+      <FlatList
+        data={activities}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <AnimatedActivityItem item={item}>
+            <View style={styles.activityRow}>
+              <View style={styles.iconWrapper}>
+                <Feather name="activity" size={20} color="#e03487" />
+              </View>
+              <View style={styles.textWrapper}>
+                <Text style={styles.description}>{item.description}</Text>
+                <Text style={styles.datetime}>
+                  {item.date} • {item.time}
+                </Text>
+              </View>
+            </View>
+          </AnimatedActivityItem>
+        )}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        scrollEnabled={false}
+      />
     )}
   </View>
 );
