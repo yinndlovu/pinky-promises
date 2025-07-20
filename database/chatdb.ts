@@ -19,8 +19,13 @@ export const createTable = async (): Promise<void> => {
         timestamp INTEGER NOT NULL
       );
     `);
+
+    try {
+      await db.execAsync(`
+        CREATE INDEX IF NOT EXISTS idx_timestamp ON messages (timestamp);
+      `);
+    } catch (indexError) {}
   } catch (error) {
-    console.error("Error creating table:", error);
     throw error;
   }
 };
@@ -31,13 +36,15 @@ export const saveMessage = async (
   sender: string,
   timestamp: number
 ): Promise<void> => {
+  if (!id || !text || !sender || typeof timestamp !== "number") {
+    throw new Error("Invalid input for saving message");
+  }
   try {
     await db.runAsync(
       `INSERT INTO messages (id, text, sender, timestamp) VALUES (?, ?, ?, ?)`,
       [id, text, sender, timestamp]
     );
   } catch (error) {
-    console.error("Error saving message:", error);
     throw error;
   }
 };
@@ -49,7 +56,6 @@ export const deleteOldMessages = async (): Promise<void> => {
       sevenDaysAgo,
     ]);
   } catch (error) {
-    console.error("Error deleting old messages:", error);
     throw error;
   }
 };
@@ -61,7 +67,6 @@ export const fetchMessages = async (): Promise<ChatMessage[]> => {
     );
     return result;
   } catch (error) {
-    console.error("Error fetching messages:", error);
     throw error;
   }
 };

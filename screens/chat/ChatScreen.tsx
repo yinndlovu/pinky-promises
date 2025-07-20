@@ -76,6 +76,7 @@ export default function ChatScreen() {
     } catch {}
   };
 
+  // use effects
   useEffect(() => {
     fetchContext();
   }, []);
