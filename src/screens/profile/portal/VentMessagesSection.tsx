@@ -1,30 +1,50 @@
+// external
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+// internal
 import { Message } from "../../../types/types";
+
+// content
 import MessageList from "./MessageList";
 
 interface Props {
   sent: Message[];
   received: Message[];
   onLongPress: (msg: Message) => void;
+  onAdd: () => void;
+  onViewMessage: (msg: Message) => void;
 }
 
 export default function VentMessagesSection({
   sent,
   received,
   onLongPress,
+  onAdd,
+  onViewMessage,
 }: Props) {
   // variables
   const unviewed = received.find((m) => !m.viewed);
 
   return (
     <View>
-      <Text style={styles.sectionTitle}>Vent Messages</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.sectionTitle}>Vent Messages</Text>
+        <TouchableOpacity style={styles.plusButton} onPress={onAdd}>
+          <Ionicons name="add" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
       {unviewed && (
         <View style={styles.banner}>
           <Text style={styles.bannerText}>You have a vent message!</Text>
           <TouchableOpacity style={styles.viewButton}>
-            <Text style={styles.viewButtonText}>View</Text>
+            <Text
+              style={styles.viewButtonText}
+              onPress={() => onViewMessage(unviewed)}
+            >
+              View
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -48,7 +68,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    marginTop: 16,
+    marginTop: 25,
     marginBottom: 10,
     color: "#dce0f7",
   },
@@ -57,6 +77,22 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 12,
     color: "#b0b3c6",
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+    marginTop: 20,
+  },
+  plusButton: {
+    backgroundColor: "#3b82f6",
+    borderRadius: 16,
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
   },
   banner: {
     flexDirection: "row",
@@ -74,7 +110,7 @@ const styles = StyleSheet.create({
   },
   viewButton: {
     marginLeft: 12,
-    backgroundColor: "#e03487", 
+    backgroundColor: "#e03487",
     paddingVertical: 7,
     paddingHorizontal: 18,
     borderRadius: 8,

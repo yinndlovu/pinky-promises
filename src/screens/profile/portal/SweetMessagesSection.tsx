@@ -1,6 +1,12 @@
+// external
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+
+// internal
 import { Message } from "../../../types/types";
+
+// content
 import MessageList from "./MessageList";
 
 interface Props {
@@ -9,6 +15,8 @@ interface Props {
   onLongPress: (msg: Message) => void;
   onViewAllSent: () => void;
   onViewAllReceived: () => void;
+  onAdd: () => void;
+  onViewMessage: (msg: Message) => void;
 }
 
 export default function SweetMessagesSection({
@@ -17,17 +25,27 @@ export default function SweetMessagesSection({
   onLongPress,
   onViewAllSent,
   onViewAllReceived,
+  onAdd,
+  onViewMessage,
 }: Props) {
   // variables
   const unviewed = received.find((m) => !m.viewed);
 
   return (
     <View>
-      <Text style={styles.sectionTitle}>Sweet Messages</Text>
+      <View style={styles.titleRow}>
+        <Text style={styles.sectionTitle}>Sweet Messages</Text>
+        <TouchableOpacity style={styles.plusButton} onPress={onAdd}>
+          <Ionicons name="add" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
       {unviewed && (
         <View style={styles.banner}>
           <Text style={styles.bannerText}>You have a sweet message!</Text>
-          <TouchableOpacity style={styles.viewButton}>
+          <TouchableOpacity 
+          style={styles.viewButton}
+          onPress={() => onViewMessage(unviewed?.text ?? "")}
+          >
             <Text style={styles.viewButtonText}>View</Text>
           </TouchableOpacity>
         </View>
@@ -84,6 +102,21 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 12,
     color: "#b0b3c6",
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
+  plusButton: {
+    backgroundColor: "#e03487",
+    borderRadius: 16,
+    width: 32,
+    height: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
   },
   row: {
     flexDirection: "row",
