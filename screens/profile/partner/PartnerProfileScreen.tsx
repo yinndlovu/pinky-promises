@@ -261,7 +261,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity onPress={() => {}} style={{ marginRight: 20 }}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("PortalScreen")}
+          style={{ marginRight: 20 }}
+        >
           <Feather name="aperture" size={26} color="#fff" />
         </TouchableOpacity>
       ),

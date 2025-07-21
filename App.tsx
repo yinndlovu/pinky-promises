@@ -34,6 +34,7 @@ import { registerForPushNotificationsAsync } from "./utils/notifications";
 import { NotificationProvider } from "./contexts/NotificationContext";
 import { useNotification } from "./contexts/NotificationContext";
 import ChatScreen from "./screens/chat/ChatScreen";
+import PortalScreen from "./screens/profile/portal/PortalScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -323,6 +324,18 @@ function AppContent() {
           options={{
             headerShown: true,
             title: "Lily",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="PortalScreen"
+          component={PortalScreen}
+          options={{
+            headerShown: true,
+            title: "Portal",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
