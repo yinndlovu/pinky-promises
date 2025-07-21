@@ -15,6 +15,7 @@ import {
 // content
 import AlertModal from "./AlertModal";
 
+// types
 type Props = {
   visible: boolean;
   onClose: () => void;
@@ -30,10 +31,12 @@ const MessageInputModal: React.FC<Props> = ({
   type,
   loading = false,
 }) => {
+  // use states
   const [text, setText] = useState("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertVisible, setAlertVisible] = useState(false);
 
+  // handlers
   const handleSend = async () => {
     if (!text.trim()) {
       return;
@@ -48,6 +51,7 @@ const MessageInputModal: React.FC<Props> = ({
     }
   };
 
+  // dynamic text
   const title =
     type === "sweet"
       ? "Leave your baby a sweet message"
