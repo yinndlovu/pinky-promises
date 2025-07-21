@@ -1,40 +1,45 @@
+// external
 import { NavigationContainer } from "@react-navigation/native";
 import {
   createStackNavigator,
   TransitionPresets,
 } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import WelcomeScreen from "./screens/welcome/WelcomeScreen";
-import NameScreen from "./screens/auth/register/NameScreen";
-import UsernameScreen from "./screens/auth/register/UsernameScreen";
-import PasswordScreen from "./screens/auth/register/PasswordScreen";
-import HomeScreen from "./screens/home/HomeScreen";
-import LoginScreen from "./screens/auth/login/LoginScreen";
-import NavigationBar from "./components/navigation/NavigationBar";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
-import SettingsScreen from "./screens/settings/SettingsScreen";
-import ProfileScreen from "./screens/profile/ProfileScreen";
-import OursScreen from "./screens/ours/OursScreen";
-import GiftsScreen from "./screens/gifts/GiftsScreen";
-import ChangeEmailScreen from "./screens/settings/ChangeEmailScreen";
-import VerifyEmailOtpScreen from "./screens/settings/VerifyEmailOtpScreen";
-import ChangePasswordScreen from "./screens/settings/ChangePasswordScreen";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import PartnerProfileScreen from "./screens/profile/partner/PartnerProfileScreen";
 import * as Location from "expo-location";
-import { LOCATION_TASK_NAME } from "./background/LocationTask";
 import React from "react";
-import SearchScreen from "./screens/search/SearchScreen";
-import UserProfileScreen from "./screens/profile/user/UserProfileScreen";
-import PendingRequestsScreen from "./screens/requests/PendingRequestsScreen";
-import NotesScreen from "./screens/ours/NotesScreen";
 import { useEffect } from "react";
-import { registerForPushNotificationsAsync } from "./utils/notifications";
-import { NotificationProvider } from "./contexts/NotificationContext";
-import { useNotification } from "./contexts/NotificationContext";
-import ChatScreen from "./screens/chat/ChatScreen";
-import PortalScreen from "./screens/profile/portal/PortalScreen";
+
+// internal
+import { registerForPushNotificationsAsync } from "./src/utils/notifications";
+import { NotificationProvider } from "./src/contexts/NotificationContext";
+import { useNotification } from "./src/contexts/NotificationContext";
+import { LOCATION_TASK_NAME } from "./src/background/LocationTask";
+import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
+
+// content
+import PartnerProfileScreen from "./src/screens/profile/partner/PartnerProfileScreen";
+import ChatScreen from "./src/screens/chat/ChatScreen";
+import PortalScreen from "./src/screens/profile/portal/PortalScreen";
+import SearchScreen from "./src/screens/search/SearchScreen";
+import UserProfileScreen from "./src/screens/profile/user/UserProfileScreen";
+import PendingRequestsScreen from "./src/screens/requests/PendingRequestsScreen";
+import NotesScreen from "./src/screens/ours/NotesScreen";
+import WelcomeScreen from "./src/screens/welcome/WelcomeScreen";
+import NameScreen from "./src/screens/auth/register/NameScreen";
+import UsernameScreen from "./src/screens/auth/register/UsernameScreen";
+import PasswordScreen from "./src/screens/auth/register/PasswordScreen";
+import HomeScreen from "./src/screens/home/HomeScreen";
+import LoginScreen from "./src/screens/auth/login/LoginScreen";
+import NavigationBar from "./src/components/navigation/NavigationBar";
+import SettingsScreen from "./src/screens/settings/SettingsScreen";
+import ProfileScreen from "./src/screens/profile/ProfileScreen";
+import OursScreen from "./src/screens/ours/OursScreen";
+import GiftsScreen from "./src/screens/gifts/GiftsScreen";
+import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";
+import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
+import ChangePasswordScreen from "./src/screens/settings/ChangePasswordScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -65,6 +70,7 @@ async function startBackgroundLocation() {
   });
 }
 
+// navigation bar
 function MainTabs() {
   return (
     <Tab.Navigator
@@ -87,6 +93,7 @@ function MainTabs() {
   );
 }
 
+// screens
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
 
