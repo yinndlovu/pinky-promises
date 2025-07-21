@@ -5,7 +5,7 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 type Props = {
   visible: boolean;
   onClose: () => void;
-  message: string;
+  message: any | null;
   type: "sweet" | "vent";
 };
 
@@ -15,6 +15,34 @@ const ViewMessageModal: React.FC<Props> = ({
   message,
   type,
 }) => {
+    // utils
+  function formatDate(dateString?: string) {
+    if (!dateString) {
+        return "";
+    }
+
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        return "";
+    }
+
+    return date
+      .toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+      .replace(",", "");
+  }
+
+  if (!message) {
+    return null;
+  }
+
   const title = type === "sweet" ? "Sweet message" : "Vent message";
 
   return (
@@ -22,7 +50,10 @@ const ViewMessageModal: React.FC<Props> = ({
       <View style={styles.overlay}>
         <View style={styles.container}>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.message}>{message}</Text>
+          <Text style={styles.message}>{message?.message || ""}</Text>
+          <Text style={styles.meta}>
+            {formatDate(message.createdAt)}
+          </Text>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
@@ -70,6 +101,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 15,
+  },
+  meta: {
+    color: "#b0b3c6",
+    fontSize: 12,
+    textAlign: "center",
+    marginBottom: 12,
   },
 });
 

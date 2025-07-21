@@ -1,6 +1,21 @@
+// external
 import React from "react";
-import { TouchableOpacity, Text, StyleSheet, View, Dimensions } from "react-native";
-import { Message } from "../../../types/types";
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  View,
+  Dimensions,
+} from "react-native";
+
+// types
+type Message = {
+  id: string;
+  message?: string;
+  seen?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 interface Props {
   message: Message;
@@ -11,19 +26,28 @@ interface Props {
 const screenWidth = Dimensions.get("window").width;
 
 export default function MessageCard({ message, onLongPress, onPress }: Props) {
-  // helpers
+  // utils
   const formatDate = (dateStr: string) => {
+    if (!dateStr) {
+      return "";
+    }
+
     const date = new Date(dateStr);
 
     if (isNaN(date.getTime())) {
-        return dateStr;
+      return dateStr;
     }
 
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+    return date
+      .toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+      .replace(",", "");
   };
 
   return (
@@ -33,10 +57,10 @@ export default function MessageCard({ message, onLongPress, onPress }: Props) {
       onPress={onPress ? () => onPress(message) : undefined}
       activeOpacity={0.85}
     >
-      <Text style={styles.messageText}>{message.content}</Text>
+      <Text style={styles.messageText}>{message.message}</Text>
       <View style={styles.metaRow}>
-        <Text style={styles.date}>{formatDate(message.date)}</Text>
-        <Text style={styles.status}>{message.viewed ? "Seen" : "Sent"}</Text>
+        <Text style={styles.date}>{formatDate(message.createdAt || "")}</Text>
+        <Text style={styles.status}>{message.seen ? "Seen" : "Sent"}</Text>
       </View>
     </TouchableOpacity>
   );

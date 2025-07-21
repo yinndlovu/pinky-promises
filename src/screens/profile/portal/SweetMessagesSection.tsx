@@ -3,11 +3,16 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// internal
-import { Message } from "../../../types/types";
-
 // content
 import MessageList from "./MessageList";
+
+type Message = {
+  id: string;
+  message?: string;
+  seen?: boolean;
+  createdAt?: string;
+  updatedAt?: string,
+};
 
 interface Props {
   sent: Message[];
@@ -17,6 +22,7 @@ interface Props {
   onViewAllReceived: () => void;
   onAdd: () => void;
   onViewMessage: (msg: Message) => void;
+  lastUnseen?: Message | null;
 }
 
 export default function SweetMessagesSection({
@@ -27,9 +33,10 @@ export default function SweetMessagesSection({
   onViewAllReceived,
   onAdd,
   onViewMessage,
+  lastUnseen,
 }: Props) {
   // variables
-  const unviewed = received.find((m) => !m.viewed);
+  const unviewed = lastUnseen;
 
   return (
     <View>
@@ -44,7 +51,7 @@ export default function SweetMessagesSection({
           <Text style={styles.bannerText}>You have a sweet message!</Text>
           <TouchableOpacity 
           style={styles.viewButton}
-          onPress={() => onViewMessage(unviewed?.text ?? "")}
+          onPress={() => onViewMessage(unviewed)}
           >
             <Text style={styles.viewButtonText}>View</Text>
           </TouchableOpacity>
@@ -160,7 +167,7 @@ const styles = StyleSheet.create({
   viewAllButtonText: {
     color: "#e03487",
     fontWeight: "bold",
-    fontSize: 15,
+    fontSize: 13,
     letterSpacing: 0.5,
   },
   emptyText: {

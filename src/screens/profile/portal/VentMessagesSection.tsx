@@ -3,11 +3,16 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// internal
-import { Message } from "../../../types/types";
-
 // content
 import MessageList from "./MessageList";
+
+type Message = {
+  id: string;
+  message?: string;
+  seen?: boolean;
+  createdAt?: string;
+  updatedAt?: string,
+};
 
 interface Props {
   sent: Message[];
@@ -15,6 +20,7 @@ interface Props {
   onLongPress: (msg: Message) => void;
   onAdd: () => void;
   onViewMessage: (msg: Message) => void;
+  lastUnseen?: Message | null;
 }
 
 export default function VentMessagesSection({
@@ -23,9 +29,10 @@ export default function VentMessagesSection({
   onLongPress,
   onAdd,
   onViewMessage,
+  lastUnseen,
 }: Props) {
   // variables
-  const unviewed = received.find((m) => !m.viewed);
+  const unviewed = lastUnseen;
 
   return (
     <View>

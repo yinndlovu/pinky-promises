@@ -9,13 +9,18 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
+  ActivityIndicator,
 } from "react-native";
+
+// content
+import AlertModal from "./AlertModal";
 
 type Props = {
   visible: boolean;
   onClose: () => void;
   onSend: (text: string) => void;
   type: "sweet" | "vent";
+  loading?: boolean;
 };
 
 const MessageInputModal: React.FC<Props> = ({
@@ -23,13 +28,23 @@ const MessageInputModal: React.FC<Props> = ({
   onClose,
   onSend,
   type,
+  loading = false,
 }) => {
   const [text, setText] = useState("");
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertVisible, setAlertVisible] = useState(false);
 
-  const handleSend = () => {
-    if (text.trim()) {
-      onSend(text.trim());
+  const handleSend = async () => {
+    if (!text.trim()) {
+      return;
+    }
+
+    try {
+      await onSend(text.trim());
       setText("");
+    } catch (err: any) {
+      setAlertMessage(err?.message || "Failed to send message");
+      setAlertVisible(true);
     }
   };
 
@@ -56,24 +71,38 @@ const MessageInputModal: React.FC<Props> = ({
               onChangeText={setText}
               multiline
               maxLength={500}
+              editable={!loading}
             />
             <View style={styles.buttonRow}>
-              <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={onClose}
+                disabled={loading}
+              >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
                   styles.sendButton,
                   { backgroundColor: type === "sweet" ? "#e03487" : "#3b82f6" },
-                  !text.trim() && { opacity: 0.5 },
+                  (!text.trim() || loading) && { opacity: 0.5 },
                 ]}
                 onPress={handleSend}
-                disabled={!text.trim()}
+                disabled={!text.trim() || loading}
               >
-                <Text style={styles.sendButtonText}>Send</Text>
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.sendButtonText}>Send</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
+          <AlertModal
+            visible={alertVisible}
+            message={alertMessage || ""}
+            onClose={() => setAlertVisible(false)}
+          />
         </View>
       </TouchableWithoutFeedback>
     </Modal>

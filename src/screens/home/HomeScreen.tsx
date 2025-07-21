@@ -63,7 +63,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
 
   // refresh screen
-  const onRefresh = React.useCallback(async () => {
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await Promise.all([

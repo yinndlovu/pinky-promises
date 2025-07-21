@@ -1,7 +1,18 @@
+// content
 import React from "react";
 import { FlatList } from "react-native";
-import { Message } from "../../../types/types";
+
+// content
 import MessageCard from "./MessageCard";
+
+// types
+type Message = {
+  id: string;
+  message?: string;
+  seen?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
 interface Props {
   messages: Message[];
@@ -11,18 +22,15 @@ interface Props {
 
 export default function MessageList({ messages, onLongPress, onPress }: Props) {
   return (
-    <FlatList
-      data={messages}
-      renderItem={({ item }) => (
+    <>
+      {messages.map((item) => (
         <MessageCard
+          key={item.id}
           message={item}
           onLongPress={onLongPress}
           onPress={onPress}
         />
-      )}
-      keyExtractor={(item) => item.id}
-      horizontal
-      showsHorizontalScrollIndicator={false}
-    />
+      ))}
+    </>
   );
 }
