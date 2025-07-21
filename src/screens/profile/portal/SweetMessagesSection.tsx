@@ -26,34 +26,47 @@ export default function SweetMessagesSection({
       <Text style={styles.sectionTitle}>Sweet Messages</Text>
       {unviewed && (
         <View style={styles.banner}>
-          <Text>You have a sweet message!</Text>
+          <Text style={styles.bannerText}>You have a sweet message!</Text>
           <TouchableOpacity style={styles.viewButton}>
-            <Text>View</Text>
+            <Text style={styles.viewButtonText}>View</Text>
           </TouchableOpacity>
         </View>
       )}
-      <Text style={styles.subTitle}>Most Recent Sent</Text>
-      {sent[0] && (
+      <Text style={styles.subTitle}>Most recent sent</Text>
+      {sent[0] ? (
         <MessageList messages={[sent[0]]} onLongPress={onLongPress} />
+      ) : (
+        <Text style={styles.emptyText}>You haven't recently sent any sweet message</Text>
       )}
       <View style={styles.row}>
-        <Text style={styles.subTitle}>Sent (Last 6)</Text>
+        <Text style={styles.subTitle}>Last six sent</Text>
         <TouchableOpacity style={styles.viewAllButton} onPress={onViewAllSent}>
-          <Text style={styles.viewAllButtonText}>View All</Text>
+          <Text style={styles.viewAllButtonText}>View all</Text>
         </TouchableOpacity>
       </View>
-      <MessageList messages={sent.slice(0, 6)} onLongPress={onLongPress} />
+      {sent.length > 0 ? (
+        <MessageList messages={sent.slice(0, 6)} onLongPress={onLongPress} />
+      ) : (
+        <Text style={styles.emptyText}>You haven't sent any sweet messages</Text>
+      )}
 
       <View style={styles.row}>
-        <Text style={styles.subTitle}>Received (Last 6)</Text>
+        <Text style={styles.subTitle}>Last six received</Text>
         <TouchableOpacity
           style={styles.viewAllButton}
           onPress={onViewAllReceived}
         >
-          <Text style={styles.viewAllButtonText}>View All</Text>
+          <Text style={styles.viewAllButtonText}>View all</Text>
         </TouchableOpacity>
       </View>
-      <MessageList messages={received.slice(0, 6)} onLongPress={onLongPress} />
+      {received.length > 0 ? (
+        <MessageList
+          messages={received.slice(0, 6)}
+          onLongPress={onLongPress}
+        />
+      ) : (
+        <Text style={styles.emptyText}>Aww, you haven't received these yet</Text>
+      )}
     </View>
   );
 }
@@ -63,7 +76,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     marginTop: 0,
-    color: "#b0b3c6",
+    color: "#dce0f7",
     marginBottom: 10,
   },
   subTitle: {
@@ -82,16 +95,28 @@ const styles = StyleSheet.create({
   banner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#ffe4e1",
-    padding: 10,
-    borderRadius: 8,
-    marginVertical: 8,
+    backgroundColor: "#1b1c2e",
+    padding: 20,
+    borderRadius: 10,
+    marginVertical: 10,
+    justifyContent: "space-between",
+  },
+  bannerText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
   viewButton: {
-    marginLeft: 10,
-    backgroundColor: "#ffb6b9",
-    padding: 6,
-    borderRadius: 6,
+    marginLeft: 12,
+    backgroundColor: "#e03487",
+    paddingVertical: 7,
+    paddingHorizontal: 18,
+    borderRadius: 8,
+  },
+  viewButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 15,
   },
   viewAllButton: {
     backgroundColor: "transparent",
@@ -104,5 +129,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 15,
     letterSpacing: 0.5,
+  },
+  emptyText: {
+    color: "#b0b3c6",
+    fontStyle: "italic",
+    marginVertical: 8,
+    marginLeft: 8,
   },
 });
