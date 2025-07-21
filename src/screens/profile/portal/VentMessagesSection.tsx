@@ -6,6 +6,7 @@ import { Ionicons } from "@expo/vector-icons";
 // content
 import MessageList from "./MessageList";
 
+// types
 type Message = {
   id: string;
   message?: string;
