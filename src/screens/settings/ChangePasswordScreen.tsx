@@ -10,8 +10,13 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
+import { changePassword } from "../../services/authService";
+
+// screen content
+import AlertModal from "../../components/modals/AlertModal";
 
 // types
 type ChangePasswordScreenProps = StackScreenProps<any, any>;
@@ -36,6 +41,8 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
     special: false,
   });
   const [confirmPasswordValid, setConfirmPasswordValid] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   // validators
   const validateNewPassword = (password: string) => {
@@ -86,10 +93,20 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 
     setLoading(true);
     try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("Session expired, please log in again");
+
+        return;
+      }
+
+      await changePassword(token, currentPassword, newPassword, confirmPassword);
+
       navigation.navigate("Settings", { passwordChanged: true });
     } catch (error) {
       setError(
-        "Failed to change password. Please check your current password and try again."
+        "Failed to change password"
       );
     } finally {
       setLoading(false);
@@ -252,6 +269,11 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
           <Text style={styles.toastText}>{error}</Text>
         </View>
       )}
+      <AlertModal
+          visible={alertVisible}
+          message={alertMessage}
+          onClose={() => setAlertVisible(false)}
+        />
     </View>
   );
 };
