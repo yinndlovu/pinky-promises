@@ -100,7 +100,7 @@ export default function SearchScreen({ navigation }: Props) {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
-        setError("Not authenticated");
+        setError("Session expired, please log in again");
         setLoading(false);
         return;
       }

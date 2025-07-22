@@ -219,10 +219,10 @@ export default function PortalScreen() {
         setAlertMessage("Vent message stored for your baby to see");
       }
 
-      await fetchAllSweetMessages();
-      await fetchAllVentMessages();
       setInputModalVisible(false);
       setAlertVisible(true);
+      await fetchAllSweetMessages();
+      await fetchAllVentMessages();
     } catch (err: any) {
       setAlertMessage(err?.message || "Failed to send sweet message");
       setAlertVisible(true);
@@ -254,7 +254,7 @@ export default function PortalScreen() {
       setViewType(type);
       setViewModalVisible(true);
 
-      fetchUnseenMessages();
+      await fetchUnseenMessages();
     } catch (err) {
       setAlertMessage("Failed to load message");
       setAlertVisible(true);

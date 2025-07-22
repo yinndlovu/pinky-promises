@@ -63,8 +63,9 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   const fetchRequests = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
-        showAlert("Not authenticated");
+        showAlert("Session expired, please log in again");
         return;
       }
 
@@ -141,7 +142,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        showAlert("Not authenticated");
+        showAlert("Session expired, please log in again");
         return;
       }
 
@@ -161,8 +162,10 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     setProcessingReject(requestId);
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
-        showAlert("Not authenticated");
+        showAlert("Session expired, please log in again");
+
         return;
       }
 

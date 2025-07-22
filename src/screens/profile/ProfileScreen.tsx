@@ -170,6 +170,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const userId = user?.id;
 
     if (!token || !userId) {
+      
       return;
     }
 
@@ -264,6 +265,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     try {
       const partner = await getPartner(token);
+
       setPartnerName(partner?.name || null);
     } catch (err: any) {
       setPartnerName(null);
@@ -294,6 +296,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     try {
       const aboutText = await getAboutUser(token, userId);
+
       setAbout(aboutText);
     } catch {
       setAbout("");
@@ -357,6 +360,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt) {
       const cachedImageUrl = buildCachedImageUrl(user.id, profilePicUpdatedAt);
+
       return (
         <Image
           source={cachedImageUrl}
@@ -513,7 +517,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         );
 
         setSuccess("Profile picture uploaded!");
-        fetchProfile();
+        await fetchProfile();
       } catch (err: any) {
         if (
           err.response?.data?.error?.includes("PayloadTooLarge") ||
@@ -564,6 +568,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           Authorization: `Bearer ${token}`,
         },
       });
+
       await fetchProfile();
     } catch (err: any) {
       setError(`Failed to update ${field}`);

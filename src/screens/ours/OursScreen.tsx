@@ -187,9 +187,9 @@ const OursScreen = ({ navigation }: Props) => {
 
     await updateSpecialDate(token, selectedDate.id, date, title, description);
 
+    setAlertMessage("Special date updated");
     setEditModalVisible(false);
     setSelectedDate(null);
-    setAlertMessage("Special date updated");
     setAlertVisible(true);
 
     await fetchSpecialDates();
@@ -199,7 +199,7 @@ const OursScreen = ({ navigation }: Props) => {
     if (!selectedDate) {
       return;
     }
-    
+
     setDeleting(true);
 
     const token = await AsyncStorage.getItem("token");
@@ -241,11 +241,13 @@ const OursScreen = ({ navigation }: Props) => {
       await deleteFavoriteMemory(token, memory.id);
       await fetchMemories(showAllMemories);
     } catch {}
+
     setMemoryModalLoading(false);
   };
 
   const handleSaveMemory = async (memoryText: string, date: string) => {
     setMemoryModalLoading(true);
+
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -253,11 +255,13 @@ const OursScreen = ({ navigation }: Props) => {
         setAlertMessage("You are not authorized. Try re-logging in.");
         setAlertVisible(true);
         setMemoryModalLoading(false);
+
         return;
       }
 
       if (editingMemory) {
         await updateFavoriteMemory(token, editingMemory.id, memoryText, date);
+
         setAlertMessage("Favorite memory updated");
       } else {
         await createFavoriteMemory(token, memoryText, date);
@@ -266,11 +270,13 @@ const OursScreen = ({ navigation }: Props) => {
 
       setMemoryModalVisible(false);
       setAlertVisible(true);
+
       await fetchMemories(showAllMemories);
     } catch (err) {
       setAlertMessage("Failed to save memory.");
       setAlertVisible(true);
     }
+
     setMemoryModalLoading(false);
   };
 
