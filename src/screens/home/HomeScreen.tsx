@@ -89,6 +89,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -117,7 +118,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        throw new Error("No token found");
+        setError("Session expired, please log in again");
+        return;
       }
 
       const response = await axios.get(
@@ -170,6 +172,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -189,6 +192,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -235,6 +239,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 

@@ -74,6 +74,10 @@ const OursScreen = ({ navigation }: Props) => {
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  // use states errors
+  const [error, setError] = useState<string | null>(null);
+  const [showError, setShowError] = useState(false);
+
   // refresh screen
   const onRefresh = async () => {
     setRefreshing(true);
@@ -91,6 +95,7 @@ const OursScreen = ({ navigation }: Props) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -110,6 +115,7 @@ const OursScreen = ({ navigation }: Props) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -128,6 +134,7 @@ const OursScreen = ({ navigation }: Props) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -149,6 +156,7 @@ const OursScreen = ({ navigation }: Props) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -182,6 +190,7 @@ const OursScreen = ({ navigation }: Props) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -205,6 +214,7 @@ const OursScreen = ({ navigation }: Props) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -235,6 +245,7 @@ const OursScreen = ({ navigation }: Props) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -252,7 +263,7 @@ const OursScreen = ({ navigation }: Props) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setAlertMessage("You are not authorized. Try re-logging in.");
+        setAlertMessage("Session expired, please log in again");
         setAlertVisible(true);
         setMemoryModalLoading(false);
 
@@ -287,6 +298,7 @@ const OursScreen = ({ navigation }: Props) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -307,6 +319,17 @@ const OursScreen = ({ navigation }: Props) => {
   useEffect(() => {
     fetchMemories(showAllMemories);
   }, [showAllMemories]);
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+      const timer = setTimeout(() => {
+        setShowError(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   {
     deleting && (
@@ -459,6 +482,12 @@ const OursScreen = ({ navigation }: Props) => {
         memory={detailsMemory}
         loading={detailsLoading}
       />
+
+      {showError && error && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{error}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -477,6 +506,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
+  },
+  toast: {
+    position: "absolute",
+    top: 50,
+    // bottom: 40,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 
