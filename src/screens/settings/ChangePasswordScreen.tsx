@@ -110,6 +110,8 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
       );
 
       setAlertMessage("Password changed. Log in again");
+      await AsyncStorage.removeItem("token");
+      
       setAlertVisible(true);
       setChangeSuccess(true);
     } catch (error: any) {

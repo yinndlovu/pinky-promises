@@ -170,7 +170,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const userId = user?.id;
 
     if (!token || !userId) {
-      
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -232,6 +232,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
@@ -249,6 +250,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const userId = user?.id;
 
     if (!token || !userId) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -260,6 +262,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -276,6 +279,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -291,6 +295,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const userId = user?.id;
 
     if (!token || !userId) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -308,7 +313,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        throw new Error("No token found");
+        setError("Session expired, please log in again");
+        return;
       }
 
       const response = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
@@ -443,6 +449,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -454,6 +461,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 
@@ -469,6 +477,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
+      setError("Session expired, please log in again");
       return;
     }
 

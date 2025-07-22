@@ -69,6 +69,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (userData) {
       setUser(userData);
     }
+    
     setIsAuthenticated(true);
   };
 
