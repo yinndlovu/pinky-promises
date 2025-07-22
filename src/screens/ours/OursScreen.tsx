@@ -199,6 +199,7 @@ const OursScreen = ({ navigation }: Props) => {
     if (!selectedDate) {
       return;
     }
+    
     setDeleting(true);
 
     const token = await AsyncStorage.getItem("token");

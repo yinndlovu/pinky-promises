@@ -18,6 +18,7 @@ import {
   viewSweetMessage,
   getSentSweetMessages,
   getReceivedSweetMessages,
+  deleteSweetMessage,
 } from "../../../services/sweetMessageService";
 import {
   ventToPartner,
@@ -25,6 +26,7 @@ import {
   viewVentMessage,
   getSentVentMessages,
   getReceivedVentMessages,
+  deleteVentMessage,
 } from "../../../services/ventMessageService";
 
 // screen content
@@ -73,6 +75,7 @@ export default function PortalScreen() {
   const [ventMessagesReceived, setVentMessagesReceived] = useState<Message[]>(
     []
   );
+  const [deleting, setDeleting] = useState(false);
 
   // refresh screen
   const onRefresh = async () => {
@@ -145,11 +148,51 @@ export default function PortalScreen() {
   };
 
   // handlers
-  const handleDelete = () => {
-    setConfirmVisible(false);
+  const handleDelete = async () => {
+    try {
+      if (!selectedMessage) {
+        return;
+      }
+
+      setDeleting(true);
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      if (inputType === "sweet") {
+        await deleteSweetMessage(token, selectedMessage.id);
+        setAlertMessage("Sweet message deleted");
+      } else {
+        await deleteVentMessage(token, selectedMessage.id);
+        setAlertMessage("Vent message deleted");
+      }
+
+      setDeleting(false);
+      setConfirmVisible(false);
+      setAlertVisible(true);
+      await fetchAllSweetMessages();
+      await fetchAllVentMessages();
+    } catch (err) {
+      setAlertMessage("Failed to delete message");
+      setDeleting(false);
+      setConfirmVisible(false);
+      setAlertVisible(true);
+    }
   };
 
   const handleLongPress = (msg: Message) => {
+    const isSent =
+      (inputType === "sweet" &&
+        sweetMessagesSent.some((m) => m.id === msg.id)) ||
+      (inputType === "vent" && ventMessagesSent.some((m) => m.id === msg.id));
+
+    if (!isSent) {
+      return;
+    }
+
     setSelectedMessage(msg);
     setConfirmVisible(true);
   };
@@ -220,6 +263,14 @@ export default function PortalScreen() {
     }
   };
 
+  {
+    deleting && (
+      <View style={styles.loadingOverlay}>
+        <ActivityIndicator size="large" color="#e03487" />
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <ScrollView
@@ -263,6 +314,7 @@ export default function PortalScreen() {
           visible={confirmVisible}
           message="Delete this message?"
           onConfirm={handleDelete}
+          loading={deleting}
           onCancel={() => setConfirmVisible(false)}
           onClose={() => setConfirmVisible(false)}
           confirmText="Delete"
@@ -314,5 +366,12 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(35,36,58,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
   },
 });
