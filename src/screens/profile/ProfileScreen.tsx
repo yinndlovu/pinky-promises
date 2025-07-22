@@ -606,8 +606,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   if (!user) {
     return (
-      <View style={styles.container}>
-        <Text style={{ color: "#fff" }}>No profile data.</Text>
+      <View style={styles.centered}>
+        <Text style={{ color: "#fff" }}>No profile data. Try logging in again</Text>
       </View>
     );
   }
