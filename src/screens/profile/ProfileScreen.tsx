@@ -170,7 +170,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const userId = user?.id;
 
     if (!token || !userId) {
-      setError("Session expired, please log in again");
       return;
     }
 
@@ -250,7 +249,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const userId = user?.id;
 
     if (!token || !userId) {
-      setError("Session expired, please log in again");
       return;
     }
 
@@ -295,7 +293,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     const userId = user?.id;
 
     if (!token || !userId) {
-      setError("Session expired, please log in again");
       return;
     }
 

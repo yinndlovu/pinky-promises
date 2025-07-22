@@ -40,6 +40,7 @@ import GiftsScreen from "./src/screens/gifts/GiftsScreen";
 import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./src/screens/settings/ChangePasswordScreen";
+import NotificationsScreen from "./src/screens/settings/NotificationsScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -343,6 +344,18 @@ function AppContent() {
           options={{
             headerShown: true,
             title: "Portal",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="NotificationsScreen"
+          component={NotificationsScreen}
+          options={{
+            headerShown: true,
+            title: "Notifications",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

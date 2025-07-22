@@ -69,7 +69,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     {
       label: "Notifications",
       icon: "bell",
-      onPress: () => {},
+      onPress: () => navigation.navigate("NotificationsScreen"),
     },
     {
       label: "About",
