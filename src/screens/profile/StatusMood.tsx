@@ -26,7 +26,7 @@ type Props = {
   mood?: string;
   moodDescription?: string;
   onEdit?: () => void;
-  status?: "home" | "away" | "unavailable";
+  status?: "home" | "away" | "unreachable" | "unavailable";
   statusDescription?: string;
 };
 
@@ -83,8 +83,13 @@ const StatusMood: React.FC<Props> = ({
     try {
       setFetchingMood(true);
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
+
       const moodData = await getMood(token);
+
       setCurrentMood(moodData.mood);
       setCurrentMoodDescription(moodData.description);
     } catch (err) {
@@ -118,6 +123,8 @@ const StatusMood: React.FC<Props> = ({
               ? { color: "#4caf50" }
               : status === "away"
               ? { color: "#e03487" }
+              : status === "unreachable"
+              ? { color: "#db8a47ff" }
               : { color: "#b0b3c6" },
           ]}
         >
@@ -125,6 +132,8 @@ const StatusMood: React.FC<Props> = ({
             ? "Home"
             : status === "away"
             ? "Away"
+            : status === "unreachable"
+            ? "Unreachable"
             : "Unavailable"}
         </Text>
         <TouchableOpacity

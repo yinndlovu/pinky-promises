@@ -54,7 +54,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [isActive, setIsActive] = useState(true);
   const [loading, setLoading] = useState(true);
   const [partnerStatus, setPartnerStatus] = useState<
-    "home" | "away" | "unavailable"
+    "home" | "away" | "unreachable" | "unavailable"
   >("unavailable");
   const [partnerMood, setPartnerMood] = useState<string>("No mood");
   const [upcomingDate, setUpcomingDate] = useState<any>(null);
@@ -195,8 +195,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       try {
         const statusData = await fetchUserStatus(token, partner.id);
 
-        if (statusData && typeof statusData.isAtHome === "boolean") {
-          if (statusData.isAtHome) {
+        if (
+          statusData &&
+          (typeof statusData.isAtHome === "boolean" ||
+            typeof statusData.unreachable === "boolean")
+        ) {
+          if (statusData.unreachable) {
+            setPartnerStatus("unreachable");
+            setIsActive(false);
+          } else if (statusData.isAtHome) {
             setPartnerStatus("home");
             setIsActive(true);
           } else {
@@ -353,6 +360,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return "Away";
       case "unavailable":
         return "Unavailable";
+      case "unreachable":
+        return "Unreachable"
       default:
         return "Unavailable";
     }

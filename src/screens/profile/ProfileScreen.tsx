@@ -20,7 +20,6 @@ import { Feather } from "@expo/vector-icons";
 import { encode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-
 import type { StackScreenProps } from "@react-navigation/stack";
 
 // internal
@@ -107,9 +106,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // use states (screen content)
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<FavoritesType>({});
-  const [homeStatus, setHomeStatus] = useState<"home" | "away" | "unavailable">(
-    "unavailable"
-  );
+  const [homeStatus, setHomeStatus] = useState<
+    "home" | "away" | "unreachable" | "unavailable"
+  >("unavailable");
   const [statusDescription, setStatusDescription] = useState<string>(
     "You must add your home location to use this feature."
   );
@@ -192,13 +191,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setStatusDescription(
           "You must add your home location to use this feature."
         );
+
         return;
       }
 
       const status = await fetchUserStatus(token, user.id);
 
-      if (status && typeof status.isAtHome === "boolean") {
-        if (status.isAtHome) {
+      if (
+        status &&
+        (typeof status.isAtHome === "boolean" ||
+          typeof status.unreachable === "boolean")
+      ) {
+        if (status.unreachable) {
+          setHomeStatus("unreachable");
+          setStatusDescription("Can't find your current location");
+        } else if (status.isAtHome) {
           setHomeStatus("home");
           setStatusDescription("You are currently at home");
         } else {
@@ -222,12 +229,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const fetchPendingRequestsCount = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const requests = await getReceivedPartnerRequests(token);
       const pendingCount = requests.filter(
         (req: any) => req.status === "pending"
       ).length;
+
       setPendingRequestsCount(pendingCount);
     } catch (error) {}
   };
@@ -235,14 +246,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const fetchFavorites = async () => {
     const token = await AsyncStorage.getItem("token");
     const userId = user?.id;
-    if (!token || !userId) return;
+
+    if (!token || !userId) {
+      return;
+    }
+
     const favs = await getUserFavorites(token, userId);
     setFavorites(favs);
   };
 
   const fetchPartnerName = async () => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+
+    if (!token) {
+      return;
+    }
+
     try {
       const partner = await getPartner(token);
       setPartnerName(partner?.name || null);
@@ -253,8 +272,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const fetchMood = async () => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+
+    if (!token) {
+      return;
+    }
+
     const moodData = await getMood(token);
+
     setMood(moodData.mood);
     setMoodDescription(moodData.description);
   };
@@ -263,7 +287,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const fetchAbout = async () => {
     const token = await AsyncStorage.getItem("token");
     const userId = user?.id;
-    if (!token || !userId) return;
+
+    if (!token || !userId) {
+      return;
+    }
+
     try {
       const aboutText = await getAboutUser(token, userId);
       setAbout(aboutText);
@@ -409,14 +437,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+
+    if (!token) {
+      return;
+    }
+
     await updateLoveLanguage(token, newLoveLanguage);
     setLoveLanguage(newLoveLanguage);
   };
 
   const handleSaveAbout = async (newAbout: string) => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+
+    if (!token) {
+      return;
+    }
+
     await updateAboutUser(token, newAbout);
     setAbout(newAbout);
   };
@@ -427,7 +463,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const handleSaveFavorites = async (newFavorites: FavoritesType) => {
     const token = await AsyncStorage.getItem("token");
-    if (!token) return;
+
+    if (!token) {
+      return;
+    }
+
     await updateUserFavorites(token, newFavorites);
     setFavorites(newFavorites);
   };
@@ -454,6 +494,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         if (result.assets[0].base64.length > 10 * 1024 * 1024) {
           setError("Image is too large. Make sure it's less than 10 MB.");
+
           return;
         }
 
@@ -527,9 +568,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     } catch (err: any) {
       setError(`Failed to update ${field}`);
     } finally {
-      if (field === "name") setLoadingName(false);
-      if (field === "username") setLoadingUsername(false);
-      if (field === "bio") setLoadingBio(false);
+      if (field === "name") {
+        setLoadingName(false);
+      }
+
+      if (field === "username") {
+        setLoadingUsername(false);
+      }
+
+      if (field === "bio") {
+        setLoadingBio(false);
+      }
     }
   };
 
@@ -694,7 +743,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           favorites={favoritesObjectToArray(favorites)}
           onEdit={() => setFavoritesModalVisible(true)}
         />
-        
+
         <UpdateFavoritesModal
           visible={favoritesModalVisible}
           initialFavorites={favorites}

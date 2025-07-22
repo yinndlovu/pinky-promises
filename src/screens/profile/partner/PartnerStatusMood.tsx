@@ -14,11 +14,15 @@ type Props = {
   refreshKey?: number;
 };
 
-const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey }) => {
+const PartnerStatusMood: React.FC<Props> = ({
+  partnerId,
+  partnerName,
+  refreshKey,
+}) => {
   // use states
-  const [status, setStatus] = useState<"home" | "away" | "unavailable">(
-    "unavailable"
-  );
+  const [status, setStatus] = useState<
+    "home" | "away" | "unreachable" | "unavailable"
+  >("unavailable");
   const [statusDescription, setStatusDescription] = useState<string>(
     "Partner hasn't set a home location"
   );
@@ -45,8 +49,17 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
       try {
         const statusData = await fetchUserStatus(token, partnerId);
 
-        if (statusData && typeof statusData.isAtHome === "boolean") {
-          if (statusData.isAtHome) {
+        if (
+          statusData &&
+          (typeof statusData.isAtHome === "boolean" ||
+            typeof statusData.unreachable === "boolean")
+        ) {
+          if (statusData.unreachable) {
+            setStatus("unreachable");
+            setStatusDescription(
+              `Can't find ${partnerName}'s current location`
+            );
+          } else if (statusData.isAtHome) {
             setStatus("home");
             setStatusDescription(`${partnerName} is currently at home`);
           } else {
@@ -64,7 +77,7 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
 
       try {
         const moodData = await getUserMood(token, partnerId);
-        
+
         setMood(moodData.mood);
         setMoodDescription(moodData.description);
       } catch (moodErr: any) {
@@ -100,6 +113,8 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
               ? { color: "#4caf50" }
               : status === "away"
               ? { color: "#e03487" }
+              : status === "unreachable"
+              ? { color: "#db8a47ff" }
               : { color: "#b0b3c6" },
           ]}
         >
@@ -107,6 +122,8 @@ const PartnerStatusMood: React.FC<Props> = ({ partnerId, partnerName, refreshKey
             ? "Home"
             : status === "away"
             ? "Away"
+            : status === "unreachable"
+            ? "Unreachable"
             : "Unavailable"}
         </Text>
       </View>
