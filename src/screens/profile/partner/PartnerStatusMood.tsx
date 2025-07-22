@@ -51,7 +51,7 @@ const PartnerStatusMood: React.FC<Props> = ({
 
         if (
           statusData &&
-          (typeof statusData.isAtHome === "boolean" ||
+          (typeof statusData.dataValues.isAtHome === "boolean" ||
             typeof statusData.unreachable === "boolean")
         ) {
           if (statusData.unreachable) {
@@ -59,7 +59,7 @@ const PartnerStatusMood: React.FC<Props> = ({
             setStatusDescription(
               `Can't find ${partnerName}'s current location`
             );
-          } else if (statusData.isAtHome) {
+          } else if (statusData.dataValues.isAtHome) {
             setStatus("home");
             setStatusDescription(`${partnerName} is currently at home`);
           } else {

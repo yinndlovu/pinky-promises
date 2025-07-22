@@ -199,13 +199,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       if (
         status &&
-        (typeof status.isAtHome === "boolean" ||
+        (typeof status.dataValues.isAtHome === "boolean" ||
           typeof status.unreachable === "boolean")
       ) {
         if (status.unreachable) {
           setHomeStatus("unreachable");
           setStatusDescription("Can't find your current location");
-        } else if (status.isAtHome) {
+        } else if (status.dataValues.isAtHome) {
           setHomeStatus("home");
           setStatusDescription("You are currently at home");
         } else {
