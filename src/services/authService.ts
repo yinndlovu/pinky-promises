@@ -8,10 +8,10 @@ export async function changePassword(
   confirmPassword: string
 ) {
   const res = await axios.put(
-    `${BASE_URL}/api/auth/change-password`,
+    `${BASE_URL}/api/auth/update-password`,
     { currentPassword, newPassword, confirmPassword },
     { headers: { Authorization: `Bearer ${token}` } }
   );
-  
+
   return res.data.message;
 }

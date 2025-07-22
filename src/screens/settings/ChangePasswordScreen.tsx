@@ -43,6 +43,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   const [confirmPasswordValid, setConfirmPasswordValid] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [changeSuccess, setChangeSuccess] = useState(false);
 
   // validators
   const validateNewPassword = (password: string) => {
@@ -101,12 +102,21 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
         return;
       }
 
-      await changePassword(token, currentPassword, newPassword, confirmPassword);
+      await changePassword(
+        token,
+        currentPassword,
+        newPassword,
+        confirmPassword
+      );
 
-      navigation.navigate("Settings", { passwordChanged: true });
-    } catch (error) {
+      setAlertMessage("Password changed. Log in again");
+      setAlertVisible(true);
+      setChangeSuccess(true);
+    } catch (error: any) {
       setError(
-        "Failed to change password"
+        error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          error.message
       );
     } finally {
       setLoading(false);
@@ -270,10 +280,17 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
         </View>
       )}
       <AlertModal
-          visible={alertVisible}
-          message={alertMessage}
-          onClose={() => setAlertVisible(false)}
-        />
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => {
+          setAlertVisible(false);
+
+          if (changeSuccess) {
+            setChangeSuccess(false);
+            navigation.navigate("Settings");
+          }
+        }}
+      />
     </View>
   );
 };

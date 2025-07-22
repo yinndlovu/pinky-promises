@@ -35,10 +35,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
-      if (route.params?.passwordChanged) {
-        setSuccess("Password changed successfully!");
-        navigation.setParams({ passwordChanged: undefined });
-      }
       if (route.params?.emailChanged) {
         setSuccess("Email address updated successfully!");
         navigation.setParams({ emailChanged: undefined });
