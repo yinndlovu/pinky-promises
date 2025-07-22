@@ -138,6 +138,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   // handlers
   const handleAcceptRequest = async (requestId: string, senderId: string) => {
     setProcessingAccept(requestId);
+    
     try {
       const token = await AsyncStorage.getItem("token");
 

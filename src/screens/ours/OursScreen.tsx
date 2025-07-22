@@ -153,15 +153,22 @@ const OursScreen = ({ navigation }: Props) => {
     title: string,
     description?: string
   ) => {
-    const token = await AsyncStorage.getItem("token");
+    try {
+      const token = await AsyncStorage.getItem("token");
 
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      await createSpecialDate(token, date, title, description);
+      await fetchSpecialDates();
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to add special date"
+      );
+      setAlertVisible(true);
     }
-
-    await createSpecialDate(token, date, title, description);
-    await fetchSpecialDates();
   };
 
   const handleLongPressDate = (date: any) => {
@@ -187,21 +194,28 @@ const OursScreen = ({ navigation }: Props) => {
       return;
     }
 
-    const token = await AsyncStorage.getItem("token");
+    try {
+      const token = await AsyncStorage.getItem("token");
 
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      await updateSpecialDate(token, selectedDate.id, date, title, description);
+
+      setAlertMessage("Special date updated");
+      setEditModalVisible(false);
+      setSelectedDate(null);
+      setAlertVisible(true);
+
+      await fetchSpecialDates();
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to update special date"
+      );
+      setAlertVisible(true);
     }
-
-    await updateSpecialDate(token, selectedDate.id, date, title, description);
-
-    setAlertMessage("Special date updated");
-    setEditModalVisible(false);
-    setSelectedDate(null);
-    setAlertVisible(true);
-
-    await fetchSpecialDates();
   };
 
   const handleDeleteSpecialDate = async () => {
@@ -211,22 +225,30 @@ const OursScreen = ({ navigation }: Props) => {
 
     setDeleting(true);
 
-    const token = await AsyncStorage.getItem("token");
+    try {
+      const token = await AsyncStorage.getItem("token");
 
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      await deleteSpecialDate(token, selectedDate.id);
+
+      setDeleteModalVisible(false);
+      setSelectedDate(null);
+      setAlertMessage("Special date deleted");
+      setAlertVisible(true);
+
+      await fetchSpecialDates();
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to delete special date"
+      );
+      setAlertVisible(true);
+    } finally {
+      setDeleting(false);
     }
-
-    await deleteSpecialDate(token, selectedDate.id);
-
-    setDeleting(false);
-    setDeleteModalVisible(false);
-    setSelectedDate(null);
-    setAlertMessage("Special date deleted");
-    setAlertVisible(true);
-
-    await fetchSpecialDates();
   };
 
   const handleAddMemory = () => {
@@ -241,6 +263,7 @@ const OursScreen = ({ navigation }: Props) => {
 
   const handleDeleteMemory = async (memory: any) => {
     setMemoryModalLoading(true);
+
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -250,8 +273,15 @@ const OursScreen = ({ navigation }: Props) => {
       }
 
       await deleteFavoriteMemory(token, memory.id);
+      setAlertMessage("Favorite memory deleted");
+      setAlertVisible(true);
       await fetchMemories(showAllMemories);
-    } catch {}
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to delete favorite memory"
+      );
+      setAlertVisible(true);
+    }
 
     setMemoryModalLoading(false);
   };
@@ -283,8 +313,10 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertVisible(true);
 
       await fetchMemories(showAllMemories);
-    } catch (err) {
-      setAlertMessage("Failed to save memory.");
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to save favorite memory"
+      );
       setAlertVisible(true);
     }
 
@@ -304,7 +336,11 @@ const OursScreen = ({ navigation }: Props) => {
 
       const memory = await getFavoriteMemoryById(token, memoryId);
       setDetailsMemory(memory);
-    } catch (e) {
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to view favorite memory"
+      );
+      setAlertVisible(true);
       setDetailsMemory(null);
     }
     setDetailsLoading(false);

@@ -175,11 +175,16 @@ export default function PortalScreen() {
       setAlertVisible(true);
       await fetchAllSweetMessages();
       await fetchAllVentMessages();
-    } catch (err) {
-      setAlertMessage("Failed to delete message");
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to delete message"
+      );
       setDeleting(false);
       setConfirmVisible(false);
       setAlertVisible(true);
+    } finally {
+      setDeleting(false);
+      setConfirmVisible(false);
     }
   };
 
@@ -224,7 +229,9 @@ export default function PortalScreen() {
       await fetchAllSweetMessages();
       await fetchAllVentMessages();
     } catch (err: any) {
-      setAlertMessage(err?.message || "Failed to send sweet message");
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to send sweet message"
+      );
       setAlertVisible(true);
     } finally {
       setLoading(false);
@@ -255,8 +262,10 @@ export default function PortalScreen() {
       setViewModalVisible(true);
 
       await fetchUnseenMessages();
-    } catch (err) {
-      setAlertMessage("Failed to load message");
+    } catch (err: any) {
+      setAlertMessage(
+        err?.response?.data?.message || "Failed to load message"
+      );
       setAlertVisible(true);
     } finally {
       setViewLoading(false);

@@ -177,15 +177,16 @@ const GiftsScreen = () => {
       await fetchGift();
       await fetchPastGifts();
     } catch (err: any) {
-      setError(err.message);
+      setError(err?.response?.data?.message || "Failed to claim gift");
     } finally {
       setClaiming(false);
     }
   };
 
   const handleSaveSetGift = async (giftName: string) => {
+    setModalLoading(true);
+
     try {
-      setModalLoading(true);
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
@@ -195,9 +196,10 @@ const GiftsScreen = () => {
       await updateSetMonthlyGift(token, giftName);
       setSetMonthlyGift(giftName);
       setMonthlyGiftModalVisible(false);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to save set gift");
     } finally {
       setModalLoading(false);
-    }
   };
 
   // use effects

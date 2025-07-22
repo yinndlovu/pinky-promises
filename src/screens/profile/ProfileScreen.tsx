@@ -450,8 +450,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return;
     }
 
-    await updateLoveLanguage(token, newLoveLanguage);
-    setLoveLanguage(newLoveLanguage);
+    try {
+      await updateLoveLanguage(token, newLoveLanguage);
+      setLoveLanguage(newLoveLanguage);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to save love language");
+    }
   };
 
   const handleSaveAbout = async (newAbout: string) => {
@@ -462,8 +466,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return;
     }
 
-    await updateAboutUser(token, newAbout);
-    setAbout(newAbout);
+    try {
+      await updateAboutUser(token, newAbout);
+      setAbout(newAbout);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to save about");
+    }
   };
 
   const handleAvatarPress = () => {
@@ -478,8 +486,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return;
     }
 
-    await updateUserFavorites(token, newFavorites);
-    setFavorites(newFavorites);
+    try {
+      await updateUserFavorites(token, newFavorites);
+      setFavorites(newFavorites);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to save favorites");
+    }
   };
 
   const handleViewCurrentPicture = () => {
@@ -604,7 +616,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   if (!user) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: "#fff" }}>No profile data. Try logging in again</Text>
+        <Text style={{ color: "#fff" }}>
+          No profile data. Try logging in again
+        </Text>
       </View>
     );
   }

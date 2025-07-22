@@ -340,7 +340,11 @@ export default function ChatScreen() {
     love langauges, and more. 
     Be warm, personal, and supportive.
     Keep your messages short and as human as possible.
-    Key details recorded: ${getFormattedKeyDetails()}
+    Key details recorded: ${getFormattedKeyDetails()} - Key details are just
+    things you have learned about them and for you to keep in mind.
+    Don't just bring up things you know about them every time, especially 
+    for no reason. Bring things up when it's relevant to the conversation or have to. 
+    This goes for everything, including dates, favorites, etc.
     If the user shares a new key detail (like a favorite, special date, or 
     relationship milestone, essentially something worth remembering), respond as normal, 
     but also include a JSON object at the end of your response with the format:
@@ -399,12 +403,15 @@ export default function ChatScreen() {
     setMessages((prev) => [userMessage, ...prev]);
     setInputText("");
     setIsSending(true);
-    await saveMessage(
-      userMessage.id,
-      userMessage.text,
-      userMessage.sender,
-      userMessage.timestamp
-    );
+
+    try {
+      await saveMessage(
+        userMessage.id,
+        userMessage.text,
+        userMessage.sender,
+        userMessage.timestamp
+      );
+    } catch (err: any) {}
 
     const aiText = await getBotResponse(inputText);
 
@@ -412,6 +419,7 @@ export default function ChatScreen() {
     let messageText = aiText;
     try {
       const match = aiText.match(/\{[\s\S]*"record"[\s\S]*\}/);
+
       if (match) {
         const json = JSON.parse(match[0]);
         record = json.record;
@@ -430,12 +438,14 @@ export default function ChatScreen() {
     setMessages((prev) => [botReply, ...prev]);
     setIsSending(false);
 
-    await saveMessage(
-      botReply.id,
-      botReply.text,
-      botReply.sender,
-      botReply.timestamp
-    );
+    try {
+      await saveMessage(
+        botReply.id,
+        botReply.text,
+        botReply.sender,
+        botReply.timestamp
+      );
+    } catch (err: any) {}
 
     const token = await AsyncStorage.getItem("token");
 
