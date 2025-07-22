@@ -200,6 +200,7 @@ const GiftsScreen = () => {
       setError(err?.response?.data?.message || "Failed to save set gift");
     } finally {
       setModalLoading(false);
+    }
   };
 
   // use effects
