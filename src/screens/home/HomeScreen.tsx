@@ -36,6 +36,7 @@ import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 // screen content
 import RecentActivity from "./RecentActivity";
 import ActionsModal from "../../components/modals/ActionsModal";
+import { getPartner } from "../../services/partnerService";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -46,7 +47,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const HEADER_HEIGHT = 60;
 
   // use states
-  const [partner, setPartner] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
@@ -68,7 +68,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     setRefreshing(true);
     try {
       await Promise.all([
-        fetchPartner(),
+        refetchPartner(),
         refetchUpcomingDate(),
         refetchActivities(),
         checkAndUpdateHomeStatus(),
@@ -114,7 +114,26 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   // fetch functions
-  const fetchPartner = async () => {
+  const {
+    data: partner,
+    isLoading: partnerLoading,
+    refetch: refetchPartner,
+  } = useQuery({
+    queryKey: ["partner"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      return await getPartner(token);
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+
+  const fetchPartnerProfilePicture = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -123,48 +142,27 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return;
       }
 
-      const response = await axios.get(
-        `${BASE_URL}/api/partnership/get-partner`,
+      const pictureResponse = await axios.get(
+        `${BASE_URL}/api/profile/get-profile-picture/${partner?.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
+          responseType: "arraybuffer",
         }
       );
-      const partnerData = response.data.partner;
-      setPartner(partnerData);
 
-      const partnerId = partnerData.id;
+      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
 
-      try {
-        const pictureResponse = await axios.get(
-          `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            responseType: "arraybuffer",
-          }
-        );
+      setAvatarUri(base64);
 
-        const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-        const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-        setAvatarUri(base64);
-
-        const lastModified = pictureResponse.headers["last-modified"];
-        setProfilePicUpdatedAt(
-          lastModified ? new Date(lastModified) : new Date()
-        );
-      } catch (picErr: any) {
-        if (![404, 500].includes(picErr.response?.status)) {
-          setError(picErr.response?.data?.error || picErr.message);
-        }
+      const lastModified = pictureResponse.headers["last-modified"];
+      setProfilePicUpdatedAt(
+        lastModified ? new Date(lastModified) : new Date()
+      );
+    } catch (picErr: any) {
+      if (![404, 500].includes(picErr.response?.status)) {
+        setError(picErr.response?.data?.error || picErr.message);
       }
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setPartner(null);
-      } else {
-        setError("Failed to fetch partner data");
-      }
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -422,10 +420,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   }, [error]);
 
   useEffect(() => {
-    fetchPartner();
-  }, []);
-
-  useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOnline(!!state.isConnected);
     });
@@ -526,29 +520,37 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           onPress={() => navigation.navigate("PartnerProfile")}
           disabled={!partner}
         >
-          <View
-            style={[
-              styles.profileCard,
-              !isActive && styles.profileCardInactive,
-            ]}
-          >
-            <View style={styles.profileRow}>
-              <View style={styles.avatarWrapper}>{renderPartnerImage()}</View>
-              <View style={styles.infoWrapper}>
-                <Text style={styles.name}>{partner?.name || "No partner"}</Text>
-                <Text style={styles.username}>
-                  @{partner?.username || "nopartner"}
+          {partnerLoading ? (
+            <View style={styles.centered}>
+              <ActivityIndicator color="#e03487" size="large" />
+            </View>
+          ) : (
+            <View
+              style={[
+                styles.profileCard,
+                !isActive && styles.profileCardInactive,
+              ]}
+            >
+              <View style={styles.profileRow}>
+                <View style={styles.avatarWrapper}>{renderPartnerImage()}</View>
+                <View style={styles.infoWrapper}>
+                  <Text style={styles.name}>
+                    {partner?.name || "No partner"}
+                  </Text>
+                  <Text style={styles.username}>
+                    @{partner?.username || "nopartner"}
+                  </Text>
+                  <Text style={styles.bio}>{partner?.bio || ""}</Text>
+                </View>
+              </View>
+              <View style={styles.statusRow}>
+                <Text style={[styles.statusText, { color: getStatusColor() }]}>
+                  Status: {getStatusDisplay()}
                 </Text>
-                <Text style={styles.bio}>{partner?.bio || ""}</Text>
+                <Text style={styles.statusText}>Mood: {partnerMood}</Text>
               </View>
             </View>
-            <View style={styles.statusRow}>
-              <Text style={[styles.statusText, { color: getStatusColor() }]}>
-                Status: {getStatusDisplay()}
-              </Text>
-              <Text style={styles.statusText}>Mood: {partnerMood}</Text>
-            </View>
-          </View>
+          )}
         </TouchableOpacity>
         <View style={styles.buttonRow}>
           <BlurView intensity={50} tint="dark" style={styles.blurButton}>
