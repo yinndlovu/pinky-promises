@@ -98,7 +98,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loveLanguageModalVisible, setLoveLanguageModalVisible] =
     useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
+
+  // use states (edit fields)
   const [editName, setEditName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
 
   // arrays
@@ -597,6 +600,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       }
     }
   };
+  
+  // fiels for editing
+  const originalName = user?.name || "";
+  const originalUsername = user?.username || "";
+  const originalBio = user?.bio || "";
 
   if (loading) {
     return (
