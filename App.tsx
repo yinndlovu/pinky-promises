@@ -28,7 +28,7 @@ import PartnerProfileScreen from "./src/screens/profile/partner/PartnerProfileSc
 import ChatScreen from "./src/screens/chat/ChatScreen";
 import PortalScreen from "./src/screens/portal/PortalScreen";
 import SearchScreen from "./src/screens/search/SearchScreen";
-import UserProfileScreen from "./src/screens/profile/user/UserProfileScreen";
+import UserProfileScreen from "./src/screens/profile/other/UserProfileScreen";
 import PendingRequestsScreen from "./src/screens/requests/PendingRequestsScreen";
 import NotesScreen from "./src/screens/ours/NotesScreen";
 import WelcomeScreen from "./src/screens/welcome/WelcomeScreen";
@@ -39,7 +39,7 @@ import HomeScreen from "./src/screens/home/HomeScreen";
 import LoginScreen from "./src/screens/auth/login/LoginScreen";
 import NavigationBar from "./src/components/navigation/NavigationBar";
 import SettingsScreen from "./src/screens/settings/SettingsScreen";
-import ProfileScreen from "./src/screens/profile/self/ProfileScreen";
+import ProfileScreen from "./src/screens/profile/user/ProfileScreen";
 import OursScreen from "./src/screens/ours/OursScreen";
 import GiftsScreen from "./src/screens/gifts/GiftsScreen";
 import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";

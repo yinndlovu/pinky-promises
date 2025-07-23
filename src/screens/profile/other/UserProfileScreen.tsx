@@ -298,6 +298,4 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   );
 };
 
-
-
 export default UserProfileScreen;

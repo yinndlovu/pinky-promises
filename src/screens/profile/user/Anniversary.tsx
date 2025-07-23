@@ -9,11 +9,11 @@ import {
   getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
-} from "../../services/specialDateService";
+} from "../../../services/specialDateService";
 
 // screen content
-import UpdateSpecialDateModal from "../../components/modals/UpdateSpecialDateModal";
-import AlertModal from "../../components/modals/AlertModal";
+import UpdateSpecialDateModal from "../../../components/modals/UpdateSpecialDateModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 // types
 type Props = {
