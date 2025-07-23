@@ -55,9 +55,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
 
   // use states
-  const [partner, setPartner] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [removingPartner, setRemovingPartner] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
@@ -67,12 +65,18 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     null
   );
 
-  const fetchPartner = async () => {
-    try {
+  // fetch functions
+  const {
+    data: partnerData,
+    isLoading: partnerDataLoading,
+    refetch: refetchPartnerData,
+  } = useQuery({
+    queryKey: ["partnerData"],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        throw new Error("No token found");
+        return null;
       }
 
       const response = await axios.get(
@@ -82,64 +86,42 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         }
       );
 
-      const partnerData = response.data.partner;
-      setPartner(partnerData);
+      return response.data.partner;
+    },
+    staleTime: 1000 * 60 * 60 * 24 * 3,
+  });
 
-      try {
-        const pictureResponse = await axios.get(
-          `${BASE_URL}/api/profile/get-profile-picture/${partnerData.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            responseType: "arraybuffer",
-          }
-        );
-        const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-        const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
+  const partner = partnerData || null;
 
-        setAvatarUri(base64);
+  const fetchProfilePicture = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
 
-        const lastModified = pictureResponse.headers["last-modified"];
-        setProfilePicUpdatedAt(
-          lastModified ? new Date(lastModified) : new Date()
-        );
-      } catch (picErr: any) {
+      if (!token || !partner?.id) {
         setAvatarUri(null);
+        return;
       }
-    } catch (err) {
-      setPartner(null);
-      setAvatarUri(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt && partner) {
-      const cachedImageUrl = buildCachedImageUrl(
-        partner.id,
-        profilePicUpdatedAt
-      );
-      return (
-        <Image
-          source={cachedImageUrl}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? avatarUri
-            : require("../../../assets/default-avatar-two.png")
+      const pictureResponse = await axios.get(
+        `${BASE_URL}/api/profile/get-profile-picture/${partnerData.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "arraybuffer",
         }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
+      );
+
+      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
+
+      setAvatarUri(base64);
+
+      const lastModified = pictureResponse.headers["last-modified"];
+      setProfilePicUpdatedAt(
+        lastModified ? new Date(lastModified) : new Date()
+      );
+    } catch (picErr: any) {
+      setAvatarUri(null);
+    }
   };
 
   const {
@@ -225,6 +207,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     staleTime: 1000 * 60 * 60,
   });
 
+  // handlers
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
     try {
@@ -255,6 +238,35 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       .filter(Boolean) as { label: string; value: string }[];
   }
 
+  const renderProfileImage = () => {
+    if (avatarUri && profilePicUpdatedAt && partner) {
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id,
+        profilePicUpdatedAt
+      );
+      return (
+        <Image
+          source={cachedImageUrl}
+          style={styles.avatar}
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={
+          avatarUri
+            ? avatarUri
+            : require("../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        contentFit="cover"
+      />
+    );
+  };
+
   // use layouts
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -269,27 +281,19 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
   }, [navigation]);
 
-  // use effects
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await fetchPartner();
-      setLoading(false);
-    })();
-  }, []);
-
   // refresh screen
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await fetchPartner();
+      await refetchPartnerData();
       await refetchCurrentUser();
 
       if (partner?.id) {
         await Promise.all([
           refetchPartnerFavorites(),
           refetchLoveLanguage(),
-          refetchPartnerAbout(partner.id),
+          refetchPartnerAbout(),
+          fetchProfilePicture(),
         ]);
       }
 
@@ -300,8 +304,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   }, [
     refetchLoveLanguage,
+    refetchPartnerData,
     refetchPartnerFavorites,
     refetchCurrentUser,
+    refetchPartnerAbout,
+    fetchProfilePicture,
     partner?.id,
   ]);
 
@@ -310,7 +317,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const username = partner?.username || "user";
   const bio = partner?.bio || "";
 
-  if (loading) {
+  if (partnerDataLoading || currentUserLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#e03487" size="large" />
@@ -361,11 +368,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             <Text style={styles.removeButtonText}>Remove</Text>
           </TouchableOpacity>
         </View>
-        {loading && (
-          <View style={styles.centered}>
-            <ActivityIndicator color="#5ad1e6" size="large" />
-          </View>
-        )}
         <View style={styles.divider} />
 
         <View style={styles.partnerRow}>
@@ -387,6 +389,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           favorites={favoritesObjectToArray(partnerFavorites)}
         />
 
+        {partnerDataLoading && (
+          <View style={styles.centered}>
+            <ActivityIndicator color="#5ad1e6" size="large" />
+          </View>
+        )}
         <View style={styles.divider} />
 
         <PartnerLoveLanguage loveLanguage={loveLanguage} />

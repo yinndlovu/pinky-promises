@@ -99,15 +99,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
   const [editName, setEditName] = useState("");
-  const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
-  const [originalName, setOriginalName] = useState("");
-  const [originalUsername, setOriginalUsername] = useState("");
-  const [originalBio, setOriginalBio] = useState("");
-
-  // use states (screen content)
-  const [user, setUser] = useState<any>(null);
-  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   // arrays
   const FAVORITE_LABELS: { [key: string]: string } = {
@@ -135,6 +127,29 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }
 
   // fetch functions
+  const {
+    data: profileData,
+    isLoading: profileDataLoading,
+    refetch: refetchProfileData,
+  } = useQuery({
+    queryKey: ["profileData"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("No token found");
+        return;
+      }
+
+      return await axios.get(`${BASE_URL}/api/profile/get-profile`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    staleTime: 1000 * 60 * 60,
+  });
+
+  const user = profileData?.data?.user || null;
+
   const {
     data: loveLanguage,
     isLoading: loveLanguageLoading,
@@ -193,23 +208,29 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     ? "You are currently not home"
     : "You must add your home location to use this feature";
 
-  const fetchPendingRequestsCount = async () => {
-    try {
+  const {
+    data: pendingRequestsData,
+    isLoading: pendingRequestsDataLoading,
+    refetch: refetchPendingRequestsData,
+  } = useQuery({
+    queryKey: ["pendingRequestCount", user?.id],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setError("Session expired, please log in again");
+        setError("No token found");
         return;
       }
 
-      const requests = await getReceivedPartnerRequests(token);
-      const pendingCount = requests.filter(
-        (req: any) => req.status === "pending"
-      ).length;
+      return await getReceivedPartnerRequests(token);
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5,
+  });
 
-      setPendingRequestsCount(pendingCount);
-    } catch (error) {}
-  };
+  const pendingRequestsCount = pendingRequestsData?.filter(
+    (req: any) => req.status === "pending"
+  ).length;
 
   const {
     data: favorites = {},
@@ -291,57 +312,35 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     staleTime: 1000 * 60 * 60,
   });
 
-  const fetchProfile = async () => {
+  const fetchProfilePicture = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
 
-      if (!token) {
-        setError("Session expired, please log in again");
+      if (!token || !user?.id) {
         return;
       }
 
-      const response = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(response.data.user);
-
-      setEditName(response.data.user.name || "");
-      setEditUsername(response.data.user.username || "");
-      setEditBio(response.data.user.bio || "");
-
-      setOriginalName(response.data.user.name || "");
-      setOriginalUsername(response.data.user.username || "");
-      setOriginalBio(response.data.user.bio || "");
-
-      const userId = response.data.user.id;
-
-      try {
-        const pictureResponse = await axios.get(
-          `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            responseType: "arraybuffer",
-          }
-        );
-
-        const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-        const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-        setAvatarUri(base64);
-
-        const lastModified = pictureResponse.headers["last-modified"];
-        setProfilePicUpdatedAt(
-          lastModified ? new Date(lastModified) : new Date()
-        );
-      } catch (picErr: any) {
-        if (picErr.response?.status !== 404) {
-          setError(picErr.response?.data?.error || picErr.message);
+      const pictureResponse = await axios.get(
+        `${BASE_URL}/api/profile/get-profile-picture/${user?.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: "arraybuffer",
         }
+      );
+
+      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
+      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
+
+      setAvatarUri(base64);
+
+      const lastModified = pictureResponse.headers["last-modified"];
+      setProfilePicUpdatedAt(
+        lastModified ? new Date(lastModified) : new Date()
+      );
+    } catch (picErr: any) {
+      if (picErr.response?.status !== 404) {
+        setError(picErr.response?.data?.error || picErr.message);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || err.message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -375,10 +374,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // use effects
   useEffect(() => {
-    fetchPendingRequestsCount();
-  }, []);
-
-  useEffect(() => {
     if (success) {
       setShowSuccess(true);
       const timer = setTimeout(() => {
@@ -401,19 +396,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   }, [error]);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
   // refresh screen
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
     try {
       await Promise.all([
         refetchLoveLanguage(),
-        fetchProfile(),
+        refetchProfileData(),
         refetchStatus(),
-        fetchPendingRequestsCount(),
+        refetchPendingRequestsData(),
         refetchFavorites(),
         refetchPartnerData(),
         refetchMoodData(),
@@ -430,6 +421,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     refetchMoodData,
     refetchFavorites,
     refetchStatus,
+    refetchProfileData,
+    refetchPendingRequestsData,
   ]);
 
   // handlers
@@ -485,7 +478,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     try {
       await updateUserFavorites(token, newFavorites);
-      
+
       await queryClient.invalidateQueries({
         queryKey: ["favorites", user?.id],
       });
@@ -535,7 +528,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         );
 
         setSuccess("Profile picture uploaded!");
-        await fetchProfile();
+        await fetchProfilePicture();
       } catch (err: any) {
         if (
           err.response?.data?.error?.includes("PayloadTooLarge") ||
@@ -587,7 +580,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         },
       });
 
-      await fetchProfile();
+      
     } catch (err: any) {
       setError(`Failed to update ${field}`);
     } finally {

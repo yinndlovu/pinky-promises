@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery } from "@tanstack/react-query";
 
 // internal
 import { fetchUserStatus } from "../../../services/userStatusService";
@@ -19,78 +20,80 @@ const PartnerStatusMood: React.FC<Props> = ({
   partnerName,
   refreshKey,
 }) => {
-  // use states
-  const [status, setStatus] = useState<
-    "home" | "away" | "unreachable" | "unavailable"
-  >("unavailable");
-  const [statusDescription, setStatusDescription] = useState<string>(
-    "Partner hasn't set a home location"
-  );
-  const [mood, setMood] = useState<string>("No mood");
-  const [moodDescription, setMoodDescription] = useState<string>(
-    "Partner hasn't set a mood yet"
-  );
-  const [loading, setLoading] = useState(true);
-
   // use effects
   useEffect(() => {
-    fetchPartnerStatusAndMood();
+    refetchPartnerMood();
+    refetchPartnerStatus();
   }, [partnerId, partnerName, refreshKey]);
 
   // fetch functions
-  const fetchPartnerStatusAndMood = async () => {
-    try {
+  const {
+    data: partnerMood,
+    isLoading: partnerMoodLoading,
+    refetch: refetchPartnerMood,
+  } = useQuery({
+    queryKey: ["partnerMood", partnerId],
+    queryFn: async () => {
+      if (!partnerId) {
+        return null;
+      }
+
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
         return;
       }
 
-      try {
-        const statusData = await fetchUserStatus(token, partnerId);
+      return await getUserMood(token, partnerId);
+    },
+    enabled: !!partnerId,
+    staleTime: 1000 * 60 * 5,
+  });
 
-        if (
-          statusData &&
-          (typeof statusData.dataValues.isAtHome === "boolean" ||
-            typeof statusData.unreachable === "boolean")
-        ) {
-          if (statusData.unreachable) {
-            setStatus("unreachable");
-            setStatusDescription(
-              `Can't find ${partnerName}'s current location`
-            );
-          } else if (statusData.dataValues.isAtHome) {
-            setStatus("home");
-            setStatusDescription(`${partnerName} is currently at home`);
-          } else {
-            setStatus("away");
-            setStatusDescription(`${partnerName} is currently not home`);
-          }
-        } else {
-          setStatus("unavailable");
-          setStatusDescription(`${partnerName} hasn't set a home location`);
-        }
-      } catch (statusErr: any) {
-        setStatus("unavailable");
-        setStatusDescription(`${partnerName} hasn't set a home location`);
+  const mood = partnerMood?.mood || "No mood";
+  const moodDescription =
+    partnerMood?.description || `${partnerName} hasn't set a mood yet`;
+
+  const {
+    data: partnerStatus,
+    isLoading: partnerStatusLoading,
+    refetch: refetchPartnerStatus,
+  } = useQuery({
+    queryKey: ["partnerStatus", partnerId],
+    queryFn: async () => {
+      if (!partnerId) {
+        return null;
       }
 
-      try {
-        const moodData = await getUserMood(token, partnerId);
+      const token = await AsyncStorage.getItem("token");
 
-        setMood(moodData.mood);
-        setMoodDescription(moodData.description);
-      } catch (moodErr: any) {
-        setMood("No mood");
-        setMoodDescription(`${partnerName} hasn't set a mood yet`);
+      if (!token) {
+        return;
       }
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  if (loading) {
+      return await fetchUserStatus(token, partnerId);
+    },
+    enabled: !!partnerId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const status = partnerStatus?.unreachable
+    ? "unreachable"
+    : partnerStatus?.dataValues.isAtHome
+    ? "home"
+    : partnerStatus?.dataValues.isAtHome === false
+    ? "away"
+    : "unavailable";
+
+  const statusDescription = partnerStatus?.unreachable
+    ? `Can't find ${partnerName}'s current location`
+    : partnerStatus?.dataValues.isAtHome
+    ? `${partnerName} is currently at home`
+    : partnerStatus?.dataValues.isAtHome === false
+    ? `${partnerName} is currently not home`
+    : `${partnerName} hasn't set a home location`;
+
+  if (partnerMoodLoading || partnerStatusLoading) {
     return (
       <View style={styles.wrapper}>
         <View style={styles.loadingContainer}>
