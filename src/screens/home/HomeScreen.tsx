@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  StatusBar,
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -53,32 +54,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     null
   );
   const [showError, setShowError] = useState(false);
-  const [isActive, setIsActive] = useState(true);
-  const [loading, setLoading] = useState(true);
-  const [partnerStatus, setPartnerStatus] = useState<
-    "home" | "away" | "unreachable" | "unavailable"
-  >("unavailable");
-  const [partnerMood, setPartnerMood] = useState<string>("No mood");
   const [refreshing, setRefreshing] = useState(false);
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchPartner(),
-        refetchUpcomingDate(),
-        refetchActivities(),
-        checkAndUpdateHomeStatus(),
-        fetchPartnerStatusAndMood(),
-      ]);
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, []);
 
   // handlers
   const handleAction = () => {
@@ -133,6 +111,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     staleTime: 1000 * 60 * 60 * 24,
   });
 
+  const partnerId = partner?.id;
+
   const fetchPartnerProfilePicture = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
@@ -143,7 +123,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${partner?.id}`,
+        `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",
@@ -167,6 +147,54 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const {
+    data: partnerStatus,
+    isLoading: partnerStatusLoading,
+    refetch: refetchPartnerStatus,
+  } = useQuery({
+    queryKey: ["partnerStatus", partnerId],
+    queryFn: async () => {
+      if (!partnerId) {
+        return null;
+      }
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      return await fetchUserStatus(token, partnerId);
+    },
+    enabled: !!partnerId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const {
+    data: partnerMood,
+    isLoading: partnerMoodLoading,
+    refetch: refetchPartnerMood,
+  } = useQuery({
+    queryKey: ["partnerMood", partnerId],
+    queryFn: async () => {
+      if (!partnerId) {
+        return null;
+      }
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      return await getUserMood(token, partnerId);
+    },
+    enabled: !!partnerId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const {
     data: upcomingDate,
     isLoading: upcomingDateLoading,
     refetch: refetchUpcomingDate,
@@ -184,57 +212,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     },
     staleTime: 1000 * 60 * 60 * 12,
   });
-
-  const fetchPartnerStatusAndMood = async () => {
-    if (!partner?.id) {
-      return;
-    }
-
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      try {
-        const statusData = await fetchUserStatus(token, partner.id);
-
-        if (
-          statusData &&
-          (typeof statusData.isAtHome === "boolean" ||
-            typeof statusData.unreachable === "boolean")
-        ) {
-          if (statusData.unreachable) {
-            setPartnerStatus("unreachable");
-            setIsActive(false);
-          } else if (statusData.isAtHome) {
-            setPartnerStatus("home");
-            setIsActive(true);
-          } else {
-            setPartnerStatus("away");
-            setIsActive(false);
-          }
-        } else {
-          setPartnerStatus("unavailable");
-          setIsActive(true);
-        }
-      } catch (statusErr: any) {
-        setPartnerStatus("unavailable");
-        setIsActive(false);
-      }
-
-      try {
-        const moodData = await getUserMood(token, partner.id);
-        setPartnerMood(moodData.mood);
-      } catch (moodErr: any) {
-        setPartnerMood("No mood");
-      }
-    } catch (error) {
-      setIsActive(false);
-    }
-  };
 
   const {
     data: activities = [],
@@ -361,41 +338,23 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const getStatusDisplay = () => {
-    switch (partnerStatus) {
-      case "home":
-        return "Home";
-      case "away":
-        return "Away";
-      case "unavailable":
-        return "Unavailable";
-      case "unreachable":
-        return "Unreachable";
-      default:
-        return "Unavailable";
-    }
-  };
+  // handle status
+  const status = partnerStatus?.unreachable
+    ? "Unreachable"
+    : partnerStatus?.isAtHome
+    ? "Home"
+    : partnerStatus?.isAtHome === false
+    ? "Away"
+    : "Unavailable";
 
-  const getStatusColor = () => {
-    switch (partnerStatus) {
-      case "home":
-        return "#4caf50";
-      case "away":
-        return "#e03487";
-      case "unavailable":
-        return "#b0b3c6";
-      default:
-        return "#b0b3c6";
-    }
-  };
+  const isActive = status === "Home" || status === "Unavailable";
+
+  const statusColor =
+    status === "Home" ? "#4caf50" : status === "Away" ? "#e03487" : "#b0b3c6";
+
+  const mood = partnerMood?.mood || "No mood";
 
   // use effects
-  useEffect(() => {
-    if (partner?.id) {
-      fetchPartnerStatusAndMood();
-    }
-  }, [partner]);
-
   useEffect(() => {
     checkAndUpdateHomeStatus();
   }, []);
@@ -426,14 +385,46 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  if (loading) {
+  // refresh screen
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refetchPartner(),
+        refetchUpcomingDate(),
+        refetchActivities(),
+        refetchPartnerMood(),
+        refetchPartnerStatus(),
+        fetchPartnerProfilePicture(),
+        checkAndUpdateHomeStatus(),
+      ]);
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, [
+    refetchPartner,
+    refetchUpcomingDate,
+    refetchActivities,
+    refetchPartnerMood,
+    refetchPartnerStatus,
+    fetchPartnerProfilePicture,
+    checkAndUpdateHomeStatus,
+  ]);
+
+  if (
+    partnerLoading ||
+    partnerStatusLoading ||
+    partnerMoodLoading ||
+    upcomingDateLoading ||
+    activitiesLoading
+  ) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#e03487" size="large" />
       </View>
     );
   }
-
   {
     !isOnline && (
       <View style={{ backgroundColor: "red", padding: 8 }}>
@@ -544,10 +535,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 </View>
               </View>
               <View style={styles.statusRow}>
-                <Text style={[styles.statusText, { color: getStatusColor() }]}>
-                  Status: {getStatusDisplay()}
+                <Text style={[styles.statusText, { color: statusColor }]}>
+                  Status: {status}
                 </Text>
-                <Text style={styles.statusText}>Mood: {partnerMood}</Text>
+                <Text style={styles.statusText}>Mood: {mood}</Text>
               </View>
             </View>
           )}
