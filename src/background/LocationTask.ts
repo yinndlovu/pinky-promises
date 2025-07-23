@@ -1,5 +1,4 @@
 import * as TaskManager from "expo-task-manager";
-import * as Location from "expo-location";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getHomeLocation } from "../services/homeLocationService";
 import { updateUserStatus } from "../services/userStatusService";

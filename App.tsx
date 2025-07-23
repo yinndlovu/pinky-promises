@@ -12,7 +12,6 @@ import React from "react";
 import { useEffect } from "react";
 import {
   QueryClient,
-  QueryClientProvider,
   onlineManager,
 } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -70,8 +69,8 @@ async function startBackgroundLocation() {
 
   await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
     accuracy: Location.Accuracy.High,
-    timeInterval: 15 * 60 * 1000,
-    distanceInterval: 50,
+    timeInterval: 5 * 60 * 1000,
+    distanceInterval: 30,
     showsBackgroundLocationIndicator: true,
     foregroundService: {
       notificationTitle: "Location Service",
@@ -391,7 +390,7 @@ export default function App() {
           client={queryClient}
           persistOptions={{
             persister: sqlitePersistor,
-            maxAge: 1000 * 60 * 60 * 24,
+            maxAge: 1000 * 60 * 60 * 24 * 3,
           }}
           onSuccess={() => {}}
         >
