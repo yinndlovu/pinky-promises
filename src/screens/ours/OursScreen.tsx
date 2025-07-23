@@ -25,7 +25,6 @@ import {
 } from "../../services/specialDateService";
 import {
   getFavoriteMemoryById,
-  getAllFavoriteMemories,
   createFavoriteMemory,
   updateFavoriteMemory,
   deleteFavoriteMemory,
@@ -54,7 +53,6 @@ const OursScreen = ({ navigation }: Props) => {
   const queryClient = useQueryClient();
 
   // use states
-  const [notesUpdatedAt, setNotesUpdatedAt] = useState<string | null>(null);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<any | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);

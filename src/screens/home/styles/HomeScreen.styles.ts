@@ -173,6 +173,35 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  absoluteFillObject: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(35,36,58,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 100,
+  },
+  interactionCard: {
+    backgroundColor: "#2c2d4a",
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 6,
+    marginHorizontal: 0,
+    position: "relative",
+    minHeight: 60,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  interactionCardTitle: {
+    color: "#e03487",
+    fontWeight: "bold",
+    fontSize: 17,
+    marginTop: 18,
+    marginBottom: 10,
+    textAlign: "center",
+    letterSpacing: 0.5,
+  },
 });
 
 export default styles;

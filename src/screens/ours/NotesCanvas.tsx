@@ -44,7 +44,7 @@ const NotesCanvas: React.FC<Props> = ({ onView, preview, updatedAt }) => (
     <Text style={styles.placeholderText}>
         {preview && preview.trim().length > 0
           ? (preview.length > 120 ? preview.slice(0, 120) + "..." : preview)
-          : "This is your shared canvas for notes or memories."}
+          : "This is your shared canvas for notes or memories"}
       </Text>
       {updatedAt && (
         <Text style={styles.updatedAt}>

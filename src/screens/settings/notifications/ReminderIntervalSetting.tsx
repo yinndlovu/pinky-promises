@@ -14,10 +14,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getReminderInterval,
   setReminderInterval,
-} from "../../services/notificationPreferenceService";
+} from "../../../services/notificationPreferenceService";
 
 // content
-import AlertModal from "../../components/modals/AlertModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 const ReminderIntervalSetting = () => {
   // use states

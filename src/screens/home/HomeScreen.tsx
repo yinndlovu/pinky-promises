@@ -4,7 +4,6 @@ import {
   ScrollView,
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
@@ -32,12 +31,17 @@ import { getUserMood } from "../../services/moodService";
 import { getUpcomingSpecialDate } from "../../services/specialDateService";
 import { getRecentActivities } from "../../services/recentActivityService";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
+import {
+  interactWithPartner,
+  getUnseenInteractions,
+} from "../../services/interactionService";
 
 // screen content
 import RecentActivity from "./RecentActivity";
 import ActionsModal from "../../components/modals/ActionsModal";
 import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
+import AlertModal from "../../components/modals/AlertModal";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -57,10 +61,33 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [interactionLoading, setInteractionLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   // handlers
-  const handleAction = () => {
+  const handleInteraction = async (action: string) => {
     setActionsModalVisible(false);
+    setInteractionLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      await interactWithPartner(token, action);
+      setAlertMessage(
+        getInteractionFeedback(action, partner?.name || "your partner")
+      );
+      setAlertVisible(true);
+      refetchUnseen();
+      refetchActivities();
+    } catch (err: any) {
+      setError(err.message || "Failed to interact");
+    } finally {
+      setInteractionLoading(false);
+    }
   };
 
   const checkAndUpdateHomeStatus = async () => {
@@ -239,6 +266,25 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     staleTime: 1000 * 60 * 5,
   });
 
+  const {
+    data: unseenInteractions = [],
+    isLoading: unseenLoading,
+    refetch: refetchUnseen,
+  } = useQuery({
+    queryKey: ["unseenInteractions"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      return await getUnseenInteractions(token);
+    },
+    staleTime: 1000 * 60 * 5, 
+  });
+
   // helpers
   const renderPartnerImage = () => {
     if (avatarUri && profilePicUpdatedAt && partner) {
@@ -337,6 +383,52 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       return "Unknown time";
     }
   };
+
+  function getInteractionMessage(action: string) {
+    switch (action) {
+      case "kiss":
+        return "just gave you a kiss";
+      case "hug":
+        return "gave you a hug";
+      case "cuddle":
+        return "cuddled you";
+      case "hold":
+        return "held your hand";
+      case "nudge":
+        return "nudged you";
+      case "caress":
+        return "caressed you";
+      case "embrace":
+        return "embraced you";
+      case "wink":
+        return "winked at you";
+      default:
+        return `interacted with you`;
+    }
+  }
+
+  function getInteractionFeedback(action: string, partnerName: string) {
+    switch (action) {
+      case "kiss":
+        return `You just gave ${partnerName} a kiss! Aww 🤍`;
+      case "hug":
+        return `You just gave ${partnerName} a hug! So sweet`;
+      case "cuddle":
+        return `You just cuddled with ${partnerName}. So cozy 🤍`;
+      case "hold":
+        return `You just held hands with ${partnerName}. Aww, cuties!`;
+      case "nudge":
+        return `You just nudged ${partnerName}`;
+      case "caress":
+        return `You just caressed ${partnerName} 🤍`;
+      case "embrace":
+        return `You just embraced ${partnerName}. Aww, lovebirds 🤍`;
+      case "wink":
+        return `You just winked at ${partnerName}`;
+      default:
+        return `You just interacted with ${partnerName}`;
+    }
+  }
 
   // handle status
   const status = partnerStatus?.unreachable
@@ -551,12 +643,18 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
         <View style={styles.buttonRow}>
           <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handleInteraction("hold")}
+            >
               <Text style={styles.buttonText}>HOLD</Text>
             </TouchableOpacity>
           </BlurView>
           <BlurView intensity={50} tint="dark" style={styles.blurButton}>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => handleInteraction("cuddle")}
+            >
               <Text style={styles.buttonText}>CUDDLE</Text>
             </TouchableOpacity>
           </BlurView>
@@ -571,9 +669,59 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <ActionsModal
             visible={actionsModalVisible}
             onClose={() => setActionsModalVisible(false)}
-            onAction={handleAction}
+            onAction={handleInteraction}
           />
         </View>
+        {unseenInteractions.length > 0 && (
+          <>
+            <Text style={styles.interactionCardTitle}>
+              LOOK WHAT YOUR BABY JUST DID
+            </Text>
+            <View style={styles.interactionCard}>
+              <Feather
+                name="bell"
+                size={22}
+                color="#e03487"
+                style={{
+                  position: "absolute",
+                  top: 14,
+                  right: 16,
+                }}
+              />
+              {unseenInteractions.map((interaction: any, idx: number) => (
+                <View
+                  key={interaction.id}
+                  style={{
+                    marginBottom:
+                      idx === unseenInteractions.length - 1 ? 0 : 10,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      marginTop: 8,
+                    }}
+                  >
+                    {partner?.name || "Your partner"}{" "}
+                    {getInteractionMessage(interaction.action)}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#b0b3c6",
+                      fontSize: 12,
+                      marginTop: 6,
+                    }}
+                  >
+                    {formatActivityDate(interaction.createdAt)} •{" "}
+                    {formatActivityTime(interaction.createdAt)}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
         {upcomingDateLoading ? (
           <View style={styles.centered}>
             <ActivityIndicator color="#e03487" size="large" />
@@ -618,6 +766,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.toastText}>{error}</Text>
         </View>
       )}
+      {interactionLoading && (
+        <View style={styles.absoluteFillObject}>
+          <ActivityIndicator size="large" color="#e03487" />
+        </View>
+      )}
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 };

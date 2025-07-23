@@ -242,13 +242,7 @@ const GiftsScreen = () => {
           onChange={() => setMonthlyGiftModalVisible(true)}
           buttonText={setMonthlyGift?.setMonthlyGift ? "Change" : "Add"}
         />
-        {giftLoading ? (
-          <View
-            style={{ alignItems: "center", marginTop: 8, marginBottom: 12 }}
-          >
-            <ActivityIndicator size="small" color="#e03487" />
-          </View>
-        ) : error ? (
+        {error ? (
           <Text style={{ color: "red" }}>{error}</Text>
         ) : gift ? (
           <ReceivedGift

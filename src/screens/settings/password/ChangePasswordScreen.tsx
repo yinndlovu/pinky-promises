@@ -13,10 +13,10 @@ import type { StackScreenProps } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
-import { changePassword } from "../../services/authService";
+import { changePassword } from "../../../services/authService";
 
 // screen content
-import AlertModal from "../../components/modals/AlertModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 // types
 type ChangePasswordScreenProps = StackScreenProps<any, any>;

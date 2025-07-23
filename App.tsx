@@ -44,8 +44,8 @@ import OursScreen from "./src/screens/ours/OursScreen";
 import GiftsScreen from "./src/screens/gifts/GiftsScreen";
 import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
-import ChangePasswordScreen from "./src/screens/settings/ChangePasswordScreen";
-import NotificationsScreen from "./src/screens/settings/NotificationsScreen";
+import ChangePasswordScreen from "./src/screens/settings/password/ChangePasswordScreen";
+import NotificationsScreen from "./src/screens/settings/notifications/NotificationsScreen";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 
