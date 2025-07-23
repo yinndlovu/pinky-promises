@@ -40,6 +40,7 @@ import { getAboutUser, updateAboutUser } from "../../services/aboutUserService";
 import { getPartner } from "../../services/partnerService";
 import { getReceivedPartnerRequests } from "../../services/partnerService";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
+import { FavoritesType } from "../../types/Favorites";
 
 // screen content
 import UpdateAboutModal from "../../components/modals/UpdateAboutModal";
@@ -55,20 +56,6 @@ import MoreAboutYou from "./MoreAboutYou";
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
 
-type FavoritesType = {
-  favoriteColor?: string;
-  favoriteFood?: string;
-  favoriteSnack?: string;
-  favoriteActivity?: string;
-  favoriteHoliday?: string;
-  favoriteTimeOfDay?: string;
-  favoriteSeason?: string;
-  favoriteAnimal?: string;
-  favoriteDrink?: string;
-  favoritePet?: string;
-  favoriteShow?: string;
-};
-
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // variables
   const insets = useSafeAreaInsets();
@@ -77,7 +64,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -508,8 +494,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     if (!result.canceled && result.assets && result.assets[0].base64) {
       try {
-        setLoading(true);
-
         if (result.assets[0].base64.length > 10 * 1024 * 1024) {
           setError("Image is too large. Make sure it's less than 10 MB.");
 
@@ -542,7 +526,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           setError("Failed to upload profile picture");
         }
       } finally {
-        setLoading(false);
       }
     }
   };
@@ -583,7 +566,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         },
       });
 
-      
+      await queryClient.invalidateQueries({
+        queryKey: ["profileData"],
+      });
     } catch (err: any) {
       setError(`Failed to update ${field}`);
     } finally {
@@ -600,13 +585,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       }
     }
   };
-  
+
   // fiels for editing
   const originalName = user?.name || "";
   const originalUsername = user?.username || "";
   const originalBio = user?.bio || "";
 
-  if (loading) {
+  if (profileDataLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#e03487" size="large" />
@@ -618,7 +603,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     return (
       <View style={styles.centered}>
         <Text style={{ color: "#fff" }}>
-          No profile data. Try logging in again
+          No profile data. Try logging in again.
         </Text>
       </View>
     );
