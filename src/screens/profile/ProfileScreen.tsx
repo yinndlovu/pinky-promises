@@ -107,7 +107,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // use states (screen content)
   const [user, setUser] = useState<any>(null);
-  const [favorites, setFavorites] = useState<FavoritesType>({});
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   // arrays
@@ -212,17 +211,28 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     } catch (error) {}
   };
 
-  const fetchFavorites = async () => {
-    const token = await AsyncStorage.getItem("token");
-    const userId = user?.id;
+  // ...existing code...
 
-    if (!token || !userId) {
-      return;
-    }
+  const {
+    data: favorites = {},
+    isLoading: favoritesLoading,
+    refetch: refetchFavorites,
+  } = useQuery({
+    queryKey: ["favorites", user?.id],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
 
-    const favs = await getUserFavorites(token, userId);
-    setFavorites(favs);
-  };
+      const userId = user?.id;
+
+      if (!token || !userId) {
+        return {};
+      }
+
+      return await getUserFavorites(token, userId);
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 60,
+  });
 
   const {
     data: partnerData,
@@ -259,6 +269,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getMood(token);
     },
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -278,6 +289,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getAboutUser(token, user?.id);
     },
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -369,10 +381,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    fetchFavorites();
-  }, [user]);
-
-  useEffect(() => {
     if (success) {
       setShowSuccess(true);
       const timer = setTimeout(() => {
@@ -408,7 +416,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         fetchProfile(),
         refetchStatus(),
         fetchPendingRequestsCount(),
-        fetchFavorites(),
+        refetchFavorites(),
         refetchPartnerData(),
         refetchMoodData(),
         refetchAbout(),
@@ -417,7 +425,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchLoveLanguage, refetchPartnerData, refetchAbout, refetchMoodData]);
+  }, [
+    refetchLoveLanguage,
+    refetchPartnerData,
+    refetchAbout,
+    refetchMoodData,
+    refetchFavorites,
+    refetchStatus,
+  ]);
 
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
@@ -472,7 +487,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     try {
       await updateUserFavorites(token, newFavorites);
-      setFavorites(newFavorites);
+      
+      await queryClient.invalidateQueries({
+        queryKey: ["favorites", user?.id],
+      });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save favorites");
     }
@@ -775,7 +793,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         />
 
         <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
-          
+
         <UpdateAboutModal
           visible={aboutModalVisible}
           initialAbout={about}
