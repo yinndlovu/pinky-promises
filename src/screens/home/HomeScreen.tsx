@@ -365,6 +365,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     checkAndUpdateHomeStatus();
   }, []);
 
+  useEffect(() => {
+    if (partnerId) {
+      fetchPartnerProfilePicture();
+    }
+  }, [partnerId]);
+
   useFocusEffect(
     useCallback(() => {
       checkAndUpdateHomeStatus();

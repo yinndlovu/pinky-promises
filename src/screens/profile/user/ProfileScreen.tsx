@@ -36,12 +36,18 @@ import {
   getLoveLanguage,
   updateLoveLanguage,
 } from "../../../services/loveLanguageService";
-import { getAboutUser, updateAboutUser } from "../../../services/aboutUserService";
+import {
+  getAboutUser,
+  updateAboutUser,
+} from "../../../services/aboutUserService";
 import { getPartner } from "../../../services/partnerService";
 import { getReceivedPartnerRequests } from "../../../services/partnerService";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { FavoritesType } from "../../../types/Favorites";
-import { FAVORITE_LABELS, favoritesObjectToArray } from "../../../helpers/profileHelpers";
+import {
+  FAVORITE_LABELS,
+  favoritesObjectToArray,
+} from "../../../helpers/profileHelpers";
 
 // screen content
 import UpdateAboutModal from "../../../components/modals/UpdateAboutModal";
@@ -91,11 +97,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editName, setEditName] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
-
-  // arrays
-  
-
-  
 
   // fetch functions
   const {
@@ -366,6 +367,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchProfilePicture();
+    }
+  }, [user?.id]);
 
   // refresh screen
   const onRefresh = React.useCallback(async () => {

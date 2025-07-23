@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
@@ -104,7 +103,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       }
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${partnerData.id}`,
+        `${BASE_URL}/api/profile/get-profile-picture/${partner?.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",
@@ -281,6 +280,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       ),
     });
   }, [navigation]);
+
+  // use effects
+  useEffect(() => {
+    if (partner?.id) {
+      fetchProfilePicture();
+    }
+  }, [partner?.id]);
 
   // refresh screen
   const onRefresh = useCallback(async () => {
