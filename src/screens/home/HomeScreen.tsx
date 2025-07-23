@@ -340,16 +340,22 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // handle status
   const status = partnerStatus?.unreachable
     ? "Unreachable"
-    : partnerStatus?.isAtHome
+    : partnerStatus?.dataValues.isAtHome
     ? "Home"
-    : partnerStatus?.isAtHome === false
+    : partnerStatus?.dataValues.isAtHome === false
     ? "Away"
     : "Unavailable";
 
   const isActive = status === "Home" || status === "Unavailable";
 
   const statusColor =
-    status === "Home" ? "#4caf50" : status === "Away" ? "#e03487" : "#b0b3c6";
+    status === "Home"
+      ? "#4caf50"
+      : status === "Away"
+      ? "#e03487"
+      : status === "Unreachable"
+      ? "#db8a47ff"
+      : "#b0b3c6";
 
   const mood = partnerMood?.mood || "No mood";
 

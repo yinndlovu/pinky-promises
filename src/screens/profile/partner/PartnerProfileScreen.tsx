@@ -46,7 +46,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [currentUserName, setCurrentUserName] = useState<string | null>(null);
   const [partnerFavorites, setPartnerFavorites] = useState([]);
-  const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
   const [partnerAbout, setPartnerAbout] = useState<string>("");
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [removingPartner, setRemovingPartner] = useState(false);
@@ -169,7 +168,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: loveLanguageLoading,
     refetch: refetchLoveLanguage,
   } = useQuery({
-    queryKey: ["loveLanguage", partner?.id],
+    queryKey: ["partnerLoveLanguage", partner?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -381,7 +380,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
         <View style={styles.divider} />
 
-        <PartnerLoveLanguage loveLanguage={partnerLoveLanguage} />
+        <PartnerLoveLanguage loveLanguage={loveLanguage} />
 
         <PartnerMoreAboutYou about={partnerAbout} />
 

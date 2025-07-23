@@ -10,6 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import { BASE_URL } from "../../configuration/config";
@@ -34,19 +35,18 @@ const StatusMood: React.FC<Props> = ({
   mood = "No mood",
   moodDescription = "You haven't added a mood yet",
   status = "unavailable",
-  statusDescription = "You must add your home location to use this feature.",
+  statusDescription = "You must add your home location to use this feature",
 }) => {
+  // variables
+  const queryClient = useQueryClient();
+
   // use states
   const [moodModalVisible, setMoodModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [currentMood, setCurrentMood] = useState<string | undefined>(mood);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [fetchingMood, setFetchingMood] = useState(false);
   const [updatingMood, setUpdatingMood] = useState(false);
-  const [currentMoodDescription, setCurrentMoodDescription] = useState<
-    string | undefined
-  >(moodDescription);
 
   // handlers
   const handleAddHome = async (location: {
@@ -55,55 +55,58 @@ const StatusMood: React.FC<Props> = ({
   }) => {
     setModalVisible(false);
 
-    await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
+    try {
+      await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
 
-    const token = await AsyncStorage.getItem("token");
-    await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const token = await AsyncStorage.getItem("token");
+      await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    setAlertMessage("Home location added!");
-    setAlertVisible(true);
+      setAlertMessage("Home location added!");
+      setAlertVisible(true);
+    } catch (err) {
+      setAlertMessage("Failed to add home location.");
+      setAlertVisible(true);
+    }
   };
 
   const handleSaveMood = async (mood: string) => {
     try {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) throw new Error("No token");
-      const moodData = await updateMood(token, mood);
-      setCurrentMood(moodData.mood);
-      setCurrentMoodDescription(moodData.description);
-    } catch (err) {
-      throw err;
-    }
-  };
-
-  // fetch functions
-  const fetchMood = async () => {
-    try {
-      setFetchingMood(true);
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
         return;
       }
 
-      const moodData = await getMood(token);
+      await updateMood(token, mood);
 
-      setCurrentMood(moodData.mood);
-      setCurrentMoodDescription(moodData.description);
+      await queryClient.invalidateQueries({
+        queryKey: ["moodData"],
+      });
     } catch (err) {
-      setCurrentMood("Neutral");
-      setCurrentMoodDescription("Feeling nothing special");
-    } finally {
-      setFetchingMood(false);
+      throw err;
     }
   };
 
-  // use effects
-  useEffect(() => {
-    fetchMood();
-  }, []);
+  // fetch functions
+  const {
+    data: moodData,
+    isLoading: moodDataLoading,
+    refetch: refetchMoodData,
+  } = useQuery({
+    queryKey: ["moodData"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await getMood(token);
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   return (
     <View style={styles.wrapper}>
@@ -156,8 +159,11 @@ const StatusMood: React.FC<Props> = ({
         </TouchableOpacity>
       </View>
       <View style={styles.moodContentRow}>
-        <Text style={styles.moodValue}>{currentMood}</Text>
-        <Text style={styles.moodDescription}> - {currentMoodDescription}</Text>
+        <Text style={styles.moodValue}>{moodData?.mood || mood}</Text>
+        <Text style={styles.moodDescription}>
+          {" "}
+          - {moodData?.description || moodDescription}
+        </Text>
       </View>
 
       <AddLocationModal
@@ -170,7 +176,7 @@ const StatusMood: React.FC<Props> = ({
         visible={moodModalVisible}
         onClose={() => setMoodModalVisible(false)}
         onSave={handleSaveMood}
-        initialMood={currentMood}
+        initialMood={moodData?.mood}
       />
 
       <AlertModal

@@ -108,16 +108,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // use states (screen content)
   const [user, setUser] = useState<any>(null);
   const [favorites, setFavorites] = useState<FavoritesType>({});
-  const [homeStatus, setHomeStatus] = useState<
-    "home" | "away" | "unreachable" | "unavailable"
-  >("unavailable");
-  const [statusDescription, setStatusDescription] = useState<string>(
-    "You must add your home location to use this feature."
-  );
-  const [mood, setMood] = useState<string>();
-  const [moodDescription, setMoodDescription] = useState<string>();
-  const [about, setAbout] = React.useState<string>("");
-  const [partnerName, setPartnerName] = useState<string | null>(null);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   // arrays
@@ -165,49 +155,44 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     staleTime: 1000 * 60 * 60 * 24,
   });
 
-  const getStatus = async () => {
-    try {
+  const {
+    data: status,
+    isLoading: statusLoading,
+    refetch: refetchStatus,
+  } = useQuery({
+    queryKey: ["status", user?.id],
+    queryFn: async () => {
+      if (!user?.id) {
+        return null;
+      }
+
       const token = await AsyncStorage.getItem("token");
 
-      if (!token || !user?.id) {
-        setHomeStatus("unavailable");
-        setStatusDescription(
-          "You must add your home location to use this feature."
-        );
-
+      if (!token) {
+        setError("Session expired, please log in again");
         return;
       }
 
-      const status = await fetchUserStatus(token, user.id);
+      return await fetchUserStatus(token, user?.id);
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-      if (
-        status &&
-        (typeof status.dataValues.isAtHome === "boolean" ||
-          typeof status.unreachable === "boolean")
-      ) {
-        if (status.unreachable) {
-          setHomeStatus("unreachable");
-          setStatusDescription("Can't find your current location");
-        } else if (status.dataValues.isAtHome) {
-          setHomeStatus("home");
-          setStatusDescription("You are currently at home");
-        } else {
-          setHomeStatus("away");
-          setStatusDescription("You're currently not home");
-        }
-      } else {
-        setHomeStatus("unavailable");
-        setStatusDescription(
-          "You must add your home location to use this feature"
-        );
-      }
-    } catch (err: any) {
-      setHomeStatus("unavailable");
-      setStatusDescription(
-        "You must add your home location to use this feature"
-      );
-    }
-  };
+  const homeStatus = status?.unreachable
+    ? "unreachable"
+    : status?.dataValues.isAtHome
+    ? "home"
+    : status?.dataValues.isAtHome === false
+    ? "away"
+    : "unavailable";
+
+  const statusDescription = status?.unreachable
+    ? "Can't find your current location"
+    : status?.dataValues.isAtHome
+    ? "You are currently at home"
+    : status?.dataValues.isAtHome === false
+    ? "You are currently not home"
+    : "You must add your home location to use this feature";
 
   const fetchPendingRequestsCount = async () => {
     try {
@@ -239,54 +224,62 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     setFavorites(favs);
   };
 
-  const fetchPartnerName = async () => {
-    const token = await AsyncStorage.getItem("token");
+  const {
+    data: partnerData,
+    isLoading: partnerDataLoading,
+    refetch: refetchPartnerData,
+  } = useQuery({
+    queryKey: ["partnerData", user?.id],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
 
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
+      if (!token) {
+        setError("No token found");
+        return;
+      }
 
-    try {
-      const partner = await getPartner(token);
+      return await getPartner(token);
+    },
+    staleTime: 1000 * 60 * 60 * 24 * 3,
+  });
 
-      setPartnerName(partner?.name || null);
-    } catch (err: any) {
-      setPartnerName(null);
-    }
-  };
+  const {
+    data: moodData,
+    isLoading: moodDataLoading,
+    refetch: refetchMoodData,
+  } = useQuery({
+    queryKey: ["moodData", user?.id],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
 
-  const fetchMood = async () => {
-    const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        setError("No token found");
+        return;
+      }
 
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
+      return await getMood(token);
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-    const moodData = await getMood(token);
+  const {
+    data: about,
+    isLoading: aboutLoading,
+    refetch: refetchAbout,
+  } = useQuery({
+    queryKey: ["about", user?.id],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
 
-    setMood(moodData.mood);
-    setMoodDescription(moodData.description);
-  };
-  fetchMood();
+      if (!token) {
+        setError("No token found");
+        return;
+      }
 
-  const fetchAbout = async () => {
-    const token = await AsyncStorage.getItem("token");
-    const userId = user?.id;
-
-    if (!token || !userId) {
-      return;
-    }
-
-    try {
-      const aboutText = await getAboutUser(token, userId);
-
-      setAbout(aboutText);
-    } catch {
-      setAbout("");
-    }
-  };
+      return await getAboutUser(token, user?.id);
+    },
+    staleTime: 1000 * 60 * 60,
+  });
 
   const fetchProfile = async () => {
     try {
@@ -376,21 +369,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (user?.id) {
-      getStatus();
-    }
-  }, [user]);
-
-  useEffect(() => {
     fetchFavorites();
-  }, [user]);
-
-  useEffect(() => {
-    fetchPartnerName();
-  }, [user]);
-
-  useEffect(() => {
-    if (user?.id) fetchAbout();
   }, [user]);
 
   useEffect(() => {
@@ -427,18 +406,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await Promise.all([
         refetchLoveLanguage(),
         fetchProfile(),
-        getStatus(),
+        refetchStatus(),
         fetchPendingRequestsCount(),
         fetchFavorites(),
-        fetchPartnerName(),
-        fetchMood(),
-        fetchAbout(),
+        refetchPartnerData(),
+        refetchMoodData(),
+        refetchAbout(),
       ]);
     } catch (e) {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchLoveLanguage]);
+  }, [refetchLoveLanguage, refetchPartnerData, refetchAbout, refetchMoodData]);
 
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
@@ -470,7 +449,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     try {
       await updateAboutUser(token, newAbout);
-      setAbout(newAbout);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["about", user?.id],
+      });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save about");
     }
@@ -742,12 +724,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             Partner:{" "}
             <Text
               style={
-                partnerName && partnerName !== "No partner"
+                partnerData?.name && partnerData?.name !== "No partner"
                   ? styles.partnerName
                   : styles.noPartnerName
               }
             >
-              {partnerName || "No partner"}
+              {partnerData?.name || "No partner"}
             </Text>
           </Text>
         </View>
@@ -755,8 +737,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <StatusMood
           status={homeStatus}
           statusDescription={statusDescription}
-          mood={mood}
-          moodDescription={moodDescription}
+          mood={moodData?.mood}
+          moodDescription={moodData?.description}
         />
 
         <Anniversary
@@ -793,6 +775,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         />
 
         <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
+          
         <UpdateAboutModal
           visible={aboutModalVisible}
           initialAbout={about}
