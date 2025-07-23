@@ -37,6 +37,20 @@ import PartnerAnniversary from "./PartnerAnniversary";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
+  const FAVORITE_LABELS: { [key: string]: string } = {
+    favoriteColor: "Favorite Color",
+    favoriteFood: "Favorite Food",
+    favoriteSnack: "Favorite Snack",
+    favoriteActivity: "Favorite Activity",
+    favoriteHoliday: "Favorite Holiday",
+    favoriteTimeOfDay: "Favorite Time of Day",
+    favoriteSeason: "Favorite Season",
+    favoriteAnimal: "Favorite Animal",
+    favoriteDrink: "Favorite Drink",
+    favoritePet: "Favorite Pet",
+    favoriteShow: "Favorite Show",
+  };
+
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
 
@@ -44,9 +58,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [partner, setPartner] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [currentUserName, setCurrentUserName] = useState<string | null>(null);
-  const [partnerFavorites, setPartnerFavorites] = useState([]);
-  const [partnerAbout, setPartnerAbout] = useState<string>("");
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [removingPartner, setRemovingPartner] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
@@ -131,37 +142,50 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     );
   };
 
-  const fetchCurrentUser = async () => {
-    try {
+  const {
+    data: currentUser,
+    isLoading: currentUserLoading,
+    refetch: refetchCurrentUser,
+  } = useQuery({
+    queryKey: ["currentUserProfile"],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        return;
+        return null;
       }
 
       const response = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setCurrentUserName(response.data.user.name);
-    } catch (err) {}
-  };
+      return response.data.user;
+    },
+    staleTime: 1000 * 60 * 60 * 24 * 3,
+  });
 
-  const fetchPartnerFavorites = async (partnerId: string) => {
-    try {
+  const currentUserName = currentUser?.name || "You";
+
+  const {
+    data: partnerFavorites = {},
+    isLoading: partnerFavoritesLoading,
+    refetch: refetchPartnerFavorites,
+  } = useQuery({
+    queryKey: ["partnerFavorites", partner?.id],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
-      if (!token) {
-        return;
+      const partnerId = partner?.id;
+
+      if (!token || !partnerId) {
+        return {};
       }
 
-      const favorites = await getUserFavorites(token, partnerId);
-
-      setPartnerFavorites(favorites);
-    } catch (err) {
-      setPartnerFavorites([]);
-    }
-  };
+      return await getUserFavorites(token, partnerId);
+    },
+    enabled: !!partner?.id,
+    staleTime: 1000 * 60 * 60,
+  });
 
   const {
     data: loveLanguage,
@@ -178,24 +202,28 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       return await getLoveLanguage(token, partner?.id);
     },
+    enabled: !!partner?.id,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
-  const fetchPartnerAbout = async (partnerId: string) => {
-    try {
+  const {
+    data: partnerAbout,
+    isLoading: partnerAboutLoading,
+    refetch: refetchPartnerAbout,
+  } = useQuery({
+    queryKey: ["partnerAbout", partner?.id],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
         return;
       }
 
-      const about = await getAboutUser(token, partnerId);
-
-      setPartnerAbout(about);
-    } catch (err) {
-      setPartnerAbout("");
-    }
-  };
+      return await getAboutUser(token, partner?.id);
+    },
+    enabled: !!partner?.id,
+    staleTime: 1000 * 60 * 60,
+  });
 
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
@@ -214,20 +242,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     } finally {
       setRemovingPartner(false);
     }
-  };
-
-  const FAVORITE_LABELS: { [key: string]: string } = {
-    favoriteColor: "Favorite Color",
-    favoriteFood: "Favorite Food",
-    favoriteSnack: "Favorite Snack",
-    favoriteActivity: "Favorite Activity",
-    favoriteHoliday: "Favorite Holiday",
-    favoriteTimeOfDay: "Favorite Time of Day",
-    favoriteSeason: "Favorite Season",
-    favoriteAnimal: "Favorite Animal",
-    favoriteDrink: "Favorite Drink",
-    favoritePet: "Favorite Pet",
-    favoriteShow: "Favorite Show",
   };
 
   // helpers
@@ -259,33 +273,23 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   useEffect(() => {
     (async () => {
       setLoading(true);
-
       await fetchPartner();
-      await fetchCurrentUser();
-
       setLoading(false);
     })();
   }, []);
-
-  useEffect(() => {
-    if (partner?.id) {
-      fetchPartnerFavorites(partner.id);
-      fetchPartnerAbout(partner.id);
-    }
-  }, [partner?.id]);
 
   // refresh screen
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await fetchPartner();
-      await fetchCurrentUser();
+      await refetchCurrentUser();
 
       if (partner?.id) {
         await Promise.all([
-          fetchPartnerFavorites(partner.id),
+          refetchPartnerFavorites(),
           refetchLoveLanguage(),
-          fetchPartnerAbout(partner.id),
+          refetchPartnerAbout(partner.id),
         ]);
       }
 
@@ -294,7 +298,12 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchLoveLanguage]);
+  }, [
+    refetchLoveLanguage,
+    refetchPartnerFavorites,
+    refetchCurrentUser,
+    partner?.id,
+  ]);
 
   // declarations
   const name = partner?.name || "User";

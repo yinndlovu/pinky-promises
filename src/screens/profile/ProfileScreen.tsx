@@ -211,8 +211,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     } catch (error) {}
   };
 
-  // ...existing code...
-
   const {
     data: favorites = {},
     isLoading: favoritesLoading,
