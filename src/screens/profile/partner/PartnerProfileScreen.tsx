@@ -16,6 +16,7 @@ import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import { getUserFavorites } from "../../../services/favoritesService";
@@ -35,7 +36,11 @@ import PartnerStatusMood from "./PartnerStatusMood";
 import PartnerAnniversary from "./PartnerAnniversary";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
+  // variables
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+
+  // use states
   const [partner, setPartner] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,28 +56,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
     null
   );
-
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await fetchPartner();
-      await fetchCurrentUser();
-
-      if (partner?.id) {
-        await Promise.all([
-          fetchPartnerFavorites(partner.id),
-          fetchPartnerLoveLanguage(partner.id),
-          fetchPartnerAbout(partner.id),
-        ]);
-      }
-
-      setRefreshKey((k) => k + 1);
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [partner?.id]);
 
   const fetchPartner = async () => {
     try {
@@ -181,21 +164,23 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   };
 
-  const fetchPartnerLoveLanguage = async (partnerId: string) => {
-    try {
+  const {
+    data: loveLanguage,
+    isLoading: loveLanguageLoading,
+    refetch: refetchLoveLanguage,
+  } = useQuery({
+    queryKey: ["loveLanguage", partner?.id],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
         return;
       }
 
-      const loveLanguage = await getLoveLanguage(token, partnerId);
-
-      setPartnerLoveLanguage(loveLanguage);
-    } catch (err) {
-      setPartnerLoveLanguage("");
-    }
-  };
+      return await getLoveLanguage(token, partner?.id);
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
 
   const fetchPartnerAbout = async (partnerId: string) => {
     try {
@@ -286,10 +271,31 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   useEffect(() => {
     if (partner?.id) {
       fetchPartnerFavorites(partner.id);
-      fetchPartnerLoveLanguage(partner.id);
       fetchPartnerAbout(partner.id);
     }
   }, [partner?.id]);
+
+  // refresh screen
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchPartner();
+      await fetchCurrentUser();
+
+      if (partner?.id) {
+        await Promise.all([
+          fetchPartnerFavorites(partner.id),
+          refetchLoveLanguage(),
+          fetchPartnerAbout(partner.id),
+        ]);
+      }
+
+      setRefreshKey((k) => k + 1);
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetchLoveLanguage]);
 
   // declarations
   const name = partner?.name || "User";

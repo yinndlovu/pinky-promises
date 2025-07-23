@@ -21,6 +21,7 @@ import { encode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import { fetchUserStatus } from "../../services/userStatusService";
@@ -72,6 +73,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
+  const queryClient = useQueryClient();
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -114,7 +116,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   );
   const [mood, setMood] = useState<string>();
   const [moodDescription, setMoodDescription] = useState<string>();
-  const [loveLanguage, setLoveLanguage] = useState("");
   const [about, setAbout] = React.useState<string>("");
   const [partnerName, setPartnerName] = useState<string | null>(null);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
@@ -144,43 +145,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       .filter(Boolean) as { label: string; value: string }[];
   }
 
-  // refresh screen
-  const onRefresh = React.useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        fetchLoveLanguage(),
-        fetchProfile(),
-        getStatus(),
-        fetchPendingRequestsCount(),
-        fetchFavorites(),
-        fetchPartnerName(),
-        fetchMood(),
-        fetchAbout(),
-      ]);
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, []);
-
   // fetch functions
-  const fetchLoveLanguage = async () => {
-    const token = await AsyncStorage.getItem("token");
-    const userId = user?.id;
+  const {
+    data: loveLanguage,
+    isLoading: loveLanguageLoading,
+    refetch: refetchLoveLanguage,
+  } = useQuery({
+    queryKey: ["loveLanguage", user?.id],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
 
-    if (!token || !userId) {
-      return;
-    }
+      if (!token) {
+        setError("No token found");
+        return;
+      }
 
-    try {
-      const ll = await getLoveLanguage(token, userId);
-
-      setLoveLanguage(ll);
-    } catch {
-      setLoveLanguage("");
-    }
-  };
+      return await getLoveLanguage(token, user?.id);
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
 
   const getStatus = async () => {
     try {
@@ -389,10 +372,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // use effects
   useEffect(() => {
-    fetchLoveLanguage();
-  }, [user]);
-
-  useEffect(() => {
     fetchPendingRequestsCount();
   }, []);
 
@@ -441,6 +420,26 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     fetchProfile();
   }, []);
 
+  // refresh screen
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refetchLoveLanguage(),
+        fetchProfile(),
+        getStatus(),
+        fetchPendingRequestsCount(),
+        fetchFavorites(),
+        fetchPartnerName(),
+        fetchMood(),
+        fetchAbout(),
+      ]);
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetchLoveLanguage]);
+
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
     const token = await AsyncStorage.getItem("token");
@@ -452,7 +451,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     try {
       await updateLoveLanguage(token, newLoveLanguage);
-      setLoveLanguage(newLoveLanguage);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["loveLanguage", user?.id],
+      });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save love language");
     }
@@ -782,6 +784,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           loveLanguage={loveLanguage}
           onEdit={() => setLoveLanguageModalVisible(true)}
         />
+
         <UpdateLoveLanguageModal
           visible={loveLanguageModalVisible}
           initialLoveLanguage={loveLanguage}

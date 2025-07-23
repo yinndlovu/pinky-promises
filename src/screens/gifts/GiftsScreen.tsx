@@ -79,10 +79,9 @@ const GiftsScreen = () => {
 
       return await getOldestUnclaimedGift(token);
     },
-    staleTime: 1000 * 60 * 60, // 10 minutes
+    staleTime: 1000 * 60 * 60,
   });
 
-  // Past Gifts
   const {
     data: pastGifts = [],
     isLoading: pastGiftsLoading,
@@ -146,7 +145,7 @@ const GiftsScreen = () => {
       return await getSetMonthlyGift(token, userId);
     },
     enabled: !!userId,
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   // handlers
