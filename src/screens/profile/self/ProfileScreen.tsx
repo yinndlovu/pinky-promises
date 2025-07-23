@@ -24,29 +24,30 @@ import type { StackScreenProps } from "@react-navigation/stack";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
-import { fetchUserStatus } from "../../services/userStatusService";
-import { getMood } from "../../services/moodService";
-import UpdateFavoritesModal from "../../components/modals/UpdateFavoritesModal";
+import { fetchUserStatus } from "../../../services/userStatusService";
+import { getMood } from "../../../services/moodService";
+import UpdateFavoritesModal from "../../../components/modals/UpdateFavoritesModal";
 import {
   getUserFavorites,
   updateUserFavorites,
-} from "../../services/favoritesService";
-import { BASE_URL } from "../../configuration/config";
+} from "../../../services/favoritesService";
+import { BASE_URL } from "../../../configuration/config";
 import {
   getLoveLanguage,
   updateLoveLanguage,
-} from "../../services/loveLanguageService";
-import { getAboutUser, updateAboutUser } from "../../services/aboutUserService";
-import { getPartner } from "../../services/partnerService";
-import { getReceivedPartnerRequests } from "../../services/partnerService";
-import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
-import { FavoritesType } from "../../types/Favorites";
+} from "../../../services/loveLanguageService";
+import { getAboutUser, updateAboutUser } from "../../../services/aboutUserService";
+import { getPartner } from "../../../services/partnerService";
+import { getReceivedPartnerRequests } from "../../../services/partnerService";
+import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
+import { FavoritesType } from "../../../types/Favorites";
+import { FAVORITE_LABELS, favoritesObjectToArray } from "../../../helpers/profileHelpers";
 
 // screen content
-import UpdateAboutModal from "../../components/modals/UpdateAboutModal";
-import UpdateLoveLanguageModal from "../../components/modals/UpdateLoveLanguageModal";
-import ProfilePictureModal from "./ProfilePictureModal";
-import ProfilePictureViewer from "./ProfilePictureViewer";
+import UpdateAboutModal from "../../../components/modals/UpdateAboutModal";
+import UpdateLoveLanguageModal from "../../../components/modals/UpdateLoveLanguageModal";
+import ProfilePictureModal from "../../../components/modals/ProfilePictureModal";
+import ProfilePictureViewer from "../../../components/modals/ProfilePictureViewer";
 import StatusMood from "./StatusMood";
 import Anniversary from "./Anniversary";
 import Favorites from "./Favorites";
@@ -91,29 +92,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editBio, setEditBio] = useState("");
 
   // arrays
-  const FAVORITE_LABELS: { [key: string]: string } = {
-    favoriteColor: "Favorite Color",
-    favoriteFood: "Favorite Food",
-    favoriteSnack: "Favorite Snack",
-    favoriteActivity: "Favorite Activity",
-    favoriteHoliday: "Favorite Holiday",
-    favoriteTimeOfDay: "Favorite Time of Day",
-    favoriteSeason: "Favorite Season",
-    favoriteAnimal: "Favorite Animal",
-    favoriteDrink: "Favorite Drink",
-    favoritePet: "Favorite Pet",
-    favoriteShow: "Favorite Show",
-  };
+  
 
-  function favoritesObjectToArray(
-    favoritesObj: any
-  ): { label: string; value: string }[] {
-    return Object.entries(FAVORITE_LABELS)
-      .map(([key, label]) =>
-        favoritesObj[key] ? { label, value: favoritesObj[key] } : null
-      )
-      .filter(Boolean) as { label: string; value: string }[];
-  }
+  
 
   // fetch functions
   const {

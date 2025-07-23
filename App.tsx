@@ -26,7 +26,7 @@ import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/PartnerProfileScreen";
 import ChatScreen from "./src/screens/chat/ChatScreen";
-import PortalScreen from "./src/screens/profile/portal/PortalScreen";
+import PortalScreen from "./src/screens/portal/PortalScreen";
 import SearchScreen from "./src/screens/search/SearchScreen";
 import UserProfileScreen from "./src/screens/profile/user/UserProfileScreen";
 import PendingRequestsScreen from "./src/screens/requests/PendingRequestsScreen";
@@ -39,7 +39,7 @@ import HomeScreen from "./src/screens/home/HomeScreen";
 import LoginScreen from "./src/screens/auth/login/LoginScreen";
 import NavigationBar from "./src/components/navigation/NavigationBar";
 import SettingsScreen from "./src/screens/settings/SettingsScreen";
-import ProfileScreen from "./src/screens/profile/ProfileScreen";
+import ProfileScreen from "./src/screens/profile/self/ProfileScreen";
 import OursScreen from "./src/screens/ours/OursScreen";
 import GiftsScreen from "./src/screens/gifts/GiftsScreen";
 import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";

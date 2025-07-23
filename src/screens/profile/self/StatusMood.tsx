@@ -13,13 +13,13 @@ import axios from "axios";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
-import { BASE_URL } from "../../configuration/config";
-import { getMood, updateMood } from "../../services/moodService";
+import { BASE_URL } from "../../../configuration/config";
+import { getMood, updateMood } from "../../../services/moodService";
 
 // screen content
-import AddLocationModal from "../../components/modals/AddLocationModal";
-import UpdateMoodModal from "../../components/modals/UpdateMoodModal";
-import AlertModal from "../../components/modals/AlertModal";
+import AddLocationModal from "../../../components/modals/AddLocationModal";
+import UpdateMoodModal from "../../../components/modals/UpdateMoodModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 // types
 type Props = {

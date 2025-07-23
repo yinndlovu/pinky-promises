@@ -19,7 +19,7 @@ import {
   getSentSweetMessages,
   getReceivedSweetMessages,
   deleteSweetMessage,
-} from "../../../services/sweetMessageService";
+} from "../../services/sweetMessageService";
 import {
   ventToPartner,
   getLastUnseenVentMessage,
@@ -27,15 +27,15 @@ import {
   getSentVentMessages,
   getReceivedVentMessages,
   deleteVentMessage,
-} from "../../../services/ventMessageService";
+} from "../../services/ventMessageService";
 
 // screen content
 import SweetMessagesSection from "./SweetMessagesSection";
 import VentMessagesSection from "./VentMessagesSection";
-import ConfirmationModal from "../../../components/modals/ConfirmationModal";
-import MessageInputModal from "../../../components/modals/MessageInputModal";
-import ViewMessageModal from "../../../components/modals/ViewMessageModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import MessageInputModal from "../../components/modals/MessageInputModal";
+import ViewMessageModal from "../../components/modals/ViewMessageModal";
+import AlertModal from "../../components/modals/AlertModal";
 
 // types
 type Message = {

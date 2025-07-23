@@ -29,7 +29,7 @@ import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 // screen content
 import ConfirmationModal from "../../../components/modals/ConfirmationModal";
 import PartnerMoreAboutYou from "./PartnerMoreAboutYou";
-import ProfilePictureViewer from "../ProfilePictureViewer";
+import ProfilePictureViewer from "../../../components/modals/ProfilePictureViewer";
 import PartnerFavorites from "./PartnerFavorites";
 import PartnerLoveLanguage from "./PartnerLoveLanguage";
 import PartnerStatusMood from "./PartnerStatusMood";
