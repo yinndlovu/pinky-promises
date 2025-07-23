@@ -57,11 +57,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const settingsOptions = [
     {
-      label: "Change email",
-      icon: "mail",
-      onPress: () => navigation.navigate("ChangeEmail"),
-    },
-    {
       label: "Change password",
       icon: "lock",
       onPress: () => navigation.navigate("ChangePassword"),

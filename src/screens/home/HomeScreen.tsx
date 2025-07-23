@@ -424,13 +424,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     checkAndUpdateHomeStatus,
   ]);
 
-  if (
-    partnerLoading ||
-    partnerStatusLoading ||
-    partnerMoodLoading ||
-    upcomingDateLoading ||
-    activitiesLoading
-  ) {
+  if (partnerLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#e03487" size="large" />

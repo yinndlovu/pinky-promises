@@ -27,6 +27,7 @@ import {
   saveKeyDetail,
   fetchKeyDetails,
 } from "../../services/ai/aiKeyDetailsService";
+import { FAVORITE_LABELS } from "../../helpers/profileHelpers";
 
 // screen content
 import styles from "./styles/ChatScreen.styles";
@@ -72,21 +73,6 @@ export default function ChatScreen() {
   const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
   const [partnerFavorites, setPartnerFavorites] = useState<any>({});
   const [aboutPartner, setAboutPartner] = useState<string>("");
-
-  // mapping
-  const FAVORITE_LABELS: { [key: string]: string } = {
-    favoriteColor: "Favorite Color",
-    favoriteFood: "Favorite Food",
-    favoriteSnack: "Favorite Snack",
-    favoriteActivity: "Favorite Activity",
-    favoriteHoliday: "Favorite Holiday",
-    favoriteTimeOfDay: "Favorite Time of Day",
-    favoriteSeason: "Favorite Season",
-    favoriteAnimal: "Favorite Animal",
-    favoriteDrink: "Favorite Drink",
-    favoritePet: "Favorite Pet",
-    favoriteShow: "Favorite Show",
-  };
 
   function favoritesObjectToArray(
     favoritesObj: any

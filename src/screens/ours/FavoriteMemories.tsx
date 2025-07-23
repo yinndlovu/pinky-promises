@@ -93,7 +93,7 @@ const FavoriteMemories: React.FC<Props> = ({
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
         <Text style={styles.sectionTitle}>Favorite memories</Text>
-        {onViewAll && memories.length > 5 && !showAll && (
+        {onViewAll && memories.length >= 4 && !showAll && (
           <TouchableOpacity style={styles.viewButton} onPress={onViewAll}>
             <Text style={styles.viewButtonText}>View all</Text>
           </TouchableOpacity>
@@ -102,7 +102,7 @@ const FavoriteMemories: React.FC<Props> = ({
       <View style={styles.memoriesCard}>
         {displayMemories.length === 0 ? (
           <Text style={styles.noMemoriesText}>
-            You haven't added any favorite memories yet.
+            You haven't added any favorite memories yet
           </Text>
         ) : (
           <FlatList

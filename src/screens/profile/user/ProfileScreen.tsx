@@ -387,6 +387,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         refetchPartnerData(),
         refetchMoodData(),
         refetchAbout(),
+        fetchProfilePicture(),
       ]);
     } catch (e) {
     } finally {
@@ -401,6 +402,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     refetchStatus,
     refetchProfileData,
     refetchPendingRequestsData,
+    fetchProfilePicture,
   ]);
 
   // handlers
@@ -503,7 +505,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           }
         );
 
-        setSuccess("Profile picture uploaded!");
+        setSuccess("Profile picture uploaded");
         await fetchProfilePicture();
       } catch (err: any) {
         if (

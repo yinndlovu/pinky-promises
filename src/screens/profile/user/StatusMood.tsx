@@ -45,7 +45,6 @@ const StatusMood: React.FC<Props> = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [fetchingMood, setFetchingMood] = useState(false);
   const [updatingMood, setUpdatingMood] = useState(false);
 
   // handlers
@@ -63,10 +62,10 @@ const StatusMood: React.FC<Props> = ({
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setAlertMessage("Home location added!");
+      setAlertMessage("Home location added");
       setAlertVisible(true);
     } catch (err) {
-      setAlertMessage("Failed to add home location.");
+      setAlertMessage("Failed to add home location");
       setAlertVisible(true);
     }
   };

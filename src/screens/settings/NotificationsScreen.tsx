@@ -13,6 +13,7 @@ import {
   Modal,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
@@ -25,17 +26,77 @@ import {
 import ReminderIntervalSetting from "./ReminderIntervalSetting";
 
 const NotificationsScreen = () => {
+  // variables
+  const queryClient = useQueryClient();
+
   // use states
-  const [preferences, setPreferences] = useState<{ [key: string]: boolean }>(
-    {}
-  );
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<{ [key: string]: boolean }>({});
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
+  const [localPreferences, setLocalPreferences] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   // variables
   const isAnyUpdating = Object.values(updating).some(Boolean);
+
+  // fetch functions
+  const fetchPreferencesQuery = async () => {
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      setError("Session expired, please log in again");
+      return {};
+    }
+
+    const prefs: { [key: string]: boolean } = {};
+    for (const { key } of NOTIFICATION_TYPES) {
+      try {
+        prefs[key] = await getNotificationPreference(token, key);
+      } catch {
+        prefs[key] = false;
+      }
+    }
+    return prefs;
+  };
+
+  const {
+    data: preferences = {},
+    isLoading: preferencesLoading,
+    refetch: refetchPreferences,
+  } = useQuery({
+    queryKey: ["notificationPreferences"],
+    queryFn: fetchPreferencesQuery,
+    staleTime: 1000 * 60 * 60 * 24 * 2,
+    retry: false,
+  });
+
+  // handlers
+  const handleToggle = async (type: string, value: boolean) => {
+    setUpdating((prev) => ({ ...prev, [type]: true }));
+
+    const token = await AsyncStorage.getItem("token");
+    if (!token) {
+      setError("Session expired, please log in again");
+      setUpdating((prev) => ({ ...prev, [type]: false }));
+
+      return;
+    }
+
+    try {
+      await setNotificationPreference(token, type, value);
+
+      setLocalPreferences((prev) => ({ ...prev, [type]: value }));
+
+      queryClient.invalidateQueries({
+        queryKey: ["notificationPreferences"],
+      });
+    } catch (e) {
+      setError("Failed to update notification");
+    }
+
+    setUpdating((prev) => ({ ...prev, [type]: false }));
+  };
 
   // use effects
   useEffect(() => {
@@ -50,50 +111,10 @@ const NotificationsScreen = () => {
   }, [error]);
 
   useEffect(() => {
-    fetchPreferences();
-  }, []);
+    setLocalPreferences(preferences);
+  }, [preferences]);
 
-  // fetch functions
-  const fetchPreferences = async () => {
-    setLoading(true);
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
-
-    const prefs: { [key: string]: boolean } = {};
-    for (const { key } of NOTIFICATION_TYPES) {
-      try {
-        prefs[key] = await getNotificationPreference(token, key);
-      } catch {
-        prefs[key] = false;
-      }
-    }
-    setPreferences(prefs);
-    setLoading(false);
-  };
-
-  // handlers
-  const handleToggle = async (type: string, value: boolean) => {
-    setUpdating((prev) => ({ ...prev, [type]: true }));
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
-
-    try {
-      await setNotificationPreference(token, type, value);
-
-      setPreferences((prev) => ({ ...prev, [type]: value }));
-    } catch (e) {}
-    setUpdating((prev) => ({ ...prev, [type]: false }));
-  };
-
-  if (loading) {
+  if (preferencesLoading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" />
@@ -128,11 +149,11 @@ const NotificationsScreen = () => {
                 <Text style={styles.description}>{description}</Text>
               </View>
               <Switch
-                value={!!preferences[key]}
+                value={!!localPreferences[key]}
                 onValueChange={(val) => handleToggle(key, val)}
                 disabled={updating[key]}
                 trackColor={{ false: "#767577", true: "#e03487" }}
-                thumbColor={preferences[key] ? "#fff" : "#b0b3c6"}
+                thumbColor={localPreferences[key] ? "#fff" : "#b0b3c6"}
               />
             </View>
           ))}

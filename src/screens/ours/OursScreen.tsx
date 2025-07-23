@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import { getNotes } from "../../services/notesService";
@@ -28,6 +29,7 @@ import {
   createFavoriteMemory,
   updateFavoriteMemory,
   deleteFavoriteMemory,
+  getRecentFavoriteMemories,
 } from "../../services/favoriteMemoriesService";
 import { useAuth } from "../../contexts/AuthContext";
 
@@ -49,13 +51,11 @@ const OursScreen = ({ navigation }: Props) => {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const currentUserId = user?.id;
+  const queryClient = useQueryClient();
 
   // use states
-  const [notesPreview, setNotesPreview] = useState<string>("");
   const [notesUpdatedAt, setNotesUpdatedAt] = useState<string | null>(null);
-  const [specialDates, setSpecialDates] = useState<any[]>([]);
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const [loadingDates, setLoadingDates] = useState(false);
   const [selectedDate, setSelectedDate] = useState<any | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -63,9 +63,7 @@ const OursScreen = ({ navigation }: Props) => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [memories, setMemories] = useState<any[]>([]);
   const [showAllMemories, setShowAllMemories] = useState(false);
-  const [memoriesLoading, setMemoriesLoading] = useState(false);
   const [memoryModalVisible, setMemoryModalVisible] = useState(false);
   const [editingMemory, setEditingMemory] = useState<any | null>(null);
   const [memoryModalLoading, setMemoryModalLoading] = useState(false);
@@ -78,20 +76,14 @@ const OursScreen = ({ navigation }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
 
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([
-      fetchNotesPreview(),
-      fetchSpecialDates(),
-      fetchMemories(showAllMemories),
-    ]);
-    setRefreshing(false);
-  };
-
   // fetch functions
-  const fetchNotesPreview = async () => {
-    try {
+  const {
+    data: notesPreview,
+    isLoading: notesPreviewLoading,
+    refetch: refetchNotesPreview,
+  } = useQuery({
+    queryKey: ["notesPreview", currentUserId],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
@@ -99,53 +91,48 @@ const OursScreen = ({ navigation }: Props) => {
         return;
       }
 
-      const notes = await getNotes(token);
+      return await getNotes(token);
+    },
+    staleTime: 1000 * 60 * 60,
+  });
 
-      setNotesPreview(notes.content || "");
-      setNotesUpdatedAt(notes.updatedAt || null);
-    } catch {
-      setNotesPreview("");
-      setNotesUpdatedAt(null);
-    }
-  };
-
-  const fetchSpecialDates = async () => {
-    setLoadingDates(true);
-    try {
+  const {
+    data: specialDates = [],
+    isLoading: specialDatesLoading,
+    refetch: refetchSpecialDates,
+  } = useQuery({
+    queryKey: ["specialDates", currentUserId],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
         setError("Session expired, please log in again");
-        return;
+        return [];
       }
 
-      const dates = await getSpecialDates(token);
-      setSpecialDates(dates);
-    } catch {
-      setSpecialDates([]);
-    } finally {
-      setLoadingDates(false);
-    }
-  };
+      return await getSpecialDates(token);
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
 
-  const fetchMemories = async (all = false) => {
-    setMemoriesLoading(true);
-    try {
+  const {
+    data: recentMemories = [],
+    isLoading: recentMemoriesLoading,
+    refetch: refetchRecentMemories,
+  } = useQuery({
+    queryKey: ["recentFavoriteMemories", currentUserId],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
         setError("Session expired, please log in again");
-        return;
+        return [];
       }
 
-      const data = await getAllFavoriteMemories(token);
-      setMemories(data || []);
-    } catch {
-      setMemories([]);
-    } finally {
-      setMemoriesLoading(false);
-    }
-  };
+      return await getRecentFavoriteMemories(token);
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
 
   // handlers
   const handleAddSpecialDate = async (
@@ -162,7 +149,10 @@ const OursScreen = ({ navigation }: Props) => {
       }
 
       await createSpecialDate(token, date, title, description);
-      await fetchSpecialDates();
+
+      await queryClient.invalidateQueries({
+        queryKey: ["specialDates", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to add special date"
@@ -209,7 +199,9 @@ const OursScreen = ({ navigation }: Props) => {
       setSelectedDate(null);
       setAlertVisible(true);
 
-      await fetchSpecialDates();
+      await queryClient.invalidateQueries({
+        queryKey: ["specialDates", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to update special date"
@@ -240,7 +232,9 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertMessage("Special date deleted");
       setAlertVisible(true);
 
-      await fetchSpecialDates();
+      await queryClient.invalidateQueries({
+        queryKey: ["specialDates", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to delete special date"
@@ -275,7 +269,10 @@ const OursScreen = ({ navigation }: Props) => {
       await deleteFavoriteMemory(token, memory.id);
       setAlertMessage("Favorite memory deleted");
       setAlertVisible(true);
-      await fetchMemories(showAllMemories);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentFavoriteMemories", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to delete favorite memory"
@@ -312,7 +309,9 @@ const OursScreen = ({ navigation }: Props) => {
       setMemoryModalVisible(false);
       setAlertVisible(true);
 
-      await fetchMemories(showAllMemories);
+      await queryClient.invalidateQueries({
+        queryKey: ["recentFavoriteMemories", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to save favorite memory"
@@ -348,15 +347,6 @@ const OursScreen = ({ navigation }: Props) => {
 
   // use effects
   useEffect(() => {
-    fetchNotesPreview();
-    fetchSpecialDates();
-  }, []);
-
-  useEffect(() => {
-    fetchMemories(showAllMemories);
-  }, [showAllMemories]);
-
-  useEffect(() => {
     if (error) {
       setShowError(true);
       const timer = setTimeout(() => {
@@ -366,6 +356,17 @@ const OursScreen = ({ navigation }: Props) => {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  // refresh screen
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      refetchNotesPreview(),
+      refetchSpecialDates(),
+      refetchRecentMemories(),
+    ]);
+    setRefreshing(false);
+  };
 
   {
     deleting && (
@@ -429,33 +430,27 @@ const OursScreen = ({ navigation }: Props) => {
         }
       >
         <NotesCanvas
-          preview={notesPreview}
-          updatedAt={notesUpdatedAt}
+          preview={notesPreview?.content}
+          updatedAt={notesPreview?.updatedAt}
           onView={() => navigation.navigate("NotesScreen")}
         />
+
         <SpecialDates
           dates={specialDates}
           onAdd={() => setAddModalVisible(true)}
           onLongPressDate={handleLongPressDate}
         />
-        {memoriesLoading ? (
-          <ActivityIndicator
-            size="large"
-            color="#e03487"
-            style={{ marginVertical: 24 }}
-          />
-        ) : (
-          <FavoriteMemories
-            memories={memories}
-            currentUserId={currentUserId}
-            onViewAll={() => setShowAllMemories(true)}
-            onViewDetails={handleViewMemoryDetails}
-            onAdd={handleAddMemory}
-            onEdit={handleEditMemory}
-            onDelete={handleDeleteMemory}
-            showAll={showAllMemories}
-          />
-        )}
+
+        <FavoriteMemories
+          memories={recentMemories}
+          currentUserId={currentUserId}
+          onViewAll={() => setShowAllMemories(true)}
+          onViewDetails={handleViewMemoryDetails}
+          onAdd={handleAddMemory}
+          onEdit={handleEditMemory}
+          onDelete={handleDeleteMemory}
+          showAll={showAllMemories}
+        />
       </ScrollView>
 
       <UpdateFavoriteMemoryModal

@@ -24,6 +24,7 @@ import { getAboutUser } from "../../../services/aboutUserService";
 import { removePartner } from "../../../services/partnerService";
 import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
+import { FAVORITE_LABELS, favoritesObjectToArray } from "../../../helpers/profileHelpers";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/ConfirmationModal";
@@ -36,21 +37,6 @@ import PartnerAnniversary from "./PartnerAnniversary";
 import styles from "./styles/PartnerProfileScreen.styles";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
-  // variables
-  const FAVORITE_LABELS: { [key: string]: string } = {
-    favoriteColor: "Favorite Color",
-    favoriteFood: "Favorite Food",
-    favoriteSnack: "Favorite Snack",
-    favoriteActivity: "Favorite Activity",
-    favoriteHoliday: "Favorite Holiday",
-    favoriteTimeOfDay: "Favorite Time of Day",
-    favoriteSeason: "Favorite Season",
-    favoriteAnimal: "Favorite Animal",
-    favoriteDrink: "Favorite Drink",
-    favoritePet: "Favorite Pet",
-    favoriteShow: "Favorite Show",
-  };
-
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
 
@@ -226,17 +212,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       setRemovingPartner(false);
     }
   };
-
-  // helpers
-  function favoritesObjectToArray(
-    favoritesObj: any
-  ): { label: string; value: string }[] {
-    return Object.entries(FAVORITE_LABELS)
-      .map(([key, label]) =>
-        favoritesObj[key] ? { label, value: favoritesObj[key] } : null
-      )
-      .filter(Boolean) as { label: string; value: string }[];
-  }
 
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt && partner) {

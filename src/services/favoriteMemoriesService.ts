@@ -20,6 +20,17 @@ export async function getAllFavoriteMemories(token: string) {
   return res.data.memories;
 }
 
+export async function getRecentFavoriteMemories(token: string) {
+  const res = await axios.get(
+    `${BASE_URL}/api/favorite-memories/recent`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  return res.data.memories;
+}
+
 export async function createFavoriteMemory(
   token: string,
   memory: string,

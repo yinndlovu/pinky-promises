@@ -106,14 +106,6 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
   const anniversaryDisplay = getAnniversaryDisplay();
   const dayMetDisplay = getDayMetDisplay();
 
-  if (loading) {
-    return (
-      <View style={styles.wrapper}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.wrapper}>
       <View style={styles.row}>

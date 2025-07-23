@@ -93,16 +93,6 @@ const PartnerStatusMood: React.FC<Props> = ({
     ? `${partnerName} is currently not home`
     : `${partnerName} hasn't set a home location`;
 
-  if (partnerMoodLoading || partnerStatusLoading) {
-    return (
-      <View style={styles.wrapper}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#e03487" />
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
