@@ -10,6 +10,12 @@ import { StyleSheet, View, ActivityIndicator } from "react-native";
 import * as Location from "expo-location";
 import React from "react";
 import { useEffect } from "react";
+import {
+  QueryClient,
+  QueryClientProvider,
+  onlineManager,
+} from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
@@ -41,9 +47,12 @@ import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./src/screens/settings/ChangePasswordScreen";
 import NotificationsScreen from "./src/screens/settings/NotificationsScreen";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+const queryClient = new QueryClient();
 
 async function startBackgroundLocation() {
   const { status } = await Location.requestForegroundPermissionsAsync();
@@ -369,10 +378,25 @@ function AppContent() {
 }
 
 export default function App() {
+  React.useEffect(() => {
+    return NetInfo.addEventListener((state) => {
+      onlineManager.setOnline(!!state.isConnected);
+    });
+  }, []);
+
   return (
     <NotificationProvider>
       <AuthProvider>
-        <AppContent />
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister: sqlitePersistor,
+            maxAge: 1000 * 60 * 60 * 24,
+          }}
+          onSuccess={() => {}}
+        >
+          <AppContent />
+        </PersistQueryClientProvider>
       </AuthProvider>
     </NotificationProvider>
   );

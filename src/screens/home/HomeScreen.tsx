@@ -19,6 +19,8 @@ import { encode } from "base64-arraybuffer";
 import * as Location from "expo-location";
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
+import { useQuery } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import { BASE_URL } from "../../configuration/config";
@@ -57,10 +59,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     "home" | "away" | "unreachable" | "unavailable"
   >("unavailable");
   const [partnerMood, setPartnerMood] = useState<string>("No mood");
-  const [upcomingDate, setUpcomingDate] = useState<any>(null);
-  const [activities, setActivities] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   // refresh screen
   const onRefresh = useCallback(async () => {
@@ -68,8 +69,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await Promise.all([
         fetchPartner(),
-        fetchUpcomingSpecialDate(),
-        fetchRecentActivities(),
+        refetchUpcomingDate(),
+        refetchActivities(),
         checkAndUpdateHomeStatus(),
         fetchPartnerStatusAndMood(),
       ]);
@@ -167,8 +168,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const fetchUpcomingSpecialDate = async () => {
-    try {
+  const {
+    data: upcomingDate,
+    isLoading: upcomingDateLoading,
+    refetch: refetchUpcomingDate,
+  } = useQuery({
+    queryKey: ["upcomingSpecialDate"],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
@@ -176,12 +182,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return;
       }
 
-      const upcoming = await getUpcomingSpecialDate(token);
-      setUpcomingDate(upcoming);
-    } catch (error: any) {
-      setUpcomingDate(null);
-    }
-  };
+      return await getUpcomingSpecialDate(token);
+    },
+    staleTime: 1000 * 60 * 60 * 12,
+  });
 
   const fetchPartnerStatusAndMood = async () => {
     if (!partner?.id) {
@@ -234,8 +238,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const fetchRecentActivities = async () => {
-    try {
+  const {
+    data: activities = [],
+    isLoading: activitiesLoading,
+    refetch: refetchActivities,
+  } = useQuery({
+    queryKey: ["recentActivities"],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
@@ -245,18 +254,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       const activitiesData = await getRecentActivities(token);
 
-      const transformedActivities = activitiesData.map((activity: any) => ({
+      return activitiesData.map((activity: any) => ({
         id: activity.id,
         description: activity.activity,
         date: formatActivityDate(activity.createdAt),
         time: formatActivityTime(activity.createdAt),
       }));
-
-      setActivities(transformedActivities);
-    } catch (error: any) {
-      setActivities([]);
-    }
-  };
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   // helpers
   const renderPartnerImage = () => {
@@ -366,7 +372,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       case "unavailable":
         return "Unavailable";
       case "unreachable":
-        return "Unreachable"
+        return "Unreachable";
       default:
         return "Unavailable";
     }
@@ -417,14 +423,29 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     fetchPartner();
-    fetchUpcomingSpecialDate();
-    fetchRecentActivities();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
   }, []);
 
   if (loading) {
     return (
       <View style={styles.centered}>
         <ActivityIndicator color="#e03487" size="large" />
+      </View>
+    );
+  }
+
+  {
+    !isOnline && (
+      <View style={{ backgroundColor: "red", padding: 8 }}>
+        <Text style={{ color: "white", textAlign: "center" }}>
+          You are offline
+        </Text>
       </View>
     );
   }
@@ -554,33 +575,44 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             onAction={handleAction}
           />
         </View>
-        {upcomingDate && (
-          <View style={styles.upcomingContainer}>
-            <Text style={styles.upcomingLabel}>UPCOMING</Text>
-            <View style={styles.eventCard}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 4,
-                }}
-              >
-                <Text style={styles.eventName}>{upcomingDate.title}</Text>
-                <Text style={styles.eventTimeLeft}>
-                  {" "}
-                  {formatTimeLeft(upcomingDate.daysUntil)}
+        {upcomingDateLoading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator color="#e03487" size="large" />
+          </View>
+        ) : (
+          upcomingDate && (
+            <View style={styles.upcomingContainer}>
+              <Text style={styles.upcomingLabel}>UPCOMING</Text>
+              <View style={styles.eventCard}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 4,
+                  }}
+                >
+                  <Text style={styles.eventName}>{upcomingDate.title}</Text>
+                  <Text style={styles.eventTimeLeft}>
+                    {" "}
+                    {formatTimeLeft(upcomingDate.daysUntil)}
+                  </Text>
+                </View>
+                <Text style={styles.eventDescription}>
+                  {upcomingDate.description ||
+                    `${upcomingDate.title} on ${formatDate(
+                      upcomingDate.nextOccurrence
+                    )}`}
                 </Text>
               </View>
-              <Text style={styles.eventDescription}>
-                {upcomingDate.description ||
-                  `${upcomingDate.title} on ${formatDate(
-                    upcomingDate.nextOccurrence
-                  )}`}
-              </Text>
             </View>
-          </View>
+          )
         )}
         <RecentActivity activities={activities} />
+        {activitiesLoading && (
+          <View style={styles.centered}>
+            <ActivityIndicator color="#e03487" size="large" />
+          </View>
+        )}
       </ScrollView>
       {showError && (
         <View style={styles.toast}>
