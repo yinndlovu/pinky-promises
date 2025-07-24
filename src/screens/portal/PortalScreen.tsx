@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // internal
 import {
@@ -28,6 +29,7 @@ import {
   getReceivedVentMessages,
   deleteVentMessage,
 } from "../../services/ventMessageService";
+import { Message } from "../../types/Message";
 
 // screen content
 import SweetMessagesSection from "./SweetMessagesSection";
@@ -37,16 +39,9 @@ import MessageInputModal from "../../components/modals/MessageInputModal";
 import ViewMessageModal from "../../components/modals/ViewMessageModal";
 import AlertModal from "../../components/modals/AlertModal";
 
-// types
-type Message = {
-  id: string;
-  message?: string;
-  seen?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-};
+type Props = NativeStackScreenProps<any, any>;
 
-export default function PortalScreen() {
+export default function PortalScreen({ navigation }: Props) {
   // variables
   const insets = useSafeAreaInsets();
 
@@ -263,9 +258,7 @@ export default function PortalScreen() {
 
       await fetchUnseenMessages();
     } catch (err: any) {
-      setAlertMessage(
-        err?.response?.data?.message || "Failed to load message"
-      );
+      setAlertMessage(err?.response?.data?.message || "Failed to load message");
       setAlertVisible(true);
     } finally {
       setViewLoading(false);
@@ -299,8 +292,8 @@ export default function PortalScreen() {
           sent={sweetMessagesSent}
           received={sweetMessagesReceived}
           onLongPress={handleLongPress}
-          onViewAllSent={() => {}}
-          onViewAllReceived={() => {}}
+          onViewAllSent={() => navigation.navigate("LastSixSentScreen")}
+          onViewAllReceived={() => navigation.navigate("LastSixReceivedScreen")}
           onAdd={() => {
             setInputType("sweet");
             handleOpenInputModal("sweet");

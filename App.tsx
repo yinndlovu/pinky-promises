@@ -10,10 +10,7 @@ import { StyleSheet, View, ActivityIndicator } from "react-native";
 import * as Location from "expo-location";
 import React from "react";
 import { useEffect } from "react";
-import {
-  QueryClient,
-  onlineManager,
-} from "@tanstack/react-query";
+import { QueryClient, onlineManager } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
@@ -51,6 +48,8 @@ import NotificationsScreen from "./src/screens/settings/notifications/Notificati
 import TimelineScreen from "./src/screens/ours/TimelineScreen";
 import AboutScreen from "./src/screens/settings/about/AboutScreen";
 import AllFavoriteMemoriesScreen from "./src/screens/ours/AllFavoriteMemoriesScreen";
+import LastSixSentScreen from "./src/screens/portal/LastSixSentScreen";
+import LastSixReceivedScreen from "./src/screens/portal/LastSixReceivedScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -403,6 +402,30 @@ function AppContent() {
           options={{
             headerShown: true,
             title: "All favorite memories",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="LastSixSentScreen"
+          component={LastSixSentScreen}
+          options={{
+            headerShown: true,
+            title: "Last six sent",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="LastSixReceivedScreen"
+          component={LastSixReceivedScreen}
+          options={{
+            headerShown: true,
+            title: "Last six received",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

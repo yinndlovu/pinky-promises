@@ -6,13 +6,8 @@ import { Ionicons } from "@expo/vector-icons";
 // content
 import MessageList from "./MessageList";
 
-type Message = {
-  id: string;
-  message?: string;
-  seen?: boolean;
-  createdAt?: string;
-  updatedAt?: string,
-};
+// internal
+import { Message } from "../../types/Message";
 
 interface Props {
   sent: Message[];

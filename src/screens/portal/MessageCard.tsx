@@ -8,14 +8,8 @@ import {
   Dimensions,
 } from "react-native";
 
-// types
-type Message = {
-  id: string;
-  message?: string;
-  seen?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-};
+// internal
+import { Message } from "../../types/Message";
 
 interface Props {
   message: Message;
