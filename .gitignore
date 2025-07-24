@@ -4,6 +4,7 @@
 node_modules/
 
 src/configuration/config.ts
+src/configuration/aboutText.ts
 
 # Expo
 .expo/

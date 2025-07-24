@@ -15,6 +15,7 @@ import {
   onlineManager,
 } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
@@ -22,6 +23,7 @@ import { NotificationProvider } from "./src/contexts/NotificationContext";
 import { useNotification } from "./src/contexts/NotificationContext";
 import { LOCATION_TASK_NAME } from "./src/background/LocationTask";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
+import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/PartnerProfileScreen";
@@ -47,8 +49,7 @@ import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./src/screens/settings/password/ChangePasswordScreen";
 import NotificationsScreen from "./src/screens/settings/notifications/NotificationsScreen";
 import TimelineScreen from "./src/screens/ours/TimelineScreen";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { sqlitePersistor } from "./src/database/reactQueryPersistor";
+import AboutScreen from "./src/screens/settings/about/AboutScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -377,6 +378,18 @@ function AppContent() {
           options={{
             headerShown: true,
             title: "Timeline",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="AboutScreen"
+          component={AboutScreen}
+          options={{
+            headerShown: true,
+            title: "About",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

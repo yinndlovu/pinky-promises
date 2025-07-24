@@ -111,7 +111,17 @@ const NotificationsScreen = () => {
   }, [error]);
 
   useEffect(() => {
-    setLocalPreferences(preferences);
+    setLocalPreferences((prev) => {
+      const prevKeys = Object.keys(prev);
+      const newKeys = Object.keys(preferences);
+      if (
+        prevKeys.length !== newKeys.length ||
+        newKeys.some((key) => prev[key] !== preferences[key])
+      ) {
+        return preferences;
+      }
+      return prev;
+    });
   }, [preferences]);
 
   if (preferencesLoading) {

@@ -69,7 +69,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     {
       label: "About",
       icon: "info",
-      onPress: () => {},
+      onPress: () => navigation.navigate("AboutScreen"),
     },
   ];
 
