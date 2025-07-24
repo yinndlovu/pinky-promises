@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
@@ -10,6 +11,7 @@ import {
   createSpecialDate,
   updateSpecialDate,
 } from "../../../services/specialDateService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content
 import UpdateSpecialDateModal from "../../../components/modals/UpdateSpecialDateModal";
@@ -35,8 +37,12 @@ type SpecialDate = {
 };
 
 const Anniversary: React.FC<Props> = () => {
+  // use contexts
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const currentUserId = user?.id;
+
   // use states
-  const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [editingDate, setEditingDate] = useState<SpecialDate | null>(null);
   const [modalType, setModalType] = useState<"anniversary" | "dayMet">(
@@ -45,10 +51,24 @@ const Anniversary: React.FC<Props> = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  // use effects
-  useEffect(() => {
-    fetchSpecialDates();
-  }, []);
+  // fetch functions
+  const {
+    data: specialDates = [],
+    isLoading: specialDatesLoading,
+    error: specialDatesError,
+    refetch: refetchSpecialDates,
+  } = useQuery<SpecialDate[]>({
+    queryKey: ["specialDates", currentUserId],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        return [];
+      }
+
+      return await getSpecialDates(token);
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
 
   // helpers
   const formatDisplayDate = (
@@ -80,7 +100,7 @@ const Anniversary: React.FC<Props> = () => {
   };
 
   const getAnniversaryDisplay = () => {
-    const anniversary = specialDates.find((date) =>
+    const anniversary = specialDates.find((date: SpecialDate) =>
       date.title.toLowerCase().includes("anniversary")
     );
 
@@ -93,7 +113,7 @@ const Anniversary: React.FC<Props> = () => {
   };
 
   const getDayMetDisplay = () => {
-    const dayMet = specialDates.find((date) =>
+    const dayMet = specialDates.find((date: SpecialDate) =>
       date.title.toLowerCase().includes("met")
     );
 
@@ -105,23 +125,9 @@ const Anniversary: React.FC<Props> = () => {
     };
   };
 
-  // fetch functions
-  const fetchSpecialDates = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const dates = await getSpecialDates(token);
-      setSpecialDates(dates);
-    } catch (error) {}
-  };
-
   // handlers
   const handleEditAnniversary = () => {
-    const anniversary = specialDates.find((date) =>
+    const anniversary = specialDates.find((date: SpecialDate) =>
       date.title.toLowerCase().includes("anniversary")
     );
 
@@ -135,7 +141,7 @@ const Anniversary: React.FC<Props> = () => {
   };
 
   const handleEditDayMet = () => {
-    const dayMet = specialDates.find((date) =>
+    const dayMet = specialDates.find((date: SpecialDate) =>
       date.title.toLowerCase().includes("met")
     );
 
@@ -165,7 +171,9 @@ const Anniversary: React.FC<Props> = () => {
       await createSpecialDate(token, date, title, description);
     }
 
-    await fetchSpecialDates();
+    await queryClient.invalidateQueries({
+      queryKey: ["specialDates", currentUserId],
+    });
   };
 
   // declarations

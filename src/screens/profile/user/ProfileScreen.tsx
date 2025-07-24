@@ -390,6 +390,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         refetchAbout(),
         fetchProfilePicture(),
       ]);
+
+      queryClient.invalidateQueries({
+        queryKey: ["specialDates", user?.id],
+      });
     } catch (e) {
     } finally {
       setRefreshing(false);
@@ -741,14 +745,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           statusDescription={statusDescription}
           mood={moodData?.mood}
           moodDescription={moodData?.description}
+          onEdit={() => refetchMoodData()}
+          onAddHome={() => {refetchStatus()}}
         />
 
-        <Anniversary
-          anniversaryDate="22 September 2024"
-          dayMet="12 September 2024"
-          onEditAnniversary={() => {}}
-          onEditDayMet={() => {}}
-        />
+        <Anniversary onEditAnniversary={() => {}} onEditDayMet={() => {}} />
 
         <Favorites
           favorites={favoritesObjectToArray(favorites)}

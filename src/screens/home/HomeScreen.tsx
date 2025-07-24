@@ -524,16 +524,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     );
   }
 
-  if (!isOnline) {
-    return (
-      <View style={styles.toast}>
-        <Text style={styles.toastText}>You are offline</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <View
         style={{
           backgroundColor: "#23243a",

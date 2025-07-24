@@ -10,16 +10,16 @@ import {
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
-import { getMood, updateMood } from "../../../services/moodService";
 
 // screen content
 import AddLocationModal from "../../../components/modals/AddLocationModal";
 import UpdateMoodModal from "../../../components/modals/UpdateMoodModal";
 import AlertModal from "../../../components/modals/AlertModal";
+import { updateMood } from "../../../services/moodService";
 
 // types
 type Props = {
@@ -36,6 +36,8 @@ const StatusMood: React.FC<Props> = ({
   moodDescription = "You haven't added a mood yet",
   status = "unavailable",
   statusDescription = "You must add your home location to use this feature",
+  onEdit,
+  onAddHome,
 }) => {
   // variables
   const queryClient = useQueryClient();
@@ -70,42 +72,21 @@ const StatusMood: React.FC<Props> = ({
     }
   };
 
-  const handleSaveMood = async (mood: string) => {
+  const handleSaveMood = async (newMood: string) => {
     try {
       const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+      await updateMood(token, newMood);
 
-      if (!token) {
-        return;
+      if (onEdit) {
+        onEdit();
       }
-
-      await updateMood(token, mood);
-
-      await queryClient.invalidateQueries({
-        queryKey: ["moodData"],
-      });
+      if (onAddHome) {
+        onAddHome();
+      }
     } catch (err) {
-      throw err;
     }
   };
-
-  // fetch functions
-  const {
-    data: moodData,
-    isLoading: moodDataLoading,
-    refetch: refetchMoodData,
-  } = useQuery({
-    queryKey: ["moodData"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await getMood(token);
-    },
-    staleTime: 1000 * 60 * 5,
-  });
 
   return (
     <View style={styles.wrapper}>
@@ -158,11 +139,8 @@ const StatusMood: React.FC<Props> = ({
         </TouchableOpacity>
       </View>
       <View style={styles.moodContentRow}>
-        <Text style={styles.moodValue}>{moodData?.mood || mood}</Text>
-        <Text style={styles.moodDescription}>
-          {" "}
-          - {moodData?.description || moodDescription}
-        </Text>
+        <Text style={styles.moodValue}>{mood}</Text>
+        <Text style={styles.moodDescription}> - {moodDescription}</Text>
       </View>
 
       <AddLocationModal
@@ -175,7 +153,7 @@ const StatusMood: React.FC<Props> = ({
         visible={moodModalVisible}
         onClose={() => setMoodModalVisible(false)}
         onSave={handleSaveMood}
-        initialMood={moodData?.mood}
+        initialMood={mood}
       />
 
       <AlertModal

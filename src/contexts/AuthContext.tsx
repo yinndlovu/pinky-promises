@@ -46,8 +46,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       return false;
     } catch (error: any) {
-      await AsyncStorage.removeItem("token");
-      return false;
+      if (
+        error.response &&
+        (error.response.status === 401 || error.response.status === 403)
+      ) {
+        await AsyncStorage.removeItem("token");
+        return false;
+      }
+
+      return true;
     }
   };
 
@@ -69,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (userData) {
       setUser(userData);
     }
-    
+
     setIsAuthenticated(true);
   };
 
@@ -102,6 +109,6 @@ export const useAuth = () => {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  
+
   return context;
 };

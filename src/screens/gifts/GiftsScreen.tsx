@@ -18,6 +18,7 @@ import ReceivedGift from "./ReceivedGift";
 import PastGiftsList from "./PastGiftsList";
 import ClaimedGiftModal from "../../components/modals/ClaimedGiftModal";
 import UpdateMonthlyGiftModal from "../../components/modals/UpdateMonthlyGiftModal";
+import AlertModal from "../../components/modals/AlertModal";
 
 // internal
 import {
@@ -47,6 +48,8 @@ const GiftsScreen = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [monthlyGiftModalVisible, setMonthlyGiftModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   // refresh screen
   const onRefresh = async () => {
@@ -194,6 +197,9 @@ const GiftsScreen = () => {
         queryKey: ["setMonthlyGift", userId],
       });
       setMonthlyGiftModalVisible(false);
+
+      setAlertMessage("You have set your favorite present");
+      setAlertVisible(true);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save set gift");
     } finally {
@@ -292,6 +298,12 @@ const GiftsScreen = () => {
         onClose={() => setMonthlyGiftModalVisible(false)}
         onSave={handleSaveSetGift}
         loading={modalLoading}
+      />
+
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
       />
     </View>
   );
