@@ -84,6 +84,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
     null
   );
+  const [uploading, setUploading] = useState(false);
 
   // use states (modals)
   const [showPictureModal, setShowPictureModal] = useState(false);
@@ -491,6 +492,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           return;
         }
 
+        setUploading(true);
+
         const token = await AsyncStorage.getItem("token");
         const userId = user.id;
 
@@ -517,6 +520,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           setError("Failed to upload profile picture");
         }
       } finally {
+        setUploading(false);
       }
     }
   };
@@ -896,8 +900,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         </View>
       )}
 
+      {uploading && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>Uploading your profile picture</Text>
+        </View>
+      )}
+
       {showSuccess && (
-        <View style={[styles.toast, { backgroundColor: "#4caf50" }]}>
+        <View style={styles.toast}>
           <Text style={styles.toastText}>{success}</Text>
         </View>
       )}

@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
   NavigationHelpers,
@@ -10,9 +16,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { BASE_URL } from "../../configuration/config";
-import { encode } from 'base64-arraybuffer';
-import { Image } from 'expo-image';
-import { buildCachedImageUrl } from '../../utils/imageCacheUtils';
+import { encode } from "base64-arraybuffer";
+import { Image } from "expo-image";
+import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 
 const NAV_ITEMS = [
   { name: "Home", icon: "home" as const },
@@ -32,19 +38,24 @@ const ACTIVE_COLOR = "#e03487";
 const INACTIVE_COLOR = "#b0b3c6";
 
 export default function NavigationBar({ navigation, currentRoute }: Props) {
+  // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(null);
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
+    null
+  );
   const [userId, setUserId] = useState<number | null>(null);
 
+  // use effects
   useEffect(() => {
     fetchUserAvatar();
   }, []);
 
+  // fetch functions
   const fetchUserAvatar = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      
+
       if (!token) {
         setLoading(false);
         return;
@@ -64,7 +75,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
         `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer"
+          responseType: "arraybuffer",
         }
       );
 
@@ -73,8 +84,10 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
 
       setAvatarUri(base64);
 
-      const lastModified = pictureResponse.headers['last-modified'];
-      setProfilePicUpdatedAt(lastModified ? new Date(lastModified) : new Date());
+      const lastModified = pictureResponse.headers["last-modified"];
+      setProfilePicUpdatedAt(
+        lastModified ? new Date(lastModified) : new Date()
+      );
     } catch (error: any) {
     } finally {
       setLoading(false);
@@ -82,23 +95,21 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   };
 
   const renderProfileIcon = () => {
-    if (loading) {
-      return (
-        <View style={styles.avatarContainer}>
-          <ActivityIndicator size={16} color={currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR} />
-        </View>
-      );
-    }
-
     if (avatarUri && profilePicUpdatedAt && userId) {
-      const cachedImageUrl = buildCachedImageUrl(userId.toString(), profilePicUpdatedAt);
+      const cachedImageUrl = buildCachedImageUrl(
+        userId.toString(),
+        profilePicUpdatedAt
+      );
       return (
         <View style={styles.avatarContainer}>
           <Image
             source={cachedImageUrl}
             style={[
               styles.avatar,
-              { borderColor: currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR }
+              {
+                borderColor:
+                  currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
+              },
             ]}
             contentFit="cover"
             transition={200}
@@ -113,7 +124,10 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
           source={require("../../assets/default-avatar-two.png")}
           style={[
             styles.avatar,
-            { borderColor: currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR }
+            {
+              borderColor:
+                currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
+            },
           ]}
           contentFit="cover"
         />

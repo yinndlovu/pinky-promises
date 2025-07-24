@@ -523,12 +523,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       </View>
     );
   }
-  {
-    !isOnline && (
-      <View style={{ backgroundColor: "red", padding: 8 }}>
-        <Text style={{ color: "white", textAlign: "center" }}>
-          You are offline
-        </Text>
+
+  if (!isOnline) {
+    return (
+      <View style={styles.toast}>
+        <Text style={styles.toastText}>You are offline</Text>
       </View>
     );
   }
@@ -754,6 +753,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       {showError && (
         <View style={styles.toast}>
           <Text style={styles.toastText}>{error}</Text>
+        </View>
+      )}
+      {interactionLoading && (
+        <View style={styles.absoluteFillObject}>
+          <ActivityIndicator size="large" color="#e03487" />
         </View>
       )}
       <AlertModal
