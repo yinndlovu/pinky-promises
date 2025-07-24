@@ -28,7 +28,6 @@ type Props = {
   onAdd?: () => void;
   onEdit?: (memory: Memory) => void;
   onDelete?: (memory: Memory) => void;
-  showAll?: boolean;
 };
 
 const FavoriteMemories: React.FC<Props> = ({
@@ -39,10 +38,9 @@ const FavoriteMemories: React.FC<Props> = ({
   onAdd,
   onEdit,
   onDelete,
-  showAll = false,
 }) => {
   // variables
-  const displayMemories = showAll ? memories : memories.slice(0, 5);
+  const displayMemories = memories.slice(0, 5);
 
   // use states
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
@@ -93,7 +91,7 @@ const FavoriteMemories: React.FC<Props> = ({
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
         <Text style={styles.sectionTitle}>Favorite memories</Text>
-        {onViewAll && memories.length >= 4 && !showAll && (
+        {onViewAll && memories.length >= 4 && (
           <TouchableOpacity style={styles.viewButton} onPress={onViewAll}>
             <Text style={styles.viewButtonText}>View all</Text>
           </TouchableOpacity>

@@ -61,7 +61,6 @@ const OursScreen = ({ navigation }: Props) => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [showAllMemories, setShowAllMemories] = useState(false);
   const [memoryModalVisible, setMemoryModalVisible] = useState(false);
   const [editingMemory, setEditingMemory] = useState<any | null>(null);
   const [memoryModalLoading, setMemoryModalLoading] = useState(false);
@@ -471,12 +470,11 @@ const OursScreen = ({ navigation }: Props) => {
         <FavoriteMemories
           memories={recentMemories}
           currentUserId={currentUserId}
-          onViewAll={() => setShowAllMemories(true)}
+          onViewAll={() => navigation.navigate("AllFavoriteMemoriesScreen")}
           onViewDetails={handleViewMemoryDetails}
           onAdd={handleAddMemory}
           onEdit={handleEditMemory}
           onDelete={handleDeleteMemory}
-          showAll={showAllMemories}
         />
       </ScrollView>
 

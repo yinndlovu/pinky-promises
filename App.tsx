@@ -50,6 +50,7 @@ import ChangePasswordScreen from "./src/screens/settings/password/ChangePassword
 import NotificationsScreen from "./src/screens/settings/notifications/NotificationsScreen";
 import TimelineScreen from "./src/screens/ours/TimelineScreen";
 import AboutScreen from "./src/screens/settings/about/AboutScreen";
+import AllFavoriteMemoriesScreen from "./src/screens/ours/AllFavoriteMemoriesScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -390,6 +391,18 @@ function AppContent() {
           options={{
             headerShown: true,
             title: "About",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="AllFavoriteMemoriesScreen"
+          component={AllFavoriteMemoriesScreen}
+          options={{
+            headerShown: true,
+            title: "All favorite memories",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
