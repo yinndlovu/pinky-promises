@@ -127,7 +127,7 @@ const NotificationsScreen = () => {
   if (preferencesLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#e03487" />
       </View>
     );
   }

@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
@@ -44,6 +45,7 @@ type Props = NativeStackScreenProps<any, any>;
 export default function PortalScreen({ navigation }: Props) {
   // variables
   const insets = useSafeAreaInsets();
+  const queryClient = useQueryClient();
 
   // use states
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -59,88 +61,123 @@ export default function PortalScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [lastUnseenSweet, setLastUnseenSweet] = useState<Message | null>(null);
-  const [lastUnseenVent, setLastUnseenVent] = useState<Message | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
-  const [sweetMessagesSent, setSweetMessagesSent] = useState<Message[]>([]);
-  const [sweetMessagesReceived, setSweetMessagesReceived] = useState<Message[]>(
-    []
-  );
-  const [ventMessagesSent, setVentMessagesSent] = useState<Message[]>([]);
-  const [ventMessagesReceived, setVentMessagesReceived] = useState<Message[]>(
-    []
-  );
   const [deleting, setDeleting] = useState(false);
 
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([
-      fetchUnseenMessages(),
-      fetchAllSweetMessages(),
-      fetchAllVentMessages(),
-    ]);
-    setRefreshing(false);
-  };
-
-  // use effects
-  useEffect(() => {
-    fetchUnseenMessages();
-    fetchAllSweetMessages();
-    fetchAllVentMessages();
-  }, []);
-
   // fetch functions
-  const fetchUnseenMessages = async () => {
-    try {
+  const {
+    data: unseenSweetMessage,
+    isLoading: unseenSweetMessageLoading,
+    refetch: refetchUnseenSweetMessage,
+  } = useQuery({
+    queryKey: ["unseenSweetMessage"],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        return;
+        return [];
       }
 
-      const sweetRes = await getLastUnseenSweetMessage(token);
-      setLastUnseenSweet(sweetRes.sweet || null);
+      const unseenSweet = await getLastUnseenSweetMessage(token);
+      return unseenSweet.sweet || null;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-      const ventRes = await getLastUnseenVentMessage(token);
-      setLastUnseenVent(ventRes.vent || null);
-    } catch (err) {
-      setLastUnseenSweet(null);
-      setLastUnseenVent(null);
-    }
-  };
-
-  const fetchAllSweetMessages = async () => {
-    try {
+  const {
+    data: unseenVentMessage,
+    isLoading: unseenVentMessageLoading,
+    refetch: refetchUnseenVentMessage,
+  } = useQuery({
+    queryKey: ["unseenVentMessage"],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        return;
+        return [];
+      }
+
+      const unseenVent = await getLastUnseenVentMessage(token);
+      return unseenVent.vent || null;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const {
+    data: sweetMessagesSent = [],
+    isLoading: sweetMessagesSentLoading,
+    refetch: refetchSweetMessagesSent,
+  } = useQuery<Message[]>({
+    queryKey: ["sweetMessagesSent"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return [];
       }
 
       const sentSweet = await getSentSweetMessages(token);
-      setSweetMessagesSent(sentSweet.sweets || sentSweet);
+      return sentSweet.sweets || sentSweet;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
-      const receivedSweet = await getReceivedSweetMessages(token);
-      setSweetMessagesReceived(receivedSweet.sweets || receivedSweet);
-    } catch (err) {}
-  };
-
-  const fetchAllVentMessages = async () => {
-    try {
+  const {
+    data: sweetMessagesReceived = [],
+    isLoading: sweetMessagesReceivedLoading,
+    refetch: refetchSweetMessagesReceived,
+  } = useQuery<Message[]>({
+    queryKey: ["sweetMessagesReceived"],
+    queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        return;
+        return [];
+      }
+
+      const receivedSweet = await getReceivedSweetMessages(token);
+      return receivedSweet.sweets || receivedSweet;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const {
+    data: ventMessagesSent = [],
+    isLoading: ventMessagesSentLoading,
+    refetch: refetchVentMessagesSent,
+  } = useQuery<Message[]>({
+    queryKey: ["ventMessagesSent"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return [];
       }
 
       const sentVent = await getSentVentMessages(token);
-      setVentMessagesSent(sentVent.vents || sentVent);
+      return sentVent.vents || sentVent;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const {
+    data: ventMessagesReceived = [],
+    isLoading: ventMessagesReceivedLoading,
+    refetch: refetchVentMessagesReceived,
+  } = useQuery<Message[]>({
+    queryKey: ["ventMessagesReceived"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return [];
+      }
 
       const receivedVent = await getReceivedVentMessages(token);
-      setVentMessagesReceived(receivedVent.vents || receivedVent);
-    } catch (err) {}
-  };
+      return receivedVent.vents || receivedVent;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   // handlers
   const handleDelete = async () => {
@@ -159,17 +196,23 @@ export default function PortalScreen({ navigation }: Props) {
 
       if (inputType === "sweet") {
         await deleteSweetMessage(token, selectedMessage.id);
+        await queryClient.invalidateQueries({
+          queryKey: ["sweetMessagesSent"],
+        });
+
         setAlertMessage("Sweet message deleted");
       } else {
         await deleteVentMessage(token, selectedMessage.id);
+        await queryClient.invalidateQueries({
+          queryKey: ["ventMessagesSent"],
+        });
+
         setAlertMessage("Vent message deleted");
       }
 
       setDeleting(false);
       setConfirmVisible(false);
       setAlertVisible(true);
-      await fetchAllSweetMessages();
-      await fetchAllVentMessages();
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to delete message"
@@ -213,16 +256,22 @@ export default function PortalScreen({ navigation }: Props) {
 
       if (inputType === "sweet") {
         await sendSweetMessage(token, text);
+        await queryClient.invalidateQueries({
+          queryKey: ["sweetMessagesSent"],
+        });
+
         setAlertMessage("Message stored for your baby to find");
       } else {
         await ventToPartner(token, text);
+        await queryClient.invalidateQueries({
+          queryKey: ["ventMessagesSent"],
+        });
+
         setAlertMessage("Vent message stored for your baby to see");
       }
 
       setInputModalVisible(false);
       setAlertVisible(true);
-      await fetchAllSweetMessages();
-      await fetchAllVentMessages();
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to send sweet message"
@@ -247,22 +296,42 @@ export default function PortalScreen({ navigation }: Props) {
       if (type === "sweet") {
         const res = await viewSweetMessage(token, msg.id);
         messageData = res.sweet;
+
+        await queryClient.invalidateQueries({
+          queryKey: ["unseenSweetMessage"],
+        });
       } else {
         const res = await viewVentMessage(token, msg.id);
         messageData = res.vent;
+
+        await queryClient.invalidateQueries({
+          queryKey: ["unseenVentMessage"],
+        });
       }
 
       setViewedMessage(messageData);
       setViewType(type);
       setViewModalVisible(true);
-
-      await fetchUnseenMessages();
     } catch (err: any) {
       setAlertMessage(err?.response?.data?.message || "Failed to load message");
       setAlertVisible(true);
     } finally {
       setViewLoading(false);
     }
+  };
+
+  // refresh screen
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      refetchUnseenSweetMessage(),
+      refetchUnseenVentMessage(),
+      refetchSweetMessagesReceived(),
+      refetchSweetMessagesSent(),
+      refetchVentMessagesReceived(),
+      refetchVentMessagesSent(),
+    ]);
+    setRefreshing(false);
   };
 
   {
@@ -299,7 +368,7 @@ export default function PortalScreen({ navigation }: Props) {
             handleOpenInputModal("sweet");
           }}
           onViewMessage={(msg) => handleViewMessage(msg, "sweet")}
-          lastUnseen={lastUnseenSweet}
+          lastUnseen={unseenSweetMessage}
         />
         <VentMessagesSection
           sent={ventMessagesSent}
@@ -310,7 +379,7 @@ export default function PortalScreen({ navigation }: Props) {
             handleOpenInputModal("vent");
           }}
           onViewMessage={(msg) => handleViewMessage(msg, "vent")}
-          lastUnseen={lastUnseenVent}
+          lastUnseen={unseenVentMessage}
         />
         <ConfirmationModal
           visible={confirmVisible}

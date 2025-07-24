@@ -708,7 +708,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           </View>
           <TouchableOpacity
             style={styles.editButton}
-            onPress={() => setEditModalVisible(true)}
+            onPress={() => {
+              setEditName(user?.name || "");
+              setEditUsername(user?.username || "");
+              setEditBio(user?.bio || "");
+              setEditModalVisible(true);
+            }}
           >
             <Feather name="edit-2" size={22} color="#e03487" />
           </TouchableOpacity>
