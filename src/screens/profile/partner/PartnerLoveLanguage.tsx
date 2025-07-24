@@ -8,7 +8,7 @@ type Props = {
 };
 
 const PartnerLoveLanguage: React.FC<Props> = ({
-  loveLanguage = "Not set",
+  loveLanguage = "",
 }) => (
   <View style={styles.wrapper}>
     <View style={styles.headerRow}>

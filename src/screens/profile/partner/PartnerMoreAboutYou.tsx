@@ -8,7 +8,7 @@ type Props = {
 };
 
 const PartnerMoreAboutYou: React.FC<Props> = ({
-  about = "stuff about you",
+  about = "",
 }) => (
   <View style={styles.wrapper}>
     <View style={styles.headerRow}>

@@ -10,7 +10,7 @@ type Props = {
 };
 
 const MoreAboutYou: React.FC<Props> = ({
-  about = "stuff about you",
+  about = "",
   onEdit,
 }) => (
   <View style={styles.wrapper}>

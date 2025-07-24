@@ -387,6 +387,23 @@ const OursScreen = ({ navigation }: Props) => {
           zIndex: 2,
         }}
       >
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            left: 18,
+            zIndex: 10,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }}
+          onPress={() => navigation.navigate("TimelineScreen")}
+        >
+          <Feather name="activity" size={22} color="#fff" />
+        </TouchableOpacity>
         <Text
           style={{
             fontSize: 20,

@@ -46,6 +46,7 @@ import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./src/screens/settings/password/ChangePasswordScreen";
 import NotificationsScreen from "./src/screens/settings/notifications/NotificationsScreen";
+import TimelineScreen from "./src/screens/ours/TimelineScreen";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 
@@ -364,6 +365,18 @@ function AppContent() {
           options={{
             headerShown: true,
             title: "Notifications",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="TimelineScreen"
+          component={TimelineScreen}
+          options={{
+            headerShown: true,
+            title: "Timeline",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

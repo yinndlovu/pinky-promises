@@ -11,7 +11,7 @@ type Props = {
 };
 
 const LoveLanguage: React.FC<Props> = ({
-  loveLanguage = "Not set",
+  loveLanguage = "",
   onEdit,
 }) => (
   <View style={styles.wrapper}>
