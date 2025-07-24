@@ -151,6 +151,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["specialDates", currentUserId],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["upcomingSpecialDate"],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to add special date"
@@ -200,6 +204,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["specialDates", currentUserId],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["upcomingSpecialDate"],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to update special date"
@@ -232,6 +240,10 @@ const OursScreen = ({ navigation }: Props) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["specialDates", currentUserId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["upcomingSpecialDate"],
       });
     } catch (err: any) {
       setAlertMessage(

@@ -282,7 +282,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       return await getUnseenInteractions(token);
     },
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
   });
 
   // helpers
@@ -722,53 +722,38 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </>
         )}
-        {upcomingDateLoading ? (
-          <View style={styles.centered}>
-            <ActivityIndicator color="#e03487" size="large" />
-          </View>
-        ) : (
-          upcomingDate && (
-            <View style={styles.upcomingContainer}>
-              <Text style={styles.upcomingLabel}>UPCOMING</Text>
-              <View style={styles.eventCard}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 4,
-                  }}
-                >
-                  <Text style={styles.eventName}>{upcomingDate.title}</Text>
-                  <Text style={styles.eventTimeLeft}>
-                    {" "}
-                    {formatTimeLeft(upcomingDate.daysUntil)}
-                  </Text>
-                </View>
-                <Text style={styles.eventDescription}>
-                  {upcomingDate.description ||
-                    `${upcomingDate.title} on ${formatDate(
-                      upcomingDate.nextOccurrence
-                    )}`}
+
+        {upcomingDate && (
+          <View style={styles.upcomingContainer}>
+            <Text style={styles.upcomingLabel}>UPCOMING</Text>
+            <View style={styles.eventCard}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 4,
+                }}
+              >
+                <Text style={styles.eventName}>{upcomingDate.title}</Text>
+                <Text style={styles.eventTimeLeft}>
+                  {" "}
+                  {formatTimeLeft(upcomingDate.daysUntil)}
                 </Text>
               </View>
+              <Text style={styles.eventDescription}>
+                {upcomingDate.description ||
+                  `${upcomingDate.title} on ${formatDate(
+                    upcomingDate.nextOccurrence
+                  )}`}
+              </Text>
             </View>
-          )
-        )}
-        <RecentActivity activities={activities} />
-        {activitiesLoading && (
-          <View style={styles.centered}>
-            <ActivityIndicator color="#e03487" size="large" />
           </View>
         )}
+        <RecentActivity activities={activities} />
       </ScrollView>
       {showError && (
         <View style={styles.toast}>
           <Text style={styles.toastText}>{error}</Text>
-        </View>
-      )}
-      {interactionLoading && (
-        <View style={styles.absoluteFillObject}>
-          <ActivityIndicator size="large" color="#e03487" />
         </View>
       )}
       <AlertModal

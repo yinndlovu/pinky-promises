@@ -50,7 +50,6 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 2,
     borderColor: "#e03487",
   },
   infoWrapper: {

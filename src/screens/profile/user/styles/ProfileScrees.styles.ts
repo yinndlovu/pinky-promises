@@ -23,7 +23,6 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 45,
-    borderWidth: 2,
     borderColor: "#e03487",
   },
   infoWrapper: {
