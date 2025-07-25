@@ -6,7 +6,7 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   message: any | null;
-  type: "sweet" | "vent";
+  type: "sweet" | "vent" | null;
 };
 
 const ViewMessageModal: React.FC<Props> = ({

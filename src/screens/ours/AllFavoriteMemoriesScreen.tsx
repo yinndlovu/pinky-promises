@@ -1,3 +1,4 @@
+// external
 import React, { useState } from "react";
 import {
   View,
@@ -11,10 +12,14 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// internal
 import {
   getAllFavoriteMemories,
   getFavoriteMemoryById,
 } from "../../services/favoriteMemoriesService";
+
+// confirmation modal
 import FavoriteMemoryDetailsModal from "../../components/modals/FavoriteMemoryDetailsModal";
 
 const AllFavoriteMemoriesScreen = () => {

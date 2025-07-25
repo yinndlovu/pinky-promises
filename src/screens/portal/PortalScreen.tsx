@@ -57,7 +57,7 @@ export default function PortalScreen({ navigation }: Props) {
   const [inputType, setInputType] = useState<"sweet" | "vent">("sweet");
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
-  const [viewType, setViewType] = useState<"sweet" | "vent">("sweet");
+  const [viewType, setViewType] = useState<"sweet" | "vent" | null>(null);
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -296,17 +296,9 @@ export default function PortalScreen({ navigation }: Props) {
       if (type === "sweet") {
         const res = await viewSweetMessage(token, msg.id);
         messageData = res.sweet;
-
-        await queryClient.invalidateQueries({
-          queryKey: ["unseenSweetMessage"],
-        });
       } else {
         const res = await viewVentMessage(token, msg.id);
         messageData = res.vent;
-
-        await queryClient.invalidateQueries({
-          queryKey: ["unseenVentMessage"],
-        });
       }
 
       setViewedMessage(messageData);
@@ -333,6 +325,18 @@ export default function PortalScreen({ navigation }: Props) {
     ]);
     setRefreshing(false);
   };
+
+  // use effects
+  useEffect(() => {
+    if (!viewModalVisible && viewType) {
+      queryClient.invalidateQueries({
+        queryKey: [
+          viewType === "sweet" ? "unseenSweetMessage" : "unseenVentMessage",
+        ],
+      });
+      setViewType(null);
+    }
+  }, [viewModalVisible]);
 
   {
     deleting && (
