@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 // internal
-import { Message } from "../../types/Message";
+import { Message } from "../../../types/Message";
 
 interface Props {
   message: Message;

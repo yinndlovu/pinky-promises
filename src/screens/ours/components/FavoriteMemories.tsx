@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 // screen content
-import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import ConfirmationModal from "../../../components/modals/ConfirmationModal";
 
 // types
 type Memory = {

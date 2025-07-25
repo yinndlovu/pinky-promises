@@ -11,8 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
-import { getNotes, updateNotes } from "../../services/notesService";
-import { useAuth } from "../../contexts/AuthContext";
+import { getNotes, updateNotes } from "../../../services/notesService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // variables
 const AUTO_SAVE_DELAY = 1000;

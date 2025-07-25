@@ -1,12 +1,11 @@
 // content
 import React from "react";
-import { FlatList } from "react-native";
 
 // content
 import MessageCard from "./MessageCard";
 
 // internal
-import { Message } from "../../types/Message";
+import { Message } from "../../../types/Message";
 
 interface Props {
   messages: Message[];

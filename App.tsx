@@ -25,11 +25,11 @@ import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/PartnerProfileScreen";
 import ChatScreen from "./src/screens/chat/ChatScreen";
-import PortalScreen from "./src/screens/portal/PortalScreen";
+import PortalScreen from "./src/screens/portal/screens/PortalScreen";
 import SearchScreen from "./src/screens/search/SearchScreen";
 import UserProfileScreen from "./src/screens/profile/other/UserProfileScreen";
 import PendingRequestsScreen from "./src/screens/requests/PendingRequestsScreen";
-import NotesScreen from "./src/screens/ours/NotesScreen";
+import NotesScreen from "./src/screens/ours/screens/NotesScreen";
 import WelcomeScreen from "./src/screens/welcome/WelcomeScreen";
 import NameScreen from "./src/screens/auth/register/NameScreen";
 import UsernameScreen from "./src/screens/auth/register/UsernameScreen";
@@ -39,17 +39,17 @@ import LoginScreen from "./src/screens/auth/login/LoginScreen";
 import NavigationBar from "./src/components/navigation/NavigationBar";
 import SettingsScreen from "./src/screens/settings/SettingsScreen";
 import ProfileScreen from "./src/screens/profile/user/ProfileScreen";
-import OursScreen from "./src/screens/ours/OursScreen";
+import OursScreen from "./src/screens/ours/screens/OursScreen";
 import GiftsScreen from "./src/screens/gifts/GiftsScreen";
 import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./src/screens/settings/password/ChangePasswordScreen";
 import NotificationsScreen from "./src/screens/settings/notifications/NotificationsScreen";
-import TimelineScreen from "./src/screens/ours/TimelineScreen";
+import TimelineScreen from "./src/screens/ours/screens/TimelineScreen";
 import AboutScreen from "./src/screens/settings/about/AboutScreen";
-import AllFavoriteMemoriesScreen from "./src/screens/ours/AllFavoriteMemoriesScreen";
-import LastSixSentScreen from "./src/screens/portal/LastSixSentScreen";
-import LastSixReceivedScreen from "./src/screens/portal/LastSixReceivedScreen";
+import AllFavoriteMemoriesScreen from "./src/screens/ours/screens/AllFavoriteMemoriesScreen";
+import LastSixSentScreen from "./src/screens/portal/screens/LastSixSentScreen";
+import LastSixReceivedScreen from "./src/screens/portal/screens/LastSixReceivedScreen";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -439,7 +439,7 @@ function AppContent() {
 }
 
 export default function App() {
-  React.useEffect(() => {
+  useEffect(() => {
     return NetInfo.addEventListener((state) => {
       onlineManager.setOnline(!!state.isConnected);
     });

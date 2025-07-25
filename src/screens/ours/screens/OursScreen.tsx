@@ -14,33 +14,34 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getNotes } from "../../services/notesService";
+import { getNotes } from "../../../services/notesService";
 import {
   getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
   deleteSpecialDate,
-} from "../../services/specialDateService";
+} from "../../../services/specialDateService";
 import {
   getFavoriteMemoryById,
   createFavoriteMemory,
   updateFavoriteMemory,
   deleteFavoriteMemory,
   getRecentFavoriteMemories,
-} from "../../services/favoriteMemoriesService";
-import { useAuth } from "../../contexts/AuthContext";
+} from "../../../services/favoriteMemoriesService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content
-import UpdateFavoriteMemoryModal from "../../components/modals/UpdateFavoriteMemoryModal";
-import FavoriteMemoryDetailsModal from "../../components/modals/FavoriteMemoryDetailsModal";
-import ConfirmationModal from "../../components/modals/ConfirmationModal";
-import AlertModal from "../../components/modals/AlertModal";
-import NotesCanvas from "./NotesCanvas";
-import SpecialDates from "./SpecialDates";
-import FavoriteMemories from "./FavoriteMemories";
-import UpdateSpecialDateModal from "../../components/modals/UpdateSpecialDateModal";
+import UpdateFavoriteMemoryModal from "../../../components/modals/UpdateFavoriteMemoryModal";
+import FavoriteMemoryDetailsModal from "../../../components/modals/FavoriteMemoryDetailsModal";
+import ConfirmationModal from "../../../components/modals/ConfirmationModal";
+import AlertModal from "../../../components/modals/AlertModal";
+import NotesCanvas from "../components/NotesCanvas";
+import SpecialDates from "../components/SpecialDates";
+import FavoriteMemories from "../components/FavoriteMemories";
+import UpdateSpecialDateModal from "../../../components/modals/UpdateSpecialDateModal";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -68,6 +69,7 @@ const OursScreen = ({ navigation }: Props) => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   // use states errors
   const [error, setError] = useState<string | null>(null);
@@ -366,6 +368,13 @@ const OursScreen = ({ navigation }: Props) => {
     }
   }, [error]);
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // refresh screen
   const onRefresh = async () => {
     setRefreshing(true);
@@ -387,6 +396,13 @@ const OursScreen = ({ navigation }: Props) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <View
         style={{
           backgroundColor: "#23243a",

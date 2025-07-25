@@ -17,10 +17,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   getAllFavoriteMemories,
   getFavoriteMemoryById,
-} from "../../services/favoriteMemoriesService";
+} from "../../../services/favoriteMemoriesService";
 
 // confirmation modal
-import FavoriteMemoryDetailsModal from "../../components/modals/FavoriteMemoryDetailsModal";
+import FavoriteMemoryDetailsModal from "../../../components/modals/FavoriteMemoryDetailsModal";
 
 const AllFavoriteMemoriesScreen = () => {
   // variables

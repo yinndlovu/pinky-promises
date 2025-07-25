@@ -1,11 +1,10 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,9 +12,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // screen content
-import SetMonthlyGift from "./SetMonthlyGift";
-import ReceivedGift from "./ReceivedGift";
-import PastGiftsList from "./PastGiftsList";
+import SetMonthlyGift from "./components/SetMonthlyGift";
+import ReceivedGift from "./components/ReceivedGift";
+import PastGiftsList from "./components/PastGiftsList";
 import ClaimedGiftModal from "../../components/modals/ClaimedGiftModal";
 import UpdateMonthlyGiftModal from "../../components/modals/UpdateMonthlyGiftModal";
 import AlertModal from "../../components/modals/AlertModal";

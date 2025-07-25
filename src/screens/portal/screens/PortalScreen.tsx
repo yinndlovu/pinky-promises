@@ -21,7 +21,7 @@ import {
   getSentSweetMessages,
   getReceivedSweetMessages,
   deleteSweetMessage,
-} from "../../services/sweetMessageService";
+} from "../../../services/sweetMessageService";
 import {
   ventToPartner,
   getLastUnseenVentMessage,
@@ -29,16 +29,16 @@ import {
   getSentVentMessages,
   getReceivedVentMessages,
   deleteVentMessage,
-} from "../../services/ventMessageService";
-import { Message } from "../../types/Message";
+} from "../../../services/ventMessageService";
+import { Message } from "../../../types/Message";
 
 // screen content
-import SweetMessagesSection from "./SweetMessagesSection";
-import VentMessagesSection from "./VentMessagesSection";
-import ConfirmationModal from "../../components/modals/ConfirmationModal";
-import MessageInputModal from "../../components/modals/MessageInputModal";
-import ViewMessageModal from "../../components/modals/ViewMessageModal";
-import AlertModal from "../../components/modals/AlertModal";
+import SweetMessagesSection from "../components/SweetMessagesSection";
+import VentMessagesSection from "../components/VentMessagesSection";
+import ConfirmationModal from "../../../components/modals/ConfirmationModal";
+import MessageInputModal from "../../../components/modals/MessageInputModal";
+import ViewMessageModal from "../../../components/modals/ViewMessageModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 type Props = NativeStackScreenProps<any, any>;
 

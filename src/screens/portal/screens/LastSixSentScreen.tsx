@@ -12,38 +12,37 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // internal
 import {
-  getReceivedSweetMessages,
+  getSentSweetMessages,
   viewSweetMessage,
-} from "../../services/sweetMessageService";
-import ViewMessageModal from "../../components/modals/ViewMessageModal";
-import { Message } from "../../types/Message";
+} from "../../../services/sweetMessageService";
+import { Message } from "../../../types/Message";
 
-const LastSixReceivedScreen = () => {
+// content
+import ViewMessageModal from "../../../components/modals/ViewMessageModal";
+
+const LastSixSentScreen = () => {
   // variables
   const insets = useSafeAreaInsets();
 
   // use states
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [viewLoading, setViewLoading] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  // fetch functions
   const {
     data: messages = [],
     isLoading: messagesLoading,
     error,
     refetch: refetchMessages,
   } = useQuery<Message[]>({
-    queryKey: ["lastSixReceivedMessages"],
+    queryKey: ["lastSixSentMessages"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -51,8 +50,7 @@ const LastSixReceivedScreen = () => {
         throw new Error("Session expired, please log in again");
       }
 
-      const res = await getReceivedSweetMessages(token);
-
+      const res = await getSentSweetMessages(token);
       return (res.sweets || res).slice(0, 6);
     },
     staleTime: 1000 * 60 * 10,
@@ -66,9 +64,13 @@ const LastSixReceivedScreen = () => {
 
   const handleViewMessage = async (msg: Message) => {
     setViewLoading(true);
+
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       const res = await viewSweetMessage(token, msg.id);
       setViewedMessage(res.sweet);
@@ -105,7 +107,7 @@ const LastSixReceivedScreen = () => {
           textAlign: "center",
         }}
       >
-        These are the last six sweet messages you received
+        These are the last six sweet messages you sent
       </Text>
       {messagesLoading ? (
         <ActivityIndicator color="#e03487" style={{ marginTop: 40 }} />
@@ -132,7 +134,6 @@ const LastSixReceivedScreen = () => {
               </View>
             </TouchableOpacity>
           )}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -146,7 +147,7 @@ const LastSixReceivedScreen = () => {
             <Text
               style={{ color: "#b0b3c6", textAlign: "center", marginTop: 40 }}
             >
-              No received messages yet
+              No sent messages yet
             </Text>
           }
         />
@@ -208,12 +209,6 @@ const styles = StyleSheet.create({
     color: "#b0b3c6",
     fontSize: 12,
   },
-  separator: {
-    height: 1,
-    backgroundColor: "#393a4a",
-    opacity: 0.5,
-    marginVertical: 8,
-  },
   toast: {
     position: "absolute",
     bottom: 20,
@@ -236,4 +231,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LastSixReceivedScreen;
+export default LastSixSentScreen;

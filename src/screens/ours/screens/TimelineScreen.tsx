@@ -21,8 +21,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getTimeline,
   createTimelineRecord,
-} from "../../services/timelineService";
-import { formatDateYearly } from "../../helpers/formatDateHelper";
+} from "../../../services/timelineService";
+import { formatDateYearly } from "../../../helpers/formatDateHelper";
 
 const TimelineScreen = () => {
   // variables

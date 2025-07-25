@@ -37,7 +37,7 @@ import {
 } from "../../services/interactionService";
 
 // screen content
-import RecentActivity from "./RecentActivity";
+import RecentActivity from "./components/RecentActivity";
 import ActionsModal from "../../components/modals/ActionsModal";
 import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
@@ -466,7 +466,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       checkAndUpdateHomeStatus();
-      const interval = setInterval(checkAndUpdateHomeStatus, 15 * 60 * 1000);
+      const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
   );

@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import { fetchUserStatus } from "../../../services/userStatusService";
@@ -93,6 +94,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loveLanguageModalVisible, setLoveLanguageModalVisible] =
     useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
 
   // use states (edit fields)
   const [editName, setEditName] = useState("");
@@ -375,6 +377,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // refresh screen
   const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -610,6 +619,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <View
         style={{
           backgroundColor: "#23243a",
@@ -746,7 +762,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           mood={moodData?.mood}
           moodDescription={moodData?.description}
           onEdit={() => refetchMoodData()}
-          onAddHome={() => {refetchStatus()}}
+          onAddHome={() => {
+            refetchStatus();
+          }}
         />
 
         <Anniversary onEditAnniversary={() => {}} onEditDayMet={() => {}} />

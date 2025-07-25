@@ -4,10 +4,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 // content
-import MessageList from "./MessageList";
+import MessageList from "../components/MessageList";
 
 // internal
-import { Message } from "../../types/Message";
+import { Message } from "../../../types/Message";
 
 interface Props {
   sent: Message[];
