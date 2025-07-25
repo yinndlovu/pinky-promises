@@ -18,19 +18,26 @@ import {
   getAllFavoriteMemories,
   getFavoriteMemoryById,
 } from "../../../services/favoriteMemoriesService";
+import { Memory } from "../../../types/Memory";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // confirmation modal
 import FavoriteMemoryDetailsModal from "../../../components/modals/FavoriteMemoryDetailsModal";
+import ConfirmationModal from "../../../components/modals/ConfirmationModal";
 
 const AllFavoriteMemoriesScreen = () => {
   // variables
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const currentUserId = user?.id;
 
   // use states
   const [refreshing, setRefreshing] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
+  const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
+  const [actionModalVisible, setActionModalVisible] = useState(false);
 
   // fetch functions
   const {
@@ -69,6 +76,31 @@ const AllFavoriteMemoriesScreen = () => {
       setDetailsMemory(null);
     }
     setDetailsLoading(false);
+  };
+
+  const handleLongPress = (item: Memory) => {
+    if (item.userId === currentUserId) {
+      setSelectedMemory(item);
+      setActionModalVisible(true);
+    }
+  };
+
+  const handleAction = (action: "edit" | "delete") => {
+    if (!selectedMemory) {
+      return;
+    }
+
+    setActionModalVisible(false);
+
+    if (action === "edit" && onEdit) {
+      onEdit(selectedMemory);
+    }
+
+    if (action === "delete") {
+      onDelete(selectedMemory);
+    }
+
+    setSelectedMemory(null);
   };
 
   // refresh screen
@@ -119,6 +151,8 @@ const AllFavoriteMemoriesScreen = () => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => handleViewMemoryDetails(item.id)}
+              onLongPress={() => handleLongPress(item)}
+              delayLongPress={400}
               activeOpacity={0.7}
               style={styles.memoryItem}
             >
@@ -149,12 +183,25 @@ const AllFavoriteMemoriesScreen = () => {
           }
         />
       )}
-      
+
       <FavoriteMemoryDetailsModal
         visible={detailsModalVisible}
         onClose={() => setDetailsModalVisible(false)}
         memory={detailsMemory}
         loading={detailsLoading}
+      />
+
+      <ConfirmationModal
+        visible={actionModalVisible}
+        message="What would you like to do with this memory?"
+        confirmText="Edit"
+        cancelText="Delete"
+        onConfirm={() => handleAction("edit")}
+        onCancel={() => handleAction("delete")}
+        onClose={() => {
+          setActionModalVisible(false);
+          setSelectedMemory(null);
+        }}
       />
     </View>
   );
