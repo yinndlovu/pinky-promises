@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content
 import AddLocationModal from "../../../components/modals/AddLocationModal";
@@ -29,6 +30,7 @@ type Props = {
   onEdit?: () => void;
   status?: "home" | "away" | "unreachable" | "unavailable";
   statusDescription?: string;
+  statusDistance?: number;
 };
 
 const StatusMood: React.FC<Props> = ({
@@ -38,9 +40,13 @@ const StatusMood: React.FC<Props> = ({
   statusDescription = "You must add your home location to use this feature",
   onEdit,
   onAddHome,
+  statusDistance,
 }) => {
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  const userId = user?.id;
 
   // use states
   const [moodModalVisible, setMoodModalVisible] = useState(false);
@@ -65,6 +71,10 @@ const StatusMood: React.FC<Props> = ({
       });
 
       setAlertMessage("Home location added");
+      await queryClient.invalidateQueries({
+        queryKey: ["status", userId],
+      });
+
       setAlertVisible(true);
     } catch (err) {
       setAlertMessage("Failed to add home location");
@@ -129,6 +139,11 @@ const StatusMood: React.FC<Props> = ({
       <Text style={styles.statusUnavailableDescription}>
         {statusDescription}
       </Text>
+      {status === "away" && statusDistance && (
+        <Text style={styles.statusDistance}>
+          {`${statusDistance} meters away from home`}
+        </Text>
+      )}
       <View style={styles.moodRow}>
         <Text style={styles.moodLabel}>Mood</Text>
         <TouchableOpacity
@@ -201,8 +216,15 @@ const styles = StyleSheet.create({
   statusUnavailableDescription: {
     color: "#b0b3c6",
     fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 2,
+  },
+  statusDistance: {
+    color: "#e03487",
+    fontSize: 12,
     marginBottom: 12,
     marginLeft: 2,
+    opacity: 0.8,
   },
   addButton: {
     backgroundColor: "#e03487",

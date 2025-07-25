@@ -164,22 +164,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await fetchUserStatus(token, user?.id);
     },
-    staleTime: 1000 * 60 * 5,
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 4,
   });
 
   const homeStatus = status?.unreachable
     ? "unreachable"
-    : status?.dataValues.isAtHome
+    : status?.isAtHome
     ? "home"
-    : status?.dataValues.isAtHome === false
+    : status?.isAtHome === false
     ? "away"
     : "unavailable";
 
   const statusDescription = status?.unreachable
     ? "Can't find your current location"
-    : status?.dataValues.isAtHome
+    : status?.isAtHome
     ? "You are currently at home"
-    : status?.dataValues.isAtHome === false
+    : status?.isAtHome === false
     ? "You are currently not home"
     : "You must add your home location to use this feature";
 

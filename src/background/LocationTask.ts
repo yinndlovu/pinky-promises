@@ -40,7 +40,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       );
       const isAtHome = distance < 100;
 
-      await updateUserStatus(token, isAtHome);
+      await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
     } catch (err) {}
   }
 });

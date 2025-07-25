@@ -74,22 +74,22 @@ const PartnerStatusMood: React.FC<Props> = ({
       return await fetchUserStatus(token, partnerId);
     },
     enabled: !!partnerId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 4,
   });
 
   const status = partnerStatus?.unreachable
     ? "unreachable"
-    : partnerStatus?.dataValues.isAtHome
+    : partnerStatus?.isAtHome
     ? "home"
-    : partnerStatus?.dataValues.isAtHome === false
+    : partnerStatus?.isAtHome === false
     ? "away"
     : "unavailable";
 
   const statusDescription = partnerStatus?.unreachable
     ? `Can't find ${partnerName}'s current location`
-    : partnerStatus?.dataValues.isAtHome
+    : partnerStatus?.isAtHome
     ? `${partnerName} is currently at home`
-    : partnerStatus?.dataValues.isAtHome === false
+    : partnerStatus?.isAtHome === false
     ? `${partnerName} is currently not home`
     : `${partnerName} hasn't set a home location`;
 
@@ -121,7 +121,11 @@ const PartnerStatusMood: React.FC<Props> = ({
         </Text>
       </View>
       <Text style={styles.statusDescription}>{statusDescription}</Text>
-
+      {partnerStatus?.isAtHome === false && partnerStatus?.distance && (
+        <Text style={styles.statusDistance}>
+          {`${partnerStatus.distance} meters away from home`}
+        </Text>
+      )}
       <View style={styles.moodRow}>
         <Text style={styles.moodLabel}>Mood</Text>
       </View>
@@ -162,7 +166,7 @@ const styles = StyleSheet.create({
   statusDescription: {
     color: "#b0b3c6",
     fontSize: 14,
-    marginBottom: 12,
+    marginBottom: 8,
     marginLeft: 2,
     marginTop: 6,
   },
@@ -171,6 +175,13 @@ const styles = StyleSheet.create({
     color: "#b0b3c6",
     fontWeight: "bold",
     marginBottom: 2,
+  },
+  statusDistance: {
+    color: "#e03487",
+    fontSize: 12,
+    marginBottom: 12,
+    marginLeft: 2,
+    opacity: 0.8,
   },
   moodRow: {
     marginTop: 10,

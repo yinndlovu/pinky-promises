@@ -284,6 +284,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["recentFavoriteMemories", currentUserId],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["allFavoriteMemories"],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to delete favorite memory"
@@ -322,6 +326,10 @@ const OursScreen = ({ navigation }: Props) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["recentFavoriteMemories", currentUserId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["allFavoriteMemories"],
       });
     } catch (err: any) {
       setAlertMessage(

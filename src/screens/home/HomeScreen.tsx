@@ -114,7 +114,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       );
       const isAtHome = distance < 100;
 
-      await updateUserStatus(token, isAtHome);
+      await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
     } catch (err) {}
   };
 
@@ -194,7 +194,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       return await fetchUserStatus(token, partnerId);
     },
     enabled: !!partnerId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 4,
   });
 
   const {
@@ -433,9 +433,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // handle status
   const status = partnerStatus?.unreachable
     ? "Unreachable"
-    : partnerStatus?.dataValues.isAtHome
+    : partnerStatus?.isAtHome
     ? "Home"
-    : partnerStatus?.dataValues.isAtHome === false
+    : partnerStatus?.isAtHome === false
     ? "Away"
     : "Unavailable";
 

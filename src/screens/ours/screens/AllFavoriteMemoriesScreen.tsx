@@ -10,13 +10,15 @@ import {
   RefreshControl,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import {
   getAllFavoriteMemories,
   getFavoriteMemoryById,
+  deleteFavoriteMemory,
+  updateFavoriteMemory,
 } from "../../../services/favoriteMemoriesService";
 import { Memory } from "../../../types/Memory";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -24,9 +26,12 @@ import { useAuth } from "../../../contexts/AuthContext";
 // confirmation modal
 import FavoriteMemoryDetailsModal from "../../../components/modals/FavoriteMemoryDetailsModal";
 import ConfirmationModal from "../../../components/modals/ConfirmationModal";
+import UpdateFavoriteMemoryModal from "../../../components/modals/UpdateFavoriteMemoryModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 const AllFavoriteMemoriesScreen = () => {
   // variables
+  const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const currentUserId = user?.id;
@@ -38,6 +43,11 @@ const AllFavoriteMemoriesScreen = () => {
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
   const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   // fetch functions
   const {
@@ -67,7 +77,7 @@ const AllFavoriteMemoriesScreen = () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        throw new Error("Session expired, please log in again");
+        return;
       }
 
       const memory = await getFavoriteMemoryById(token, memoryId);
@@ -86,21 +96,83 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleAction = (action: "edit" | "delete") => {
-    if (!selectedMemory) {
+    if (!selectedMemory) return;
+    setActionModalVisible(false);
+
+    if (action === "edit") {
+      setEditingMemory(selectedMemory);
+      setEditModalVisible(true);
+    } else if (action === "delete") {
+      handleDeleteMemory(selectedMemory);
+    }
+  };
+
+  const handleDeleteMemory = async (memory: Memory) => {
+    setEditLoading(true);
+    setActionModalVisible(false);
+
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      await deleteFavoriteMemory(token, memory.id);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["allFavoriteMemories"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentFavoriteMemories", currentUserId],
+      });
+
+      setAlertMessage("Favorite memory deleted");
+      setAlertVisible(true);
+    } catch (err) {
+      setAlertMessage("Failed to delete favorite memory");
+      setAlertVisible(true);
+    }
+
+    setEditLoading(false);
+    setSelectedMemory(null);
+  };
+
+  const handleSaveEditMemory = async (memoryText: string, date: string) => {
+    if (!editingMemory) {
       return;
     }
 
-    setActionModalVisible(false);
+    setEditLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
 
-    if (action === "edit" && onEdit) {
-      onEdit(selectedMemory);
+      if (!token) {
+        return;
+      }
+
+      await updateFavoriteMemory(token, editingMemory.id, memoryText, date);
+
+      setEditModalVisible(false);
+      setEditingMemory(null);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["allFavoriteMemories"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentFavoriteMemories", currentUserId],
+      });
+
+      setAlertMessage("Favorite memory updated");
+      setAlertVisible(true);
+    } catch (err) {
+      setAlertMessage("Failed to update favorite memory");
+      setAlertVisible(true);
     }
 
-    if (action === "delete") {
-      onDelete(selectedMemory);
-    }
-
-    setSelectedMemory(null);
+    setEditLoading(false);
   };
 
   // refresh screen
@@ -141,7 +213,7 @@ const AllFavoriteMemoriesScreen = () => {
         <ActivityIndicator color="#e03487" style={{ marginTop: 40 }} />
       ) : error ? (
         <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
-          {error.message || "Failed to load memories"}
+          {error.message || "Failed to load favorite memories"}
         </Text>
       ) : (
         <FlatList
@@ -202,6 +274,25 @@ const AllFavoriteMemoriesScreen = () => {
           setActionModalVisible(false);
           setSelectedMemory(null);
         }}
+      />
+
+      <UpdateFavoriteMemoryModal
+        visible={editModalVisible}
+        onClose={() => {
+          setEditModalVisible(false);
+          setEditingMemory(null);
+        }}
+        onSave={handleSaveEditMemory}
+        initialMemory={editingMemory?.memory}
+        initialDate={editingMemory?.date}
+        isEditing={true}
+        loading={editLoading}
+      />
+
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
       />
     </View>
   );
