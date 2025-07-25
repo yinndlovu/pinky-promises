@@ -9,9 +9,11 @@ import {
   Platform,
   SafeAreaView,
   TouchableOpacity,
+  Modal,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 // internal
 import { getPartner } from "../../services/partnerService";
@@ -31,6 +33,7 @@ import { FAVORITE_LABELS } from "../../helpers/profileHelpers";
 
 // screen content
 import styles from "./styles/ChatScreen.styles";
+import ConfirmationModal from "../../components/modals/ConfirmationModal";
 
 // chats database
 import {
@@ -38,6 +41,7 @@ import {
   fetchMessages,
   saveMessage,
   deleteOldMessages,
+  deleteAllMessages,
 } from "../../database/chatdb";
 
 type Message = {
@@ -47,6 +51,8 @@ type Message = {
   timestamp: number;
 };
 
+type ChatScreenParams = { showOptions?: boolean };
+
 export default function ChatScreen() {
   // variables
   const { user } = useAuth();
@@ -54,6 +60,8 @@ export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const EXTRA_KEYBOARD_PADDING = 50;
   const LAST_CLEANUP_KEY = "lastCleanupDate";
+  const navigation = useNavigation();
+  const route = useRoute();
 
   // use states
   const [partnerName, setPartnerName] = useState<string>("");
@@ -68,6 +76,8 @@ export default function ChatScreen() {
   const [aboutUser, setAboutUser] = useState<string>("");
   const [favorites, setFavorites] = useState<any>({});
   const [keyDetails, setKeyDetails] = useState<any[]>([]);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // use states (partner data)
   const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
@@ -193,6 +203,13 @@ export default function ChatScreen() {
     }
   }, [userId]);
 
+  useEffect(() => {
+    if ((route.params as any)?.showOptions) {
+      setShowOptions(true);
+      navigation.setParams({ showOptions: false } as any);
+    }
+  }, [route.params]);
+
   // helpers
   const getFormattedKeyDetails = useCallback(() => {
     if (!keyDetails.length) {
@@ -283,6 +300,13 @@ export default function ChatScreen() {
     return aboutPartner || "Not set";
   }, [aboutPartner]);
 
+  // handlers
+  const handleDelete = async () => {
+    await deleteAllMessages();
+    setMessages([]);
+    setShowConfirm(false);
+  };
+
   // AI call
   const getBotResponse = async (message: string) => {
     const todayString = new Date().toLocaleDateString("en-GB", {
@@ -308,7 +332,7 @@ export default function ChatScreen() {
     it's just ${user?.name || "User"} chatting with you.
     Text them back in lowercase letters only.
     Show excitement by adding extra letters where necessary, like "heyyy"
-    Make your texts as short as possible.
+    Make your texts as short as possible, and avoid using too much emojis, a little is fine.
     Sound human, like their best friend rather than an AI.
     Their anniversary is ${getFormattedAnniversary()}.
     Special dates: ${getFormattedSpecialDates()}.
@@ -506,7 +530,6 @@ export default function ChatScreen() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingTop: 24, paddingBottom: 60 }}
           renderItem={({ item, index }) => {
-            // Check if this message is the first of a new day
             const currentDay = getDayLabel(item.timestamp);
             const prevMsg = messages[index + 1];
             const prevDay = prevMsg ? getDayLabel(prevMsg.timestamp) : null;
@@ -579,6 +602,60 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      <Modal
+        visible={showOptions}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowOptions(false)}
+      >
+        <TouchableOpacity
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.2)",
+            justifyContent: "flex-start",
+            alignItems: "flex-end",
+            paddingTop: 50,
+            paddingRight: 20,
+          }}
+          activeOpacity={1}
+          onPressOut={() => setShowOptions(false)}
+        >
+          <View
+            style={{
+              backgroundColor: "#23243a",
+              borderRadius: 8,
+              padding: 8,
+              minWidth: 120,
+              shadowColor: "#000",
+              shadowOpacity: 0.2,
+              shadowRadius: 8,
+              elevation: 4,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => {
+                setShowOptions(false);
+                setShowConfirm(true);
+              }}
+              style={{ paddingVertical: 10, paddingHorizontal: 16 }}
+            >
+              <Text style={{ color: "#e03487", fontWeight: "bold" }}>
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      <ConfirmationModal
+        visible={showConfirm}
+        message="Are you sure you want to delete all chat messages?"
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDelete}
+        onCancel={() => setShowConfirm(false)}
+        onClose={() => setShowConfirm(false)}
+      />
     </SafeAreaView>
   );
 }

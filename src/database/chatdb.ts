@@ -70,3 +70,11 @@ export const fetchMessages = async (): Promise<ChatMessage[]> => {
     throw error;
   }
 };
+
+export async function deleteAllMessages() {
+  try {
+    await db.runAsync("DELETE FROM messages");
+  } catch (error) {
+    throw error;
+  }
+}

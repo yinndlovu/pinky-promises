@@ -294,6 +294,21 @@ const AllFavoriteMemoriesScreen = () => {
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
       />
+
+      {editLoading && !editModalVisible && (
+        <View
+          style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: "rgba(35,36,58,0.7)",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+          }}
+        >
+          <ActivityIndicator size="large" color="#e03487" />
+          <Text style={{ color: "#fff", marginTop: 12 }}>Deleting...</Text>
+        </View>
+      )}
     </View>
   );
 };

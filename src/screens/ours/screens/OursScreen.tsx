@@ -568,6 +568,13 @@ const OursScreen = ({ navigation }: Props) => {
           <Text style={styles.toastText}>{error}</Text>
         </View>
       )}
+
+      {memoryModalLoading && !memoryModalVisible && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#e03487" />
+          <Text style={{ color: "#fff", marginTop: 12 }}>Deleting...</Text>
+        </View>
+      )}
     </View>
   );
 };

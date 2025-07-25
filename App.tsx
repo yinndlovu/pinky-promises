@@ -6,13 +6,20 @@ import {
 } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  View,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import * as Location from "expo-location";
 import React from "react";
 import { useEffect } from "react";
 import { QueryClient, onlineManager } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { Image } from "expo-image";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
@@ -50,6 +57,7 @@ import AboutScreen from "./src/screens/settings/about/AboutScreen";
 import AllFavoriteMemoriesScreen from "./src/screens/ours/screens/AllFavoriteMemoriesScreen";
 import LastSixSentScreen from "./src/screens/portal/screens/LastSixSentScreen";
 import LastSixReceivedScreen from "./src/screens/portal/screens/LastSixReceivedScreen";
+import Feather from "@expo/vector-icons/build/Feather";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -101,6 +109,18 @@ function MainTabs() {
       <Tab.Screen name="Ours" component={OursScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+  );
+}
+
+function AIHeader() {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <Image
+        source={require("./src/assets/ai_icon.png")}
+        style={{ width: 28, height: 28, borderRadius: 14, marginRight: 8 }}
+      />
+      <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Lily</Text>
+    </View>
   );
 }
 
@@ -339,14 +359,24 @@ function AppContent() {
         <Stack.Screen
           name="ChatScreen"
           component={ChatScreen}
-          options={{
+          options={({ navigation }) => ({
             headerShown: true,
-            title: "Lily",
+            headerTitle: () => <AIHeader />,
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
             headerTitleAlign: "center",
-          }}
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.setParams({ showOptions: true } as any)
+                }
+                style={{ marginRight: 16 }}
+              >
+                <Feather name="more-vertical" size={22} color="#fff" />
+              </TouchableOpacity>
+            ),
+          })}
         />
         <Stack.Screen
           name="PortalScreen"
