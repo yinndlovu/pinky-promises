@@ -89,7 +89,7 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="fade" transparent>
       <View style={styles.overlay}>
         <View style={styles.content}>
           <Text style={styles.title}>

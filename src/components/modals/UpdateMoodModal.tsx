@@ -70,7 +70,7 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent>
+    <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>

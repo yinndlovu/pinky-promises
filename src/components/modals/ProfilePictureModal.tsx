@@ -19,7 +19,7 @@ const ProfilePictureModal: React.FC<Props> = ({
 }) => (
   <Modal
     visible={visible}
-    animationType="fade"
+    animationType="slide"
     transparent
     onRequestClose={onClose}
   >
