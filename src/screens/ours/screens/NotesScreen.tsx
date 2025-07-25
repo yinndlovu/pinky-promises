@@ -12,7 +12,6 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 
 // internal
 import { getNotes, updateNotes } from "../../../services/notesService";
-import { useAuth } from "../../../contexts/AuthContext";
 
 // variables
 const AUTO_SAVE_DELAY = 1000;
@@ -20,6 +19,8 @@ const AUTO_SAVE_DELAY = 1000;
 const NotesScreen: React.FC = () => {
   // use states
   const [content, setContent] = useState("");
+
+  // use states (proccesing)
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

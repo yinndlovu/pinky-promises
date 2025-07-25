@@ -4,13 +4,10 @@ import { View, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-// types
-type Props = {
-  loveLanguage?: string;
-  onEdit?: () => void;
-};
+// internal
+import { LoveLanguageProps } from "../../../types/LoveLanguage";
 
-const LoveLanguage: React.FC<Props> = ({
+const LoveLanguage: React.FC<LoveLanguageProps> = ({
   loveLanguage = "",
   onEdit,
 }) => (

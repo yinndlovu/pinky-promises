@@ -15,7 +15,7 @@ import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 // internal
 import { getUserFavorites } from "../../../services/favoritesService";
@@ -24,7 +24,7 @@ import { getAboutUser } from "../../../services/aboutUserService";
 import { removePartner } from "../../../services/partnerService";
 import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
-import { FAVORITE_LABELS, favoritesObjectToArray } from "../../../helpers/profileHelpers";
+import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/ConfirmationModal";
@@ -37,19 +37,21 @@ import PartnerAnniversary from "./PartnerAnniversary";
 import styles from "./styles/PartnerProfileScreen.styles";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
-  const queryClient = useQueryClient();
+  // variables
   const insets = useSafeAreaInsets();
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
-  const [removingPartner, setRemovingPartner] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
     null
   );
+
+  // use states (processing)
+  const [removingPartner, setRemovingPartner] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   // fetch functions
   const {

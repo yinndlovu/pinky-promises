@@ -30,6 +30,7 @@ import {
   updateSetMonthlyGift,
 } from "../../services/setMonthlyGiftService";
 import { useAuth } from "../../contexts/AuthContext";
+import { formatDateDMY, formatTime } from "../../helpers/formatDateHelper";
 
 const GiftsScreen = () => {
   // variables
@@ -103,29 +104,9 @@ const GiftsScreen = () => {
         id: gift.id,
         giftName: gift.name,
         receivedAt:
-          new Date(gift.createdAt).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }) +
-          " " +
-          new Date(gift.createdAt).toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }),
+          formatDateDMY(gift.createdAt) + " " + formatTime(gift.createdAt),
         claimedAt:
-          new Date(gift.claimDate).toLocaleDateString("en-GB", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          }) +
-          " " +
-          new Date(gift.claimDate).toLocaleTimeString("en-GB", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }),
+          formatDateDMY(gift.claimDate) + " " + formatTime(gift.claimDate),
       }));
     },
     staleTime: 1000 * 60 * 60 * 24,
@@ -253,17 +234,7 @@ const GiftsScreen = () => {
           <ReceivedGift
             giftName={gift.name}
             receivedAt={
-              new Date(gift.createdAt).toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              }) +
-              " " +
-              new Date(gift.createdAt).toLocaleTimeString("en-GB", {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: false,
-              })
+              formatDateDMY(gift.createdAt) + " " + formatTime(gift.createdAt)
             }
             onClaim={handleClaim}
             claiming={claiming}

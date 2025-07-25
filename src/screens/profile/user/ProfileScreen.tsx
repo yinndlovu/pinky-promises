@@ -45,10 +45,7 @@ import { getPartner } from "../../../services/partnerService";
 import { getReceivedPartnerRequests } from "../../../services/partnerService";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { FavoritesType } from "../../../types/Favorites";
-import {
-  FAVORITE_LABELS,
-  favoritesObjectToArray,
-} from "../../../helpers/profileHelpers";
+import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
 
 // screen content
 import UpdateAboutModal from "../../../components/modals/UpdateAboutModal";
@@ -78,13 +75,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [showError, setShowError] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
+    null
+  );
+
+  // use states (processing)
   const [loadingName, setLoadingName] = useState(false);
   const [loadingUsername, setLoadingUsername] = useState(false);
   const [loadingBio, setLoadingBio] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
   const [uploading, setUploading] = useState(false);
 
   // use states (modals)

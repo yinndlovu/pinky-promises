@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import {
@@ -24,17 +23,15 @@ import { Message } from "../../../types/Message";
 import ViewMessageModal from "../../../components/modals/ViewMessageModal";
 
 const LastSixSentScreen = () => {
-  // variables
-  const insets = useSafeAreaInsets();
-
   // use states
-  const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [viewLoading, setViewLoading] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+
+  // use states (processing)
+  const [refreshing, setRefreshing] = useState(false);
+  const [viewLoading, setViewLoading] = useState(false);
 
   const {
     data: messages = [],

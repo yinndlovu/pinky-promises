@@ -7,28 +7,24 @@ import {
   FlatList,
   Animated,
   TouchableWithoutFeedback,
-  TouchableOpacity,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-// types
-type Activity = {
-  id: string;
-  description: string;
-  date: string;
-  time: string;
-};
-
-type Props = {
-  activities: Activity[];
-};
+// internal
+import {
+  RecentActivity,
+  RecentActivityProps,
+} from "../../../types/RecentActivity";
 
 type AnimatedActivityItemProps = {
-  item: Activity;
+  item: RecentActivity;
   children: React.ReactNode;
 };
 
-const AnimatedActivityItem: React.FC<AnimatedActivityItemProps> = ({ item, children }) => {
+const AnimatedActivityItem: React.FC<AnimatedActivityItemProps> = ({
+  item,
+  children,
+}) => {
   const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
@@ -61,7 +57,7 @@ const AnimatedActivityItem: React.FC<AnimatedActivityItemProps> = ({ item, child
   );
 };
 
-const RecentActivity: React.FC<Props> = ({ activities }) => (
+const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => (
   <View style={styles.container}>
     <Text style={styles.sectionTitle}>RECENT ACTIVITY</Text>
     {activities.length === 0 ? (

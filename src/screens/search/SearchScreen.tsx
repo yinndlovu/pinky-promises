@@ -17,6 +17,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 // internal
 import { searchUsers } from "../../services/searchService";
 import { BASE_URL } from "../../configuration/config";
+import { User } from "../../types/User";
+import { ProfilePictureInfo } from "../../types/ProfilePicture";
 
 // screen content
 import AlertModal from "../../components/modals/AlertModal";
@@ -24,21 +26,6 @@ import UserListItem from "./UserListItem";
 
 // types
 type Props = NativeStackScreenProps<any>;
-
-type User = {
-  id: string;
-  name: string;
-  username: string;
-  isPartner?: boolean;
-  isUser?: boolean;
-};
-
-type ProfilePictureInfo = {
-  [userId: string]: {
-    uri: string;
-    updatedAt: Date;
-  };
-};
 
 export default function SearchScreen({ navigation }: Props) {
   // variables
@@ -52,6 +39,8 @@ export default function SearchScreen({ navigation }: Props) {
   const [profilePictures, setProfilePictures] = useState<ProfilePictureInfo>(
     {}
   );
+
+  // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 

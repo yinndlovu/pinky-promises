@@ -2,12 +2,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-// types
-type Props = {
-  loveLanguage?: string;
-};
+// internal
+import { PartnerLoveLanguageProps } from "../../../types/LoveLanguage";
 
-const PartnerLoveLanguage: React.FC<Props> = ({
+const PartnerLoveLanguage: React.FC<PartnerLoveLanguageProps> = ({
   loveLanguage = "",
 }) => (
   <View style={styles.wrapper}>
@@ -26,7 +24,7 @@ const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
     marginBottom: 18,
-    marginTop: 20
+    marginTop: 20,
   },
   headerRow: {
     flexDirection: "row",

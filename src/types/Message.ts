@@ -5,3 +5,10 @@ export type Message = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+export type ChatMessage = {
+  id: string;
+  text: string;
+  sender: string;
+  timestamp: number;
+};

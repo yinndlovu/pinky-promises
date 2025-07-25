@@ -3,19 +3,10 @@ import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-// types
-type PastGift = {
-  id: string;
-  giftName: string;
-  receivedAt: string;
-  claimedAt: string;
-};
+// internal
+import { PastGiftProps } from "../../../types/Gift";
 
-type Props = {
-  gifts: PastGift[];
-};
-
-const PastGiftsList: React.FC<Props> = ({ gifts }) => (
+const PastGiftsList: React.FC<PastGiftProps> = ({ gifts }) => (
   <View style={styles.container}>
     <Text style={styles.title}>Past Received Presents</Text>
     <FlatList

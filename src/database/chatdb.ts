@@ -1,11 +1,8 @@
+// external
 import { openDatabaseSync } from "expo-sqlite";
 
-export type ChatMessage = {
-  id: string;
-  text: string;
-  sender: string;
-  timestamp: number;
-};
+// internal
+import { ChatMessage } from "../types/Message";
 
 const db = openDatabaseSync("chat.db");
 

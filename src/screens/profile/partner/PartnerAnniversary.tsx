@@ -5,21 +5,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { getSpecialDates } from "../../../services/specialDateService";
+import { SpecialDate } from "../../../types/SpecialDate";
 
 // types
 type Props = {
   partnerId: string;
-};
-
-type SpecialDate = {
-  id: string;
-  date: string;
-  title: string;
-  description?: string;
-  togetherFor?: string;
-  knownFor?: string;
-  nextAnniversaryIn?: string;
-  nextMetDayIn?: string;
 };
 
 const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {

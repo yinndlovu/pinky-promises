@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
@@ -34,7 +33,6 @@ const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
 // types
 type Props = NativeStackScreenProps<any, "UserProfile">;
-
 type RequestStatus = "none" | "pending" | "incoming";
 
 const UserProfileScreen = ({ route, navigation }: Props) => {

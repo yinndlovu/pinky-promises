@@ -21,6 +21,7 @@ import {
 } from "../../services/partnerService";
 import { BASE_URL } from "../../configuration/config";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
+import { PendingRequest } from "../../types/Request";
 
 // screen content
 import AlertModal from "../../components/modals/AlertModal";
@@ -29,23 +30,9 @@ import styles from "./styles/PendingRequestsScreen.styles";
 // variables
 const fallbackAvatar = require("../../assets/default-avatar-two.png");
 
-// types
-type PendingRequest = {
-  id: string;
-  sender: {
-    id: string;
-    username: string;
-  } | null;
-  status: string;
-  createdAt: string;
-};
-
 const PendingRequestsScreen = ({ navigation }: any) => {
   // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [processingAccept, setProcessingAccept] = useState<string | null>(null);
-  const [processingReject, setProcessingReject] = useState<string | null>(null);
   const [profilePictures, setProfilePictures] = useState<{
     [userId: string]: string;
   }>({});
@@ -54,6 +41,11 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<{
     [userId: string]: Date;
   }>({});
+
+  // use states (processing)
+  const [loading, setLoading] = useState(true);
+  const [processingAccept, setProcessingAccept] = useState<string | null>(null);
+  const [processingReject, setProcessingReject] = useState<string | null>(null);
 
   // use effects
   useEffect(() => {
@@ -139,7 +131,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   // handlers
   const handleAcceptRequest = async (requestId: string, senderId: string) => {
     setProcessingAccept(requestId);
-    
+
     try {
       const token = await AsyncStorage.getItem("token");
 

@@ -2,14 +2,14 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-// types
-type Props = {
-  giftName: string;
-  onChange?: () => void;
-  buttonText?: string;
-};
+// internal
+import { SetMonthlyGiftProps } from "../../../types/Gift";
 
-const SetMonthlyGift: React.FC<Props> = ({ giftName, onChange, buttonText = "Change" }) => (
+const SetMonthlyGift: React.FC<SetMonthlyGiftProps> = ({
+  giftName,
+  onChange,
+  buttonText = "Change",
+}) => (
   <View style={styles.card}>
     <Text style={styles.tip}>YOUR FAVORITE PRESENT</Text>
     <Text style={styles.giftName}>{giftName}</Text>

@@ -3,18 +3,10 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-// types
-type FavoriteItem = {
-  label: string;
-  value: string;
-};
+// internal
+import { FavoritesProps } from "../../../types/Favorites";
 
-type Props = {
-  favorites: FavoriteItem[];
-  onEdit?: () => void;
-};
-
-const Favorites: React.FC<Props> = ({ favorites, onEdit }) => {
+const Favorites: React.FC<FavoritesProps> = ({ favorites, onEdit }) => {
   const rows = [];
   for (let i = 0; i < favorites.length; i += 2) {
     rows.push(favorites.slice(i, i + 2));

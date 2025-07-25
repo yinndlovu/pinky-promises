@@ -13,7 +13,6 @@ import {
   RefreshControl,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -26,7 +25,6 @@ import { formatDateYearly } from "../../../helpers/formatDateHelper";
 
 const TimelineScreen = () => {
   // variables
-  const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
 
   // use states

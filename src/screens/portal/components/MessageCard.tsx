@@ -10,40 +10,19 @@ import {
 
 // internal
 import { Message } from "../../../types/Message";
+import { formatDateDMYHM } from "../../../helpers/formatDateHelper";
 
+// interfaces
 interface Props {
   message: Message;
   onLongPress: (msg: Message) => void;
   onPress?: (msg: Message) => void;
 }
 
+// get screen width
 const screenWidth = Dimensions.get("window").width;
 
 export default function MessageCard({ message, onLongPress, onPress }: Props) {
-  // utils
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) {
-      return "";
-    }
-
-    const date = new Date(dateStr);
-
-    if (isNaN(date.getTime())) {
-      return dateStr;
-    }
-
-    return date
-      .toLocaleString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      })
-      .replace(",", "");
-  };
-
   return (
     <TouchableOpacity
       style={styles.card}
@@ -53,7 +32,7 @@ export default function MessageCard({ message, onLongPress, onPress }: Props) {
     >
       <Text style={styles.messageText}>{message.message}</Text>
       <View style={styles.metaRow}>
-        <Text style={styles.date}>{formatDate(message.createdAt || "")}</Text>
+        <Text style={styles.date}>{formatDateDMYHM(message.createdAt || "")}</Text>
         <Text style={styles.status}>{message.seen ? "Seen" : "Sent"}</Text>
       </View>
     </TouchableOpacity>

@@ -40,6 +40,7 @@ import MessageInputModal from "../../../components/modals/MessageInputModal";
 import ViewMessageModal from "../../../components/modals/ViewMessageModal";
 import AlertModal from "../../../components/modals/AlertModal";
 
+// types
 type Props = NativeStackScreenProps<any, any>;
 
 export default function PortalScreen({ navigation }: Props) {
@@ -48,21 +49,26 @@ export default function PortalScreen({ navigation }: Props) {
   const queryClient = useQueryClient();
 
   // use states
-  const [confirmVisible, setConfirmVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<Message | undefined>(
     undefined
   );
-  const [refreshing, setRefreshing] = useState(false);
-  const [inputModalVisible, setInputModalVisible] = useState(false);
   const [inputType, setInputType] = useState<"sweet" | "vent">("sweet");
-  const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
   const [viewType, setViewType] = useState<"sweet" | "vent" | null>(null);
-  const [loading, setLoading] = useState(false);
+  
+  
+  // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [viewModalVisible, setViewModalVisible] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [inputModalVisible, setInputModalVisible] = useState(false);
+
+  // use states (processing)
+  const [refreshing, setRefreshing] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // fetch functions
   const {

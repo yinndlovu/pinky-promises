@@ -54,22 +54,26 @@ const OursScreen = ({ navigation }: Props) => {
   const queryClient = useQueryClient();
 
   // use states
-  const [addModalVisible, setAddModalVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<any | null>(null);
+  const [detailsMemory, setDetailsMemory] = useState<any>(null);
+  const [isOnline, setIsOnline] = useState(true);
+
+  // use states (modals)
+  const [addModalVisible, setAddModalVisible] = useState(false);
   const [actionModalVisible, setActionModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [deleting, setDeleting] = useState(false);
   const [memoryModalVisible, setMemoryModalVisible] = useState(false);
-  const [editingMemory, setEditingMemory] = useState<any | null>(null);
-  const [memoryModalLoading, setMemoryModalLoading] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [detailsMemory, setDetailsMemory] = useState<any>(null);
+
+  // use states (processing)
   const [refreshing, setRefreshing] = useState(false);
-  const [isOnline, setIsOnline] = useState(true);
+   const [deleting, setDeleting] = useState(false);
+   const [editingMemory, setEditingMemory] = useState<any | null>(null);
+   const [memoryModalLoading, setMemoryModalLoading] = useState(false);
+   const [detailsLoading, setDetailsLoading] = useState(false);
 
   // use states errors
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +96,7 @@ const OursScreen = ({ navigation }: Props) => {
 
       return await getNotes(token);
     },
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 30,
   });
 
   const {

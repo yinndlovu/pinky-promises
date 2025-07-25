@@ -11,8 +11,6 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // internal
 import {
@@ -21,20 +19,18 @@ import {
 } from "../../../services/sweetMessageService";
 import ViewMessageModal from "../../../components/modals/ViewMessageModal";
 import { Message } from "../../../types/Message";
+import { formatDateDMY } from "../../../helpers/formatDateHelper";
 
 const LastSixReceivedScreen = () => {
-  // variables
-  const insets = useSafeAreaInsets();
-
   // use states
-  const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
-  const [viewLoading, setViewLoading] = useState(false);
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+
+  // use states (processing)
+  const [refreshing, setRefreshing] = useState(false);
+  const [viewLoading, setViewLoading] = useState(false);
 
   // fetch functions
   const {
@@ -81,19 +77,6 @@ const LastSixReceivedScreen = () => {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) {
-      return "";
-    }
-
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <Text
@@ -127,7 +110,7 @@ const LastSixReceivedScreen = () => {
               <Text style={styles.memoryText}>{item.message}</Text>
               <View style={styles.metaRow}>
                 <Text style={styles.metaText}>
-                  {formatDate(item.createdAt || "")}
+                  {formatDateDMY(item.createdAt || "")}
                 </Text>
               </View>
             </TouchableOpacity>

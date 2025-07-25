@@ -30,6 +30,7 @@ import {
   fetchKeyDetails,
 } from "../../services/ai/aiKeyDetailsService";
 import { FAVORITE_LABELS } from "../../helpers/profileHelpers";
+import { ChatMessage } from "../../types/Message";
 
 // screen content
 import styles from "./styles/ChatScreen.styles";
@@ -44,15 +45,6 @@ import {
   deleteAllMessages,
 } from "../../database/chatdb";
 
-type Message = {
-  id: string;
-  text: string;
-  sender: string;
-  timestamp: number;
-};
-
-type ChatScreenParams = { showOptions?: boolean };
-
 export default function ChatScreen() {
   // variables
   const { user } = useAuth();
@@ -64,26 +56,29 @@ export default function ChatScreen() {
   const route = useRoute();
 
   // use states
-  const [partnerName, setPartnerName] = useState<string>("");
-  const [partnerId, setPartnerId] = useState<string>("");
   const [specialDates, setSpecialDates] = useState<any[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [isSending, setIsSending] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  // use states (users details)
   const [favoriteMemories, setFavoriteMemories] = useState<any[]>([]);
   const [notes, setNotes] = useState<any[]>([]);
   const [loveLanguage, setLoveLanguage] = useState<string>("");
   const [aboutUser, setAboutUser] = useState<string>("");
   const [favorites, setFavorites] = useState<any>({});
   const [keyDetails, setKeyDetails] = useState<any[]>([]);
-  const [showOptions, setShowOptions] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   // use states (partner data)
   const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
   const [partnerFavorites, setPartnerFavorites] = useState<any>({});
   const [aboutPartner, setAboutPartner] = useState<string>("");
+  const [partnerName, setPartnerName] = useState<string>("");
+  const [partnerId, setPartnerId] = useState<string>("");
 
+  // helpers
   function favoritesObjectToArray(
     favoritesObj: any
   ): { label: string; value: string }[] {
@@ -96,6 +91,7 @@ export default function ChatScreen() {
       .filter(Boolean) as { label: string; value: string }[];
   }
 
+  // check if chats have been cleaned that day
   const runCleanupOncePerDay = async () => {
     try {
       const lastCleanup = await AsyncStorage.getItem(LAST_CLEANUP_KEY);
@@ -405,7 +401,7 @@ export default function ChatScreen() {
     }
 
     const timestamp = Date.now();
-    const userMessage: Message = {
+    const userMessage: ChatMessage = {
       id: timestamp.toString(),
       text: inputText,
       sender: "You",
@@ -440,7 +436,7 @@ export default function ChatScreen() {
     } catch (e) {}
 
     const botTimestamp = Date.now();
-    const botReply: Message = {
+    const botReply: ChatMessage = {
       id: (botTimestamp + 1).toString(),
       text: messageText || "sorry, i didn’t quite get that. please try again.",
       sender: "Lily",

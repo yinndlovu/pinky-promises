@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 // internal
 import { BASE_URL } from "../../../configuration/config";
 import { useAuth } from "../../../contexts/AuthContext";
+import { StatusMoodProps } from "../../../types/StatusMood";
 
 // screen content
 import AddLocationModal from "../../../components/modals/AddLocationModal";
@@ -22,18 +23,7 @@ import UpdateMoodModal from "../../../components/modals/UpdateMoodModal";
 import AlertModal from "../../../components/modals/AlertModal";
 import { updateMood } from "../../../services/moodService";
 
-// types
-type Props = {
-  onAddHome?: () => void;
-  mood?: string;
-  moodDescription?: string;
-  onEdit?: () => void;
-  status?: "home" | "away" | "unreachable" | "unavailable";
-  statusDescription?: string;
-  statusDistance?: number;
-};
-
-const StatusMood: React.FC<Props> = ({
+const StatusMood: React.FC<StatusMoodProps> = ({
   mood = "No mood",
   moodDescription = "You haven't added a mood yet",
   status = "unavailable",
@@ -45,7 +35,6 @@ const StatusMood: React.FC<Props> = ({
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
-
   const userId = user?.id;
 
   // use states

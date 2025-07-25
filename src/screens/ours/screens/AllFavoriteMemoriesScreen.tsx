@@ -22,6 +22,7 @@ import {
 } from "../../../services/favoriteMemoriesService";
 import { Memory } from "../../../types/Memory";
 import { useAuth } from "../../../contexts/AuthContext";
+import { formatDateDMY } from "../../../helpers/formatDateHelper";
 
 // confirmation modal
 import FavoriteMemoryDetailsModal from "../../../components/modals/FavoriteMemoryDetailsModal";
@@ -182,19 +183,6 @@ const AllFavoriteMemoriesScreen = () => {
     setRefreshing(false);
   };
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) {
-      return "";
-    }
-
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       <Text
@@ -233,7 +221,7 @@ const AllFavoriteMemoriesScreen = () => {
                 <Text style={styles.metaText}>
                   {item.author ? `By ${item.author}` : "By Unknown"}
                 </Text>
-                <Text style={styles.metaText}>{formatDate(item.date)}</Text>
+                <Text style={styles.metaText}>{formatDateDMY(item.date)}</Text>
               </View>
             </TouchableOpacity>
           )}

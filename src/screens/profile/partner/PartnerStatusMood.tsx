@@ -7,15 +7,9 @@ import { useQuery } from "@tanstack/react-query";
 // internal
 import { fetchUserStatus } from "../../../services/userStatusService";
 import { getUserMood } from "../../../services/moodService";
+import { PartnerStatusMoodProps } from "../../../types/StatusMood";
 
-// types
-type Props = {
-  partnerId: string;
-  partnerName: string;
-  refreshKey?: number;
-};
-
-const PartnerStatusMood: React.FC<Props> = ({
+const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   partnerId,
   partnerName,
   refreshKey,

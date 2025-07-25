@@ -9,6 +9,7 @@ import MessageList from "../components/MessageList";
 // internal
 import { Message } from "../../../types/Message";
 
+// interfaces
 interface Props {
   sent: Message[];
   received: Message[];

@@ -1,11 +1,6 @@
+// external
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
   NavigationHelpers,
@@ -15,19 +10,13 @@ import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs"
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BASE_URL } from "../../configuration/config";
 import { encode } from "base64-arraybuffer";
 import { Image } from "expo-image";
+
+// internal
+import { BASE_URL } from "../../configuration/config";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
-
-const NAV_ITEMS = [
-  { name: "Home", icon: "home" as const },
-  { name: "Presents", icon: "gift" as const },
-  { name: "Ours", icon: "heart" as const },
-  { name: "Profile", icon: "user" as const },
-];
-
-type NavItem = (typeof NAV_ITEMS)[number]["name"];
+import { NavItem, NAV_ITEMS } from "./NavItem";
 
 type Props = {
   navigation: NavigationHelpers<ParamListBase, BottomTabNavigationEventMap>;

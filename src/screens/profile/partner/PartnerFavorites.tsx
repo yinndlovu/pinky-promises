@@ -2,17 +2,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-// types
-type FavoriteItem = {
-  label: string;
-  value: string;
-};
+// internal
+import { PartnerFavoritesProps } from "../../../types/Favorites";
 
-type Props = {
-  favorites: FavoriteItem[];
-};
-
-const PartnerFavorites: React.FC<Props> = ({ favorites }) => {
+const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
   const rows = [];
   for (let i = 0; i < favorites.length; i += 2) {
     rows.push(favorites.slice(i, i + 2));

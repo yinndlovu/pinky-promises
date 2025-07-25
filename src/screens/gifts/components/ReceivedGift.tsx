@@ -9,15 +9,15 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-// types
-type Props = {
-  giftName: string;
-  receivedAt: string;
-  onClaim?: () => void;
-  claiming?: boolean;
-};
+// internal
+import { ReceivedGiftProps } from "../../../types/Gift";
 
-const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim, claiming }) => (
+const ReceivedGift: React.FC<ReceivedGiftProps> = ({
+  giftName,
+  receivedAt,
+  onClaim,
+  claiming,
+}) => (
   <View style={styles.card}>
     <View style={styles.row}>
       <Feather
@@ -30,7 +30,11 @@ const ReceivedGift: React.FC<Props> = ({ giftName, receivedAt, onClaim, claiming
     </View>
     <Text style={styles.giftName}>{giftName}</Text>
     <Text style={styles.dateText}>{receivedAt}</Text>
-    <TouchableOpacity style={styles.claimButton} onPress={onClaim} disabled={claiming}>
+    <TouchableOpacity
+      style={styles.claimButton}
+      onPress={onClaim}
+      disabled={claiming}
+    >
       {claiming ? (
         <ActivityIndicator color="#fff" />
       ) : (

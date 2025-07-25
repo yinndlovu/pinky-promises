@@ -12,32 +12,15 @@ import {
   updateSpecialDate,
 } from "../../../services/specialDateService";
 import { useAuth } from "../../../contexts/AuthContext";
+import { AnniversaryProps, SpecialDate } from "../../../types/SpecialDate";
+import { formatProfileDisplayDate } from "../../../helpers/formatDateHelper";
 
 // screen content
 import UpdateSpecialDateModal from "../../../components/modals/UpdateSpecialDateModal";
 import AlertModal from "../../../components/modals/AlertModal";
 
-// types
-type Props = {
-  anniversaryDate?: string;
-  dayMet?: string;
-  onEditAnniversary?: () => void;
-  onEditDayMet?: () => void;
-};
-
-type SpecialDate = {
-  id: string;
-  date: string;
-  title: string;
-  description?: string;
-  togetherFor?: string;
-  knownFor?: string;
-  nextAnniversaryIn?: string;
-  nextMetDayIn?: string;
-};
-
-const Anniversary: React.FC<Props> = () => {
-  // use contexts
+const Anniversary: React.FC<AnniversaryProps> = () => {
+  // variables
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const currentUserId = user?.id;
@@ -71,41 +54,13 @@ const Anniversary: React.FC<Props> = () => {
   });
 
   // helpers
-  const formatDisplayDate = (
-    dateString: string,
-    timeInfo?: string
-  ): { date: string; timeInfo?: string } => {
-    if (!dateString || dateString === "Not set") {
-      return {
-        date: "Not set",
-      };
-    }
-
-    try {
-      const date = new Date(dateString);
-      const day = date.getDate();
-      const month = date.toLocaleDateString("en-US", { month: "short" });
-      const year = date.getFullYear();
-      const formattedDate = `${day} ${month} ${year}`;
-
-      return {
-        date: formattedDate,
-        timeInfo,
-      };
-    } catch (error) {
-      return {
-        date: dateString,
-      };
-    }
-  };
-
   const getAnniversaryDisplay = () => {
     const anniversary = specialDates.find((date: SpecialDate) =>
       date.title.toLowerCase().includes("anniversary")
     );
 
     if (anniversary) {
-      return formatDisplayDate(anniversary.date, anniversary.togetherFor);
+      return formatProfileDisplayDate(anniversary.date, anniversary.togetherFor);
     }
     return {
       date: "Not set",
@@ -118,7 +73,7 @@ const Anniversary: React.FC<Props> = () => {
     );
 
     if (dayMet) {
-      return formatDisplayDate(dayMet.date, dayMet.knownFor);
+      return formatProfileDisplayDate(dayMet.date, dayMet.knownFor);
     }
     return {
       date: "Not set",

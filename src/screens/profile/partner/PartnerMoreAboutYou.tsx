@@ -2,14 +2,10 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
-// types
-type Props = {
-  about?: string;
-};
+// internal
+import { PartnerAboutProps } from "../../../types/About";
 
-const PartnerMoreAboutYou: React.FC<Props> = ({
-  about = "",
-}) => (
+const PartnerMoreAboutYou: React.FC<PartnerAboutProps> = ({ about = "" }) => (
   <View style={styles.wrapper}>
     <View style={styles.headerRow}>
       <Text style={styles.label}>More about you</Text>

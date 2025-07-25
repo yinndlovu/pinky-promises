@@ -35,6 +35,11 @@ import {
   interactWithPartner,
   getUnseenInteractions,
 } from "../../services/interactionService";
+import {
+  formatDateDMY,
+  formatTime,
+  formatTimeLeft,
+} from "../../helpers/formatDateHelper";
 
 // screen content
 import RecentActivity from "./components/RecentActivity";
@@ -59,10 +64,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   );
   const [showError, setShowError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
+
+  // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
+  const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
   // handlers
@@ -259,8 +266,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       return activitiesData.map((activity: any) => ({
         id: activity.id,
         description: activity.activity,
-        date: formatActivityDate(activity.createdAt),
-        time: formatActivityTime(activity.createdAt),
+        date: formatDateDMY(activity.createdAt),
+        time: formatTime(activity.createdAt),
       }));
     },
     staleTime: 1000 * 60 * 5,
@@ -311,77 +318,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         contentFit="cover"
       />
     );
-  };
-
-  const formatTimeLeft = (daysUntil: number): string => {
-    if (daysUntil === 0) {
-      return "Today";
-    }
-
-    if (daysUntil === 1) {
-      return "1 day left";
-    }
-
-    if (daysUntil < 30) {
-      return `${daysUntil} days left`;
-    }
-
-    const months = Math.floor(daysUntil / 30);
-    const remainingDays = daysUntil % 30;
-
-    if (months === 1 && remainingDays === 0) {
-      return "1 month left";
-    }
-
-    if (months === 1) {
-      return `1 month ${remainingDays} days left`;
-    }
-
-    if (remainingDays === 0) {
-      return `${months} months left`;
-    }
-
-    return `${months} months ${remainingDays} days left`;
-  };
-
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      const day = date.getDate();
-      const month = date.toLocaleDateString("en-US", { month: "short" });
-      const year = date.getFullYear();
-
-      return `${day} ${month} ${year}`;
-    } catch (error) {
-      return dateString;
-    }
-  };
-
-  const formatActivityDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      const day = date.getDate();
-      const month = date.toLocaleDateString("en-US", { month: "short" });
-      const year = date.getFullYear();
-
-      return `${day} ${month} ${year}`;
-    } catch (error) {
-      return "Unknown date";
-    }
-  };
-
-  const formatActivityTime = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-
-      return date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      });
-    } catch (error) {
-      return "Unknown time";
-    }
   };
 
   function getInteractionMessage(action: string) {
@@ -712,8 +648,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                       marginTop: 6,
                     }}
                   >
-                    {formatActivityDate(interaction.createdAt)} •{" "}
-                    {formatActivityTime(interaction.createdAt)}
+                    {formatDateDMY(interaction.createdAt)} •{" "}
+                    {formatTime(interaction.createdAt)}
                   </Text>
                 </View>
               ))}
@@ -740,7 +676,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               </View>
               <Text style={styles.eventDescription}>
                 {upcomingDate.description ||
-                  `${upcomingDate.title} on ${formatDate(
+                  `${upcomingDate.title} on ${formatDateDMY(
                     upcomingDate.nextOccurrence
                   )}`}
               </Text>

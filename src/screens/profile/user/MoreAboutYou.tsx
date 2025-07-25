@@ -3,13 +3,10 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-// types
-type Props = {
-  about?: string;
-  onEdit?: () => void;
-};
+// internal
+import { AboutProps } from "../../../types/About";
 
-const MoreAboutYou: React.FC<Props> = ({
+const MoreAboutYou: React.FC<AboutProps> = ({
   about = "",
   onEdit,
 }) => (
