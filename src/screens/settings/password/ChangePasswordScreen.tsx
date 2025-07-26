@@ -7,10 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import { changePassword } from "../../../services/authService";
@@ -44,6 +48,9 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [changeSuccess, setChangeSuccess] = useState(false);
+
+  // variables
+  const insets = useSafeAreaInsets();
 
   // validators
   const validateNewPassword = (password: string) => {
@@ -111,7 +118,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 
       setAlertMessage("Password changed. Log in again");
       await AsyncStorage.removeItem("token");
-      
+
       setAlertVisible(true);
       setChangeSuccess(true);
     } catch (error: any) {
@@ -150,150 +157,156 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
-      <ScrollView
-        contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={false}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
-        <View style={styles.contentWrapper}>
-          <View style={styles.inputSection}>
-            <Text style={styles.sectionLabel}>Current password</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter current password"
-                placeholderTextColor="#b0b3c6"
-                value={currentPassword}
-                onChangeText={setCurrentPassword}
-                secureTextEntry={!showCurrentPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity
-                style={styles.eyeButton}
-                onPress={() => setShowCurrentPassword(!showCurrentPassword)}
-              >
-                <Feather
-                  name={showCurrentPassword ? "eye-off" : "eye"}
-                  size={20}
-                  color="#b0b3c6"
+        <ScrollView
+          contentContainerStyle={styles.container}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.contentWrapper}>
+            <View style={styles.inputSection}>
+              <Text style={styles.sectionLabel}>Current password</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter current password"
+                  placeholderTextColor="#b0b3c6"
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                  secureTextEntry={!showCurrentPassword}
+                  autoCapitalize="none"
                 />
-              </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowCurrentPassword(!showCurrentPassword)}
+                >
+                  <Feather
+                    name={showCurrentPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="#b0b3c6"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
 
-          <View style={styles.inputSection}>
-            <Text style={styles.sectionLabel}>New password</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter new password"
-                placeholderTextColor="#b0b3c6"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry={!showNewPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity
-                style={styles.eyeButton}
-                onPress={() => setShowNewPassword(!showNewPassword)}
-              >
-                <Feather
-                  name={showNewPassword ? "eye-off" : "eye"}
-                  size={20}
-                  color="#b0b3c6"
+            <View style={styles.inputSection}>
+              <Text style={styles.sectionLabel}>New password</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter new password"
+                  placeholderTextColor="#b0b3c6"
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                  secureTextEntry={!showNewPassword}
+                  autoCapitalize="none"
                 />
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowNewPassword(!showNewPassword)}
+                >
+                  <Feather
+                    name={showNewPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="#b0b3c6"
+                  />
+                </TouchableOpacity>
+              </View>
 
-            <View style={styles.validationContainer}>
-              <ValidationItem
-                valid={newPasswordValid.length}
-                text="At least 8 characters"
-              />
-              <ValidationItem
-                valid={newPasswordValid.letter}
-                text="One letter"
-              />
-              <ValidationItem
-                valid={newPasswordValid.number}
-                text="One number"
-              />
-              <ValidationItem
-                valid={newPasswordValid.special}
-                text="One special character"
-              />
-            </View>
-          </View>
-
-          <View style={styles.inputSection}>
-            <Text style={styles.sectionLabel}>Confirm new password</Text>
-            <View style={styles.inputWrapper}>
-              <TextInput
-                style={styles.input}
-                placeholder="Confirm new password"
-                placeholderTextColor="#b0b3c6"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry={!showConfirmPassword}
-                autoCapitalize="none"
-              />
-              <TouchableOpacity
-                style={styles.eyeButton}
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                <Feather
-                  name={showConfirmPassword ? "eye-off" : "eye"}
-                  size={20}
-                  color="#b0b3c6"
-                />
-              </TouchableOpacity>
-            </View>
-
-            {confirmPassword.length > 0 && (
               <View style={styles.validationContainer}>
                 <ValidationItem
-                  valid={confirmPasswordValid}
-                  text="Passwords match"
+                  valid={newPasswordValid.length}
+                  text="At least 8 characters"
+                />
+                <ValidationItem
+                  valid={newPasswordValid.letter}
+                  text="One letter"
+                />
+                <ValidationItem
+                  valid={newPasswordValid.number}
+                  text="One number"
+                />
+                <ValidationItem
+                  valid={newPasswordValid.special}
+                  text="One special character"
                 />
               </View>
-            )}
+            </View>
+
+            <View style={styles.inputSection}>
+              <Text style={styles.sectionLabel}>Confirm new password</Text>
+              <View style={styles.inputWrapper}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm new password"
+                  placeholderTextColor="#b0b3c6"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirmPassword}
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  <Feather
+                    name={showConfirmPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="#b0b3c6"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {confirmPassword.length > 0 && (
+                <View style={styles.validationContainer}>
+                  <ValidationItem
+                    valid={confirmPasswordValid}
+                    text="Passwords match"
+                  />
+                </View>
+              )}
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.saveButton,
+                (!isFormValid() || loading) && styles.saveButtonDisabled,
+              ]}
+              onPress={handleSave}
+              disabled={!isFormValid() || loading}
+              activeOpacity={0.7}
+            >
+              {loading ? (
+                <Text style={styles.saveButtonText}>Changing...</Text>
+              ) : (
+                <Text style={styles.saveButtonText}>Change password</Text>
+              )}
+            </TouchableOpacity>
           </View>
+        </ScrollView>
+        {showError && (
+          <View style={styles.toast}>
+            <Text style={styles.toastText}>{error}</Text>
+          </View>
+        )}
+        <AlertModal
+          visible={alertVisible}
+          message={alertMessage}
+          onClose={() => {
+            setAlertVisible(false);
 
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              (!isFormValid() || loading) && styles.saveButtonDisabled,
-            ]}
-            onPress={handleSave}
-            disabled={!isFormValid() || loading}
-            activeOpacity={0.7}
-          >
-            {loading ? (
-              <Text style={styles.saveButtonText}>Changing...</Text>
-            ) : (
-              <Text style={styles.saveButtonText}>Change password</Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-      {showError && (
-        <View style={styles.toast}>
-          <Text style={styles.toastText}>{error}</Text>
-        </View>
-      )}
-      <AlertModal
-        visible={alertVisible}
-        message={alertMessage}
-        onClose={() => {
-          setAlertVisible(false);
-
-          if (changeSuccess) {
-            setChangeSuccess(false);
-            navigation.navigate("Settings");
-          }
-        }}
-      />
-    </View>
+            if (changeSuccess) {
+              setChangeSuccess(false);
+              navigation.navigate("Settings");
+            }
+          }}
+        />
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
