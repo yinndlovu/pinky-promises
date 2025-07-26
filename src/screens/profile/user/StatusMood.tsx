@@ -63,6 +63,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [updatingMood, setUpdatingMood] = useState(false);
 
+  // use effects
   useEffect(() => {
     floatAnimation.value = withRepeat(
       withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
