@@ -60,7 +60,10 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
     );
 
     if (anniversary) {
-      return formatProfileDisplayDate(anniversary.date, anniversary.togetherFor);
+      return formatProfileDisplayDate(
+        anniversary.date,
+        anniversary.togetherFor
+      );
     }
     return {
       date: "Not set",
@@ -172,24 +175,26 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
         </TouchableOpacity>
       </View>
 
-      <UpdateSpecialDateModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSave={handleSave}
-        initialDate={editingDate?.date}
-        initialTitle={
-          editingDate?.title ||
-          (modalType === "anniversary" ? "Anniversary" : "Day we met")
-        }
-        initialDescription={editingDate?.description}
-        isEditing={!!editingDate}
-      />
+      <View style={{ zIndex: 1000 }}>
+        <UpdateSpecialDateModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSave={handleSave}
+          initialDate={editingDate?.date}
+          initialTitle={
+            editingDate?.title ||
+            (modalType === "anniversary" ? "Anniversary" : "Day we met")
+          }
+          initialDescription={editingDate?.description}
+          isEditing={!!editingDate}
+        />
 
-      <AlertModal
-        visible={alertVisible}
-        message={alertMessage}
-        onClose={() => setAlertVisible(false)}
-      />
+        <AlertModal
+          visible={alertVisible}
+          message={alertMessage}
+          onClose={() => setAlertVisible(false)}
+        />
+      </View>
     </View>
   );
 };

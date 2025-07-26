@@ -55,8 +55,7 @@ export default function PortalScreen({ navigation }: Props) {
   const [inputType, setInputType] = useState<"sweet" | "vent">("sweet");
   const [viewedMessage, setViewedMessage] = useState<string>("");
   const [viewType, setViewType] = useState<"sweet" | "vent" | null>(null);
-  
-  
+
   // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -371,8 +370,8 @@ export default function PortalScreen({ navigation }: Props) {
           sent={sweetMessagesSent}
           received={sweetMessagesReceived}
           onLongPress={handleLongPress}
-          onViewAllSent={() => navigation.navigate("LastSixSentScreen")}
-          onViewAllReceived={() => navigation.navigate("LastSixReceivedScreen")}
+          onViewAllSent={() => navigation.navigate("SentMessagesScreen")}
+          onViewAllReceived={() => navigation.navigate("ReceivedMessagesScreen")}
           onAdd={() => {
             setInputType("sweet");
             handleOpenInputModal("sweet");

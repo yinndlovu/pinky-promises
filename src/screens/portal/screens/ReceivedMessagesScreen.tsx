@@ -21,7 +21,7 @@ import ViewMessageModal from "../../../components/modals/ViewMessageModal";
 import { Message } from "../../../types/Message";
 import { formatDateDMY } from "../../../helpers/formatDateHelper";
 
-const LastSixReceivedScreen = () => {
+const ReceivedMessagesScreen = () => {
   // use states
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
@@ -49,7 +49,7 @@ const LastSixReceivedScreen = () => {
 
       const res = await getReceivedSweetMessages(token);
 
-      return (res.sweets || res).slice(0, 6);
+      return (res.sweets || res);
     },
     staleTime: 1000 * 60 * 10,
   });
@@ -84,11 +84,11 @@ const LastSixReceivedScreen = () => {
           color: "#fff",
           fontSize: 15,
           fontWeight: "600",
-          margin: 18,
+          margin: 16,
           textAlign: "center",
         }}
       >
-        These are the last six sweet messages you received
+        These are all the sweet messages you received
       </Text>
       {messagesLoading ? (
         <ActivityIndicator color="#e03487" style={{ marginTop: 40 }} />
@@ -219,4 +219,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LastSixReceivedScreen;
+export default ReceivedMessagesScreen;

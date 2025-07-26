@@ -774,13 +774,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           onEdit={() => setFavoritesModalVisible(true)}
         />
 
-        <UpdateFavoritesModal
-          visible={favoritesModalVisible}
-          initialFavorites={favorites}
-          onClose={() => setFavoritesModalVisible(false)}
-          onSave={handleSaveFavorites}
-        />
-
         <View style={styles.divider} />
 
         <LoveLanguage
@@ -788,135 +781,146 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           onEdit={() => setLoveLanguageModalVisible(true)}
         />
 
-        <UpdateLoveLanguageModal
-          visible={loveLanguageModalVisible}
-          initialLoveLanguage={loveLanguage}
-          onClose={() => setLoveLanguageModalVisible(false)}
-          onSave={handleSaveLoveLanguage}
-        />
-
         <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
 
-        <UpdateAboutModal
-          visible={aboutModalVisible}
-          initialAbout={about}
-          onClose={() => setAboutModalVisible(false)}
-          onSave={handleSaveAbout}
-        />
+        <View style={{ zIndex: 1000 }}>
+          <UpdateFavoritesModal
+            visible={favoritesModalVisible}
+            initialFavorites={favorites}
+            onClose={() => setFavoritesModalVisible(false)}
+            onSave={handleSaveFavorites}
+          />
 
-        <Modal
-          visible={editModalVisible}
-          animationType="fade"
-          transparent
-          onRequestClose={() => setEditModalVisible(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setEditModalVisible(false)}>
-            <View style={styles.modalOverlay}>
-              <BlurView intensity={0} style={StyleSheet.absoluteFill}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>Edit profile</Text>
-                  <View style={styles.editRow}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Name"
-                      value={editName}
-                      onChangeText={setEditName}
-                      placeholderTextColor="#b0b3c6"
-                    />
-                    {editName !== originalName && (
-                      <TouchableOpacity
-                        style={styles.tickIcon}
-                        onPress={() => handleSaveField("name", editName)}
-                        disabled={loadingName}
-                      >
-                        {loadingName ? (
-                          <ActivityIndicator size={22} color="#4caf50" />
-                        ) : (
-                          <Feather name="check" size={22} color="#4caf50" />
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                  <View style={styles.editRow}>
-                    <Text style={styles.atSymbol}>@</Text>
-                    <TextInput
-                      style={styles.inputWithAt}
-                      placeholder="username"
-                      value={editUsername}
-                      onChangeText={(text) =>
-                        setEditUsername(text.replace(/^@+/, ""))
-                      }
-                      placeholderTextColor="#b0b3c6"
-                      autoCapitalize="none"
-                    />
-                    {editUsername !== originalUsername && (
-                      <TouchableOpacity
-                        style={styles.tickIcon}
-                        onPress={() =>
-                          handleSaveField(
-                            "username",
-                            editUsername.replace(/^@/, "")
-                          )
+          <UpdateLoveLanguageModal
+            visible={loveLanguageModalVisible}
+            initialLoveLanguage={loveLanguage}
+            onClose={() => setLoveLanguageModalVisible(false)}
+            onSave={handleSaveLoveLanguage}
+          />
+
+          <UpdateAboutModal
+            visible={aboutModalVisible}
+            initialAbout={about}
+            onClose={() => setAboutModalVisible(false)}
+            onSave={handleSaveAbout}
+          />
+
+          <Modal
+            visible={editModalVisible}
+            animationType="fade"
+            transparent
+            onRequestClose={() => setEditModalVisible(false)}
+          >
+            <TouchableWithoutFeedback
+              onPress={() => setEditModalVisible(false)}
+            >
+              <View style={styles.modalOverlay}>
+                <BlurView intensity={0} style={StyleSheet.absoluteFill}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Edit profile</Text>
+                    <View style={styles.editRow}>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Name"
+                        value={editName}
+                        onChangeText={setEditName}
+                        placeholderTextColor="#b0b3c6"
+                      />
+                      {editName !== originalName && (
+                        <TouchableOpacity
+                          style={styles.tickIcon}
+                          onPress={() => handleSaveField("name", editName)}
+                          disabled={loadingName}
+                        >
+                          {loadingName ? (
+                            <ActivityIndicator size={22} color="#4caf50" />
+                          ) : (
+                            <Feather name="check" size={22} color="#4caf50" />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    <View style={styles.editRow}>
+                      <Text style={styles.atSymbol}>@</Text>
+                      <TextInput
+                        style={styles.inputWithAt}
+                        placeholder="username"
+                        value={editUsername}
+                        onChangeText={(text) =>
+                          setEditUsername(text.replace(/^@+/, ""))
                         }
-                        disabled={loadingUsername}
-                      >
-                        {loadingUsername ? (
-                          <ActivityIndicator size={22} color="#4caf50" />
-                        ) : (
-                          <Feather name="check" size={22} color="#4caf50" />
-                        )}
-                      </TouchableOpacity>
-                    )}
+                        placeholderTextColor="#b0b3c6"
+                        autoCapitalize="none"
+                      />
+                      {editUsername !== originalUsername && (
+                        <TouchableOpacity
+                          style={styles.tickIcon}
+                          onPress={() =>
+                            handleSaveField(
+                              "username",
+                              editUsername.replace(/^@/, "")
+                            )
+                          }
+                          disabled={loadingUsername}
+                        >
+                          {loadingUsername ? (
+                            <ActivityIndicator size={22} color="#4caf50" />
+                          ) : (
+                            <Feather name="check" size={22} color="#4caf50" />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    <View style={styles.editRow}>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Bio"
+                        value={editBio}
+                        onChangeText={setEditBio}
+                        placeholderTextColor="#b0b3c6"
+                      />
+                      {editBio !== originalBio && (
+                        <TouchableOpacity
+                          style={styles.tickIcon}
+                          onPress={() => handleSaveField("bio", editBio)}
+                          disabled={loadingBio}
+                        >
+                          {loadingBio ? (
+                            <ActivityIndicator size={22} color="#4caf50" />
+                          ) : (
+                            <Feather name="check" size={22} color="#4caf50" />
+                          )}
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      onPress={() => setEditModalVisible(false)}
+                    >
+                      <Text style={styles.cancelButtonText}>Close</Text>
+                    </TouchableOpacity>
                   </View>
-                  <View style={styles.editRow}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Bio"
-                      value={editBio}
-                      onChangeText={setEditBio}
-                      placeholderTextColor="#b0b3c6"
-                    />
-                    {editBio !== originalBio && (
-                      <TouchableOpacity
-                        style={styles.tickIcon}
-                        onPress={() => handleSaveField("bio", editBio)}
-                        disabled={loadingBio}
-                      >
-                        {loadingBio ? (
-                          <ActivityIndicator size={22} color="#4caf50" />
-                        ) : (
-                          <Feather name="check" size={22} color="#4caf50" />
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => setEditModalVisible(false)}
-                  >
-                    <Text style={styles.cancelButtonText}>Close</Text>
-                  </TouchableOpacity>
-                </View>
-              </BlurView>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-        <ProfilePictureModal
-          visible={showPictureModal}
-          onClose={() => setShowPictureModal(false)}
-          onSelectNew={handleSelectNewPicture}
-          onViewCurrent={handleViewCurrentPicture}
-        />
+                </BlurView>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+          <ProfilePictureModal
+            visible={showPictureModal}
+            onClose={() => setShowPictureModal(false)}
+            onSelectNew={handleSelectNewPicture}
+            onViewCurrent={handleViewCurrentPicture}
+          />
 
-        <ProfilePictureViewer
-          visible={showPictureViewer}
-          imageUri={
-            user && profilePicUpdatedAt
-              ? buildCachedImageUrl(user.id, profilePicUpdatedAt)
-              : null
-          }
-          onClose={() => setShowPictureViewer(false)}
-        />
+          <ProfilePictureViewer
+            visible={showPictureViewer}
+            imageUri={
+              user && profilePicUpdatedAt
+                ? buildCachedImageUrl(user.id, profilePicUpdatedAt)
+                : null
+            }
+            onClose={() => setShowPictureViewer(false)}
+          />
+        </View>
       </ScrollView>
       {showError && (
         <View style={styles.toast}>

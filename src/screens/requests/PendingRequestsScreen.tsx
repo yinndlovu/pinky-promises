@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { encode } from "base64-arraybuffer";
 import axios from "axios";
 import { Image } from "expo-image";
+import { useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
@@ -31,6 +32,9 @@ import styles from "./styles/PendingRequestsScreen.styles";
 const fallbackAvatar = require("../../assets/default-avatar-two.png");
 
 const PendingRequestsScreen = ({ navigation }: any) => {
+  // variables
+  const queryClient = useQueryClient();
+
   // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
   const [profilePictures, setProfilePictures] = useState<{
@@ -141,6 +145,12 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       }
 
       await acceptPartnerRequest(token, requestId);
+      await queryClient.invalidateQueries({
+        queryKey: ["partnerRequests"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["partnerData"],
+      });
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
 
@@ -164,6 +174,9 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       }
 
       await rejectPartnerRequest(token, requestId);
+      await queryClient.invalidateQueries({
+        queryKey: ["partnerRequests"],
+      });
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
 

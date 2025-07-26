@@ -55,8 +55,8 @@ import NotificationsScreen from "./src/screens/settings/notifications/Notificati
 import TimelineScreen from "./src/screens/ours/screens/TimelineScreen";
 import AboutScreen from "./src/screens/settings/about/AboutScreen";
 import AllFavoriteMemoriesScreen from "./src/screens/ours/screens/AllFavoriteMemoriesScreen";
-import LastSixSentScreen from "./src/screens/portal/screens/LastSixSentScreen";
-import LastSixReceivedScreen from "./src/screens/portal/screens/LastSixReceivedScreen";
+import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen";
+import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
 import Feather from "@expo/vector-icons/build/Feather";
 
 const Stack = createStackNavigator();
@@ -441,11 +441,11 @@ function AppContent() {
           }}
         />
         <Stack.Screen
-          name="LastSixSentScreen"
-          component={LastSixSentScreen}
+          name="SentMessagesScreen"
+          component={SentMessagesScreen}
           options={{
             headerShown: true,
-            title: "Last six sent",
+            title: "Sent sweet messages",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
@@ -453,11 +453,11 @@ function AppContent() {
           }}
         />
         <Stack.Screen
-          name="LastSixReceivedScreen"
-          component={LastSixReceivedScreen}
+          name="ReceivedMessagesScreen"
+          component={ReceivedMessagesScreen}
           options={{
             headerShown: true,
-            title: "Last six received",
+            title: "Received sweet messages",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

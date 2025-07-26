@@ -15,7 +15,7 @@ import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import { getUserFavorites } from "../../../services/favoritesService";
@@ -39,7 +39,7 @@ import styles from "./styles/PartnerProfileScreen.styles";
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
   const insets = useSafeAreaInsets();
-
+  const queryClient = useQueryClient();
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -206,6 +206,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       }
 
       await removePartner(token);
+      await queryClient.invalidateQueries({
+        queryKey: ["partnerData"],
+      });
+
       setShowRemoveModal(false);
 
       navigation.replace("UserProfile", { userId: partner.id });
@@ -383,7 +387,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         <PartnerLoveLanguage loveLanguage={loveLanguage} />
 
         <PartnerMoreAboutYou about={partnerAbout} />
+      </ScrollView>
 
+      <View style={{ zIndex: 1000 }}>
         <ConfirmationModal
           visible={showRemoveModal}
           message="Are you sure you want to remove your partner?"
@@ -394,17 +400,16 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           onClose={() => setShowRemoveModal(false)}
           loading={removingPartner}
         />
-      </ScrollView>
-
-      <ProfilePictureViewer
-        visible={showPictureViewer}
-        imageUri={
-          partner && profilePicUpdatedAt
-            ? buildCachedImageUrl(partner.id, profilePicUpdatedAt)
-            : null
-        }
-        onClose={() => setShowPictureViewer(false)}
-      />
+        <ProfilePictureViewer
+          visible={showPictureViewer}
+          imageUri={
+            partner && profilePicUpdatedAt
+              ? buildCachedImageUrl(partner.id, profilePicUpdatedAt)
+              : null
+          }
+          onClose={() => setShowPictureViewer(false)}
+        />
+      </View>
     </View>
   );
 };

@@ -22,7 +22,7 @@ import { Message } from "../../../types/Message";
 // content
 import ViewMessageModal from "../../../components/modals/ViewMessageModal";
 
-const LastSixSentScreen = () => {
+const SentMessagesScreen = () => {
   // use states
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
@@ -48,7 +48,7 @@ const LastSixSentScreen = () => {
       }
 
       const res = await getSentSweetMessages(token);
-      return (res.sweets || res).slice(0, 6);
+      return (res.sweets || res);
     },
     staleTime: 1000 * 60 * 10,
   });
@@ -100,11 +100,11 @@ const LastSixSentScreen = () => {
           color: "#fff",
           fontSize: 15,
           fontWeight: "600",
-          margin: 18,
+          margin: 16,
           textAlign: "center",
         }}
       >
-        These are the last six sweet messages you sent
+        These are all the sweet messages you sent
       </Text>
       {messagesLoading ? (
         <ActivityIndicator color="#e03487" style={{ marginTop: 40 }} />
@@ -131,6 +131,7 @@ const LastSixSentScreen = () => {
               </View>
             </TouchableOpacity>
           )}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -226,6 +227,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  separator: {
+    height: 1,
+    backgroundColor: "#393a4a",
+    opacity: 0.5,
+    marginVertical: 8,
+  },
 });
 
-export default LastSixSentScreen;
+export default SentMessagesScreen;

@@ -12,6 +12,7 @@ import axios from "axios";
 import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
+import { useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
@@ -38,7 +39,7 @@ type RequestStatus = "none" | "pending" | "incoming";
 const UserProfileScreen = ({ route, navigation }: Props) => {
   // variables
   const { userId } = route.params as { userId: string };
-
+  const queryClient = useQueryClient();
   // use states
   const [user, setUser] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -129,6 +130,10 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
         case "incoming":
           if (incomingRequestId) {
             await acceptPartnerRequest(token, incomingRequestId);
+            await queryClient.invalidateQueries({
+              queryKey: ["partnerData"],
+            });
+
             setRequestStatus("none");
             setIncomingRequestId(null);
 

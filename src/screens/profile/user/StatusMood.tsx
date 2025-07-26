@@ -11,6 +11,15 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withRepeat,
+  withTiming,
+  interpolate,
+  Easing,
+} from "react-native-reanimated";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -24,8 +33,8 @@ import AlertModal from "../../../components/modals/AlertModal";
 import { updateMood } from "../../../services/moodService";
 
 const StatusMood: React.FC<StatusMoodProps> = ({
-  mood = "No mood",
-  moodDescription = "You haven't added a mood yet",
+  mood,
+  moodDescription,
   status = "unavailable",
   statusDescription = "You must add your home location to use this feature",
   onEdit,
@@ -36,6 +45,16 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const userId = user?.id;
+  const displayMood = mood || "No mood";
+  const displayMoodDescription =
+    moodDescription || "You haven't added a mood yet";
+
+  // animation variables
+  const pulseAnimation = useSharedValue(1);
+  const floatAnimation = useSharedValue(0);
+  const statusColorAnimation = useSharedValue(0);
+  const moodBounceAnimation = useSharedValue(0);
+  const fadeInAnimation = useSharedValue(0);
 
   // use states
   const [moodModalVisible, setMoodModalVisible] = useState(false);
@@ -43,6 +62,44 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [updatingMood, setUpdatingMood] = useState(false);
+
+  useEffect(() => {
+    floatAnimation.value = withRepeat(
+      withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
+      -1,
+      true
+    );
+
+    fadeInAnimation.value = withTiming(1, {
+      duration: 800,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, []);
+
+  useEffect(() => {
+    const statusValues = { home: 0, away: 1, unreachable: 2, unavailable: 3 };
+    const targetValue = statusValues[status as keyof typeof statusValues] || 3;
+
+    statusColorAnimation.value = withSpring(targetValue, {
+      damping: 15,
+      stiffness: 150,
+    });
+
+    pulseAnimation.value = withRepeat(
+      withTiming(1.2, { duration: 600, easing: Easing.out(Easing.cubic) }),
+      2,
+      true
+    );
+  }, [status]);
+
+  useEffect(() => {
+    if (displayMood && displayMood !== "No mood") {
+      moodBounceAnimation.value = withSpring(1, {
+        damping: 8,
+        stiffness: 200,
+      });
+    }
+  }, [displayMood]);
 
   // handlers
   const handleAddHome = async (location: {
@@ -83,56 +140,143 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       if (onAddHome) {
         onAddHome();
       }
-    } catch (err) {
+    } catch (err) {}
+  };
+
+  // animated styles
+  const pulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseAnimation.value }],
+  }));
+
+  const floatStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: interpolate(floatAnimation.value, [0, 1], [0, -3]),
+      },
+    ],
+  }));
+
+  const statusColorStyle = useAnimatedStyle(() => {
+    const colors = ["#4caf50", "#e03487", "#db8a47", "#b0b3c6"];
+    const currentColor =
+      colors[Math.round(statusColorAnimation.value)] || colors[3];
+
+    return {
+      backgroundColor: currentColor,
+    };
+  });
+
+  const moodBounceStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: withSpring(moodBounceAnimation.value, {
+          damping: 8,
+          stiffness: 200,
+        }),
+      },
+    ],
+  }));
+
+  const fadeInStyle = useAnimatedStyle(() => ({
+    opacity: fadeInAnimation.value,
+    transform: [
+      {
+        translateY: interpolate(fadeInAnimation.value, [0, 1], [20, 0]),
+      },
+    ],
+  }));
+
+  const getStatusEmoji = (status: string) => {
+    switch (status) {
+      case "home":
+        return "🏠";
+      case "away":
+        return "🚶";
+      case "unreachable":
+        return "❓";
+      default:
+        return "⏸️";
     }
   };
 
+  const getMoodEmoji = (mood: string) => {
+    if (!mood || mood === "No mood") {
+      return "😐";
+    }
+
+    const moodEmojis: { [key: string]: string } = {
+      happy: "😊",
+      sad: "😢",
+      excited: "🤩",
+      irritated: "😠",
+      content: "😌",
+      annoyed: "🙄",
+      "very happy": "😍",
+      crying: "😭",
+      neutral: "😐",
+      angry: "😠",
+      default: "😐",
+    };
+    return moodEmojis[mood.toLowerCase()] || moodEmojis.default;
+  };
+
   return (
-    <View style={styles.wrapper}>
+    <Animated.View style={[styles.wrapper, fadeInStyle]}>
       {updatingMood && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#e03487" />
         </View>
       )}
+
       <View style={styles.headerRow}>
         <Text style={styles.statusLabel}>Status</Text>
       </View>
-      <View style={styles.statusUnavailableRow}>
-        <Text
-          style={[
-            styles.statusUnavailable,
-            status === "home"
-              ? { color: "#4caf50" }
+
+      <Animated.View style={[styles.statusRow, floatStyle]}>
+        <Animated.View style={[styles.statusIndicator, pulseStyle]}>
+          <Animated.View style={[styles.statusDot, statusColorStyle]} />
+        </Animated.View>
+
+        <View style={styles.statusContent}>
+          <Text style={styles.statusEmoji}>{getStatusEmoji(status)}</Text>
+          <Text
+            style={[
+              styles.statusValue,
+              status === "home"
+                ? { color: "#4caf50" }
+                : status === "away"
+                ? { color: "#e03487" }
+                : status === "unreachable"
+                ? { color: "#db8a47ff" }
+                : { color: "#b0b3c6" },
+            ]}
+          >
+            {status === "home"
+              ? "Home"
               : status === "away"
-              ? { color: "#e03487" }
+              ? "Away"
               : status === "unreachable"
-              ? { color: "#db8a47ff" }
-              : { color: "#b0b3c6" },
-          ]}
-        >
-          {status === "home"
-            ? "Home"
-            : status === "away"
-            ? "Away"
-            : status === "unreachable"
-            ? "Unreachable"
-            : "Unavailable"}
-        </Text>
+              ? "Unreachable"
+              : "Unavailable"}
+          </Text>
+        </View>
+
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => setModalVisible(true)}
         >
           <Feather name="plus" size={18} color="#fff" />
         </TouchableOpacity>
-      </View>
-      <Text style={styles.statusUnavailableDescription}>
-        {statusDescription}
-      </Text>
+      </Animated.View>
+
+      <Text style={styles.statusDescription}>{statusDescription}</Text>
+
       {status === "away" && statusDistance && (
         <Text style={styles.statusDistance}>
           {`${statusDistance} meters away from home`}
         </Text>
       )}
+
       <View style={styles.moodRow}>
         <Text style={styles.moodLabel}>Mood</Text>
         <TouchableOpacity
@@ -142,30 +286,34 @@ const StatusMood: React.FC<StatusMoodProps> = ({
           <Feather name="edit-2" size={18} color="#e03487" />
         </TouchableOpacity>
       </View>
-      <View style={styles.moodContentRow}>
-        <Text style={styles.moodValue}>{mood}</Text>
-        <Text style={styles.moodDescription}> - {moodDescription}</Text>
+
+      <Animated.View style={[styles.moodContentRow, moodBounceStyle]}>
+        <Text style={styles.moodEmoji}>{getMoodEmoji(displayMood)}</Text>
+        <Text style={styles.moodValue}>{displayMood}</Text>
+        <Text style={styles.moodDescription}> - {displayMoodDescription}</Text>
+      </Animated.View>
+
+      <View style={{ zIndex: 1000 }}>
+        <AddLocationModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onConfirm={handleAddHome}
+        />
+
+        <UpdateMoodModal
+          visible={moodModalVisible}
+          onClose={() => setMoodModalVisible(false)}
+          onSave={handleSaveMood}
+          initialMood={displayMood}
+        />
+
+        <AlertModal
+          visible={alertVisible}
+          message={alertMessage}
+          onClose={() => setAlertVisible(false)}
+        />
       </View>
-
-      <AddLocationModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onConfirm={handleAddHome}
-      />
-
-      <UpdateMoodModal
-        visible={moodModalVisible}
-        onClose={() => setMoodModalVisible(false)}
-        onSave={handleSaveMood}
-        initialMood={mood}
-      />
-
-      <AlertModal
-        visible={alertVisible}
-        message={alertMessage}
-        onClose={() => setAlertVisible(false)}
-      />
-    </View>
+    </Animated.View>
   );
 };
 
@@ -188,25 +336,47 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   statusRow: {
-    marginBottom: 0,
-  },
-  statusUnavailableRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 0,
   },
-  statusUnavailable: {
+  statusIndicator: {
+    marginRight: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statusDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  statusContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  statusEmoji: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  statusValue: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
     marginRight: 8,
   },
-  statusUnavailableDescription: {
+  statusDescription: {
     color: "#b0b3c6",
     fontSize: 14,
     marginBottom: 8,
     marginLeft: 2,
+    marginTop: 6,
   },
   statusDistance: {
     color: "#e03487",
@@ -228,12 +398,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 2,
   },
-  statusContentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
   moodRow: {
     marginTop: 10,
     marginBottom: 4,
@@ -250,6 +414,10 @@ const styles = StyleSheet.create({
   moodContentRow: {
     flexDirection: "row",
     alignItems: "center",
+  },
+  moodEmoji: {
+    fontSize: 20,
+    marginRight: 8,
   },
   moodValue: {
     fontSize: 16,
