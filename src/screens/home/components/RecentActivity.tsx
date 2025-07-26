@@ -12,12 +12,12 @@ import { Feather } from "@expo/vector-icons";
 
 // internal
 import {
-  RecentActivity,
+  RecentActivityItem,
   RecentActivityProps,
 } from "../../../types/RecentActivity";
 
 type AnimatedActivityItemProps = {
-  item: RecentActivity;
+  item: RecentActivityItem;
   children: React.ReactNode;
 };
 

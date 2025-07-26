@@ -1,4 +1,4 @@
-export type RecentActivity = {
+export type RecentActivityItem = {
   id: string;
   description: string;
   date: string;
@@ -6,5 +6,5 @@ export type RecentActivity = {
 };
 
 export type RecentActivityProps = {
-  activities: RecentActivity[];
+  activities: RecentActivityItem[];
 };

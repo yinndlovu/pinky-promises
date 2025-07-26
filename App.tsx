@@ -119,7 +119,9 @@ function AIHeader() {
         source={require("./src/assets/ai_icon.png")}
         style={{ width: 28, height: 28, borderRadius: 14, marginRight: 8 }}
       />
-      <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>Lily</Text>
+      <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
+        Lily
+      </Text>
     </View>
   );
 }
