@@ -341,6 +341,20 @@ export default function PortalScreen({ navigation }: Props) {
           viewType === "sweet" ? "unseenSweetMessage" : "unseenVentMessage",
         ],
       });
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          viewType === "sweet" ? "sweetMessagesSent" : "ventMessagesSent",
+        ],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: [
+          viewType === "sweet"
+            ? "sweetMessagesReceived"
+            : "ventMessagesReceived",
+        ],
+      });
       setViewType(null);
     }
   }, [viewModalVisible]);
