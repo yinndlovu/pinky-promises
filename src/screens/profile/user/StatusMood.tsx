@@ -106,8 +106,6 @@ const StatusMood: React.FC<StatusMoodProps> = ({
     latitude: number;
     longitude: number;
   }) => {
-    setModalVisible(false);
-
     try {
       await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
 
@@ -125,6 +123,8 @@ const StatusMood: React.FC<StatusMoodProps> = ({
     } catch (err) {
       setAlertMessage("Failed to add home location");
       setAlertVisible(true);
+    } finally {
+      setModalVisible(false);
     }
   };
 

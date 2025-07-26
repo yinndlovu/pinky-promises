@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // screen content
 import SetMonthlyGift from "./components/SetMonthlyGift";
@@ -50,6 +51,15 @@ const GiftsScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [isOnline, setIsOnline] = useState(true);
+
+  // use effects
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // refresh screen
   const onRefresh = async () => {
@@ -189,6 +199,13 @@ const GiftsScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <View
         style={{
           backgroundColor: "#23243a",

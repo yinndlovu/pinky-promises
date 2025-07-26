@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import {
@@ -55,6 +56,7 @@ export default function PortalScreen({ navigation }: Props) {
   const [inputType, setInputType] = useState<"sweet" | "vent">("sweet");
   const [viewedMessage, setViewedMessage] = useState<string>("");
   const [viewType, setViewType] = useState<"sweet" | "vent" | null>(null);
+  const [isOnline, setIsOnline] = useState(true);
 
   // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
@@ -343,6 +345,13 @@ export default function PortalScreen({ navigation }: Props) {
     }
   }, [viewModalVisible]);
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
   {
     deleting && (
       <View style={styles.loadingOverlay}>
@@ -353,6 +362,13 @@ export default function PortalScreen({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
@@ -371,7 +387,9 @@ export default function PortalScreen({ navigation }: Props) {
           received={sweetMessagesReceived}
           onLongPress={handleLongPress}
           onViewAllSent={() => navigation.navigate("SentMessagesScreen")}
-          onViewAllReceived={() => navigation.navigate("ReceivedMessagesScreen")}
+          onViewAllReceived={() =>
+            navigation.navigate("ReceivedMessagesScreen")
+          }
           onAdd={() => {
             setInputType("sweet");
             handleOpenInputModal("sweet");

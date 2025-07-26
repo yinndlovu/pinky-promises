@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   TouchableOpacity,
+  Button,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
@@ -46,7 +47,7 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
           if (status !== "granted") {
             setError("Permission to access location was denied");
             setLoading(false);
-            
+
             return;
           }
 
@@ -64,10 +65,13 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
   }, [visible]);
 
   const handleConfirm = async () => {
-    if (!location) return;
+    if (!location) {
+      return;
+    }
+
     setSaving(true);
     try {
-      await onConfirm(location);
+      onConfirm(location);
       setAlertMessage("Home location added!");
       setAlertVisible(true);
     } catch (e) {
@@ -84,9 +88,15 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Your current location</Text>
           {loading ? (
-            <ActivityIndicator size="large" color="#e03487" />
+            <>
+              <ActivityIndicator size="large" color="#e03487" />
+              <Button title="Stop" onPress={onClose} color="#e03487" />
+            </>
           ) : error ? (
-            <Text style={styles.errorText}>{error}</Text>
+            <>
+              <Text style={styles.errorText}>{error}</Text>
+              <Button title="Close" onPress={onClose} color="#e03487" />
+            </>
           ) : location ? (
             <>
               <MapView

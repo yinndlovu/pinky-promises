@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -13,6 +13,7 @@ import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import { searchUsers } from "../../services/searchService";
@@ -39,10 +40,19 @@ export default function SearchScreen({ navigation }: Props) {
   const [profilePictures, setProfilePictures] = useState<ProfilePictureInfo>(
     {}
   );
+  const [isOnline, setIsOnline] = useState(true);
 
   // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+
+  // use effects
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // fetch functions
   const fetchProfilePicture = async (userId: string, token: string) => {
@@ -122,6 +132,13 @@ export default function SearchScreen({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a", paddingTop: 0 }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <TextInput
         style={{
           backgroundColor: "#1b1c2e",

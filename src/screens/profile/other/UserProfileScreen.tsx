@@ -13,6 +13,7 @@ import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import {
@@ -40,6 +41,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   // variables
   const { userId } = route.params as { userId: string };
   const queryClient = useQueryClient();
+
   // use states
   const [user, setUser] = useState<any>(null);
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -54,6 +56,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
     null
   );
+  const [isOnline, setIsOnline] = useState(true);
 
   // use effects
   useEffect(() => {
@@ -107,6 +110,13 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
     fetchUser();
   }, [userId]);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // handlers
   const handlePartnerAction = async () => {
@@ -258,6 +268,13 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}

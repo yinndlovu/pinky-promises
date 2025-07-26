@@ -289,6 +289,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       return await getUnseenInteractions(token);
     },
+    enabled: !!partnerId,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -451,14 +452,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     fetchPartnerProfilePicture,
     checkAndUpdateHomeStatus,
   ]);
-
-  if (partnerLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
-      </View>
-    );
-  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -690,11 +683,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.toastText}>{error}</Text>
         </View>
       )}
+
       {interactionLoading && (
         <View style={styles.absoluteFillObject}>
           <ActivityIndicator size="large" color="#e03487" />
         </View>
       )}
+
       <AlertModal
         visible={alertVisible}
         message={alertMessage}

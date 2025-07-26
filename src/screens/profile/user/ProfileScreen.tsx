@@ -599,14 +599,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const originalUsername = user?.username || "";
   const originalBio = user?.bio || "";
 
-  if (profileDataLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
-      </View>
-    );
-  }
-
   if (!user) {
     return (
       <View style={styles.centered}>

@@ -16,6 +16,7 @@ import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import { getUserFavorites } from "../../../services/favoritesService";
@@ -40,6 +41,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -48,6 +50,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
     null
   );
+  const [isOnline, setIsOnline] = useState(true);
 
   // use states (processing)
   const [removingPartner, setRemovingPartner] = useState(false);
@@ -269,6 +272,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   }, [partner?.id]);
 
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // refresh screen
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -325,6 +335,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      {!isOnline && (
+        <View style={{ backgroundColor: "red", padding: 8 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline
+          </Text>
+        </View>
+      )}
       <ScrollView
         refreshControl={
           <RefreshControl
