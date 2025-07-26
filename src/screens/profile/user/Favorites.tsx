@@ -55,7 +55,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#b0b3c6",
     fontWeight: "bold",
-    letterSpacing: 1,
   },
   editButton: {
     backgroundColor: "transparent",
