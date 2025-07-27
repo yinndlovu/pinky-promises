@@ -459,6 +459,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     checkAndUpdateHomeStatus,
   ]);
 
+  if (partnerLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#e03487" size="large" />
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       {!isOnline && (

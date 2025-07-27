@@ -618,9 +618,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   if (!user) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: "#fff" }}>
-          No profile data. Try logging in again.
+        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+          Something went wrong
         </Text>
+      </View>
+    );
+  }
+
+  if (profileDataLoading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator color="#e03487" size="large" />
       </View>
     );
   }

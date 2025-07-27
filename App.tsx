@@ -13,7 +13,6 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
-import * as Location from "expo-location";
 import React from "react";
 import { useEffect } from "react";
 import { QueryClient, onlineManager } from "@tanstack/react-query";
@@ -24,8 +23,7 @@ import { Image } from "expo-image";
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
 import { NotificationProvider } from "./src/contexts/NotificationContext";
-import { useNotification } from "./src/contexts/NotificationContext";
-import { LOCATION_TASK_NAME } from "./src/background/LocationTask";
+import { useNotification } from "./src/contexts/NotificationContext"; // do things for notifications
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 
@@ -59,6 +57,7 @@ import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen"
 import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
 import Feather from "@expo/vector-icons/build/Feather";
 
+// variables
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
