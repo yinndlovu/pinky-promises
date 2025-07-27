@@ -47,6 +47,7 @@ import ActionsModal from "../../components/modals/ActionsModal";
 import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
 import AlertModal from "../../components/modals/AlertModal";
+import { checkLocationPermissions } from "../../services/locationPermissionService";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -109,6 +110,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const home = await getHomeLocation(token);
 
       if (!home) {
+        return;
+      }
+
+      const { foreground } = await checkLocationPermissions();
+      if (foreground !== "granted") {
         return;
       }
 

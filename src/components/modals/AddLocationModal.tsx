@@ -1,3 +1,4 @@
+// external
 import React, { useEffect, useState } from "react";
 import {
   Modal,
@@ -10,7 +11,15 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
+
+// content
 import AlertModal from "./AlertModal";
+
+// internal
+import {
+  requestLocationPermissions,
+  startBackgroundLocationTracking,
+} from "../../services/locationPermissionService";
 
 type AddLocationModalProps = {
   visible: boolean;
@@ -42,14 +51,7 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
         setAlertVisible(false);
         setAlertMessage("");
         try {
-          let { status } = await Location.requestForegroundPermissionsAsync();
-
-          if (status !== "granted") {
-            setError("Permission to access location was denied");
-            setLoading(false);
-
-            return;
-          }
+          await requestLocationPermissions();
 
           let loc = await Location.getCurrentPositionAsync({});
           setLocation({
@@ -71,8 +73,10 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
 
     setSaving(true);
     try {
+      await startBackgroundLocationTracking();
+
       onConfirm(location);
-      setAlertMessage("Home location added!");
+      setAlertMessage("Home location added");
       setAlertVisible(true);
     } catch (e) {
       setAlertMessage("Failed to add location");

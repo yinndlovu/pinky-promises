@@ -63,32 +63,6 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
 
-async function startBackgroundLocation() {
-  const { status } = await Location.requestForegroundPermissionsAsync();
-
-  if (status !== "granted") {
-    return;
-  }
-
-  const { status: bgStatus } =
-    await Location.requestBackgroundPermissionsAsync();
-
-  if (bgStatus !== "granted") {
-    return;
-  }
-
-  await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-    accuracy: Location.Accuracy.High,
-    timeInterval: 5 * 60 * 1000,
-    distanceInterval: 30,
-    showsBackgroundLocationIndicator: true,
-    foregroundService: {
-      notificationTitle: "Location Service",
-      notificationBody: "Tracking your home status...",
-    },
-  });
-}
-
 // navigation bar
 function MainTabs() {
   return (
@@ -129,10 +103,6 @@ function AIHeader() {
 // screens
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
-
-  React.useEffect(() => {
-    startBackgroundLocation();
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
