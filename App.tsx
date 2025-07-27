@@ -484,7 +484,7 @@ export default function App() {
           client={queryClient}
           persistOptions={{
             persister: sqlitePersistor,
-            maxAge: 1000 * 60 * 60 * 24 * 3,
+            maxAge: 1000 * 60 * 60 * 24 * 4,
           }}
           onSuccess={() => {}}
         >

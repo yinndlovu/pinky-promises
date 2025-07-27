@@ -14,22 +14,16 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
-import { getPartner } from "../../services/partnerService";
-import { getSpecialDates } from "../../services/specialDateService";
 import { useAuth } from "../../contexts/AuthContext";
 import { DEEPSEEK_KEY } from "../../configuration/config";
-import { getAllFavoriteMemories } from "../../services/favoriteMemoriesService";
-import { getNotes } from "../../services/notesService";
-import { getLoveLanguage } from "../../services/loveLanguageService";
-import { getUserFavorites } from "../../services/favoritesService";
-import { getAboutUser } from "../../services/aboutUserService";
 import {
   saveKeyDetail,
   fetchKeyDetails,
 } from "../../services/ai/aiKeyDetailsService";
-import { FAVORITE_LABELS } from "../../helpers/profileHelpers";
+import { favoritesObjectToArray } from "../../helpers/aiHelpers";
 import { ChatMessage } from "../../types/Message";
 
 // screen content
@@ -44,6 +38,7 @@ import {
   deleteOldMessages,
   deleteAllMessages,
 } from "../../database/chatdb";
+import { getContext } from "../../services/ai/contextService";
 
 export default function ChatScreen() {
   // variables
@@ -54,42 +49,49 @@ export default function ChatScreen() {
   const LAST_CLEANUP_KEY = "lastCleanupDate";
   const navigation = useNavigation();
   const route = useRoute();
+  const queryClient = useQueryClient();
 
   // use states
-  const [specialDates, setSpecialDates] = useState<any[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [isSending, setIsSending] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // use states (users details)
-  const [favoriteMemories, setFavoriteMemories] = useState<any[]>([]);
-  const [notes, setNotes] = useState<any[]>([]);
-  const [loveLanguage, setLoveLanguage] = useState<string>("");
-  const [aboutUser, setAboutUser] = useState<string>("");
-  const [favorites, setFavorites] = useState<any>({});
-  const [keyDetails, setKeyDetails] = useState<any[]>([]);
+  // fetch functions
+  const {
+    data: context,
+    isLoading: contextLoading,
+    refetch: refetchContext,
+  } = useQuery({
+    queryKey: ["aiContext", userId],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+      return await getContext(token);
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 60 * 12,
+  });
 
-  // use states (partner data)
-  const [partnerLoveLanguage, setPartnerLoveLanguage] = useState<string>("");
-  const [partnerFavorites, setPartnerFavorites] = useState<any>({});
-  const [aboutPartner, setAboutPartner] = useState<string>("");
-  const [partnerName, setPartnerName] = useState<string>("");
-  const [partnerId, setPartnerId] = useState<string>("");
-
-  // helpers
-  function favoritesObjectToArray(
-    favoritesObj: any
-  ): { label: string; value: string }[] {
-    return Object.entries(FAVORITE_LABELS)
-      .map(([key, label]) =>
-        favoritesObj && favoritesObj[key]
-          ? { label, value: favoritesObj[key] }
-          : null
-      )
-      .filter(Boolean) as { label: string; value: string }[];
-  }
+  const {
+    data: keyDetails = [],
+    isLoading: keyDetailsLoading,
+    refetch: refetchKeyDetails,
+  } = useQuery({
+    queryKey: ["keyDetails", userId],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        throw new Error("No token found");
+      }
+      return await fetchKeyDetails(token);
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 60 * 4,
+  });
 
   // check if chats have been cleaned that day
   const runCleanupOncePerDay = async () => {
@@ -106,98 +108,12 @@ export default function ChatScreen() {
     } catch (error) {}
   };
 
-  // fetch context
-  const fetchContext = async () => {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      return;
-    }
-
-    try {
-      const partner = await getPartner(token);
-      setPartnerName(partner?.name || "");
-      setPartnerId(partner?.id || "");
-    } catch {}
-
-    try {
-      const dates = await getSpecialDates(token);
-      setSpecialDates(dates || []);
-    } catch {}
-
-    try {
-      const memories = await getAllFavoriteMemories(token);
-      setFavoriteMemories(memories || []);
-    } catch {}
-
-    try {
-      const notesData = await getNotes(token);
-      setNotes(notesData || []);
-    } catch {}
-
-    try {
-      const loveLang = await getLoveLanguage(token, userId);
-      setLoveLanguage(loveLang || "");
-    } catch {}
-
-    try {
-      const userAbout = await getAboutUser(token, userId);
-      setAboutUser(userAbout || "");
-    } catch {}
-
-    try {
-      const favs = await getUserFavorites(token, userId);
-      setFavorites(favs || []);
-    } catch {}
-  };
-
-  const fetchPartnerData = async () => {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token || !partnerId) {
-      return;
-    }
-
-    try {
-      const partnerLoveLang = await getLoveLanguage(token, partnerId);
-      setPartnerLoveLanguage(partnerLoveLang || "");
-    } catch {}
-
-    try {
-      const partnerFavs = await getUserFavorites(token, partnerId);
-      setPartnerFavorites(partnerFavs || []);
-    } catch {}
-
-    try {
-      const partnerAbout = await getAboutUser(token, partnerId);
-      setAboutPartner(partnerAbout || "");
-    } catch {}
-  };
-
   // use effects
-  useEffect(() => {
-    fetchContext();
-  }, []);
-
-  useEffect(() => {
-    if (partnerId) {
-      fetchPartnerData();
-    }
-  }, [partnerId]);
-
   useEffect(() => {
     createTable();
     runCleanupOncePerDay();
     fetchMessages().then(setMessages);
   }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchKeyDetails(userId)
-        .then(setKeyDetails)
-        .catch(() => setKeyDetails([]));
-    }
-  }, [userId]);
 
   useEffect(() => {
     if ((route.params as any)?.showOptions) {
@@ -212,17 +128,19 @@ export default function ChatScreen() {
       return "None recorded.";
     }
 
-    return keyDetails.map((d) => `${d.type}: ${d.key} = ${d.value}`).join("; ");
+    return keyDetails
+      .map((d: any) => `${d.type}: ${d.key} = ${d.value}`)
+      .join("; ");
   }, [keyDetails]);
 
   const getFormattedSpecialDates = useCallback(() => {
-    if (!specialDates.length) {
+    if (!context?.specialDateDetails?.length) {
       return "None set";
     }
 
-    return specialDates
+    return context.specialDateDetails
       .map(
-        (d) =>
+        (d: any) =>
           `${d.title}: ${new Date(d.date).toLocaleDateString("en-GB", {
             day: "2-digit",
             month: "short",
@@ -230,12 +148,13 @@ export default function ChatScreen() {
           })}`
       )
       .join(", ");
-  }, [specialDates]);
+  }, [context]);
 
   const getFormattedAnniversary = useCallback(() => {
-    const anniversary = specialDates.find((d) =>
+    const anniversary = context.specialDateDetails.find((d: any) =>
       d.title.toLowerCase().includes("anniversary")
     );
+
     return anniversary
       ? new Date(anniversary.date).toLocaleDateString("en-GB", {
           day: "2-digit",
@@ -243,58 +162,56 @@ export default function ChatScreen() {
           year: "numeric",
         })
       : "Not set";
-  }, [specialDates]);
+  }, [context]);
 
   const getFormattedFavoriteMemories = useCallback(() => {
-    if (!favoriteMemories.length) {
+    if (!context?.favoriteMemories?.length) {
       return "None set";
     }
 
-    return favoriteMemories.map((m) => m.memory).join(", ");
-  }, [favoriteMemories]);
+    return context.favoriteMemories.map((m: any) => m.memory).join(", ");
+  }, [context]);
 
   const getFormattedNotes = useCallback(() => {
-    if (!notes.length) {
-      return "None set";
-    }
-
-    return notes.map((n) => n.content).join(" | ");
-  }, [notes]);
+    return context?.pairNotes || "None set";
+  }, [context]);
 
   const getFormattedLoveLanguage = useCallback(() => {
-    return loveLanguage || "Not set";
-  }, [loveLanguage]);
+    return context?.userLoveLanguage || "Not set";
+  }, [context]);
 
   const getFormattedAboutUser = useCallback(() => {
-    return aboutUser || "Not set";
-  }, [aboutUser]);
+    return context?.userAbout || "Not set";
+  }, [context]);
 
   const getFormattedFavorites = useCallback(() => {
-    const favArr = favoritesObjectToArray(favorites);
+    const favArr = favoritesObjectToArray(context?.userFavorites);
+
     if (!favArr.length) {
       return "None set";
     }
 
     return favArr.map((f) => `${f.label}: ${f.value}`).join(", ");
-  }, [favorites]);
+  }, [context]);
 
   // helpers (partner)
   const getFormattedPartnerLoveLanguage = useCallback(() => {
-    return partnerLoveLanguage || "Not set";
-  }, [partnerLoveLanguage]);
+    return context?.partnerLoveLanguage || "Not set";
+  }, [context]);
 
   const getFormattedPartnerFavorites = useCallback(() => {
-    const favArr = favoritesObjectToArray(partnerFavorites);
+    const favArr = favoritesObjectToArray(context?.partnerFavorites);
+
     if (!favArr.length) {
       return "None set";
     }
 
     return favArr.map((f) => `${f.label}: ${f.value}`).join(", ");
-  }, [partnerFavorites]);
+  }, [context]);
 
   const getFormattedAboutPartner = useCallback(() => {
-    return aboutPartner || "Not set";
-  }, [aboutPartner]);
+    return context?.partnerAbout || "Not set";
+  }, [context]);
 
   // handlers
   const handleDelete = async () => {
@@ -314,18 +231,20 @@ export default function ChatScreen() {
 
     const systemPrompt = `
     Your name is Lily, and a helpful assistant (more like a mascot) for ${
-      user?.name || "User"
+      context?.userName || "User"
     }. Their partner's name is ${
-      partnerName || "Partner"
+      context?.partnerName || "Partner"
     }, they are a couple using the Pinky Promises app.
     Today is: ${todayString}
     Currently, you're talking to just ${
-      user?.name || "User"
+      context?.userName || "User"
     }, so avoid addressing this 
     user as if it's the two of them with their partner.
     So say things like "heyyy ${user?.name || "User"}" not "heyyy 
-    ${user?.name || "User"} & ${partnerName || "Partner"}" because 
-    it's just ${user?.name || "User"} chatting with you.
+    ${context?.userName || "User"} & ${
+      context?.partnerName || "Partner"
+    }" because 
+    it's just ${context?.userName || "User"} chatting with you.
     Text them back in lowercase letters only.
     Show excitement by adding extra letters where necessary, like "heyyy"
     Make your texts as short as possible, and avoid using too much emojis, a little is fine.
@@ -337,13 +256,15 @@ export default function ChatScreen() {
     Love language for : ${getFormattedLoveLanguage()}.
     Favorites: ${getFormattedFavorites()}.
     Love language for ${
-      partnerName || "Partner"
+      context?.partnerName || "Partner"
     }: ${getFormattedPartnerLoveLanguage()}.
     Favorites for ${
-      partnerName || "Partner"
+      context?.partnerName || "Partner"
     }: ${getFormattedPartnerFavorites()}.
-    More about ${user?.name || "User"}: ${getFormattedAboutUser()}.
-    More about ${partnerName || "Partner"}: ${getFormattedAboutPartner()}
+    More about ${context?.userName || "User"}: ${getFormattedAboutUser()}.
+    More about ${
+      context?.partnerName || "Partner"
+    }: ${getFormattedAboutPartner()}
     Answer questions about their relationship, memories, special dates, favorites, 
     love langauges, and more. 
     Be warm, personal, and supportive.
@@ -461,13 +382,17 @@ export default function ChatScreen() {
       return;
     }
 
-    if (record && partnerId && token) {
-      await saveKeyDetail({ ...record, userId, partnerId, token });
+    if (record && context?.partnerId && token) {
+      await saveKeyDetail({
+        ...record,
+        userId,
+        partnerId: context?.partnerId,
+        token,
+      });
 
-      try {
-        const details = await fetchKeyDetails(token);
-        setKeyDetails(details);
-      } catch {}
+      await queryClient.invalidateQueries({
+        queryKey: ["keyDetails", userId],
+      });
     }
   };
 
@@ -512,6 +437,20 @@ export default function ChatScreen() {
       minute: "2-digit",
     });
   };
+
+  if (contextLoading || keyDetailsLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#23243a" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text style={{ color: "#e03487", fontSize: 16, fontWeight: "bold" }}>
+            Loading Lily...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#23243a" }}>
