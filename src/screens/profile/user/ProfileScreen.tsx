@@ -434,6 +434,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await queryClient.invalidateQueries({
         queryKey: ["loveLanguage", user?.id],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", user?.id],
+      });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save love language");
     }
@@ -452,6 +456,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["about", user?.id],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save about");
@@ -475,6 +483,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["favorites", user?.id],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save favorites");
@@ -576,6 +588,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["profileData"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(`Failed to update ${field}`);

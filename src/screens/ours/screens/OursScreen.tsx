@@ -160,6 +160,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["upcomingSpecialDate"],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to add special date"
@@ -213,6 +217,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["upcomingSpecialDate"],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to update special date"
@@ -249,6 +257,10 @@ const OursScreen = ({ navigation }: Props) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["upcomingSpecialDate"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
       setAlertMessage(
@@ -292,6 +304,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["allFavoriteMemories"],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", currentUserId],
+      });
     } catch (err: any) {
       setAlertMessage(
         err?.response?.data?.message || "Failed to delete favorite memory"
@@ -334,6 +350,10 @@ const OursScreen = ({ navigation }: Props) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["allFavoriteMemories"],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
       setAlertMessage(
