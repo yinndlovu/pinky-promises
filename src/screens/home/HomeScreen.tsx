@@ -131,7 +131,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: partnerLoading,
     refetch: refetchPartner,
   } = useQuery({
-    queryKey: ["partner"],
+    queryKey: ["partnerData"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
