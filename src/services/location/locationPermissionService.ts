@@ -1,5 +1,5 @@
 import * as Location from "expo-location";
-import { LOCATION_TASK_NAME } from "../background/LocationTask";
+import { LOCATION_TASK_NAME } from "../../background/LocationTask";
 
 export async function requestLocationPermissions() {
   const { status } = await Location.requestForegroundPermissionsAsync();

@@ -40,6 +40,7 @@ import {
   formatTime,
   formatTimeLeft,
 } from "../../helpers/formatDateHelper";
+import { checkLocationPermissions } from "../../services/location/locationPermissionService";
 
 // screen content
 import RecentActivity from "./components/RecentActivity";
@@ -47,7 +48,6 @@ import ActionsModal from "../../components/modals/ActionsModal";
 import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
 import AlertModal from "../../components/modals/AlertModal";
-import { checkLocationPermissions } from "../../services/locationPermissionService";
 
 // types
 type Props = NativeStackScreenProps<any>;

@@ -19,7 +19,7 @@ import AlertModal from "./AlertModal";
 import {
   requestLocationPermissions,
   startBackgroundLocationTracking,
-} from "../../services/locationPermissionService";
+} from "../../services/location/locationPermissionService";
 
 type AddLocationModalProps = {
   visible: boolean;
