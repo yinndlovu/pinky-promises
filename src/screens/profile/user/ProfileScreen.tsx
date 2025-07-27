@@ -233,7 +233,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: partnerDataLoading,
     refetch: refetchPartnerData,
   } = useQuery({
-    queryKey: ["partnerData", user?.id],
+    queryKey: ["partnerData"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
