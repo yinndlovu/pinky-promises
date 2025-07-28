@@ -46,6 +46,7 @@ import { getReceivedPartnerRequests } from "../../../services/partnerService";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { FavoritesType } from "../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
+import { storeMessage } from "../../../services/messageStorageService";
 
 // screen content
 import UpdateAboutModal from "../../../components/modals/UpdateAboutModal";
@@ -59,6 +60,8 @@ import LoveLanguage from "./LoveLanguage";
 import MoreAboutYou from "./MoreAboutYou";
 import styles from "./styles/ProfileScrees.styles";
 import MessageStorage from "./MessageStorage";
+import StoreMessageModal from "../../../components/modals/input-modals/StoreMessageModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
@@ -69,8 +72,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     {
       id: "1",
       title: "Hello",
-      message: "This is a message. This message is purely just for visuals and nothing more. it is for testing and stuff. like really bro " +
-      "you can literally just decide to go away and it would not matter because it's just a static message that does not do nothing.",
+      message:
+        "This is a message. This message is purely just for visuals and nothing more. it is for testing and stuff. like really bro " +
+        "you can literally just decide to go away and it would not matter because it's just a static message that does not do nothing.",
       createdAt: "2025-07-28T10:00:00Z",
     },
     {
@@ -84,7 +88,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       title: "Hey you",
       message: "This is yet another message",
       createdAt: "2025-07-28T10:00:00Z",
-    }
+    },
   ];
 
   // variables
@@ -118,6 +122,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     useState(false);
   const [aboutModalVisible, setAboutModalVisible] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [storeMessageModalVisible, setStoreMessageModalVisible] =
+    useState(false);
+  const [storingMessage, setStoringMessage] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
 
   // use states (edit fields)
   const [editName, setEditName] = useState("");
@@ -636,7 +645,31 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   function handleAddMessage() {
+    setStoreMessageModalVisible(true);
   }
+
+  const handleStoreMessage = async (title: string, message: string) => {
+    setStoringMessage(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        setError("Session expired, please log in again");
+        return;
+      }
+
+      await storeMessage(token, title, message);
+      setAlertMessage("Message stored");
+      setStoreMessageModalVisible(false);
+      setAlertVisible(true);
+    } catch (error: any) {
+      setAlertMessage(error?.response?.message || "Failed to store message");
+      setStoreMessageModalVisible(false);
+      setAlertVisible(true);
+    } finally {
+      setStoringMessage(false);
+    }
+  };
 
   function handleLongPressMessage(msg: any) {
     console.log("long pressed", msg);
@@ -993,6 +1026,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 : null
             }
             onClose={() => setShowPictureViewer(false)}
+          />
+
+          <StoreMessageModal
+            visible={storeMessageModalVisible}
+            onClose={() => setStoreMessageModalVisible(false)}
+            onStore={handleStoreMessage}
+            loading={storingMessage}
+          />
+
+          <AlertModal
+            visible={alertVisible}
+            message={alertMessage}
+            onClose={() => setAlertVisible(false)}
           />
         </View>
       </ScrollView>

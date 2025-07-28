@@ -56,22 +56,15 @@ const FavoriteMemoryDetailsModal: React.FC<Props> = ({
             <Text style={styles.loadingText}>Loading...</Text>
           ) : memory ? (
             <>
-              {/* Date at the top */}
               <Text style={styles.memoryDateText}>
                 this happened on {formatDate(memory.date)}
               </Text>
-
-              {/* Memory text */}
               <Text style={styles.memoryText}>{memory.memory}</Text>
-
-              {/* Author below memory text */}
               <Text style={styles.memoryAuthorText}>
                 {memory.author
                   ? `${memory.author} wrote this`
                   : "Unknown author"}
               </Text>
-
-              {/* Created and updated at the bottom, side by side */}
               <View style={styles.bottomRow}>
                 <Text style={styles.bottomMeta}>
                   Created: {formatDate(memory.createdAt)}

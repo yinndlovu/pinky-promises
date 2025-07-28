@@ -94,11 +94,9 @@ const MessageInputModal: React.FC<Props> = ({
                 onPress={handleSend}
                 disabled={!text.trim() || loading}
               >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.sendButtonText}>Send</Text>
-                )}
+                <Text style={styles.sendButtonText}>
+                  {loading ? "Sending..." : "Send"}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

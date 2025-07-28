@@ -89,12 +89,13 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
               <ActivityIndicator size="large" color="#e03487" />
             </View>
           )}
+          
           <AlertModal
             visible={alertVisible}
             message={alertMessage}
             onClose={() => {
               setAlertVisible(false);
-              if (alertMessage === "More about you updated!") onClose();
+              if (alertMessage === "More about you updated") onClose();
             }}
           />
         </View>

@@ -1,5 +1,17 @@
+// external
 import React, { useState, useEffect } from "react";
-import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
+import {
+  Modal,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+} from "react-native";
+
+// content
 import AlertModal from "./AlertModal";
 
 const FAVORITE_FIELDS = [
@@ -65,7 +77,10 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
       <View style={styles.overlay}>
         <View style={styles.content}>
           <Text style={styles.title}>Update your favorites</Text>
-          <ScrollView style={{ width: "100%" }} contentContainerStyle={{ paddingBottom: 16 }}>
+          <ScrollView
+            style={{ width: "100%" }}
+            contentContainerStyle={{ paddingBottom: 16 }}
+          >
             {FAVORITE_FIELDS.map((field) => (
               <View key={field.key} style={styles.inputGroup}>
                 <Text style={styles.label}>{field.label}</Text>
@@ -80,10 +95,20 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
             ))}
           </ScrollView>
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
-              <Text style={styles.saveButtonText}>{loading ? "Saving..." : "Save"}</Text>
+            <TouchableOpacity
+              style={styles.saveButton}
+              onPress={handleSave}
+              disabled={loading}
+            >
+              <Text style={styles.saveButtonText}>
+                {loading ? "Saving..." : "Save"}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={onClose}
+              disabled={loading}
+            >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
