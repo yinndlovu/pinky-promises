@@ -12,3 +12,9 @@ export interface MessageStorageProps {
   onLongPress: (msg: StoredMessage) => void;
   onPress?: (msg: StoredMessage) => void;
 }
+
+export interface PartnerMessageStorageProps {
+  name: string;
+  messages: StoredMessage[];
+  onPress?: (msg: StoredMessage) => void;
+}

@@ -13,29 +13,28 @@ import {
 import { formatDateDMYHM } from "../../../helpers/formatDateHelper";
 import {
   StoredMessage,
-  MessageStorageProps,
+  PartnerMessageStorageProps,
 } from "../../../interfaces/MessageStorage";
 import { getTrimmedText } from "../../../helpers/profileHelpers";
 
 const screenWidth = Dimensions.get("window").width;
 
-export default function MessageStorage({
+export default function PartnerMessageStorage({
   name,
   messages,
-  onAdd,
-  onLongPress,
   onPress,
-}: MessageStorageProps) {
+}: PartnerMessageStorageProps) {
   function MessageCard({ message }: { message: StoredMessage }) {
     return (
       <TouchableOpacity
         style={styles.card}
-        onLongPress={() => onLongPress(message)}
         onPress={onPress ? () => onPress(message) : undefined}
         activeOpacity={0.85}
       >
         <Text style={styles.title}>{message.title}</Text>
-        <Text style={styles.messageText}>{getTrimmedText(message.message)}</Text>
+        <Text style={styles.messageText}>
+          {getTrimmedText(message.message)}
+        </Text>
         <Text style={styles.date}>{formatDateDMYHM(message.createdAt)}</Text>
       </TouchableOpacity>
     );
@@ -45,12 +44,9 @@ export default function MessageStorage({
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
         <Text style={styles.headerText}>Message storage</Text>
-        <TouchableOpacity onPress={onAdd} style={styles.plusButton}>
-          <Text style={styles.plusText}>＋</Text>
-        </TouchableOpacity>
       </View>
       <Text style={styles.description}>
-        Your favorite messages {name} ever sent you
+        {name}'s favorite messages from you
       </Text>
 
       <FlatList

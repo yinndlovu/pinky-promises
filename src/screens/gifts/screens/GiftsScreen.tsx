@@ -13,25 +13,25 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // screen content
-import SetMonthlyGift from "./components/SetMonthlyGift";
-import ReceivedGift from "./components/ReceivedGift";
-import PastGiftsList from "./components/PastGiftsList";
-import ClaimedGiftModal from "../../components/modals/ClaimedGiftModal";
-import UpdateMonthlyGiftModal from "../../components/modals/UpdateMonthlyGiftModal";
-import AlertModal from "../../components/modals/AlertModal";
+import SetMonthlyGift from "../components/SetMonthlyGift";
+import ReceivedGift from "../components/ReceivedGift";
+import PastGiftsList from "../components/PastGiftsList";
+import ClaimedGiftModal from "../../../components/modals/ClaimedGiftModal";
+import UpdateMonthlyGiftModal from "../../../components/modals/UpdateMonthlyGiftModal";
+import AlertModal from "../../../components/modals/AlertModal";
 
 // internal
 import {
   getOldestUnclaimedGift,
   claimMonthlyGift,
   getLastFiveClaimedGifts,
-} from "../../services/monthlyGiftService";
+} from "../../../services/monthlyGiftService";
 import {
   getSetMonthlyGift,
   updateSetMonthlyGift,
-} from "../../services/setMonthlyGiftService";
-import { useAuth } from "../../contexts/AuthContext";
-import { formatDateDMY, formatTime } from "../../helpers/formatDateHelper";
+} from "../../../services/setMonthlyGiftService";
+import { useAuth } from "../../../contexts/AuthContext";
+import { formatDateDMY, formatTime } from "../../../helpers/formatDateHelper";
 
 const GiftsScreen = () => {
   // variables

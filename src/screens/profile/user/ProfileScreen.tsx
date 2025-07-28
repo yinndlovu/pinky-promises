@@ -636,14 +636,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   function handleAddMessage() {
-    console.log("plus button clicked");
   }
 
-  function handleLongPress(msg: any) {
+  function handleLongPressMessage(msg: any) {
     console.log("long pressed", msg);
   }
 
-  function handlePress(msg: any) {
+  function handlePressMessage(msg: any) {
     console.log("pressed", msg);
   }
 
@@ -854,8 +853,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           name="Yin"
           messages={messages}
           onAdd={handleAddMessage}
-          onLongPress={handleLongPress}
-          onPress={handlePress}
+          onLongPress={handleLongPressMessage}
+          onPress={handlePressMessage}
         />
 
         <View style={{ zIndex: 1000 }}>

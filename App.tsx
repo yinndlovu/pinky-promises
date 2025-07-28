@@ -46,7 +46,7 @@ import NavigationBar from "./src/components/navigation/NavigationBar";
 import SettingsScreen from "./src/screens/settings/SettingsScreen";
 import ProfileScreen from "./src/screens/profile/user/ProfileScreen";
 import OursScreen from "./src/screens/ours/screens/OursScreen";
-import GiftsScreen from "./src/screens/gifts/GiftsScreen";
+import GiftsScreen from "./src/screens/gifts/screens/GiftsScreen";
 import ChangeEmailScreen from "./src/screens/settings/ChangeEmailScreen";
 import VerifyEmailOtpScreen from "./src/screens/settings/VerifyEmailOtpScreen";
 import ChangePasswordScreen from "./src/screens/settings/password/ChangePasswordScreen";

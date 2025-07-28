@@ -36,8 +36,32 @@ import PartnerLoveLanguage from "./PartnerLoveLanguage";
 import PartnerStatusMood from "./PartnerStatusMood";
 import PartnerAnniversary from "./PartnerAnniversary";
 import styles from "./styles/PartnerProfileScreen.styles";
+import PartnerMessageStorage from "./PartnerMessageStorage";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
+  // static data
+  const messages = [
+    {
+      id: "1",
+      title: "Hello",
+      message: "This is a message. This message is purely just for visuals and nothing more. it is for testing and stuff. like really bro " +
+      "you can literally just decide to go away and it would not matter because it's just a static message that does not do nothing.",
+      createdAt: "2025-07-28T10:00:00Z",
+    },
+    {
+      id: "2",
+      title: "Hey there",
+      message: "This is another message message",
+      createdAt: "2025-07-28T10:00:00Z",
+    },
+    {
+      id: "3",
+      title: "Hey you",
+      message: "This is yet another message",
+      createdAt: "2025-07-28T10:00:00Z",
+    }
+  ];
+
   // variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
@@ -222,6 +246,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   };
 
+  function handlePressMessage(msg: any) {
+
+  }
+
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt && partner) {
       const cachedImageUrl = buildCachedImageUrl(
@@ -404,6 +432,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         <PartnerLoveLanguage loveLanguage={loveLanguage} />
 
         <PartnerMoreAboutYou about={partnerAbout} />
+        <PartnerMessageStorage
+                  name="Yin"
+                  messages={messages}
+                  onPress={handlePressMessage}
+                />
       </ScrollView>
 
       <View style={{ zIndex: 1000 }}>
