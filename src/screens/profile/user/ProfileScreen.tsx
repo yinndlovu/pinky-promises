@@ -58,11 +58,35 @@ import Favorites from "./Favorites";
 import LoveLanguage from "./LoveLanguage";
 import MoreAboutYou from "./MoreAboutYou";
 import styles from "./styles/ProfileScrees.styles";
+import MessageStorage from "./MessageStorage";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
+  // static data
+  const messages = [
+    {
+      id: "1",
+      title: "Hello",
+      message: "This is a message. This message is purely just for visuals and nothing more. it is for testing and stuff. like really bro " +
+      "you can literally just decide to go away and it would not matter because it's just a static message that does not do nothing.",
+      createdAt: "2025-07-28T10:00:00Z",
+    },
+    {
+      id: "2",
+      title: "Hey there",
+      message: "This is another message message",
+      createdAt: "2025-07-28T10:00:00Z",
+    },
+    {
+      id: "3",
+      title: "Hey you",
+      message: "This is yet another message",
+      createdAt: "2025-07-28T10:00:00Z",
+    }
+  ];
+
   // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
@@ -140,6 +164,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getLoveLanguage(token, user?.id);
     },
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -610,6 +635,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   };
 
+  function handleAddMessage() {
+    console.log("plus button clicked");
+  }
+
+  function handleLongPress(msg: any) {
+    console.log("long pressed", msg);
+  }
+
+  function handlePress(msg: any) {
+    console.log("pressed", msg);
+  }
+
   // fiels for editing
   const originalName = user?.name || "";
   const originalUsername = user?.username || "";
@@ -618,9 +655,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   if (!user) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
-          Something went wrong
-        </Text>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor="#e03487"
+              colors={["#e03487"]}
+              progressBackgroundColor="#23243a"
+            />
+          }
+          contentContainerStyle={styles.centered}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+            Something went wrong viewing your profile
+          </Text>
+        </ScrollView>
       </View>
     );
   }
@@ -798,6 +849,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         />
 
         <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
+
+        <MessageStorage
+          name="Yin"
+          messages={messages}
+          onAdd={handleAddMessage}
+          onLongPress={handleLongPress}
+          onPress={handlePress}
+        />
 
         <View style={{ zIndex: 1000 }}>
           <UpdateFavoritesModal

@@ -71,8 +71,10 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   };
 
   const getDayMetDisplay = () => {
-    const dayMet = specialDates.find((date: SpecialDate) =>
-      date.title.toLowerCase().includes("met")
+    const dayMet = specialDates.find(
+      (date: SpecialDate) =>
+        date.title.toLowerCase().includes("met") ||
+        date.title.toLowerCase().includes("meet")
     );
 
     if (dayMet) {

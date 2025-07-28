@@ -21,3 +21,11 @@ export function favoritesObjectToArray(
     )
     .filter(Boolean) as { label: string; value: string }[];
 }
+
+export function getTrimmedText(text: string, limit = 200) {
+  if (text.length <= limit) {
+    return text;
+  }
+
+  return text.substring(0, limit).trim() + "…";
+}
