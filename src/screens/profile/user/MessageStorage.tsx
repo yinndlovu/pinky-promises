@@ -14,7 +14,7 @@ import { formatDateDMYHM } from "../../../helpers/formatDateHelper";
 import {
   StoredMessage,
   MessageStorageProps,
-} from "../../../../interfaces/MessageStorage";
+} from "../../../interfaces/MessageStorage";
 import { getTrimmedText } from "../../../helpers/profileHelpers";
 
 const screenWidth = Dimensions.get("window").width;
