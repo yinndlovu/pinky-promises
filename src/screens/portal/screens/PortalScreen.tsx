@@ -88,7 +88,7 @@ export default function PortalScreen({ navigation }: Props) {
       const unseenSweet = await getLastUnseenSweetMessage(token);
       return unseenSweet.sweet || null;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 
   const {
@@ -107,7 +107,7 @@ export default function PortalScreen({ navigation }: Props) {
       const unseenVent = await getLastUnseenVentMessage(token);
       return unseenVent.vent || null;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 
   const {
@@ -126,7 +126,7 @@ export default function PortalScreen({ navigation }: Props) {
       const sentSweet = await getSentSweetMessages(token);
       return sentSweet.sweets || sentSweet;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
   });
 
   const {
@@ -145,7 +145,7 @@ export default function PortalScreen({ navigation }: Props) {
       const receivedSweet = await getReceivedSweetMessages(token);
       return receivedSweet.sweets || receivedSweet;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
   });
 
   const {
@@ -164,7 +164,7 @@ export default function PortalScreen({ navigation }: Props) {
       const sentVent = await getSentVentMessages(token);
       return sentVent.vents || sentVent;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
   });
 
   const {
@@ -183,7 +183,7 @@ export default function PortalScreen({ navigation }: Props) {
       const receivedVent = await getReceivedVentMessages(token);
       return receivedVent.vents || receivedVent;
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
   });
 
   // handlers
