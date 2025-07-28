@@ -19,6 +19,7 @@ import { QueryClient, onlineManager } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Image } from "expo-image";
+import Feather from "@expo/vector-icons/build/Feather";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
@@ -55,7 +56,6 @@ import AboutScreen from "./src/screens/settings/about/AboutScreen";
 import AllFavoriteMemoriesScreen from "./src/screens/ours/screens/AllFavoriteMemoriesScreen";
 import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen";
 import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
-import Feather from "@expo/vector-icons/build/Feather";
 
 // variables
 const Stack = createStackNavigator();
