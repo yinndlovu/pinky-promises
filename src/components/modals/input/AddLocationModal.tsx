@@ -13,13 +13,13 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
 // content
-import AlertModal from "./AlertModal";
+import AlertModal from "../output/AlertModal";
 
 // internal
 import {
   requestLocationPermissions,
   startBackgroundLocationTracking,
-} from "../../services/location/locationPermissionService";
+} from "../../../services/location/locationPermissionService";
 
 type AddLocationModalProps = {
   visible: boolean;

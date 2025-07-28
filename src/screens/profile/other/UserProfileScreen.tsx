@@ -27,7 +27,7 @@ import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 
 // screen content
-import AlertModal from "../../../components/modals/AlertModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 import styles from "./styles/UserProfileScreen.styles";
 
 // variables

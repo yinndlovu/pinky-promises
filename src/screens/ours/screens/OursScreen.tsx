@@ -34,14 +34,14 @@ import {
 import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content
-import UpdateFavoriteMemoryModal from "../../../components/modals/UpdateFavoriteMemoryModal";
-import FavoriteMemoryDetailsModal from "../../../components/modals/FavoriteMemoryDetailsModal";
-import ConfirmationModal from "../../../components/modals/ConfirmationModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
+import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
+import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 import NotesCanvas from "../components/NotesCanvas";
 import SpecialDates from "../components/SpecialDates";
 import FavoriteMemories from "../components/FavoriteMemories";
-import UpdateSpecialDateModal from "../../../components/modals/UpdateSpecialDateModal";
+import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
 
 type Props = NativeStackScreenProps<any>;
 

@@ -16,8 +16,8 @@ import { AnniversaryProps, SpecialDate } from "../../../types/SpecialDate";
 import { formatProfileDisplayDate } from "../../../helpers/formatDateHelper";
 
 // screen content
-import UpdateSpecialDateModal from "../../../components/modals/UpdateSpecialDateModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 const Anniversary: React.FC<AnniversaryProps> = () => {
   // variables

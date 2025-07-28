@@ -10,7 +10,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { useAuth } from "../../contexts/AuthContext";
-import LogoutModal from "../../components/modals/LogoutModal";
+import LogoutModal from "../../components/modals/selection/LogoutModal";
 
 type SettingsScreenProps = StackScreenProps<any, any>;
 

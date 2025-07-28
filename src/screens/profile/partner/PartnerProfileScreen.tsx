@@ -28,9 +28,9 @@ import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
 
 // screen content
-import ConfirmationModal from "../../../components/modals/ConfirmationModal";
+import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 import PartnerMoreAboutYou from "./PartnerMoreAboutYou";
-import ProfilePictureViewer from "../../../components/modals/ProfilePictureViewer";
+import ProfilePictureViewer from "../../../components/modals/output/ProfilePictureViewer";
 import PartnerFavorites from "./PartnerFavorites";
 import PartnerLoveLanguage from "./PartnerLoveLanguage";
 import PartnerStatusMood from "./PartnerStatusMood";

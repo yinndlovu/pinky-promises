@@ -1,4 +1,3 @@
-// external
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -7,65 +6,43 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   ActivityIndicator,
+  TouchableWithoutFeedback
 } from "react-native";
+import AlertModal from "../output/AlertModal";
 
-// content
-import AlertModal from "./AlertModal";
-
-const FAVORITE_FIELDS = [
-  { key: "favoriteColor", label: "Favorite Color" },
-  { key: "favoriteFood", label: "Favorite Food" },
-  { key: "favoriteSnack", label: "Favorite Snack" },
-  { key: "favoriteActivity", label: "Favorite Activity" },
-  { key: "favoriteHoliday", label: "Favorite Holiday" },
-  { key: "favoriteTimeOfDay", label: "Favorite Time of Day" },
-  { key: "favoriteSeason", label: "Favorite Season" },
-  { key: "favoriteAnimal", label: "Favorite Animal" },
-  { key: "favoriteDrink", label: "Favorite Drink" },
-  { key: "favoritePet", label: "Favorite Pet" },
-  { key: "favoriteShow", label: "Favorite Show" },
-];
-
-type Favorites = { [key: string]: string };
-
-type UpdateFavoritesModalProps = {
+type UpdateAboutModalProps = {
   visible: boolean;
-  initialFavorites: Favorites;
+  initialAbout: string;
   onClose: () => void;
-  onSave: (favorites: Favorites) => Promise<void>;
+  onSave: (about: string) => Promise<void>;
 };
 
-const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
+const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
   visible,
-  initialFavorites,
+  initialAbout,
   onClose,
   onSave,
 }) => {
-  const [favorites, setFavorites] = useState<Favorites>(initialFavorites || {});
+  const [about, setAbout] = useState(initialAbout || "");
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     if (visible) {
-      setFavorites(initialFavorites || {});
+      setAbout(initialAbout || "");
     }
-  }, [visible, initialFavorites]);
-
-  const handleChange = (key: string, value: string) => {
-    setFavorites((prev) => ({ ...prev, [key]: value }));
-  };
+  }, [visible, initialAbout]);
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await onSave(favorites);
-      setAlertMessage("Favorites updated");
+      await onSave(about);
+      setAlertMessage("More about you updated!");
       setAlertVisible(true);
     } catch (err) {
-      setAlertMessage("Failed to update favorites");
+      setAlertMessage("Failed to update info");
       setAlertVisible(true);
     } finally {
       setLoading(false);
@@ -74,26 +51,21 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
+      <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.overlay}>
         <View style={styles.content}>
-          <Text style={styles.title}>Update your favorites</Text>
-          <ScrollView
-            style={{ width: "100%" }}
-            contentContainerStyle={{ paddingBottom: 16 }}
-          >
-            {FAVORITE_FIELDS.map((field) => (
-              <View key={field.key} style={styles.inputGroup}>
-                <Text style={styles.label}>{field.label}</Text>
-                <TextInput
-                  style={styles.input}
-                  value={favorites[field.key] || ""}
-                  onChangeText={(text) => handleChange(field.key, text)}
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                  placeholderTextColor="#b0b3c6"
-                />
-              </View>
-            ))}
-          </ScrollView>
+          <Text style={styles.title}>Update more about you</Text>
+          <TextInput
+            style={styles.textArea}
+            value={about}
+            onChangeText={setAbout}
+            placeholder="Tell us more about you..."
+            placeholderTextColor="#b0b3c6"
+            multiline
+            numberOfLines={6}
+            maxLength={500}
+            editable={!loading}
+          />
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={styles.saveButton}
@@ -117,16 +89,18 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
               <ActivityIndicator size="large" color="#e03487" />
             </View>
           )}
+
           <AlertModal
             visible={alertVisible}
             message={alertMessage}
             onClose={() => {
               setAlertVisible(false);
-              if (alertMessage === "Favorites updated") onClose();
+              if (alertMessage === "More about you updated") onClose();
             }}
           />
         </View>
       </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -145,7 +119,6 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
     width: "90%",
-    maxHeight: "90%",
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 10,
@@ -159,22 +132,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     alignSelf: "center",
   },
-  inputGroup: {
-    marginBottom: 14,
-  },
-  label: {
-    color: "#b0b3c6",
-    fontSize: 15,
-    marginBottom: 4,
-    marginLeft: 2,
-  },
-  input: {
+  textArea: {
     backgroundColor: "#393a4a",
     color: "#fff",
     borderRadius: 8,
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 12,
     fontSize: 16,
+    minHeight: 120,
+    width: "100%",
+    textAlignVertical: "top",
+    marginBottom: 16,
     borderWidth: 1,
     borderColor: "#393a4a",
   },
@@ -223,4 +191,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UpdateFavoritesModal;
+export default UpdateAboutModal;

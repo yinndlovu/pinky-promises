@@ -36,10 +36,10 @@ import { Message } from "../../../types/Message";
 // screen content
 import SweetMessagesSection from "../components/SweetMessagesSection";
 import VentMessagesSection from "../components/VentMessagesSection";
-import ConfirmationModal from "../../../components/modals/ConfirmationModal";
-import MessageInputModal from "../../../components/modals/MessageInputModal";
-import ViewMessageModal from "../../../components/modals/ViewMessageModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
+import MessageInputModal from "../../../components/modals/input/MessageInputModal";
+import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 // types
 type Props = NativeStackScreenProps<any, any>;

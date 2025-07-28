@@ -13,7 +13,7 @@ import {
 } from "react-native";
 
 // content
-import AlertModal from "./AlertModal";
+import AlertModal from "../output/AlertModal";
 
 // types
 type Props = {

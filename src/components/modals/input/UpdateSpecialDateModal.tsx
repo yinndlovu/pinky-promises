@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
-import AlertModal from "./AlertModal";
+import AlertModal from "../output/AlertModal";
 
 type UpdateSpecialDateModalProps = {
   visible: boolean;

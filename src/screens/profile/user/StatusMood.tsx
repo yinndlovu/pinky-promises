@@ -27,9 +27,9 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { StatusMoodProps } from "../../../types/StatusMood";
 
 // screen content
-import AddLocationModal from "../../../components/modals/AddLocationModal";
-import UpdateMoodModal from "../../../components/modals/UpdateMoodModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import AddLocationModal from "../../../components/modals/input/AddLocationModal";
+import UpdateMoodModal from "../../../components/modals/selection/UpdateMoodModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 import { updateMood } from "../../../services/moodService";
 
 const StatusMood: React.FC<StatusMoodProps> = ({

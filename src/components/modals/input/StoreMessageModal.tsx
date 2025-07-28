@@ -15,7 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // content
-import AlertModal from "../AlertModal";
+import AlertModal from "../output/AlertModal";
 
 // types
 type Props = {

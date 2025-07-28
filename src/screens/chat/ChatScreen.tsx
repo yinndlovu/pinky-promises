@@ -28,7 +28,7 @@ import { ChatMessage } from "../../types/Message";
 
 // screen content
 import styles from "./styles/ChatScreen.styles";
-import ConfirmationModal from "../../components/modals/ConfirmationModal";
+import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
 
 // chats database
 import {

@@ -20,7 +20,7 @@ import {
 import { Message } from "../../../types/Message";
 
 // content
-import ViewMessageModal from "../../../components/modals/ViewMessageModal";
+import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 
 const SentMessagesScreen = () => {
   // use states

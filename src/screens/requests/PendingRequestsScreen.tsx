@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
@@ -25,7 +24,7 @@ import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 import { PendingRequest } from "../../types/Request";
 
 // screen content
-import AlertModal from "../../components/modals/AlertModal";
+import AlertModal from "../../components/modals/output/AlertModal";
 import styles from "./styles/PendingRequestsScreen.styles";
 
 // variables

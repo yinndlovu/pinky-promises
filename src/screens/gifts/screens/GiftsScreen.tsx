@@ -16,9 +16,9 @@ import NetInfo from "@react-native-community/netinfo";
 import SetMonthlyGift from "../components/SetMonthlyGift";
 import ReceivedGift from "../components/ReceivedGift";
 import PastGiftsList from "../components/PastGiftsList";
-import ClaimedGiftModal from "../../../components/modals/ClaimedGiftModal";
-import UpdateMonthlyGiftModal from "../../../components/modals/UpdateMonthlyGiftModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import ClaimedGiftModal from "../../../components/modals/output/ClaimedGiftModal";
+import UpdateMonthlyGiftModal from "../../../components/modals/input/UpdateMonthlyGiftModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 // internal
 import {

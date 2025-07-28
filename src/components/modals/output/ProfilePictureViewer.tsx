@@ -11,7 +11,7 @@ import { Feather } from "@expo/vector-icons";
 import { Image } from "expo-image";
 
 // internal
-import { ProfilePictureViewerProps } from "../../types/ProfilePicture";
+import { ProfilePictureViewerProps } from "../../../types/ProfilePicture";
 
 
 const ProfilePictureViewer: React.FC<ProfilePictureViewerProps> = ({

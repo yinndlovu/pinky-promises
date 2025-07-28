@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -6,44 +7,65 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
   ActivityIndicator,
-  TouchableWithoutFeedback
 } from "react-native";
-import AlertModal from "./AlertModal";
 
-type UpdateLoveLanguageModalProps = {
+// content
+import AlertModal from "../output/AlertModal";
+
+const FAVORITE_FIELDS = [
+  { key: "favoriteColor", label: "Favorite Color" },
+  { key: "favoriteFood", label: "Favorite Food" },
+  { key: "favoriteSnack", label: "Favorite Snack" },
+  { key: "favoriteActivity", label: "Favorite Activity" },
+  { key: "favoriteHoliday", label: "Favorite Holiday" },
+  { key: "favoriteTimeOfDay", label: "Favorite Time of Day" },
+  { key: "favoriteSeason", label: "Favorite Season" },
+  { key: "favoriteAnimal", label: "Favorite Animal" },
+  { key: "favoriteDrink", label: "Favorite Drink" },
+  { key: "favoritePet", label: "Favorite Pet" },
+  { key: "favoriteShow", label: "Favorite Show" },
+];
+
+type Favorites = { [key: string]: string };
+
+type UpdateFavoritesModalProps = {
   visible: boolean;
-  initialLoveLanguage: string;
+  initialFavorites: Favorites;
   onClose: () => void;
-  onSave: (loveLanguage: string) => Promise<void>;
+  onSave: (favorites: Favorites) => Promise<void>;
 };
 
-const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
+const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
   visible,
-  initialLoveLanguage,
+  initialFavorites,
   onClose,
   onSave,
 }) => {
-  const [loveLanguage, setLoveLanguage] = useState(initialLoveLanguage || "");
+  const [favorites, setFavorites] = useState<Favorites>(initialFavorites || {});
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     if (visible) {
-      setLoveLanguage(initialLoveLanguage || "");
+      setFavorites(initialFavorites || {});
     }
-  }, [visible, initialLoveLanguage]);
+  }, [visible, initialFavorites]);
+
+  const handleChange = (key: string, value: string) => {
+    setFavorites((prev) => ({ ...prev, [key]: value }));
+  };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await onSave(loveLanguage);
-
-      setAlertMessage("Love language updated!");
+      await onSave(favorites);
+      setAlertMessage("Favorites updated");
       setAlertVisible(true);
     } catch (err) {
-      setAlertMessage("Failed to update love language");
+      setAlertMessage("Failed to update favorites");
       setAlertVisible(true);
     } finally {
       setLoading(false);
@@ -52,18 +74,26 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.overlay}>
         <View style={styles.content}>
-          <Text style={styles.title}>Update love language</Text>
-          <TextInput
-            style={styles.input}
-            value={loveLanguage}
-            onChangeText={setLoveLanguage}
-            placeholder="Enter your love language"
-            placeholderTextColor="#b0b3c6"
-            editable={!loading}
-          />
+          <Text style={styles.title}>Update your favorites</Text>
+          <ScrollView
+            style={{ width: "100%" }}
+            contentContainerStyle={{ paddingBottom: 16 }}
+          >
+            {FAVORITE_FIELDS.map((field) => (
+              <View key={field.key} style={styles.inputGroup}>
+                <Text style={styles.label}>{field.label}</Text>
+                <TextInput
+                  style={styles.input}
+                  value={favorites[field.key] || ""}
+                  onChangeText={(text) => handleChange(field.key, text)}
+                  placeholder={`Enter ${field.label.toLowerCase()}`}
+                  placeholderTextColor="#b0b3c6"
+                />
+              </View>
+            ))}
+          </ScrollView>
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={styles.saveButton}
@@ -92,12 +122,11 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
             message={alertMessage}
             onClose={() => {
               setAlertVisible(false);
-              if (alertMessage === "Love language updated!") onClose();
+              if (alertMessage === "Favorites updated") onClose();
             }}
           />
         </View>
       </View>
-      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -116,6 +145,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: "center",
     width: "90%",
+    maxHeight: "90%",
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 10,
@@ -129,23 +159,30 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     alignSelf: "center",
   },
+  inputGroup: {
+    marginBottom: 14,
+  },
+  label: {
+    color: "#b0b3c6",
+    fontSize: 15,
+    marginBottom: 4,
+    marginLeft: 2,
+  },
   input: {
     backgroundColor: "#393a4a",
     color: "#fff",
     borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#393a4a",
-    width: "100%",
-    marginBottom: 24,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    marginTop: 8,
+    marginTop: 12,
   },
   saveButton: {
     backgroundColor: "#e03487",
@@ -186,4 +223,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UpdateLoveLanguageModal;
+export default UpdateFavoritesModal;

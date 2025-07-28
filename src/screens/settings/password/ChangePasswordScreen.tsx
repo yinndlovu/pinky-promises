@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { changePassword } from "../../../services/authService";
 
 // screen content
-import AlertModal from "../../../components/modals/AlertModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 // types
 type ChangePasswordScreenProps = StackScreenProps<any, any>;

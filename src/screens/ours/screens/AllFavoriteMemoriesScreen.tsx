@@ -25,10 +25,10 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY } from "../../../helpers/formatDateHelper";
 
 // confirmation modal
-import FavoriteMemoryDetailsModal from "../../../components/modals/FavoriteMemoryDetailsModal";
-import ConfirmationModal from "../../../components/modals/ConfirmationModal";
-import UpdateFavoriteMemoryModal from "../../../components/modals/UpdateFavoriteMemoryModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
+import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
+import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 const AllFavoriteMemoriesScreen = () => {
   // variables

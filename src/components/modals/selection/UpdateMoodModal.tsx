@@ -1,48 +1,68 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Modal,
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
+  TouchableOpacity,
   ActivityIndicator,
   TouchableWithoutFeedback
 } from "react-native";
-import AlertModal from "./AlertModal";
+import ModalSelector from "react-native-modal-selector";
+import AlertModal from "./output-modals/AlertModal";
 
-type UpdateAboutModalProps = {
+const MOOD_OPTIONS = [
+  "Happy",
+  "Excited",
+  "Content",
+  "Sad",
+  "Unhappy",
+  "Angry",
+  "Annoyed",
+  "Irritated",
+  "Very happy",
+  "Crying",
+  "Neutral",
+];
+
+type UpdateMoodModalProps = {
   visible: boolean;
-  initialAbout: string;
   onClose: () => void;
-  onSave: (about: string) => Promise<void>;
+  onSave: (mood: string) => void;
+  initialMood?: string;
 };
 
-const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
+const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   visible,
-  initialAbout,
   onClose,
   onSave,
+  initialMood = "happy",
 }) => {
-  const [about, setAbout] = useState(initialAbout || "");
+  const [selectedMood, setSelectedMood] = useState(initialMood);
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (visible) {
-      setAbout(initialAbout || "");
+      setSelectedMood(initialMood);
     }
-  }, [visible, initialAbout]);
+  }, [visible, initialMood]);
+
+  const data = MOOD_OPTIONS.map((mood) => ({
+    key: mood,
+    label: mood.charAt(0).toUpperCase() + mood.slice(1),
+  }));
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await onSave(about);
-      setAlertMessage("More about you updated!");
+      await onSave(selectedMood);
+      
+      setAlertMessage("Mood updated!");
       setAlertVisible(true);
     } catch (err) {
-      setAlertMessage("Failed to update info");
+      setAlertMessage("Failed to update mood");
       setAlertVisible(true);
     } finally {
       setLoading(false);
@@ -52,19 +72,24 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Update more about you</Text>
-          <TextInput
-            style={styles.textArea}
-            value={about}
-            onChangeText={setAbout}
-            placeholder="Tell us more about you..."
-            placeholderTextColor="#b0b3c6"
-            multiline
-            numberOfLines={6}
-            maxLength={500}
-            editable={!loading}
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Update your mood</Text>
+          <ModalSelector
+            data={data}
+            initValue={
+              selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)
+            }
+            onChange={(option) => setSelectedMood(option.key)}
+            style={styles.selector}
+            selectStyle={styles.selectStyle}
+            selectTextStyle={styles.selectTextStyle}
+            optionTextStyle={styles.optionTextStyle}
+            optionContainerStyle={styles.optionContainerStyle}
+            cancelStyle={styles.cancelStyle}
+            cancelTextStyle={styles.cancelTextStyle}
+            backdropPressToClose={true}
+            animationType="fade"
           />
           <View style={styles.buttonRow}>
             <TouchableOpacity
@@ -89,13 +114,12 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
               <ActivityIndicator size="large" color="#e03487" />
             </View>
           )}
-          
           <AlertModal
             visible={alertVisible}
             message={alertMessage}
             onClose={() => {
               setAlertVisible(false);
-              if (alertMessage === "More about you updated") onClose();
+              if (alertMessage === "Mood updated!") onClose();
             }}
           />
         </View>
@@ -106,14 +130,13 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  modalOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(5, 3, 12, 0.7)",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 1000,
   },
-  content: {
+  modalContent: {
     backgroundColor: "#23243a",
     borderRadius: 16,
     padding: 24,
@@ -123,34 +146,51 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 5,
-    position: "relative",
   },
-  title: {
+  modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 16,
     alignSelf: "center",
   },
-  textArea: {
-    backgroundColor: "#393a4a",
-    color: "#fff",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    minHeight: 120,
+  selector: {
     width: "100%",
-    textAlignVertical: "top",
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#393a4a",
+    marginBottom: 24,
+  },
+  selectStyle: {
+    backgroundColor: "#393a4a",
+    borderRadius: 10,
+    borderWidth: 0,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  selectTextStyle: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  optionTextStyle: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  optionContainerStyle: {
+    backgroundColor: "#23243a",
+    borderRadius: 10,
+  },
+  cancelStyle: {
+    backgroundColor: "#e03487",
+    borderRadius: 10,
+  },
+  cancelTextStyle: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    marginTop: 12,
+    marginTop: 8,
   },
   saveButton: {
     backgroundColor: "#e03487",
@@ -191,4 +231,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UpdateAboutModal;
+export default UpdateMoodModal;

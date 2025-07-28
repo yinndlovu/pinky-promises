@@ -27,7 +27,7 @@ import NetInfo from "@react-native-community/netinfo";
 // internal
 import { fetchUserStatus } from "../../../services/userStatusService";
 import { getMood } from "../../../services/moodService";
-import UpdateFavoritesModal from "../../../components/modals/UpdateFavoritesModal";
+import UpdateFavoritesModal from "../../../components/modals/input/UpdateFavoritesModal";
 import {
   getUserFavorites,
   updateUserFavorites,
@@ -49,10 +49,10 @@ import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
 import { storeMessage } from "../../../services/messageStorageService";
 
 // screen content
-import UpdateAboutModal from "../../../components/modals/UpdateAboutModal";
-import UpdateLoveLanguageModal from "../../../components/modals/UpdateLoveLanguageModal";
-import ProfilePictureModal from "../../../components/modals/ProfilePictureModal";
-import ProfilePictureViewer from "../../../components/modals/ProfilePictureViewer";
+import UpdateAboutModal from "../../../components/modals/input/UpdateAboutModal";
+import UpdateLoveLanguageModal from "../../../components/modals/input/UpdateLoveLanguageModal";
+import ProfilePictureModal from "../../../components/modals/selection/ProfilePictureModal";
+import ProfilePictureViewer from "../../../components/modals/output/ProfilePictureViewer";
 import StatusMood from "./StatusMood";
 import Anniversary from "./Anniversary";
 import Favorites from "./Favorites";
@@ -60,8 +60,8 @@ import LoveLanguage from "./LoveLanguage";
 import MoreAboutYou from "./MoreAboutYou";
 import styles from "./styles/ProfileScrees.styles";
 import MessageStorage from "./MessageStorage";
-import StoreMessageModal from "../../../components/modals/input-modals/StoreMessageModal";
-import AlertModal from "../../../components/modals/AlertModal";
+import StoreMessageModal from "../../../components/modals/input/StoreMessageModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;

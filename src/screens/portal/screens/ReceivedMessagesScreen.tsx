@@ -17,7 +17,7 @@ import {
   getReceivedSweetMessages,
   viewSweetMessage,
 } from "../../../services/sweetMessageService";
-import ViewMessageModal from "../../../components/modals/ViewMessageModal";
+import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import { Message } from "../../../types/Message";
 import { formatDateDMY } from "../../../helpers/formatDateHelper";
 

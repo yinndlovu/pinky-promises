@@ -22,7 +22,7 @@ import { User } from "../../types/User";
 import { ProfilePictureInfo } from "../../types/ProfilePicture";
 
 // screen content
-import AlertModal from "../../components/modals/AlertModal";
+import AlertModal from "../../components/modals/output/AlertModal";
 import UserListItem from "./UserListItem";
 
 // types

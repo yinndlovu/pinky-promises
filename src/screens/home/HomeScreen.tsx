@@ -44,10 +44,10 @@ import { checkLocationPermissions } from "../../services/location/locationPermis
 
 // screen content
 import RecentActivity from "./components/RecentActivity";
-import ActionsModal from "../../components/modals/ActionsModal";
+import ActionsModal from "../../components/modals/selection/ActionsModal";
 import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
-import AlertModal from "../../components/modals/AlertModal";
+import AlertModal from "../../components/modals/output/AlertModal";
 
 // types
 type Props = NativeStackScreenProps<any>;

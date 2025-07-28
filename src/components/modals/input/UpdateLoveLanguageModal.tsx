@@ -1,68 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
   Text,
-  StyleSheet,
+  TextInput,
   TouchableOpacity,
+  StyleSheet,
   ActivityIndicator,
   TouchableWithoutFeedback
 } from "react-native";
-import ModalSelector from "react-native-modal-selector";
-import AlertModal from "./AlertModal";
+import AlertModal from "./output-modals/AlertModal";
 
-const MOOD_OPTIONS = [
-  "Happy",
-  "Excited",
-  "Content",
-  "Sad",
-  "Unhappy",
-  "Angry",
-  "Annoyed",
-  "Irritated",
-  "Very happy",
-  "Crying",
-  "Neutral",
-];
-
-type UpdateMoodModalProps = {
+type UpdateLoveLanguageModalProps = {
   visible: boolean;
+  initialLoveLanguage: string;
   onClose: () => void;
-  onSave: (mood: string) => void;
-  initialMood?: string;
+  onSave: (loveLanguage: string) => Promise<void>;
 };
 
-const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
+const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   visible,
+  initialLoveLanguage,
   onClose,
   onSave,
-  initialMood = "happy",
 }) => {
-  const [selectedMood, setSelectedMood] = useState(initialMood);
+  const [loveLanguage, setLoveLanguage] = useState(initialLoveLanguage || "");
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (visible) {
-      setSelectedMood(initialMood);
+      setLoveLanguage(initialLoveLanguage || "");
     }
-  }, [visible, initialMood]);
-
-  const data = MOOD_OPTIONS.map((mood) => ({
-    key: mood,
-    label: mood.charAt(0).toUpperCase() + mood.slice(1),
-  }));
+  }, [visible, initialLoveLanguage]);
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      await onSave(selectedMood);
-      
-      setAlertMessage("Mood updated!");
+      await onSave(loveLanguage);
+
+      setAlertMessage("Love language updated!");
       setAlertVisible(true);
     } catch (err) {
-      setAlertMessage("Failed to update mood");
+      setAlertMessage("Failed to update love language");
       setAlertVisible(true);
     } finally {
       setLoading(false);
@@ -72,24 +53,16 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Update your mood</Text>
-          <ModalSelector
-            data={data}
-            initValue={
-              selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)
-            }
-            onChange={(option) => setSelectedMood(option.key)}
-            style={styles.selector}
-            selectStyle={styles.selectStyle}
-            selectTextStyle={styles.selectTextStyle}
-            optionTextStyle={styles.optionTextStyle}
-            optionContainerStyle={styles.optionContainerStyle}
-            cancelStyle={styles.cancelStyle}
-            cancelTextStyle={styles.cancelTextStyle}
-            backdropPressToClose={true}
-            animationType="fade"
+      <View style={styles.overlay}>
+        <View style={styles.content}>
+          <Text style={styles.title}>Update love language</Text>
+          <TextInput
+            style={styles.input}
+            value={loveLanguage}
+            onChangeText={setLoveLanguage}
+            placeholder="Enter your love language"
+            placeholderTextColor="#b0b3c6"
+            editable={!loading}
           />
           <View style={styles.buttonRow}>
             <TouchableOpacity
@@ -119,7 +92,7 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
             message={alertMessage}
             onClose={() => {
               setAlertVisible(false);
-              if (alertMessage === "Mood updated!") onClose();
+              if (alertMessage === "Love language updated!") onClose();
             }}
           />
         </View>
@@ -130,13 +103,14 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
 };
 
 const styles = StyleSheet.create({
-  modalOverlay: {
+  overlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(5, 3, 12, 0.7)",
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 1000,
   },
-  modalContent: {
+  content: {
     backgroundColor: "#23243a",
     borderRadius: 16,
     padding: 24,
@@ -146,45 +120,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 5,
+    position: "relative",
   },
-  modalTitle: {
+  title: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#fff",
     marginBottom: 16,
     alignSelf: "center",
   },
-  selector: {
+  input: {
+    backgroundColor: "#393a4a",
+    color: "#fff",
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#393a4a",
     width: "100%",
     marginBottom: 24,
-  },
-  selectStyle: {
-    backgroundColor: "#393a4a",
-    borderRadius: 10,
-    borderWidth: 0,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  selectTextStyle: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  optionTextStyle: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  optionContainerStyle: {
-    backgroundColor: "#23243a",
-    borderRadius: 10,
-  },
-  cancelStyle: {
-    backgroundColor: "#e03487",
-    borderRadius: 10,
-  },
-  cancelTextStyle: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
   },
   buttonRow: {
     flexDirection: "row",
@@ -231,4 +186,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UpdateMoodModal;
+export default UpdateLoveLanguageModal;

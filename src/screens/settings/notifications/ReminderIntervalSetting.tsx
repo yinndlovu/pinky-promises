@@ -17,7 +17,7 @@ import {
 } from "../../../services/notificationPreferenceService";
 
 // content
-import AlertModal from "../../../components/modals/AlertModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 const ReminderIntervalSetting = () => {
   // use states
