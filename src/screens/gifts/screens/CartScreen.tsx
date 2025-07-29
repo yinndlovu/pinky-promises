@@ -47,6 +47,7 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
   const loadCartItems = async () => {
     try {
       const savedItems = await AsyncStorage.getItem("cartItems");
+
       if (savedItems) {
         setCartItems(JSON.parse(savedItems));
       }
@@ -89,14 +90,14 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const removeItemFromCart = async (itemId: string) => {
-    const updatedItems = cartItems.filter(item => item.id !== itemId);
+    const updatedItems = cartItems.filter((item) => item.id !== itemId);
     setCartItems(updatedItems);
     await saveCartItems(updatedItems);
   };
 
   const clearCart = () => {
     Alert.alert(
-      "Clear Cart",
+      "Clear cart",
       "Are you sure you want to remove all items from your cart?",
       [
         {
@@ -150,47 +151,6 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
-      {/* Header */}
-      <View
-        style={{
-          backgroundColor: "#23243a",
-          paddingTop: insets.top,
-          height: HEADER_HEIGHT + insets.top,
-          justifyContent: "center",
-          alignItems: "center",
-          position: "relative",
-          zIndex: 2,
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            position: "absolute",
-            top: insets.top + (HEADER_HEIGHT - 36) / 2,
-            left: 18,
-            zIndex: 10,
-            backgroundColor: "#23243a",
-            borderRadius: 20,
-            padding: 8,
-            shadowColor: "#000",
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-          }}
-          onPress={() => navigation.goBack()}
-        >
-          <Feather name="arrow-left" size={22} color="#fff" />
-        </TouchableOpacity>
-        <Text
-          style={{
-            fontSize: 20,
-            color: "#fff",
-            letterSpacing: 0,
-          }}
-        >
-          Shopping Cart
-        </Text>
-      </View>
-
-      {/* Content */}
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -200,15 +160,21 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
           renderEmptyState()
         ) : (
           <>
-            {/* Cart Items */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>CART ITEMS</Text>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionTitle}>CART ITEMS</Text>
+                <TouchableOpacity
+                  style={styles.addButton}
+                  onPress={() => setAddItemModalVisible(true)}
+                >
+                  <Feather name="plus" size={24} color="#fff" />
+                </TouchableOpacity>
+              </View>
               <View style={styles.cartItemsContainer}>
                 {cartItems.map(renderCartItem)}
               </View>
             </View>
 
-            {/* Total */}
             <View style={styles.totalSection}>
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total</Text>
@@ -218,39 +184,22 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
               </View>
             </View>
 
-            {/* Actions */}
             <View style={styles.actionsSection}>
-              <TouchableOpacity
-                style={styles.clearButton}
-                onPress={clearCart}
-              >
+              <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
                 <Feather name="trash-2" size={18} color="#e03487" />
-                <Text style={styles.clearButtonText}>Clear Cart</Text>
+                <Text style={styles.clearButtonText}>Clear cart</Text>
               </TouchableOpacity>
             </View>
           </>
         )}
       </ScrollView>
-
-      {/* Add Item Button */}
-      <View style={styles.addButtonContainer}>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setAddItemModalVisible(true)}
-        >
-          <Feather name="plus" size={24} color="#fff" />
-          <Text style={styles.addButtonText}>Add Item</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Add Item Modal */}
       <Modal visible={addItemModalVisible} transparent animationType="fade">
         <TouchableWithoutFeedback onPress={() => setAddItemModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
                 <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Add New Item</Text>
+                  <Text style={styles.modalTitle}>Add new item</Text>
                   <TouchableOpacity
                     onPress={() => setAddItemModalVisible(false)}
                     style={styles.closeButton}
@@ -258,18 +207,18 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
                     <Feather name="x" size={24} color="#fff" />
                   </TouchableOpacity>
                 </View>
-                
+
                 <View style={styles.form}>
                   <Text style={styles.label}>Item name</Text>
                   <TextInput
                     style={styles.input}
                     value={newItemName}
                     onChangeText={setNewItemName}
-                    placeholder="e.g., Coffee mug"
+                    placeholder="e.g., Cute brown plushie"
                     placeholderTextColor="#b0b3c6"
                     maxLength={50}
                   />
-                  
+
                   <Text style={styles.label}>Value ($)</Text>
                   <TextInput
                     style={styles.input}
@@ -281,7 +230,7 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
                     maxLength={10}
                   />
                 </View>
-                
+
                 <View style={styles.modalActions}>
                   <TouchableOpacity
                     style={styles.cancelButton}
@@ -292,12 +241,13 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
                   <TouchableOpacity
                     style={[
                       styles.saveButton,
-                      (!newItemName.trim() || !newItemValue.trim()) && styles.saveButtonDisabled,
+                      (!newItemName.trim() || !newItemValue.trim()) &&
+                        styles.saveButtonDisabled,
                     ]}
                     onPress={addItemToCart}
                     disabled={!newItemName.trim() || !newItemValue.trim()}
                   >
-                    <Text style={styles.saveButtonText}>Add Item</Text>
+                    <Text style={styles.saveButtonText}>Add item</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -321,16 +271,40 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 24,
   },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
   sectionTitle: {
     fontSize: 13,
     color: "#b0b3c6",
     letterSpacing: 1,
     textTransform: "uppercase",
-    marginBottom: 16,
     opacity: 0.7,
     fontWeight: "bold",
   },
+  addButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#e03487",
+    borderRadius: 16,
+    width: 26,
+    height: 26,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  addButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 8,
+  },
   cartItemsContainer: {
+    marginTop: 16,
     backgroundColor: "#1b1c2e",
     borderRadius: 16,
     overflow: "hidden",
@@ -398,31 +372,6 @@ const styles = StyleSheet.create({
   },
   clearButtonText: {
     color: "#e03487",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  addButtonContainer: {
-    position: "absolute",
-    bottom: 20,
-    left: 16,
-    right: 16,
-  },
-  addButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#e03487",
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  addButtonText: {
-    color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
     marginLeft: 8,
@@ -506,14 +455,14 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   cancelButton: {
-    backgroundColor: "#23243a",
+    backgroundColor: "#393a4a",
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 24,
     alignItems: "center",
-    borderWidth: 1,
     borderColor: "#b0b3c6",
     marginRight: 8,
+    flex: 1
   },
   cancelButtonText: {
     color: "#b0b3c6",
@@ -526,6 +475,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 24,
     alignItems: "center",
+    flex: 1
   },
   saveButtonDisabled: {
     opacity: 0.6,

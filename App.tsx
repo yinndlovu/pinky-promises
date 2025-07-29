@@ -443,6 +443,7 @@ function AppContent() {
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
+            headerTitleAlign: "center",
           }}
         />
       </Stack.Navigator>

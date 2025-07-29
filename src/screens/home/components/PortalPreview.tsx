@@ -13,8 +13,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { getPortalActivityCount } from "../../../services/countService";
-import { getLastUnseenSweetMessage } from "../../../services/sweetMessageService";
-import { getLastUnseenVentMessage } from "../../../services/ventMessageService";
 
 // types
 type PortalPreviewProps = {
