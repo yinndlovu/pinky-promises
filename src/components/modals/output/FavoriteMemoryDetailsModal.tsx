@@ -1,3 +1,4 @@
+// external
 import React from "react";
 import {
   Modal,
@@ -9,6 +10,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
+// types
 type Props = {
   visible: boolean;
   onClose: () => void;

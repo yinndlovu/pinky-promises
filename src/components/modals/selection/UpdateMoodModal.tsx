@@ -9,7 +9,7 @@ import {
   TouchableWithoutFeedback
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
-import AlertModal from "./output-modals/AlertModal";
+import AlertModal from "../output/AlertModal";
 
 const MOOD_OPTIONS = [
   "Happy",

@@ -1,3 +1,4 @@
+// external
 import React from "react";
 import {
   Modal,
@@ -9,6 +10,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
+// types
 type ConfirmationModalProps = {
   visible: boolean;
   message: string;

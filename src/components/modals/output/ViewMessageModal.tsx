@@ -2,6 +2,7 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
+// types
 type Props = {
   visible: boolean;
   onClose: () => void;

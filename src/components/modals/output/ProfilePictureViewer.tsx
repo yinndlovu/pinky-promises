@@ -33,7 +33,7 @@ const ProfilePictureViewer: React.FC<ProfilePictureViewerProps> = ({
             <Feather name="x" size={24} color="#fff" />
           </TouchableOpacity>
           <Image
-            source={imageUri || require("../../assets/default-avatar-two.png")}
+            source={imageUri || require("../../../assets/default-avatar-two.png")}
             style={styles.fullImage}
             contentFit="contain"
             transition={200}

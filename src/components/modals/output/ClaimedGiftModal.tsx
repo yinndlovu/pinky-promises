@@ -1,8 +1,10 @@
+// external
 import React, { useState } from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 
+// types
 type ClaimedGiftModalProps = {
   visible: boolean;
   giftName: string;

@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback
 } from "react-native";
-import AlertModal from "./output-modals/AlertModal";
+import AlertModal from "../output/AlertModal";
 
 type UpdateLoveLanguageModalProps = {
   visible: boolean;

@@ -155,11 +155,10 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    width: "100%",
     marginTop: 8,
   },
   cancelButton: {
-    backgroundColor: "#23243a",
+    backgroundColor: "#393a4a",
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 24,

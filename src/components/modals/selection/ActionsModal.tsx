@@ -1,3 +1,4 @@
+// external
 import React from "react";
 import {
   Modal,
@@ -9,12 +10,14 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 
+// types
 type ActionsModalProps = {
   visible: boolean;
   onClose: () => void;
   onAction: (actionKey: string) => void;
 };
 
+// actions
 const ACTIONS = [
   { key: "kiss", label: "KISS" },
   { key: "hug", label: "HUG" },
