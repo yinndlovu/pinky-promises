@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
+import { getPortalActivityCount } from "../../../services/countService";
 import { getLastUnseenSweetMessage } from "../../../services/sweetMessageService";
 import { getLastUnseenVentMessage } from "../../../services/ventMessageService";
 
@@ -21,7 +22,10 @@ type PortalPreviewProps = {
   navigation: any;
 };
 
-const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) => {
+const PortalPreview: React.FC<PortalPreviewProps> = ({
+  partner,
+  navigation,
+}) => {
   // animations
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
@@ -29,37 +33,25 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
   const shadowAnim = useRef(new Animated.Value(0.1)).current;
 
   // fetch functions
-  const {
-    data: unseenSweetMessage,
-    isLoading: sweetLoading,
-  } = useQuery({
-    queryKey: ["unseenSweetMessage"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return null;
-      const unseenSweet = await getLastUnseenSweetMessage(token);
-      return unseenSweet.sweet || null;
-    },
-    staleTime: 1000 * 60 * 5,
-    enabled: !!partner,
-  });
+  const { data: portalActivityCount, isLoading: portalActivityCountLoading } =
+    useQuery({
+      queryKey: ["portalActivityCount"],
+      queryFn: async () => {
+        const token = await AsyncStorage.getItem("token");
 
-  const {
-    data: unseenVentMessage,
-    isLoading: ventLoading,
-  } = useQuery({
-    queryKey: ["unseenVentMessage"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return null;
-      const unseenVent = await getLastUnseenVentMessage(token);
-      return unseenVent.vent || null;
-    },
-    staleTime: 1000 * 60 * 5,
-    enabled: !!partner,
-  });
+        if (!token) {
+          return null;
+        }
 
-  const totalUnseen = (unseenSweetMessage ? 1 : 0) + (unseenVentMessage ? 1 : 0);
+        return getPortalActivityCount(token);
+      },
+      staleTime: 1000 * 60,
+      enabled: !!partner,
+    });
+
+  const totalUnseen = portalActivityCount?.total || 0;
+  const sweetTotal = portalActivityCount?.sweetTotal || 0;
+  const ventTotal = portalActivityCount?.ventTotal || 0;
 
   // animations
   useEffect(() => {
@@ -154,11 +146,11 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
   };
 
   const getActivityIcon = () => {
-    if (unseenSweetMessage && unseenVentMessage) {
+    if (sweetTotal > 0 && ventTotal > 0) {
       return "message-circle";
-    } else if (unseenSweetMessage) {
+    } else if (sweetTotal > 0) {
       return "heart";
-    } else if (unseenVentMessage) {
+    } else if (ventTotal > 0) {
       return "message-square";
     } else {
       return "inbox";
@@ -198,9 +190,7 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
             style={[
               styles.contentWrapper,
               {
-                transform: [
-                  { scale: Animated.multiply(pulseAnim, scaleAnim) },
-                ],
+                transform: [{ scale: Animated.multiply(pulseAnim, scaleAnim) }],
               },
             ]}
           >
@@ -226,7 +216,7 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
                   color={totalUnseen > 0 ? "#e03487" : "#b0b3c6"}
                 />
               </Animated.View>
-              
+
               {totalUnseen > 0 && (
                 <Animated.View
                   style={[
