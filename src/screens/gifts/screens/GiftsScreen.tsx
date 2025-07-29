@@ -6,11 +6,14 @@ import {
   StyleSheet,
   ScrollView,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
+import { Feather } from "@expo/vector-icons";
+import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // screen content
 import SetMonthlyGift from "../components/SetMonthlyGift";
@@ -33,7 +36,9 @@ import {
 import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY, formatTime } from "../../../helpers/formatDateHelper";
 
-const GiftsScreen = () => {
+type Props = NativeStackScreenProps<any>;
+
+const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
@@ -226,6 +231,23 @@ const GiftsScreen = () => {
         >
           Presents
         </Text>
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            right: 18,
+            zIndex: 10,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }}
+          onPress={() => navigation.navigate("CartScreen")}
+        >
+          <Feather name="shopping-cart" size={22} color="#fff" />
+        </TouchableOpacity>
       </View>
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}

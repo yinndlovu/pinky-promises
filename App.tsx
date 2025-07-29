@@ -56,6 +56,7 @@ import AboutScreen from "./src/screens/settings/about/AboutScreen";
 import AllFavoriteMemoriesScreen from "./src/screens/ours/screens/AllFavoriteMemoriesScreen";
 import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen";
 import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
+import CartScreen from "./src/screens/gifts/screens/CartScreen";
 
 // variables
 const Stack = createStackNavigator();
@@ -431,6 +432,17 @@ function AppContent() {
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
             headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="CartScreen"
+          component={CartScreen}
+          options={{
+            headerShown: true,
+            title: "Cart",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
           }}
         />
       </Stack.Navigator>

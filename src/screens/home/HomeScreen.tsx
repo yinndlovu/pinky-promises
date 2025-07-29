@@ -48,6 +48,7 @@ import ActionsModal from "../../components/modals/selection/ActionsModal";
 import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
 import AlertModal from "../../components/modals/output/AlertModal";
+import PortalPreview from "./components/PortalPreview";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -690,6 +691,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
         )}
+        <PortalPreview partner={partner} navigation={navigation} />
         <RecentActivity activities={activities} />
       </ScrollView>
       {showError && (
