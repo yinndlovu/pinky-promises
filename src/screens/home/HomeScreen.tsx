@@ -691,7 +691,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </View>
         )}
+
         <PortalPreview partner={partner} navigation={navigation} />
+        
         <RecentActivity activities={activities} />
       </ScrollView>
       {showError && (

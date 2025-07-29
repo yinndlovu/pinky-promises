@@ -12,25 +12,21 @@ import { useQuery } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
-import {
-  getLastUnseenSweetMessage,
-} from "../../../services/sweetMessageService";
+import { getLastUnseenSweetMessage } from "../../../services/sweetMessageService";
 import { getLastUnseenVentMessage } from "../../../services/ventMessageService";
 
-import {
-  getLastUnseenVentMessage as getLastUnseenVent,
-} from "../../../services/ventMessageService";
-
+// types
 type PortalPreviewProps = {
   partner: any;
   navigation: any;
 };
 
 const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) => {
-  // variables
+  // animations
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const shadowAnim = useRef(new Animated.Value(0.1)).current;
 
   // fetch functions
   const {
@@ -98,12 +94,29 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
         ])
       );
 
+      const shadowAnimation = Animated.loop(
+        Animated.sequence([
+          Animated.timing(shadowAnim, {
+            toValue: 0.3,
+            duration: 2000,
+            useNativeDriver: false,
+          }),
+          Animated.timing(shadowAnim, {
+            toValue: 0.1,
+            duration: 2000,
+            useNativeDriver: false,
+          }),
+        ])
+      );
+
       pulseAnimation.start();
       glowAnimation.start();
+      shadowAnimation.start();
 
       return () => {
         pulseAnimation.stop();
         glowAnimation.stop();
+        shadowAnimation.stop();
       };
     }
   }, [totalUnseen]);
@@ -165,13 +178,7 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
           style={[
             styles.portalCard,
             {
-              transform: [
-                { scale: Animated.multiply(pulseAnim, scaleAnim) },
-              ],
-              shadowOpacity: glowAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.1, 0.3],
-              }),
+              shadowOpacity: shadowAnim,
             },
           ]}
         >
@@ -187,60 +194,72 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
             ]}
           />
 
-          <View style={styles.iconContainer}>
-            <Animated.View
-              style={[
-                styles.iconWrapper,
-                {
-                  transform: [
-                    {
-                      scale: pulseAnim.interpolate({
-                        inputRange: [1, 1.05],
-                        outputRange: [1, 1.1],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            >
-              <Feather
-                name={getActivityIcon()}
-                size={24}
-                color={totalUnseen > 0 ? "#e03487" : "#b0b3c6"}
-              />
-            </Animated.View>
-            
-            {totalUnseen > 0 && (
+          <Animated.View
+            style={[
+              styles.contentWrapper,
+              {
+                transform: [
+                  { scale: Animated.multiply(pulseAnim, scaleAnim) },
+                ],
+              },
+            ]}
+          >
+            <View style={styles.iconContainer}>
               <Animated.View
                 style={[
-                  styles.notificationBadge,
+                  styles.iconWrapper,
                   {
                     transform: [
                       {
                         scale: pulseAnim.interpolate({
                           inputRange: [1, 1.05],
-                          outputRange: [1, 1.2],
+                          outputRange: [1, 1.1],
                         }),
                       },
                     ],
                   },
                 ]}
               >
-                <Text style={styles.badgeText}>
-                  {totalUnseen > 99 ? "99+" : totalUnseen}
-                </Text>
+                <Feather
+                  name={getActivityIcon()}
+                  size={24}
+                  color={totalUnseen > 0 ? "#e03487" : "#b0b3c6"}
+                />
               </Animated.View>
-            )}
-          </View>
+              
+              {totalUnseen > 0 && (
+                <Animated.View
+                  style={[
+                    styles.notificationBadge,
+                    {
+                      transform: [
+                        {
+                          scale: pulseAnim.interpolate({
+                            inputRange: [1, 1.05],
+                            outputRange: [1, 1.2],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  <Text style={styles.badgeText}>
+                    {totalUnseen > 99 ? "99+" : totalUnseen}
+                  </Text>
+                </Animated.View>
+              )}
+            </View>
 
-          <View style={styles.contentContainer}>
-            <Text style={styles.activityText}>{getActivityText()}</Text>
-            <Text style={styles.portalText}>Tap to view your portal</Text>
-          </View>
+            <View style={styles.contentContainer}>
+              <Text style={styles.activityText}>{getActivityText()}</Text>
+              <Text style={styles.portalText}>Tap to view your portal</Text>
+            </View>
 
-          <View style={styles.arrowContainer}>
-            <Feather name="chevron-right" size={20} color="#b0b3c6" />
-          </View>
+            <View style={styles.arrowContainer}>
+              <Feather name="chevron-right" size={20} color="#b0b3c6" />
+            </View>
+          </Animated.View>
+
           {totalUnseen > 0 && (
             <>
               <Animated.View
@@ -311,7 +330,7 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({ partner, navigation }) =>
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 32,
+    marginTop: 24,
     marginBottom: 24,
   },
   sectionTitle: {
@@ -327,8 +346,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#1b1c2e",
     borderRadius: 16,
     padding: 20,
-    flexDirection: "row",
-    alignItems: "center",
     shadowColor: "#e03487",
     shadowOffset: {
       width: 0,
@@ -338,6 +355,10 @@ const styles = StyleSheet.create({
     elevation: 4,
     position: "relative",
     overflow: "hidden",
+  },
+  contentWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   glowBackground: {
     position: "absolute",

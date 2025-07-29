@@ -93,7 +93,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({ activities }) => (
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 32,
+    marginTop: 10,
     marginBottom: 50,
   },
   sectionTitle: {
