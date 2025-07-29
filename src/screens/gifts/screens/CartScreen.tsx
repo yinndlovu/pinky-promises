@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,129 +10,224 @@ import {
   TextInput,
   ActivityIndicator,
   TouchableWithoutFeedback,
-  Alert,
+  RefreshControl,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// types
-type CartItem = {
-  id: string;
-  name: string;
-  value: number;
-};
+// internal
+import {
+  addItem,
+  getItems,
+  getCartTotal,
+  clearCart,
+  deleteItem,
+} from "../../../services/cartService";
+import { CartItem } from "../../../types/Cart";
 
-type Props = NativeStackScreenProps<any>;
+// content
+import AlertModal from "../../../components/modals/output/AlertModal";
+import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 
-const CartScreen: React.FC<Props> = ({ navigation }) => {
+const CartScreen = () => {
   // variables
-  const insets = useSafeAreaInsets();
-  const HEADER_HEIGHT = 60;
+  const queryClient = useQueryClient();
 
   // use states
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [newItemValue, setNewItemValue] = useState("");
-  const [loading, setLoading] = useState(false);
 
-  // use effects
-  useEffect(() => {
-    loadCartItems();
-  }, []);
+  // use states (processing)
+  const [refreshing, setRefreshing] = useState(false);
 
-  // handlers
-  const loadCartItems = async () => {
-    try {
-      const savedItems = await AsyncStorage.getItem("cartItems");
+  // use states (modals)
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [confirmationAction, setConfirmationAction] = useState<
+    (() => void) | null
+  >(null);
 
-      if (savedItems) {
-        setCartItems(JSON.parse(savedItems));
+  // fetch functions
+  const {
+    data: cartItems = [],
+    isLoading: cartItemsLoading,
+    refetch: refetchCartItems,
+  } = useQuery({
+    queryKey: ["cartItems"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Session expired, please log in again");
       }
-    } catch (error) {
-      console.error("Error loading cart items:", error);
-    }
-  };
 
-  const saveCartItems = async (items: CartItem[]) => {
-    try {
-      await AsyncStorage.setItem("cartItems", JSON.stringify(items));
-    } catch (error) {
-      console.error("Error saving cart items:", error);
-    }
-  };
+      const response = await getItems(token);
+      return Array.isArray(response) ? response : [];
+    },
+    staleTime: 1000 * 60 * 60 * 24 * 3,
+  });
 
-  const addItemToCart = async () => {
+  const {
+    data: cartTotal = 0,
+    isLoading: cartTotalLoading,
+    refetch: refetchCartTotal,
+  } = useQuery({
+    queryKey: ["cartTotal"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const totalData = await getCartTotal(token);
+      return totalData.total || 0;
+    },
+    staleTime: 1000 * 60 * 60 * 24 * 3,
+  });
+
+  // mutations
+  const addItemMutation = useMutation({
+    mutationFn: async ({ item, value }: { item: string; value: string }) => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await addItem(token, item, value);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+
+      setNewItemName("");
+      setNewItemValue("");
+      setAddItemModalVisible(false);
+      setAlertMessage("Item added to cart");
+      setAlertVisible(true);
+    },
+    onError: (error: any) => {
+      setAlertMessage(error?.message || "Failed to add item to cart");
+      setAlertVisible(true);
+    },
+  });
+
+  const deleteItemMutation = useMutation({
+    mutationFn: async (itemId: string) => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await deleteItem(token, itemId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+
+      setConfirmationVisible(false);
+      setAlertMessage("Item removed from cart");
+      setAlertVisible(true);
+    },
+    onError: (error: any) => {
+      setAlertMessage(error?.message || "Failed to remove item from cart");
+      setAlertVisible(true);
+    },
+  });
+
+  const clearCartMutation = useMutation({
+    mutationFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return clearCart(token);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+
+      setConfirmationVisible(false);
+      setAlertMessage("Cart cleared");
+      setAlertVisible(true);
+    },
+    onError: (error: any) => {
+      setConfirmationVisible(false);
+      setAlertMessage(error?.message || "Failed to clear cart");
+      setAlertVisible(true);
+    },
+  });
+
+  /// handlers
+  const handleAddItem = () => {
     if (!newItemName.trim() || !newItemValue.trim()) {
+      setAlertMessage("Please fill in all fields");
+      setAlertVisible(true);
+
       return;
     }
 
     const value = parseFloat(newItemValue);
     if (isNaN(value) || value <= 0) {
+      setAlertMessage("Please enter a valid price");
+      setAlertVisible(true);
+
       return;
     }
 
-    const newItem: CartItem = {
-      id: Date.now().toString(),
-      name: newItemName.trim(),
-      value: value,
-    };
-
-    const updatedItems = [...cartItems, newItem];
-    setCartItems(updatedItems);
-    await saveCartItems(updatedItems);
-
-    setNewItemName("");
-    setNewItemValue("");
-    setAddItemModalVisible(false);
+    addItemMutation.mutate({ item: newItemName.trim(), value: newItemValue });
   };
 
-  const removeItemFromCart = async (itemId: string) => {
-    const updatedItems = cartItems.filter((item) => item.id !== itemId);
-    setCartItems(updatedItems);
-    await saveCartItems(updatedItems);
-  };
-
-  const clearCart = () => {
-    Alert.alert(
-      "Clear cart",
-      "Are you sure you want to remove all items from your cart?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Clear",
-          style: "destructive",
-          onPress: async () => {
-            setCartItems([]);
-            await saveCartItems([]);
-          },
-        },
-      ]
+  const handleRemoveItem = (itemId: string) => {
+    setConfirmationMessage(
+      "Are you sure you want to remove this item from your cart?"
     );
+
+    setConfirmationAction(() => () => deleteItemMutation.mutate(itemId));
+    setConfirmationVisible(true);
   };
 
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.value, 0);
+  const handleClearCart = () => {
+    setConfirmationMessage(
+      "Are you sure you want to remove all items from your cart?"
+    );
+
+    setConfirmationAction(() => () => clearCartMutation.mutate());
+    setConfirmationVisible(true);
   };
 
   const formatCurrency = (amount: number) => {
     return `$${amount.toFixed(2)}`;
   };
 
+  // refresh screen
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refetchCartItems(), refetchCartTotal()]);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const renderCartItem = (item: CartItem) => (
     <View key={item.id} style={styles.cartItem}>
       <View style={styles.itemInfo}>
-        <Text style={styles.itemName}>{item.name}</Text>
+        <Text style={styles.itemName}>{item.item}</Text>
         <Text style={styles.itemValue}>{formatCurrency(item.value)}</Text>
       </View>
       <TouchableOpacity
         style={styles.removeButton}
-        onPress={() => removeItemFromCart(item.id)}
+        onPress={() => handleRemoveItem(item.id)}
+        disabled={deleteItemMutation.isPending}
       >
         <Feather name="trash-2" size={18} color="#e03487" />
       </TouchableOpacity>
@@ -146,8 +241,26 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
       <Text style={styles.emptyStateSubtitle}>
         Add some items to get started
       </Text>
+      <TouchableOpacity
+        style={styles.emptyStateAddButton}
+        onPress={() => setAddItemModalVisible(true)}
+      >
+        <Feather name="plus" size={20} color="#fff" />
+        <Text style={styles.emptyStateAddButtonText}>Add your first item</Text>
+      </TouchableOpacity>
     </View>
   );
+
+  const safeCartItems = Array.isArray(cartItems) ? cartItems : [];
+
+  if (cartItemsLoading || cartTotalLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#e03487" />
+        <Text style={styles.loadingText}>Loading cart...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -155,8 +268,17 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#e03487"]}
+            tintColor="#e03487"
+            progressBackgroundColor="#23243a"
+          />
+        }
       >
-        {cartItems.length === 0 ? (
+        {safeCartItems.length === 0 ? (
           renderEmptyState()
         ) : (
           <>
@@ -171,7 +293,7 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
                 </TouchableOpacity>
               </View>
               <View style={styles.cartItemsContainer}>
-                {cartItems.map(renderCartItem)}
+                {safeCartItems.map(renderCartItem)}
               </View>
             </View>
 
@@ -179,13 +301,17 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total</Text>
                 <Text style={styles.totalValue}>
-                  {formatCurrency(calculateTotal())}
+                  {formatCurrency(cartTotal)}
                 </Text>
               </View>
             </View>
 
             <View style={styles.actionsSection}>
-              <TouchableOpacity style={styles.clearButton} onPress={clearCart}>
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={handleClearCart}
+                disabled={clearCartMutation.isPending}
+              >
                 <Feather name="trash-2" size={18} color="#e03487" />
                 <Text style={styles.clearButtonText}>Clear cart</Text>
               </TouchableOpacity>
@@ -235,6 +361,7 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
                   <TouchableOpacity
                     style={styles.cancelButton}
                     onPress={() => setAddItemModalVisible(false)}
+                    disabled={addItemMutation.isPending}
                   >
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
@@ -244,10 +371,16 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
                       (!newItemName.trim() || !newItemValue.trim()) &&
                         styles.saveButtonDisabled,
                     ]}
-                    onPress={addItemToCart}
-                    disabled={!newItemName.trim() || !newItemValue.trim()}
+                    onPress={handleAddItem}
+                    disabled={
+                      !newItemName.trim() ||
+                      !newItemValue.trim() ||
+                      addItemMutation.isPending
+                    }
                   >
-                    <Text style={styles.saveButtonText}>Add item</Text>
+                    <Text style={styles.saveButtonText}>
+                      {addItemMutation.isPending ? "Adding..." : "Add item"}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -255,6 +388,23 @@ const CartScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
+
+      <ConfirmationModal
+        visible={confirmationVisible}
+        message={confirmationMessage}
+        onConfirm={() => confirmationAction?.()}
+        onCancel={() => setConfirmationVisible(false)}
+        onClose={() => setConfirmationVisible(false)}
+        confirmText="Confirm"
+        cancelText="Cancel"
+        loading={deleteItemMutation.isPending || clearCartMutation.isPending}
+      />
     </View>
   );
 };
@@ -267,6 +417,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 100,
+  },
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    color: "#fff",
+    fontSize: 16,
+    marginTop: 12,
   },
   section: {
     marginBottom: 24,
@@ -393,6 +552,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
   },
+  emptyStateAddButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e03487",
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginTop: 50,
+    paddingHorizontal: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  emptyStateAddButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    marginLeft: 8,
+  },
   modalOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(5, 3, 12, 0.7)",
@@ -462,7 +640,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderColor: "#b0b3c6",
     marginRight: 8,
-    flex: 1
+    flex: 1,
   },
   cancelButtonText: {
     color: "#b0b3c6",
@@ -475,7 +653,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 24,
     alignItems: "center",
-    flex: 1
+    flex: 1,
   },
   saveButtonDisabled: {
     opacity: 0.6,

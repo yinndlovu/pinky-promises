@@ -36,7 +36,7 @@ export async function getCartTotal(token: string) {
 }
 
 export async function clearCart(token: string) {
-  const res = await axios.get(`${BASE_URL}/api/cart/clear`, {
+  const res = await axios.delete(`${BASE_URL}/api/cart/clear`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
