@@ -65,13 +65,6 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
             </View>
             <View style={styles.actions}>
               <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={onClose}
-                disabled={loading}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
                 style={[
                   styles.saveButton,
                   (!giftName.trim() || loading) && styles.saveButtonDisabled,
@@ -82,6 +75,13 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
                 <Text style={styles.saveButtonText}>
                   {loading ? "Saving..." : initialGiftName ? "Update" : "Save"}
                 </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={onClose}
+                disabled={loading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
             {loading && (
@@ -163,12 +163,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 24,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#b0b3c6",
-    marginRight: 8,
+    flex: 1,
   },
   cancelButtonText: {
-    color: "#b0b3c6",
+    color: "#fff",
     fontWeight: "bold",
     fontSize: 15,
   },
@@ -178,6 +176,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 24,
     alignItems: "center",
+    marginRight: 8,
+    flex: 1,
   },
   saveButtonDisabled: {
     opacity: 0.6,
