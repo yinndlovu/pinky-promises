@@ -7,7 +7,8 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   message: any | null;
-  type: "sweet" | "vent" | null;
+  type: "sweet" | "vent" | "stored" | null;
+  customTitle?: string;
 };
 
 const ViewMessageModal: React.FC<Props> = ({
@@ -15,17 +16,18 @@ const ViewMessageModal: React.FC<Props> = ({
   onClose,
   message,
   type,
+  customTitle,
 }) => {
-    // utils
+  // utils
   function formatDate(dateString?: string) {
     if (!dateString) {
-        return "";
+      return "";
     }
 
     const date = new Date(dateString);
 
     if (isNaN(date.getTime())) {
-        return "";
+      return "";
     }
 
     return date
@@ -44,7 +46,19 @@ const ViewMessageModal: React.FC<Props> = ({
     return null;
   }
 
-  const title = type === "sweet" ? "Sweet message" : "Vent message";
+  let title = customTitle;
+
+  if (!title) {
+    if (type === "sweet") {
+      title = "Sweet message";
+    } else if (type === "vent") {
+      title = "Vent message";
+    } else if (type === "stored") {
+      title = message?.title || "Stored message";
+    } else {
+      title = "Message";
+    }
+  }
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -52,9 +66,7 @@ const ViewMessageModal: React.FC<Props> = ({
         <View style={styles.container}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message?.message || ""}</Text>
-          <Text style={styles.meta}>
-            {formatDate(message.createdAt)}
-          </Text>
+          <Text style={styles.meta}>{formatDate(message.createdAt)}</Text>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>

@@ -205,7 +205,7 @@ const CartScreen = () => {
   };
 
   const formatCurrency = (amount: number) => {
-    return `$${amount.toFixed(2)}`;
+    return `${amount.toFixed(0)}`;
   };
 
   // refresh screen
@@ -345,7 +345,7 @@ const CartScreen = () => {
                     maxLength={50}
                   />
 
-                  <Text style={styles.label}>Value ($)</Text>
+                  <Text style={styles.label}>How much is it?</Text>
                   <TextInput
                     style={styles.input}
                     value={newItemValue}

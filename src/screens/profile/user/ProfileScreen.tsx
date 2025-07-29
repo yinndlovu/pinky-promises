@@ -21,7 +21,7 @@ import { encode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
@@ -46,7 +46,13 @@ import { getReceivedPartnerRequests } from "../../../services/partnerService";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { FavoritesType } from "../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
-import { storeMessage } from "../../../services/messageStorageService";
+import {
+  storeMessage,
+  getStoredMessages,
+  updateMessage,
+  deleteMessage,
+  viewMessage,
+} from "../../../services/messageStorageService";
 
 // screen content
 import UpdateAboutModal from "../../../components/modals/input/UpdateAboutModal";
@@ -62,35 +68,14 @@ import styles from "./styles/ProfileScrees.styles";
 import MessageStorage from "./MessageStorage";
 import StoreMessageModal from "../../../components/modals/input/StoreMessageModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
+import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
+import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
+import modalStyles from "./styles/ModalStyles.styles";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  // static data
-  const messages = [
-    {
-      id: "1",
-      title: "Hello",
-      message:
-        "This is a message. This message is purely just for visuals and nothing more. it is for testing and stuff. like really bro " +
-        "you can literally just decide to go away and it would not matter because it's just a static message that does not do nothing.",
-      createdAt: "2025-07-28T10:00:00Z",
-    },
-    {
-      id: "2",
-      title: "Hey there",
-      message: "This is another message message",
-      createdAt: "2025-07-28T10:00:00Z",
-    },
-    {
-      id: "3",
-      title: "Hey you",
-      message: "This is yet another message",
-      createdAt: "2025-07-28T10:00:00Z",
-    },
-  ];
-
   // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
@@ -132,6 +117,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editName, setEditName] = useState("");
   const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
+
+  // use states (message storage)
+  const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [confirmationAction, setConfirmationAction] = useState<
+    (() => void) | null
+  >(null);
+  const [editingMessage, setEditingMessage] = useState<any>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editMessageText, setEditMessageText] = useState("");
 
   // fetch functions
   const {
@@ -353,6 +350,109 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   };
 
+  const {
+    data: storedMessages = [],
+    isLoading: storedMessagesLoading,
+    refetch: refetchStoredMessages,
+  } = useQuery({
+    queryKey: ["storedMessages"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const response = await getStoredMessages(token);
+      return Array.isArray(response) ? response : [];
+    },
+    staleTime: 1000 * 60 * 60 * 24 * 2,
+  });
+
+  const storeMessageMutation = useMutation({
+    mutationFn: async ({
+      title,
+      message,
+    }: {
+      title: string;
+      message: string;
+    }) => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await storeMessage(token, title, message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+
+      setStoreMessageModalVisible(false);
+      setAlertMessage("Message stored successfully!");
+      setAlertVisible(true);
+    },
+    onError: (error: any) => {
+      setAlertMessage(error?.message || "Failed to store message");
+      setAlertVisible(true);
+    },
+  });
+
+  const updateMessageMutation = useMutation({
+    mutationFn: async ({
+      messageId,
+      title,
+      message,
+    }: {
+      messageId: string;
+      title: string;
+      message: string;
+    }) => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await updateMessage(token, messageId, title, message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+      setEditModalVisible(false);
+      setEditingMessage(null);
+      setEditTitle("");
+      setEditMessageText("");
+      setAlertMessage("Message updated successfully!");
+      setAlertVisible(true);
+    },
+    onError: (error: any) => {
+      setAlertMessage(error?.message || "Failed to update message");
+      setAlertVisible(true);
+    },
+  });
+
+  const deleteMessageMutation = useMutation({
+    mutationFn: async (messageId: string) => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await deleteMessage(token, messageId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+      setConfirmationVisible(false);
+      setAlertMessage("Message deleted successfully!");
+      setAlertVisible(true);
+    },
+    onError: (error: any) => {
+      setAlertMessage(error?.message || "Failed to delete message");
+      setAlertVisible(true);
+    },
+  });
+
   // helpers
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt) {
@@ -432,6 +532,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         refetchMoodData(),
         refetchAbout(),
         fetchProfilePicture(),
+        refetchStoredMessages(),
       ]);
 
       queryClient.invalidateQueries({
@@ -451,6 +552,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     refetchProfileData,
     refetchPendingRequestsData,
     fetchProfilePicture,
+    refetchStoredMessages,
   ]);
 
   // handlers
@@ -671,13 +773,51 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
   };
 
-  function handleLongPressMessage(msg: any) {
-    console.log("long pressed", msg);
-  }
+  const handleViewMessage = (message: any) => {
+    setSelectedMessage(message);
+    setViewMessageModalVisible(true);
+  };
 
-  function handlePressMessage(msg: any) {
-    console.log("pressed", msg);
-  }
+  const handleLongPressMessage = (message: any) => {
+    setSelectedMessage(message);
+    setConfirmationMessage("What would you like to do with this message?");
+    setConfirmationAction(() => () => {});
+    setConfirmationVisible(true);
+  };
+
+  const handleEditMessage = () => {
+    if (!selectedMessage) return;
+
+    setEditingMessage(selectedMessage);
+    setEditTitle(selectedMessage.title);
+    setEditMessageText(selectedMessage.message);
+    setEditModalVisible(true);
+    setConfirmationVisible(false);
+  };
+
+  const handleDeleteMessage = () => {
+    if (!selectedMessage) return;
+
+    setConfirmationMessage("Are you sure you want to delete this message?");
+    setConfirmationAction(
+      () => () => deleteMessageMutation.mutate(selectedMessage.id)
+    );
+    setConfirmationVisible(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingMessage || !editTitle.trim() || !editMessageText.trim()) {
+      setAlertMessage("Please fill in all fields");
+      setAlertVisible(true);
+      return;
+    }
+
+    updateMessageMutation.mutate({
+      messageId: editingMessage.id,
+      title: editTitle.trim(),
+      message: editMessageText.trim(),
+    });
+  };
 
   // fiels for editing
   const originalName = user?.name || "";
@@ -884,10 +1024,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         <MessageStorage
           name="Yin"
-          messages={messages}
+          messages={storedMessages}
           onAdd={handleAddMessage}
           onLongPress={handleLongPressMessage}
-          onPress={handlePressMessage}
+          onPress={handleViewMessage}
         />
 
         <View style={{ zIndex: 1000 }}>
@@ -1011,6 +1151,86 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
               </View>
             </TouchableWithoutFeedback>
           </Modal>
+
+          <Modal visible={editModalVisible} transparent animationType="fade">
+            <TouchableWithoutFeedback
+              onPress={() => setEditModalVisible(false)}
+            >
+              <View style={modalStyles.modalOverlay}>
+                <TouchableWithoutFeedback>
+                  <View style={modalStyles.modalContent}>
+                    <View style={modalStyles.modalHeader}>
+                      <Text style={modalStyles.modalTitle}>Edit message</Text>
+                      <TouchableOpacity
+                        onPress={() => setEditModalVisible(false)}
+                        style={modalStyles.closeButton}
+                      >
+                        <Feather name="x" size={24} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={modalStyles.form}>
+                      <Text style={modalStyles.label}>Message title</Text>
+                      <TextInput
+                        style={modalStyles.input}
+                        value={editTitle}
+                        onChangeText={setEditTitle}
+                        placeholder="Message title..."
+                        placeholderTextColor="#b0b3c6"
+                        maxLength={50}
+                      />
+
+                      <Text style={modalStyles.label}>Message</Text>
+                      <TextInput
+                        value={editMessageText}
+                        onChangeText={setEditMessageText}
+                        placeholder="Type the message here..."
+                        placeholderTextColor="#b0b3c6"
+                        multiline
+                        maxLength={1000}
+                        textAlignVertical="top"
+                        style={[modalStyles.input, modalStyles.textArea]}
+                      />
+                    </View>
+
+                    <View style={modalStyles.modalActions}>
+                      <TouchableOpacity
+                        style={[
+                          modalStyles.saveButton,
+                          (!editTitle.trim() ||
+                            !editMessageText.trim() ||
+                            updateMessageMutation.isPending) &&
+                            modalStyles.saveButtonDisabled,
+                        ]}
+                        onPress={handleSaveEdit}
+                        disabled={
+                          !editTitle.trim() ||
+                          !editMessageText.trim() ||
+                          updateMessageMutation.isPending
+                        }
+                      >
+                        {updateMessageMutation.isPending ? (
+                          <ActivityIndicator color="#fff" size="small" />
+                        ) : (
+                          <Text style={modalStyles.saveButtonText}>
+                            Save
+                          </Text>
+                        )}
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={modalStyles.cancelButton}
+                        onPress={() => setEditModalVisible(false)}
+                        disabled={updateMessageMutation.isPending}
+                      >
+                        <Text style={modalStyles.cancelButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+
           <ProfilePictureModal
             visible={showPictureModal}
             onClose={() => setShowPictureModal(false)}
@@ -1033,6 +1253,44 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             onClose={() => setStoreMessageModalVisible(false)}
             onStore={handleStoreMessage}
             loading={storingMessage}
+          />
+
+          <ViewMessageModal
+            visible={viewMessageModalVisible}
+            onClose={() => setViewMessageModalVisible(false)}
+            message={selectedMessage}
+            type={null}
+          />
+
+          <ConfirmationModal
+            visible={confirmationVisible}
+            message={confirmationMessage}
+            onConfirm={() => {
+              if (confirmationMessage.includes("What would you like to do")) {
+                handleEditMessage();
+              } else {
+                confirmationAction?.();
+              }
+            }}
+            onCancel={() => {
+              if (confirmationMessage.includes("What would you like to do")) {
+                handleDeleteMessage();
+              } else {
+                setConfirmationVisible(false);
+              }
+            }}
+            onClose={() => setConfirmationVisible(false)}
+            confirmText={
+              confirmationMessage.includes("What would you like to do")
+                ? "Edit"
+                : "Confirm"
+            }
+            cancelText={
+              confirmationMessage.includes("What would you like to do")
+                ? "Delete"
+                : "Cancel"
+            }
+            loading={deleteMessageMutation.isPending}
           />
 
           <AlertModal

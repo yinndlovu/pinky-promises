@@ -26,6 +26,7 @@ import { removePartner } from "../../../services/partnerService";
 import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
+import { getReceivedMessages } from "../../../services/messageStorageService";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
@@ -37,31 +38,10 @@ import PartnerStatusMood from "./PartnerStatusMood";
 import PartnerAnniversary from "./PartnerAnniversary";
 import styles from "./styles/PartnerProfileScreen.styles";
 import PartnerMessageStorage from "./PartnerMessageStorage";
+import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
+import AlertModal from "../../../components/modals/output/AlertModal";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
-  // static data
-  const messages = [
-    {
-      id: "1",
-      title: "Hello",
-      message: "This is a message. This message is purely just for visuals and nothing more. it is for testing and stuff. like really bro " +
-      "you can literally just decide to go away and it would not matter because it's just a static message that does not do nothing.",
-      createdAt: "2025-07-28T10:00:00Z",
-    },
-    {
-      id: "2",
-      title: "Hey there",
-      message: "This is another message message",
-      createdAt: "2025-07-28T10:00:00Z",
-    },
-    {
-      id: "3",
-      title: "Hey you",
-      message: "This is yet another message",
-      createdAt: "2025-07-28T10:00:00Z",
-    }
-  ];
-
   // variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
@@ -79,6 +59,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   // use states (processing)
   const [removingPartner, setRemovingPartner] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // use states (message storage)
+  const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
 
   // fetch functions
   const {
@@ -222,6 +206,25 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     staleTime: 1000 * 60 * 60,
   });
 
+  const {
+    data: partnerStoredMessages = [],
+    isLoading: partnerStoredMessagesLoading,
+    refetch: refetchPartnerStoredMessages,
+  } = useQuery({
+    queryKey: ["partnerStoredMessages"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const response = await getReceivedMessages(token);
+      return Array.isArray(response) ? response : [];
+    },
+    staleTime: 1000 * 60 * 60 * 12,
+  });
+
   // handlers
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
@@ -246,9 +249,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   };
 
-  function handlePressMessage(msg: any) {
-
-  }
+  const handleViewMessage = (message: any) => {
+    setSelectedMessage(message);
+    setViewMessageModalVisible(true);
+  };
 
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt && partner) {
@@ -320,6 +324,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           refetchLoveLanguage(),
           refetchPartnerAbout(),
           fetchProfilePicture(),
+          refetchPartnerStoredMessages(),
         ]);
       }
 
@@ -335,6 +340,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     refetchCurrentUser,
     refetchPartnerAbout,
     fetchProfilePicture,
+    refetchPartnerStoredMessages,
     partner?.id,
   ]);
 
@@ -433,10 +439,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
         <PartnerMoreAboutYou about={partnerAbout} />
         <PartnerMessageStorage
-                  name="Yin"
-                  messages={messages}
-                  onPress={handlePressMessage}
-                />
+          name="Yin"
+          messages={partnerStoredMessages}
+          onPress={handleViewMessage}
+        />
       </ScrollView>
 
       <View style={{ zIndex: 1000 }}>
@@ -458,6 +464,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
               : null
           }
           onClose={() => setShowPictureViewer(false)}
+        />
+
+        <ViewMessageModal
+          visible={viewMessageModalVisible}
+          onClose={() => setViewMessageModalVisible(false)}
+          message={selectedMessage}
+          type="stored"
         />
       </View>
     </View>
