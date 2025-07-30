@@ -15,3 +15,17 @@ export type SpecialDate = {
   nextAnniversaryIn?: string;
   nextMetDayIn?: string;
 };
+
+export type SpecialDateType = {
+  id: string;
+  title: string;
+  date: string;
+  description: string;
+  extra?: { [key: string]: string };
+};
+
+export type SpecialDateProps = {
+  dates: SpecialDateType[];
+  onAdd: () => void;
+  onLongPressDate?: (date: any) => void;
+};

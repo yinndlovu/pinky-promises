@@ -2,37 +2,15 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 
-// types
-type Props = {
-  onView?: () => void;
-  preview?: string;
-  updatedAt?: string | null;
-};
+// internal
+import { NotesCanvasProps } from "../../../types/Notes";
+import { formatDateTime } from "../../../helpers/notesHelpers";
 
-// helpers
-const formatDateTime = (isoString?: string | null) => {
-  if (!isoString) {
-    return "";
-  }
-
-  const date = new Date(isoString);
-  
-  return (
-    date.toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    }) +
-    " " +
-    date.toLocaleTimeString("en-GB", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    })
-  );
-};
-
-const NotesCanvas: React.FC<Props> = ({ onView, preview, updatedAt }) => (
+const NotesCanvas: React.FC<NotesCanvasProps> = ({
+  onView,
+  preview,
+  updatedAt,
+}) => (
   <View style={styles.wrapper}>
     <View style={styles.headerRow}>
       <Text style={styles.sectionTitle}>Our notes</Text>
@@ -41,9 +19,11 @@ const NotesCanvas: React.FC<Props> = ({ onView, preview, updatedAt }) => (
       </TouchableOpacity>
     </View>
     <View style={styles.canvas}>
-    <Text style={styles.placeholderText}>
+      <Text style={styles.placeholderText}>
         {preview && preview.trim().length > 0
-          ? (preview.length > 120 ? preview.slice(0, 120) + "..." : preview)
+          ? preview.length > 120
+            ? preview.slice(0, 120) + "..."
+            : preview
           : "This is your shared canvas for notes or memories"}
       </Text>
       {updatedAt && (
@@ -99,7 +79,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 2,
-    position: "relative"
+    position: "relative",
   },
   placeholderText: {
     color: "#b0b3c6",
