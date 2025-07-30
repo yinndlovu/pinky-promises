@@ -182,7 +182,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       );
     } catch (picErr: any) {
       if (![404, 500].includes(picErr.response?.status)) {
-        setError(picErr.response?.data?.error || picErr.message);
       }
     }
   };
@@ -693,7 +692,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         )}
 
         <PortalPreview partner={partner} navigation={navigation} />
-        
+
         <RecentActivity activities={activities} />
       </ScrollView>
       {showError && (

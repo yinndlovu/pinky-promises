@@ -57,6 +57,8 @@ export default function PortalScreen({ navigation }: Props) {
   const [viewedMessage, setViewedMessage] = useState<string>("");
   const [viewType, setViewType] = useState<"sweet" | "vent" | null>(null);
   const [isOnline, setIsOnline] = useState(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
@@ -82,6 +84,7 @@ export default function PortalScreen({ navigation }: Props) {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setToastMessage("Session expired, please log in again");
         return [];
       }
 
@@ -207,26 +210,24 @@ export default function PortalScreen({ navigation }: Props) {
           queryKey: ["sweetMessagesSent"],
         });
 
-        setAlertMessage("Sweet message deleted");
+        setToastMessage("Sweet message deleted");
       } else {
         await deleteVentMessage(token, selectedMessage.id);
         await queryClient.invalidateQueries({
           queryKey: ["ventMessagesSent"],
         });
 
-        setAlertMessage("Vent message deleted");
+        setToastMessage("Vent message deleted");
       }
 
       setDeleting(false);
       setConfirmVisible(false);
-      setAlertVisible(true);
     } catch (err: any) {
-      setAlertMessage(
+      setToastMessage(
         err?.response?.data?.message || "Failed to delete message"
       );
       setDeleting(false);
       setConfirmVisible(false);
-      setAlertVisible(true);
     } finally {
       setDeleting(false);
       setConfirmVisible(false);
@@ -280,10 +281,9 @@ export default function PortalScreen({ navigation }: Props) {
       setInputModalVisible(false);
       setAlertVisible(true);
     } catch (err: any) {
-      setAlertMessage(
+      setToastMessage(
         err?.response?.data?.message || "Failed to send sweet message"
       );
-      setAlertVisible(true);
     } finally {
       setLoading(false);
     }
@@ -312,8 +312,7 @@ export default function PortalScreen({ navigation }: Props) {
       setViewType(type);
       setViewModalVisible(true);
     } catch (err: any) {
-      setAlertMessage(err?.response?.data?.message || "Failed to load message");
-      setAlertVisible(true);
+      setToastMessage(err?.response?.data?.message || "Failed to load message");
     } finally {
       setViewLoading(false);
     }
@@ -365,6 +364,17 @@ export default function PortalScreen({ navigation }: Props) {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   {
     deleting && (
@@ -467,6 +477,12 @@ export default function PortalScreen({ navigation }: Props) {
           </Text>
         </View>
       )}
+
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -485,5 +501,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
+  },
+  toast: {
+    position: "absolute",
+    bottom: 60,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

@@ -184,8 +184,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         queryClient.invalidateQueries({ queryKey: ["pastGifts"] });
       }, 1000);
     } catch (err: any) {
-      setAlertMessage(err?.response?.data?.message || "Failed to open present");
-      setAlertVisible(true);
+      setToastMessage(err?.response?.data?.message || "Failed to open present");
     } finally {
       setClaiming(false);
     }
@@ -347,7 +346,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: "absolute",
-    top: 50,
+    bottom: 60,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",

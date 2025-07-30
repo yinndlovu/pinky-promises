@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -32,6 +32,20 @@ const TimelineScreen = () => {
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+
+  // use effects
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // fetch functions
   const {
@@ -44,7 +58,7 @@ const TimelineScreen = () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        throw new Error("Session expired, please log in again");
+        return;
       }
 
       return await getTimeline(token);
@@ -57,7 +71,7 @@ const TimelineScreen = () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        throw new Error("Session expired, please log in again");
+        return;
       }
 
       return await createTimelineRecord(token, record);
@@ -65,6 +79,7 @@ const TimelineScreen = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["timeline"] });
       setModalVisible(false);
+      setToastMessage("New timeline event added");
       setInputValue("");
     },
     onError: (err: any) => {
@@ -211,6 +226,11 @@ const TimelineScreen = () => {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -265,6 +285,26 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 22,
     borderRadius: 8,
+  },
+  toast: {
+    position: "absolute",
+    bottom: 60,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 

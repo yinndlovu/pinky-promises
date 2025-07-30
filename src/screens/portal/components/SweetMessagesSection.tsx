@@ -7,19 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageList from "../components/MessageList";
 
 // internal
-import { Message } from "../../../types/Message";
-
-// interfaces
-interface Props {
-  sent: Message[];
-  received: Message[];
-  onLongPress: (msg: Message) => void;
-  onViewAllSent: () => void;
-  onViewAllReceived: () => void;
-  onAdd: () => void;
-  onViewMessage: (msg: Message) => void;
-  lastUnseen?: Message | null;
-}
+import { SweetMessageProps } from "../../../interfaces/PortalMessage";
 
 export default function SweetMessagesSection({
   sent,
@@ -30,7 +18,7 @@ export default function SweetMessagesSection({
   onAdd,
   onViewMessage,
   lastUnseen,
-}: Props) {
+}: SweetMessageProps) {
   // variables
   const unviewed = lastUnseen;
 
@@ -45,9 +33,9 @@ export default function SweetMessagesSection({
       {unviewed && (
         <View style={styles.banner}>
           <Text style={styles.bannerText}>You have a sweet message!</Text>
-          <TouchableOpacity 
-          style={styles.viewButton}
-          onPress={() => onViewMessage(unviewed)}
+          <TouchableOpacity
+            style={styles.viewButton}
+            onPress={() => onViewMessage(unviewed)}
           >
             <Text style={styles.viewButtonText}>View</Text>
           </TouchableOpacity>
@@ -57,7 +45,9 @@ export default function SweetMessagesSection({
       {sent[0] ? (
         <MessageList messages={[sent[0]]} onLongPress={onLongPress} />
       ) : (
-        <Text style={styles.emptyText}>You haven't recently sent any sweet message</Text>
+        <Text style={styles.emptyText}>
+          You haven't recently sent any sweet message
+        </Text>
       )}
       <View style={styles.row}>
         <Text style={styles.subTitle}>Last six sent</Text>
@@ -68,7 +58,9 @@ export default function SweetMessagesSection({
       {sent.length > 0 ? (
         <MessageList messages={sent.slice(0, 6)} onLongPress={onLongPress} />
       ) : (
-        <Text style={styles.emptyText}>You haven't sent any sweet messages</Text>
+        <Text style={styles.emptyText}>
+          You haven't sent any sweet messages
+        </Text>
       )}
 
       <View style={styles.row}>
@@ -86,7 +78,9 @@ export default function SweetMessagesSection({
           onLongPress={onLongPress}
         />
       ) : (
-        <Text style={styles.emptyText}>Aww, you haven't received these yet</Text>
+        <Text style={styles.emptyText}>
+          Aww, you haven't received these yet
+        </Text>
       )}
     </View>
   );

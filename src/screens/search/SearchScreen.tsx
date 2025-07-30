@@ -36,7 +36,8 @@ export default function SearchScreen({ navigation }: Props) {
   const [query, setQuery] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [showError, setShowError] = useState(false);
   const [profilePictures, setProfilePictures] = useState<ProfilePictureInfo>(
     {}
   );
@@ -53,6 +54,17 @@ export default function SearchScreen({ navigation }: Props) {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+      const timer = setTimeout(() => {
+        setShowError(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   // fetch functions
   const fetchProfilePicture = async (userId: string, token: string) => {
@@ -94,15 +106,17 @@ export default function SearchScreen({ navigation }: Props) {
       return;
     }
     setLoading(true);
-    setError("");
+    setError(null);
 
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
         setError("Session expired, please log in again");
         setLoading(false);
         return;
       }
+
       const results = await searchUsers(token, text);
       setUsers(results);
 
@@ -158,9 +172,6 @@ export default function SearchScreen({ navigation }: Props) {
       {loading && (
         <ActivityIndicator color="#e03487" style={{ marginTop: 20 }} />
       )}
-      {error ? (
-        <Text style={{ color: "red", alignSelf: "center" }}>{error}</Text>
-      ) : null}
       <FlatList
         data={users}
         keyExtractor={(item) => item.id}
@@ -181,13 +192,41 @@ export default function SearchScreen({ navigation }: Props) {
           ) : null
         }
       />
+
       <AlertModal
         visible={alertVisible}
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
       />
+
+      {showError && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{error}</Text>
+        </View>
+      )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  toast: {
+    position: "absolute",
+    bottom: 60,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+});
