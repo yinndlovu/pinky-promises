@@ -311,7 +311,7 @@ export default function ChatScreen() {
       const data = await response.json();
       return data?.choices?.[0]?.message?.content?.trim();
     } catch (error) {
-      return "Sorry, something went wrong. Please try again.";
+      return "sorry, something went wrong. please try again.";
     }
   };
 

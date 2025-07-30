@@ -7,25 +7,15 @@ import { Ionicons } from "@expo/vector-icons";
 import MessageList from "../components/MessageList";
 
 // internal
-import { Message } from "../../../types/Message";
-
-interface Props {
-  sent: Message[];
-  received: Message[];
-  onLongPress: (msg: Message) => void;
-  onAdd: () => void;
-  onViewMessage: (msg: Message) => void;
-  lastUnseen?: Message | null;
-}
+import { VentMessageProps } from "../../../interfaces/PortalMessage";
 
 export default function VentMessagesSection({
   sent,
-  received,
   onLongPress,
   onAdd,
   onViewMessage,
   lastUnseen,
-}: Props) {
+}: VentMessageProps) {
   // variables
   const unviewed = lastUnseen;
 

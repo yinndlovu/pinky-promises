@@ -112,6 +112,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [storingMessage, setStoringMessage] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
+  const [editMessageModalVisible, setEditMessageModalVisible] = useState(false);
+  const [addMessageModalVisible, setAddMessageModalVisible] = useState(false);
 
   // use states (edit fields)
   const [editName, setEditName] = useState("");
@@ -418,7 +420,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
-      setEditModalVisible(false);
+      setEditMessageModalVisible(false);
       setEditingMessage(null);
       setEditTitle("");
       setEditMessageText("");
@@ -443,6 +445,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+
       setConfirmationVisible(false);
       setAlertMessage("Message deleted");
       setAlertVisible(true);
@@ -791,7 +794,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     setEditingMessage(selectedMessage);
     setEditTitle(selectedMessage.title);
     setEditMessageText(selectedMessage.message);
-    setEditModalVisible(true);
+    setEditMessageModalVisible(true);
     setConfirmationVisible(false);
   };
 
@@ -1152,9 +1155,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             </TouchableWithoutFeedback>
           </Modal>
 
-          <Modal visible={editModalVisible} transparent animationType="fade">
+          <Modal visible={editMessageModalVisible} transparent animationType="fade">
             <TouchableWithoutFeedback
-              onPress={() => setEditModalVisible(false)}
+              onPress={() => setEditMessageModalVisible(false)}
             >
               <View style={modalStyles.modalOverlay}>
                 <TouchableWithoutFeedback>
@@ -1162,7 +1165,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     <View style={modalStyles.modalHeader}>
                       <Text style={modalStyles.modalTitle}>Edit message</Text>
                       <TouchableOpacity
-                        onPress={() => setEditModalVisible(false)}
+                        onPress={() => setEditMessageModalVisible(false)}
                         style={modalStyles.closeButton}
                       >
                         <Feather name="x" size={24} color="#fff" />
@@ -1219,7 +1222,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={modalStyles.cancelButton}
-                        onPress={() => setEditModalVisible(false)}
+                        onPress={() => setEditMessageModalVisible(false)}
                         disabled={updateMessageMutation.isPending}
                       >
                         <Text style={modalStyles.cancelButtonText}>Cancel</Text>

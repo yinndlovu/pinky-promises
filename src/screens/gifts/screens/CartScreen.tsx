@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -38,6 +38,8 @@ const CartScreen = () => {
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
   const [newItemName, setNewItemName] = useState("");
   const [newItemValue, setNewItemValue] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   // use states (processing)
   const [refreshing, setRefreshing] = useState(false);
@@ -132,12 +134,10 @@ const CartScreen = () => {
       queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
 
       setConfirmationVisible(false);
-      setAlertMessage("Item removed from cart");
-      setAlertVisible(true);
+      setToastMessage("Item deleted from cart");
     },
     onError: (error: any) => {
-      setAlertMessage(error?.message || "Failed to remove item from cart");
-      setAlertVisible(true);
+      setToastMessage(error?.message || "Failed to remove item from cart");
     },
   });
 
@@ -217,6 +217,18 @@ const CartScreen = () => {
       setRefreshing(false);
     }
   };
+
+  // use effects
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   const renderCartItem = (item: CartItem) => (
     <View key={item.id} style={styles.cartItem}>
@@ -405,6 +417,12 @@ const CartScreen = () => {
         cancelText="Cancel"
         loading={deleteItemMutation.isPending || clearCartMutation.isPending}
       />
+
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -662,6 +680,26 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 15,
+  },
+  toast: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 

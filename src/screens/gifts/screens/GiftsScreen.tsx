@@ -36,6 +36,7 @@ import {
 import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY, formatTime } from "../../../helpers/formatDateHelper";
 
+// types
 type Props = NativeStackScreenProps<any>;
 
 const GiftsScreen: React.FC<Props> = ({ navigation }) => {
@@ -47,7 +48,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const queryClient = useQueryClient();
 
   // use states
-  const [error, setError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
   const [claiming, setClaiming] = useState(false);
   const [claimedGift, setClaimedGift] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -65,6 +67,17 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // refresh screen
   const onRefresh = async () => {
@@ -91,7 +104,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setError("No token found");
+        setToastMessage("Session expired, please log in again");
         return;
       }
 
@@ -110,7 +123,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setError("No token found");
+        setToastMessage("Session expired, please log in again");
         return;
       }
 
@@ -158,7 +171,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setError("No token found");
+        setToastMessage("Session expired, please log in again");
         return;
       }
 
@@ -171,7 +184,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         queryClient.invalidateQueries({ queryKey: ["pastGifts"] });
       }, 1000);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to claim gift");
+      setAlertMessage(err?.response?.data?.message || "Failed to open present");
+      setAlertVisible(true);
     } finally {
       setClaiming(false);
     }
@@ -196,7 +210,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       setAlertMessage("You have set your favorite present");
       setAlertVisible(true);
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to save set gift");
+      setToastMessage(err?.response?.data?.message || "Failed to save favorite present");
     } finally {
       setModalLoading(false);
     }
@@ -267,9 +281,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
           onChange={() => setMonthlyGiftModalVisible(true)}
           buttonText={setMonthlyGift?.setMonthlyGift ? "Change" : "Add"}
         />
-        {error ? (
-          <Text style={{ color: "red" }}>{error}</Text>
-        ) : gift ? (
+        { gift ? (
           <ReceivedGift
             giftName={gift.name}
             receivedAt={
@@ -314,6 +326,12 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
       />
+
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -326,6 +344,26 @@ const styles = StyleSheet.create({
     alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
+  },
+  toast: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
 
