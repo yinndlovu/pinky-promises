@@ -38,7 +38,6 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   const {
     data: specialDates = [],
     isLoading: specialDatesLoading,
-    error: specialDatesError,
     refetch: refetchSpecialDates,
   } = useQuery<SpecialDate[]>({
     queryKey: ["specialDates", currentUserId],

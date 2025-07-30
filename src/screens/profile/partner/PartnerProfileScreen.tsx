@@ -39,7 +39,6 @@ import PartnerAnniversary from "./PartnerAnniversary";
 import styles from "./styles/PartnerProfileScreen.styles";
 import PartnerMessageStorage from "./PartnerMessageStorage";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
-import AlertModal from "../../../components/modals/output/AlertModal";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
@@ -184,7 +183,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       return await getLoveLanguage(token, partner?.id);
     },
     enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60,
   });
 
   const {
@@ -222,7 +221,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       const response = await getReceivedMessages(token);
       return Array.isArray(response) ? response : [];
     },
-    staleTime: 1000 * 60 * 60 * 12,
+    staleTime: 1000 * 60 * 60,
   });
 
   // handlers
@@ -422,7 +421,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           refreshKey={refreshKey}
         />
 
-        <PartnerAnniversary partnerId={partner.id} />
+        <PartnerAnniversary />
 
         <PartnerFavorites
           favorites={favoritesObjectToArray(partnerFavorites)}
@@ -433,13 +432,15 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             <ActivityIndicator color="#5ad1e6" size="large" />
           </View>
         )}
+
         <View style={styles.divider} />
 
         <PartnerLoveLanguage loveLanguage={loveLanguage} />
 
         <PartnerMoreAboutYou about={partnerAbout} />
+
         <PartnerMessageStorage
-          name="Yin"
+          name={name}
           messages={partnerStoredMessages}
           onPress={handleViewMessage}
         />
@@ -456,6 +457,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           onClose={() => setShowRemoveModal(false)}
           loading={removingPartner}
         />
+
         <ProfilePictureViewer
           visible={showPictureViewer}
           imageUri={

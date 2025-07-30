@@ -2,25 +2,36 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useQuery } from "@tanstack/react-query";
 
 // internal
 import { getSpecialDates } from "../../../services/specialDateService";
 import { SpecialDate } from "../../../types/SpecialDate";
+import { useAuth } from "../../../contexts/AuthContext";
 
-// types
-type Props = {
-  partnerId: string;
-};
+const PartnerAnniversary = () => {
+  // variables
+  const { user } = useAuth();
+  const currentUserId = user?.id;
 
-const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
-  // use states
-  const [specialDates, setSpecialDates] = useState<SpecialDate[]>([]);
-  const [loading, setLoading] = useState(true);
+  // fetch functions
+  const {
+    data: specialDates = [],
+    isLoading: specialDatesLoading,
+    refetch: refetchSpecialDates,
+  } = useQuery<SpecialDate[]>({
+    queryKey: ["specialDates", currentUserId],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
 
-  // use effects
-  useEffect(() => {
-    fetchSpecialDates();
-  }, [partnerId]);
+      if (!token) {
+        return [];
+      }
+
+      return await getSpecialDates(token);
+    },
+    staleTime: 1000 * 60 * 60,
+  });
 
   // helpers
   const formatDisplayDate = (
@@ -71,25 +82,6 @@ const PartnerAnniversary: React.FC<Props> = ({ partnerId }) => {
     return {
       date: "Not set",
     };
-  };
-
-  // fetch functions
-  const fetchSpecialDates = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const dates = await getSpecialDates(token);
-
-      setSpecialDates(dates);
-    } catch (error) {
-      console.error("Failed to fetch special dates:", error);
-    } finally {
-      setLoading(false);
-    }
   };
 
   // declarations

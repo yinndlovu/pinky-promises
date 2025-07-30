@@ -8,6 +8,7 @@ export async function getSpecialDates(token: string) {
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+
   return res.data.specialDates;
 }
 
@@ -22,6 +23,7 @@ export async function createSpecialDate(
     { date, title, description },
     { headers: { Authorization: `Bearer ${token}` } }
   );
+
   return res.data;
 }
 
@@ -37,6 +39,7 @@ export async function updateSpecialDate(
     { date, title, description },
     { headers: { Authorization: `Bearer ${token}` } }
   );
+
   return res.data;
 }
 
@@ -45,6 +48,7 @@ export async function deleteSpecialDate(token: string, dateId: string) {
     `${BASE_URL}/api/special-dates/delete-special-date/${dateId}`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
+
   return res.data;
 }
 
@@ -55,5 +59,6 @@ export async function getUpcomingSpecialDate(token: string) {
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+  
   return res.data.upcomingSpecialDate;
 }

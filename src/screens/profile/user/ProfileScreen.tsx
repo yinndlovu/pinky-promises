@@ -389,7 +389,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
 
       setStoreMessageModalVisible(false);
-      setAlertMessage("Message stored successfully!");
+      setAlertMessage("Message stored");
       setAlertVisible(true);
     },
     onError: (error: any) => {
@@ -422,7 +422,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setEditingMessage(null);
       setEditTitle("");
       setEditMessageText("");
-      setAlertMessage("Message updated successfully!");
+      setAlertMessage("Message updated");
       setAlertVisible(true);
     },
     onError: (error: any) => {
@@ -444,7 +444,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
       setConfirmationVisible(false);
-      setAlertMessage("Message deleted successfully!");
+      setAlertMessage("Message deleted");
       setAlertVisible(true);
     },
     onError: (error: any) => {
@@ -1023,7 +1023,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
 
         <MessageStorage
-          name="Yin"
+          name={partnerData?.name || "No one"}
           messages={storedMessages}
           onAdd={handleAddMessage}
           onLongPress={handleLongPressMessage}
@@ -1259,7 +1259,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             visible={viewMessageModalVisible}
             onClose={() => setViewMessageModalVisible(false)}
             message={selectedMessage}
-            type={null}
+            type="stored"
           />
 
           <ConfirmationModal
