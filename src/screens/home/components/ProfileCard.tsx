@@ -188,13 +188,20 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     }).start();
   };
 
+  if (!partner) {
+    return (
+      <View style={styles.noPartnerContainer}>
+        <Text style={styles.noPartnerText}>You have no partner. Add one to unlock features.</Text>
+      </View>
+    );
+  }
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      disabled={!partner}
     >
       <Animated.View
         style={[
@@ -418,6 +425,26 @@ const styles = StyleSheet.create({
   particle3: {
     top: 20,
     right: 80,
+  },
+  noPartnerContainer: {
+    backgroundColor: "#1b1c2e",
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+    width: "100%",
+    minHeight: 120,
+  },
+  noPartnerText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#b0b3c6",
+    textAlign: "center",
   },
 });
 
