@@ -209,7 +209,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       return await fetchUserStatus(token, partnerId);
     },
     enabled: !!partnerId,
-    staleTime: 1000 * 60 * 4,
+    staleTime: 1000 * 60 * 2,
   });
 
   const {
@@ -233,7 +233,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       return await getUserMood(token, partnerId);
     },
     enabled: !!partnerId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   });
 
   const {

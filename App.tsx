@@ -9,7 +9,6 @@ import { StatusBar } from "expo-status-bar";
 import {
   StyleSheet,
   View,
-  ActivityIndicator,
   Text,
   TouchableOpacity,
 } from "react-native";
