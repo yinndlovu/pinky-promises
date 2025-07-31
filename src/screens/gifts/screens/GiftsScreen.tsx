@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // screen content
@@ -209,7 +209,9 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       setAlertMessage("You have set your favorite present");
       setAlertVisible(true);
     } catch (err: any) {
-      setToastMessage(err?.response?.data?.message || "Failed to save favorite present");
+      setToastMessage(
+        err?.response?.data?.message || "Failed to save favorite present"
+      );
     } finally {
       setModalLoading(false);
     }
@@ -235,6 +237,28 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
           zIndex: 2,
         }}
       >
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            left: 18,
+            zIndex: 10,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+          }}
+          onPress={() => {
+            setAlertMessage(
+              "Woo, see someone wants to play some games already... They are currently locked, oops 👀"
+            );
+            setAlertVisible(true);
+          }}
+        >
+          <FontAwesome5 name="gamepad" size={22} color="#fff" />
+        </TouchableOpacity>
         <Text
           style={{
             fontSize: 20,
@@ -280,7 +304,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
           onChange={() => setMonthlyGiftModalVisible(true)}
           buttonText={setMonthlyGift?.setMonthlyGift ? "Change" : "Add"}
         />
-        { gift ? (
+        {gift ? (
           <ReceivedGift
             giftName={gift.name}
             receivedAt={

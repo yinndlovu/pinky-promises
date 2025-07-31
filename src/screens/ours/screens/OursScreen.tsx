@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -457,7 +457,7 @@ const OursScreen = ({ navigation }: Props) => {
           }}
           onPress={() => navigation.navigate("TimelineScreen")}
         >
-          <Feather name="activity" size={22} color="#fff" />
+          <FontAwesome5 name="stream" size={22} color="#fff" />
         </TouchableOpacity>
         <Text
           style={{

@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { FontAwesome6 } from "@expo/vector-icons";
 
 // internal
 import { ReceivedGiftProps } from "../../../types/Gift";
@@ -20,7 +20,7 @@ const ReceivedGift: React.FC<ReceivedGiftProps> = ({
 }) => (
   <View style={styles.card}>
     <View style={styles.row}>
-      <Feather
+      <FontAwesome6
         name="gift"
         size={22}
         color="#e03487"
