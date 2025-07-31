@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pinky Promises",
     "slug": "pinky-promises",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
@@ -13,7 +13,15 @@
       "backgroundColor": "#23243a"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to location to track your home status and provide location-based features.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to location in the background to track your home status and provide location-based features.",
+        "UIBackgroundModes": [
+          "location",
+          "background-processing"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,7 +35,12 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.yinn.pinkypromises",
-      "googleServicesFile": "./google-services.json"
+      "googleServicesFile": "./google-services.json",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./src/assets/favicon.png"
@@ -35,7 +48,17 @@
     "plugins": [
       "react-native-compressor",
       "expo-notifications",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Pinky Promises to use your location to track your home status and provide location-based features.",
+          "locationAlwaysPermission": "Allow Pinky Promises to use your location in the background to track your home status and provide location-based features.",
+          "locationWhenInUsePermission": "Allow Pinky Promises to use your location to track your home status and provide location-based features.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ]
     ],
     "extra": {
       "eas": {
