@@ -23,9 +23,14 @@ export async function requestLocationPermissions() {
 
 export async function startBackgroundLocationTracking() {
   try {
+    const isEnabled = await Location.hasServicesEnabledAsync();
+    if (!isEnabled) {
+      throw new Error("Location services are not enabled on your device");
+    }
+
     await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
       accuracy: Location.Accuracy.High,
-      timeInterval: 5 * 60 * 1000,
+      timeInterval: 4 * 60 * 1000,
       distanceInterval: 30,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
@@ -39,11 +44,19 @@ export async function startBackgroundLocationTracking() {
 }
 
 export async function checkLocationPermissions() {
-  const foregroundStatus = await Location.getForegroundPermissionsAsync();
-  const backgroundStatus = await Location.getBackgroundPermissionsAsync();
+  try {
+    const foregroundStatus = await Location.getForegroundPermissionsAsync();
+    const backgroundStatus = await Location.getBackgroundPermissionsAsync();
 
-  return {
-    foreground: foregroundStatus.status,
-    background: backgroundStatus.status,
-  };
+    return {
+      foreground: foregroundStatus.status,
+      background: backgroundStatus.status,
+    };
+  } catch (error) {
+    console.error("Failed to check location permissions:", error);
+    return {
+      foreground: "undetermined",
+      background: "undetermined",
+    };
+  }
 }

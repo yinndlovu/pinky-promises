@@ -53,13 +53,22 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
         try {
           await requestLocationPermissions();
 
-          let loc = await Location.getCurrentPositionAsync({});
+          let loc = await Location.getCurrentPositionAsync({
+            accuracy: Location.Accuracy.BestForNavigation,
+            timeInterval: 1000,
+          });
           setLocation({
             latitude: loc.coords.latitude,
             longitude: loc.coords.longitude,
           });
-        } catch (e) {
-          setError("Failed to get location");
+        } catch (e: any) {
+          if (e.message?.includes("permission denied")) {
+            setError("Location permission denied. Please enable location access in your device settings.");
+          } else if (e.message?.includes("timeout")) {
+            setError("Location request timed out. Please try again.");
+          } else {
+            setError("Failed to get location. Please check your GPS and try again.");
+          }
         }
         setLoading(false);
       })();
