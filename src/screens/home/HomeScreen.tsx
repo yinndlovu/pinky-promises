@@ -354,7 +354,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   function getInteractionFeedback(action: string, partnerName: string) {
     switch (action) {
       case "kiss":
-        return `You just gave ${partnerName} a kiss! Aww 🤍`;
+        return `Mwah! You just gave ${partnerName} a kiss! Aww 🤍`;
       case "hug":
         return `You just gave ${partnerName} a hug! So sweet`;
       case "cuddle":
