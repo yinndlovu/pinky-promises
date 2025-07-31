@@ -95,7 +95,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       refetchUnseen();
       refetchActivities();
     } catch (err: any) {
-      setError(err.message || "Failed to interact");
+      setError(err?.response?.message || "Failed to interact");
     } finally {
       setInteractionLoading(false);
     }
