@@ -11,9 +11,9 @@ const modalStyles = StyleSheet.create({
   modalContent: {
     backgroundColor: "#23243a",
     borderRadius: 16,
-    padding: 28,
+    padding: 20,
     alignItems: "center",
-    width: "80%",
+    width: "95%",
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowRadius: 10,
@@ -57,7 +57,7 @@ const modalStyles = StyleSheet.create({
     marginBottom: 16,
   },
   textArea: {
-    minHeight: 100,
+    minHeight: 160,
     textAlignVertical: "top",
   },
   modalActions: {

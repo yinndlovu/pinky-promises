@@ -49,6 +49,7 @@ import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
 import AlertModal from "../../components/modals/output/AlertModal";
 import PortalPreview from "./components/PortalPreview";
+import ProfileCard from "./components/ProfileCard";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -182,7 +183,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       );
     } catch (picErr: any) {
       if (![404, 500].includes(picErr.response?.status)) {
-        setError(picErr.response?.data?.error || picErr.message);
       }
     }
   };
@@ -354,7 +354,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   function getInteractionFeedback(action: string, partnerName: string) {
     switch (action) {
       case "kiss":
-        return `You just gave ${partnerName} a kiss! Aww 🤍`;
+        return `Mwah! You just gave ${partnerName} a kiss! Aww 🤍`;
       case "hug":
         return `You just gave ${partnerName} a hug! So sweet`;
       case "cuddle":
@@ -546,43 +546,22 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.partnerLabel}>PARTNER</Text>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate("PartnerProfile")}
-          disabled={!partner}
-        >
-          {partnerLoading ? (
-            <View style={styles.centered}>
-              <ActivityIndicator color="#e03487" size="large" />
-            </View>
-          ) : (
-            <View
-              style={[
-                styles.profileCard,
-                !isActive && styles.profileCardInactive,
-              ]}
-            >
-              <View style={styles.profileRow}>
-                <View style={styles.avatarWrapper}>{renderPartnerImage()}</View>
-                <View style={styles.infoWrapper}>
-                  <Text style={styles.name}>
-                    {partner?.name || "No partner"}
-                  </Text>
-                  <Text style={styles.username}>
-                    @{partner?.username || "nopartner"}
-                  </Text>
-                  <Text style={styles.bio}>{partner?.bio || ""}</Text>
-                </View>
-              </View>
-              <View style={styles.statusRow}>
-                <Text style={[styles.statusText, { color: statusColor }]}>
-                  Status: {status}
-                </Text>
-                <Text style={styles.statusText}>Mood: {mood}</Text>
-              </View>
-            </View>
-          )}
-        </TouchableOpacity>
+        {partnerLoading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator color="#e03487" size="large" />
+          </View>
+        ) : (
+          <ProfileCard
+            partner={partner}
+            avatarUri={avatarUri}
+            status={status}
+            statusColor={statusColor}
+            mood={mood}
+            isActive={isActive}
+            onPress={() => navigation.navigate("PartnerProfile")}
+            renderPartnerImage={renderPartnerImage}
+          />
+        )}
         <View style={styles.buttonRow}>
           <BlurView intensity={50} tint="dark" style={styles.blurButton}>
             <TouchableOpacity
@@ -693,7 +672,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         )}
 
         <PortalPreview partner={partner} navigation={navigation} />
-        
+
         <RecentActivity activities={activities} />
       </ScrollView>
       {showError && (

@@ -1,7 +1,7 @@
 // external
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome5 } from "@expo/vector-icons";
 
 // internal
 import { PastGiftProps } from "../../../types/Gift";
@@ -14,7 +14,7 @@ const PastGiftsList: React.FC<PastGiftProps> = ({ gifts }) => (
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <View style={styles.row}>
-          <Feather name="gift" size={20} color="#e03487" style={styles.icon} />
+          <FontAwesome5 name="gift" size={20} color="#e03487" style={styles.icon} />
           <View style={styles.details}>
             <Text style={styles.giftName}>{item.giftName}</Text>
             <Text style={styles.detailText}>

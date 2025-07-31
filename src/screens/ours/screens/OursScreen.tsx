@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -165,10 +165,9 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
-      setAlertMessage(
+      setError(
         err?.response?.data?.message || "Failed to add special date"
       );
-      setAlertVisible(true);
     }
   };
 
@@ -222,11 +221,11 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
-      setAlertMessage(
+      setError(
         err?.response?.data?.message || "Failed to update special date"
       );
-      setAlertVisible(true);
     }
+    setEditModalVisible(false);
   };
 
   const handleDeleteSpecialDate = async () => {
@@ -263,12 +262,12 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
-      setAlertMessage(
+      setError(
         err?.response?.data?.message || "Failed to delete special date"
       );
-      setAlertVisible(true);
     } finally {
       setDeleting(false);
+      setDeleteModalVisible(false);
     }
   };
 
@@ -309,10 +308,9 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
-      setAlertMessage(
+      setError(
         err?.response?.data?.message || "Failed to delete favorite memory"
       );
-      setAlertVisible(true);
     }
 
     setMemoryModalLoading(false);
@@ -356,10 +354,9 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
-      setAlertMessage(
+      setError(
         err?.response?.data?.message || "Failed to save favorite memory"
       );
-      setAlertVisible(true);
     }
 
     setMemoryModalLoading(false);
@@ -379,10 +376,9 @@ const OursScreen = ({ navigation }: Props) => {
       const memory = await getFavoriteMemoryById(token, memoryId);
       setDetailsMemory(memory);
     } catch (err: any) {
-      setAlertMessage(
+      setError(
         err?.response?.data?.message || "Failed to view favorite memory"
       );
-      setAlertVisible(true);
       setDetailsMemory(null);
     }
     setDetailsLoading(false);
@@ -461,7 +457,7 @@ const OursScreen = ({ navigation }: Props) => {
           }}
           onPress={() => navigation.navigate("TimelineScreen")}
         >
-          <Feather name="activity" size={22} color="#fff" />
+          <FontAwesome5 name="stream" size={22} color="#fff" />
         </TouchableOpacity>
         <Text
           style={{
@@ -620,8 +616,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: "absolute",
-    top: 50,
-    // bottom: 40,
+    bottom: 60,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",

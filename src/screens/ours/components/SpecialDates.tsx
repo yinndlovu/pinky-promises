@@ -8,20 +8,9 @@ import {
   FlatList,
 } from "react-native";
 
-// types
-type SpecialDate = {
-  id: string;
-  title: string;
-  date: string;
-  description: string;
-  extra?: { [key: string]: string };
-};
-
-type Props = {
-  dates: SpecialDate[];
-  onAdd: () => void;
-  onLongPressDate?: (date: any) => void;
-};
+// internal
+import { SpecialDateProps } from "../../../types/SpecialDate";
+import { STANDARD_FIELDS } from "../../../helpers/specialDateHelpers";
 
 // helpers
 function formatExtraLabel(key: string): string {
@@ -29,19 +18,11 @@ function formatExtraLabel(key: string): string {
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1) + ":";
 }
 
-// variables
-const STANDARD_FIELDS = [
-  "id",
-  "date",
-  "title",
-  "description",
-  "userId",
-  "partnerId",
-  "createdAt",
-  "updatedAt",
-];
-
-const SpecialDates: React.FC<Props> = ({ dates, onAdd, onLongPressDate }) => (
+const SpecialDates: React.FC<SpecialDateProps> = ({
+  dates,
+  onAdd,
+  onLongPressDate,
+}) => (
   <View style={styles.wrapper}>
     <Text style={styles.sectionTitle}>Our special dates</Text>
     <View style={styles.datesCard}>

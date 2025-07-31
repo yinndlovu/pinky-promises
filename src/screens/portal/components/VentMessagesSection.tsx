@@ -11,6 +11,7 @@ import { VentMessageProps } from "../../../interfaces/PortalMessage";
 
 export default function VentMessagesSection({
   sent,
+  received,
   onLongPress,
   onAdd,
   onViewMessage,

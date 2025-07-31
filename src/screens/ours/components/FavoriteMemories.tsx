@@ -8,29 +8,14 @@ import {
   FlatList,
 } from "react-native";
 
+// internal
+import { Memory, FavoriteMemoryProps } from "../../../types/Memory";
+import { formatDateDMY } from "../../../helpers/formatDateHelper";
+
 // screen content
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 
-// types
-type Memory = {
-  id: string;
-  memory: string;
-  date: string;
-  author: string | null;
-  userId: string;
-};
-
-type Props = {
-  memories: Memory[];
-  currentUserId: string;
-  onViewAll?: () => void;
-  onViewDetails?: (memoryId: string) => void;
-  onAdd?: () => void;
-  onEdit?: (memory: Memory) => void;
-  onDelete?: (memory: Memory) => void;
-};
-
-const FavoriteMemories: React.FC<Props> = ({
+const FavoriteMemories: React.FC<FavoriteMemoryProps> = ({
   memories,
   currentUserId,
   onViewAll,
@@ -72,21 +57,6 @@ const FavoriteMemories: React.FC<Props> = ({
     setSelectedMemory(null);
   };
 
-  // helpers
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) {
-      return "";
-    }
-
-    const date = new Date(dateStr);
-
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
   return (
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
@@ -119,7 +89,7 @@ const FavoriteMemories: React.FC<Props> = ({
                   <Text style={styles.metaText}>
                     {item.author ? `By ${item.author}` : "By Unknown"}
                   </Text>
-                  <Text style={styles.metaText}>{formatDate(item.date)}</Text>
+                  <Text style={styles.metaText}>{formatDateDMY(item.date)}</Text>
                 </View>
               </TouchableOpacity>
             )}

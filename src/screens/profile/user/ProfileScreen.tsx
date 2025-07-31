@@ -1155,7 +1155,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             </TouchableWithoutFeedback>
           </Modal>
 
-          <Modal visible={editMessageModalVisible} transparent animationType="fade">
+          <Modal visible={editMessageModalVisible} transparent animationType="slide">
             <TouchableWithoutFeedback
               onPress={() => setEditMessageModalVisible(false)}
             >

@@ -33,7 +33,6 @@ import AlertModal from "../../../components/modals/output/AlertModal";
 const AllFavoriteMemoriesScreen = () => {
   // variables
   const queryClient = useQueryClient();
-  const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const currentUserId = user?.id;
 
