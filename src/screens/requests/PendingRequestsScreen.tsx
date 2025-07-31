@@ -26,6 +26,7 @@ import { PendingRequest } from "../../types/Request";
 // screen content
 import AlertModal from "../../components/modals/output/AlertModal";
 import styles from "./styles/PendingRequestsScreen.styles";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 
 // variables
 const fallbackAvatar = require("../../assets/default-avatar-two.png");
@@ -237,7 +238,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
+        <LoadingSpinner message="Loading partner requests..." size="medium" />
       </View>
     );
   }

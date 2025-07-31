@@ -39,6 +39,7 @@ import PartnerAnniversary from "./PartnerAnniversary";
 import styles from "./styles/PartnerProfileScreen.styles";
 import PartnerMessageStorage from "./PartnerMessageStorage";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
@@ -351,7 +352,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   if (partnerDataLoading || currentUserLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
+        <LoadingSpinner message="Starting Paris' App" size="medium" />
       </View>
     );
   }

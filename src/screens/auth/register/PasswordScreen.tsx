@@ -57,7 +57,7 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
   // handlers
   const handleRegister = async () => {
     setLoading(true);
-    
+
     try {
       const response = await axios.post(`${BASE_URL}/api/auth/register`, {
         name,
@@ -196,7 +196,9 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
         onPress={handleRegister}
         disabled={!isFormValid || loading}
       >
-        <Text style={styles.registerButtonText}>Register</Text>
+        <Text style={styles.registerButtonText}>
+          {loading ? "Registering" : "Register"}
+        </Text>
         {loading && (
           <ActivityIndicator
             size="small"

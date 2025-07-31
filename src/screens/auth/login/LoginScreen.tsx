@@ -35,7 +35,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       setError("Username and password are required");
       return;
     }
-    
+
     setError("");
     setLoading(true);
     try {
@@ -111,7 +111,9 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         onPress={handleLogin}
         disabled={loading}
       >
-        <Text style={styles.loginButtonText}>Log in</Text>
+        <Text style={styles.loginButtonText}>
+          {loading ? "Logging in" : "Log in"}
+        </Text>
         {loading && (
           <ActivityIndicator
             size="small"

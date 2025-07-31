@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  ActivityIndicator,
   TouchableWithoutFeedback,
   RefreshControl,
 } from "react-native";
@@ -29,6 +28,7 @@ import { CartItem } from "../../../types/Cart";
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 const CartScreen = () => {
   // variables
@@ -267,9 +267,8 @@ const CartScreen = () => {
 
   if (cartItemsLoading || cartTotalLoading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#e03487" />
-        <Text style={styles.loadingText}>Loading cart...</Text>
+      <View style={styles.centered}>
+        <LoadingSpinner message="Loading cart..." size="medium" />
       </View>
     );
   }
@@ -439,6 +438,12 @@ const styles = StyleSheet.create({
   loadingContainer: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  centered: {
+    flex: 1,
+    backgroundColor: "#23243a",
+    alignItems: "center",
+    justifyContent: "center",
   },
   loadingText: {
     color: "#fff",

@@ -40,6 +40,7 @@ import ConfirmationModal from "../../../components/modals/selection/Confirmation
 import MessageInputModal from "../../../components/modals/input/MessageInputModal";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // types
 type Props = NativeStackScreenProps<any, any>;
@@ -376,6 +377,14 @@ export default function PortalScreen({ navigation }: Props) {
     }
   }, [toastMessage]);
 
+  if (unseenSweetMessageLoading || unseenVentMessageLoading) {
+    return (
+      <View style={styles.centered}>
+        <LoadingSpinner message="Loading portal..." size="medium" />
+      </View>
+    );
+  }
+
   {
     deleting && (
       <View style={styles.loadingOverlay}>
@@ -521,5 +530,11 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  centered: {
+    flex: 1,
+    backgroundColor: "#23243a",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

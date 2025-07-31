@@ -24,6 +24,7 @@ import {
 
 // screen content
 import ReminderIntervalSetting from "./ReminderIntervalSetting";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 const NotificationsScreen = () => {
   // variables
@@ -127,7 +128,7 @@ const NotificationsScreen = () => {
   if (preferencesLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#e03487" />
+        <LoadingSpinner message="Loading notifications..." size="medium" />
       </View>
     );
   }

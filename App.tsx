@@ -57,6 +57,7 @@ import AllFavoriteMemoriesScreen from "./src/screens/ours/screens/AllFavoriteMem
 import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen";
 import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
 import CartScreen from "./src/screens/gifts/screens/CartScreen";
+import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 
 // variables
 const Stack = createStackNavigator();
@@ -113,7 +114,7 @@ function AppContent() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
+        <LoadingSpinner message="Starting Paris' App" size="medium" />
       </View>
     );
   }

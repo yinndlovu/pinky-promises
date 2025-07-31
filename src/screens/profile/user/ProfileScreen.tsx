@@ -71,6 +71,7 @@ import AlertModal from "../../../components/modals/output/AlertModal";
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import modalStyles from "./styles/ModalStyles.styles";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
@@ -854,7 +855,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   if (profileDataLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
+        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }
@@ -1155,7 +1156,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             </TouchableWithoutFeedback>
           </Modal>
 
-          <Modal visible={editMessageModalVisible} transparent animationType="slide">
+          <Modal
+            visible={editMessageModalVisible}
+            transparent
+            animationType="slide"
+          >
             <TouchableWithoutFeedback
               onPress={() => setEditMessageModalVisible(false)}
             >
@@ -1215,9 +1220,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         {updateMessageMutation.isPending ? (
                           <ActivityIndicator color="#fff" size="small" />
                         ) : (
-                          <Text style={modalStyles.saveButtonText}>
-                            Save
-                          </Text>
+                          <Text style={modalStyles.saveButtonText}>Save</Text>
                         )}
                       </TouchableOpacity>
                       <TouchableOpacity

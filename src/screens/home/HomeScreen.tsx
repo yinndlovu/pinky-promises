@@ -50,6 +50,7 @@ import styles from "./styles/HomeScreen.styles";
 import AlertModal from "../../components/modals/output/AlertModal";
 import PortalPreview from "./components/PortalPreview";
 import ProfileCard from "./components/ProfileCard";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -463,7 +464,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   if (partnerLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator color="#e03487" size="large" />
+        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }

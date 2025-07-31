@@ -22,6 +22,7 @@ import PastGiftsList from "../components/PastGiftsList";
 import ClaimedGiftModal from "../../../components/modals/output/ClaimedGiftModal";
 import UpdateMonthlyGiftModal from "../../../components/modals/input/UpdateMonthlyGiftModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // internal
 import {
@@ -217,6 +218,14 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
+  if (setMonthlyGiftLoading || giftLoading) {
+    return (
+      <View style={styles.centered}>
+        <LoadingSpinner showMessage={false} size="medium" />
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       {!isOnline && (
@@ -387,6 +396,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
+  },
+  centered: {
+    flex: 1,
+    backgroundColor: "#23243a",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

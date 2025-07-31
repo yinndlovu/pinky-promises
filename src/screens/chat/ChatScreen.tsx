@@ -29,6 +29,7 @@ import { ChatMessage } from "../../types/Message";
 // screen content
 import styles from "./styles/ChatScreen.styles";
 import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 
 // chats database
 import {
@@ -444,9 +445,7 @@ export default function ChatScreen() {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <Text style={{ color: "#e03487", fontSize: 16, fontWeight: "bold" }}>
-            Loading Lily...
-          </Text>
+          <LoadingSpinner message="Loading Lily..." size="medium" />
         </View>
       </SafeAreaView>
     );
