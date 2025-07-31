@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ImageBackground,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
@@ -22,7 +23,7 @@ const NameScreen: React.FC<Props> = ({ navigation }) => {
       setError("Name is required");
       return;
     }
-    
+
     if (name.length > 25) {
       setError("Name must not exceed 25 characters");
       return;
@@ -33,31 +34,45 @@ const NameScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>What's your name?</Text>
-      <TextInput
-        style={styles.input}
-        placeholder=""
-        placeholderTextColor="#b0b3c6"
-        value={name}
-        onChangeText={setName}
-        maxLength={25}
-      />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.nextButtonText}>Next</Text>
-      </TouchableOpacity>
-    </View>
+    <ImageBackground
+      source={require("../../../assets/app_background.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <Text style={styles.label}>What's your name?</Text>
+        <TextInput
+          style={styles.input}
+          placeholder=""
+          placeholderTextColor="#b0b3c6"
+          value={name}
+          onChangeText={setName}
+          maxLength={25}
+        />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+          <Text style={styles.nextButtonText}>Next</Text>
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  overlay: {
     flex: 1,
-    alignItems: "center",
+    width: "100%",
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
     justifyContent: "center",
-    backgroundColor: "#23243a",
+    alignItems: "center",
     padding: 16,
+  },
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   label: {
     fontSize: 22,

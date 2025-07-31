@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  ImageBackground,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
@@ -62,77 +63,91 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Log in to your account</Text>
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={[styles.input, { borderWidth: 0, marginBottom: 0 }]}
-          placeholder="Username"
-          placeholderTextColor="#b0b3c6"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          maxLength={20}
-        />
-      </View>
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={styles.passwordInput}
-          placeholder="Password"
-          placeholderTextColor="#b0b3c6"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPassword}
-          maxLength={32}
-        />
-        <TouchableOpacity
-          style={styles.eyeButton}
-          onPress={() => setShowPassword((v) => !v)}
-        >
-          <Feather
-            name={showPassword ? "eye-off" : "eye"}
-            size={20}
-            color="#b0b3c6"
+    <ImageBackground
+      source={require("../../../assets/app_background.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <Text style={styles.label}>Log in to your account</Text>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={[styles.input, { borderWidth: 0, marginBottom: 0 }]}
+            placeholder="Username"
+            placeholderTextColor="#b0b3c6"
+            value={username}
+            onChangeText={setUsername}
+            autoCapitalize="none"
+            maxLength={20}
           />
+        </View>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Password"
+            placeholderTextColor="#b0b3c6"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            maxLength={32}
+          />
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setShowPassword((v) => !v)}
+          >
+            <Feather
+              name={showPassword ? "eye-off" : "eye"}
+              size={20}
+              color="#b0b3c6"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <TouchableOpacity
+          style={[
+            styles.loginButton,
+            {
+              opacity: loading ? 0.6 : 1,
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+            },
+          ]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.loginButtonText}>
+            {loading ? "Logging in" : "Log in"}
+          </Text>
+          {loading && (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={{ marginLeft: 8 }}
+            />
+          )}
         </TouchableOpacity>
       </View>
-
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity
-        style={[
-          styles.loginButton,
-          {
-            opacity: loading ? 0.6 : 1,
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-          },
-        ]}
-        onPress={handleLogin}
-        disabled={loading}
-      >
-        <Text style={styles.loginButtonText}>
-          {loading ? "Logging in" : "Log in"}
-        </Text>
-        {loading && (
-          <ActivityIndicator
-            size="small"
-            color="#fff"
-            style={{ marginLeft: 8 }}
-          />
-        )}
-      </TouchableOpacity>
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  overlay: {
     flex: 1,
-    alignItems: "center",
+    width: "100%",
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
     justifyContent: "center",
-    backgroundColor: "#23243a",
+    alignItems: "center",
     padding: 16,
+  },
+  background: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   label: {
     fontSize: 22,
