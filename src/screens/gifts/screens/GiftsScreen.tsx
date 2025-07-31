@@ -110,7 +110,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
 
       return await getOldestUnclaimedGift(token);
     },
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 15,
   });
 
   const {
@@ -156,7 +156,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       return await getSetMonthlyGift(token, userId);
     },
     enabled: !!userId,
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60 * 24 * 3,
   });
 
   // handlers

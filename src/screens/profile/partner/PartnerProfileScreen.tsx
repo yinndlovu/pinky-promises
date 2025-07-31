@@ -86,7 +86,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       return response.data.partner;
     },
-    staleTime: 1000 * 60 * 60 * 24 * 3,
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   const partner = partnerData || null;
@@ -127,7 +127,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: currentUserLoading,
     refetch: refetchCurrentUser,
   } = useQuery({
-    queryKey: ["currentUserProfile"],
+    queryKey: ["profileData"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 

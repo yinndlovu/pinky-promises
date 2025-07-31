@@ -56,7 +56,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
       return await getUserMood(token, partnerId);
     },
     enabled: !!partnerId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   });
 
   const mood = partnerMood?.mood || "No mood";
@@ -83,7 +83,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
       return await fetchUserStatus(token, partnerId);
     },
     enabled: !!partnerId,
-    staleTime: 1000 * 60 * 4,
+    staleTime: 1000 * 60 * 2,
   });
 
   const status = partnerStatus?.unreachable
