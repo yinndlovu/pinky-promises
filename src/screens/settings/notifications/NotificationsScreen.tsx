@@ -128,7 +128,7 @@ const NotificationsScreen = () => {
   if (preferencesLoading) {
     return (
       <View style={styles.centered}>
-        <LoadingSpinner message="Loading notifications..." size="medium" />
+        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }

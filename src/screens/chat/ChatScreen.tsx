@@ -445,7 +445,7 @@ export default function ChatScreen() {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <LoadingSpinner message="Loading Lily..." size="medium" />
+          <LoadingSpinner showMessage={false} size="medium" />
         </View>
       </SafeAreaView>
     );

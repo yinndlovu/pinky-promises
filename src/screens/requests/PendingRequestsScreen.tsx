@@ -238,7 +238,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <LoadingSpinner message="Loading partner requests..." size="medium" />
+        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }

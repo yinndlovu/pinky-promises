@@ -268,7 +268,7 @@ const CartScreen = () => {
   if (cartItemsLoading || cartTotalLoading) {
     return (
       <View style={styles.centered}>
-        <LoadingSpinner message="Loading cart..." size="medium" />
+        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }

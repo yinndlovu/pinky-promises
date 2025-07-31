@@ -1,15 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Animated } from "react-native";
 
 interface LoadingSpinnerProps {
   message?: string;
-  size?: 'small' | 'medium' | 'large';
+  size?: "small" | "medium" | "large";
   showMessage?: boolean;
 }
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   message = "Loading...",
-  size = 'medium',
+  size = "medium",
   showMessage = true,
 }) => {
   const spinAnim = useRef(new Animated.Value(0)).current;
@@ -122,9 +122,9 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   const getSizeStyles = () => {
     switch (size) {
-      case 'small':
+      case "small":
         return { containerSize: 80, spinnerSize: 40, fontSize: 14 };
-      case 'large':
+      case "large":
         return { containerSize: 160, spinnerSize: 80, fontSize: 18 };
       default:
         return { containerSize: 120, spinnerSize: 60, fontSize: 16 };
@@ -135,12 +135,17 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
   const spin = spinAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
+    outputRange: ["0deg", "360deg"],
   });
 
   return (
     <View style={styles.container}>
-      <View style={[styles.spinnerContainer, { width: containerSize, height: containerSize }]}>
+      <View
+        style={[
+          styles.spinnerContainer,
+          { width: containerSize, height: containerSize },
+        ]}
+      >
         <Animated.View
           style={[
             styles.glowBackground,
@@ -160,17 +165,16 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
               width: spinnerSize,
               height: spinnerSize,
               borderRadius: spinnerSize / 2,
-              transform: [
-                { rotate: spin },
-                { scale: heartBeatAnim },
-              ],
+              transform: [{ rotate: spin }, { scale: heartBeatAnim }],
             },
           ]}
         >
           <View style={styles.heartContainer}>
-            <View style={[styles.heartLeft, { backgroundColor: '#e03487' }]} />
-            <View style={[styles.heartRight, { backgroundColor: '#e03487' }]} />
-            <View style={[styles.heartBottom, { backgroundColor: '#e03487' }]} />
+            <View style={[styles.heartLeft, { backgroundColor: "#e03487" }]} />
+            <View style={[styles.heartRight, { backgroundColor: "#e03487" }]} />
+            <View
+              style={[styles.heartBottom, { backgroundColor: "#e03487" }]}
+            />
           </View>
         </Animated.View>
 
@@ -258,43 +262,43 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 20,
   },
   spinnerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
   },
   glowBackground: {
-    position: 'absolute',
-    backgroundColor: 'rgba(224, 52, 135, 0.1)',
-    shadowColor: '#e03487',
+    position: "absolute",
+    backgroundColor: "rgba(224, 52, 135, 0.1)",
+    shadowColor: "#e03487",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
     shadowRadius: 20,
     elevation: 8,
   },
   spinner: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1b1c2e',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#1b1c2e",
     borderWidth: 3,
-    borderColor: '#e03487',
-    shadowColor: '#e03487',
+    borderColor: "#e03487",
+    shadowColor: "#e03487",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.5,
     shadowRadius: 10,
     elevation: 5,
   },
   heartContainer: {
-    position: 'relative',
+    position: "relative",
     width: 20,
     height: 18,
   },
   heartLeft: {
-    position: 'absolute',
+    position: "absolute",
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -302,7 +306,7 @@ const styles = StyleSheet.create({
     left: 0,
   },
   heartRight: {
-    position: 'absolute',
+    position: "absolute",
     width: 10,
     height: 10,
     borderRadius: 5,
@@ -310,20 +314,20 @@ const styles = StyleSheet.create({
     right: 0,
   },
   heartBottom: {
-    position: 'absolute',
+    position: "absolute",
     width: 10,
     height: 10,
     borderRadius: 5,
     bottom: 0,
     left: 5,
-    transform: [{ rotate: '45deg' }],
+    transform: [{ rotate: "45deg" }],
   },
   particle: {
-    position: 'absolute',
+    position: "absolute",
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#e03487',
+    backgroundColor: "#e03487",
   },
   particle1: {
     top: 20,
@@ -338,11 +342,11 @@ const styles = StyleSheet.create({
     right: 50,
   },
   message: {
-    color: '#b0b3c6',
-    fontWeight: '600',
-    textAlign: 'center',
+    color: "#e03487",
+    textAlign: "center",
     marginTop: 16,
-    letterSpacing: 0.5,
+    fontWeight: "bold",
+    fontSize: 10,
   },
 });
 

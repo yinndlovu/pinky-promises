@@ -380,7 +380,7 @@ export default function PortalScreen({ navigation }: Props) {
   if (unseenSweetMessageLoading || unseenVentMessageLoading) {
     return (
       <View style={styles.centered}>
-        <LoadingSpinner message="Loading portal..." size="medium" />
+        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }

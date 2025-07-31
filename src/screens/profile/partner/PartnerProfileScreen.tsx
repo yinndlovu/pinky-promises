@@ -352,7 +352,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   if (partnerDataLoading || currentUserLoading) {
     return (
       <View style={styles.centered}>
-        <LoadingSpinner message="Starting Paris' App" size="medium" />
+        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }
