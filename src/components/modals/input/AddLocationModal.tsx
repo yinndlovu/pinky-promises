@@ -120,7 +120,7 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
               </Text>
               <View style={styles.buttonRow}>
                 <TouchableOpacity
-                  style={styles.confirmButton}
+                  style={[styles.confirmButton, saving && { opacity: 0.5 }]}
                   onPress={handleConfirm}
                   disabled={saving}
                 >

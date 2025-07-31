@@ -66,7 +66,7 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
           />
           <View style={styles.buttonRow}>
             <TouchableOpacity
-              style={styles.saveButton}
+              style={[styles.saveButton, loading && { opacity: 0.5 }]}
               onPress={handleSave}
               disabled={loading}
             >
