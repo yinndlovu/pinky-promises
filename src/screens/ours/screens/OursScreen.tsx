@@ -96,7 +96,7 @@ const OursScreen = ({ navigation }: Props) => {
 
       return await getNotes(token);
     },
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
   });
 
   const {
@@ -115,7 +115,7 @@ const OursScreen = ({ navigation }: Props) => {
 
       return await getSpecialDates(token);
     },
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60,
   });
 
   const {
@@ -134,7 +134,7 @@ const OursScreen = ({ navigation }: Props) => {
 
       return await getRecentFavoriteMemories(token);
     },
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60,
   });
 
   // handlers

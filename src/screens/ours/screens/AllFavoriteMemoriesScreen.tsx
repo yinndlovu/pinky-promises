@@ -67,7 +67,7 @@ const AllFavoriteMemoriesScreen = () => {
 
       return await getAllFavoriteMemories(token);
     },
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 60,
   });
 
   // handlers
