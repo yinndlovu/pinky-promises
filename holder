@@ -1,0 +1,23 @@
+// Basic usage
+import { LoadingSpinner } from '../components';
+
+<LoadingSpinner />
+
+// With custom message
+<LoadingSpinner message="Loading your love..." />
+
+// Different sizes
+<LoadingSpinner size="small" message="Loading..." />
+<LoadingSpinner size="medium" message="Loading..." />
+<LoadingSpinner size="large" message="Loading..." />
+
+// Without message
+<LoadingSpinner showMessage={false} />
+
+// In a full-screen loading state
+<View style={{ flex: 1, backgroundColor: '#23243a', justifyContent: 'center', alignItems: 'center' }}>
+  <LoadingSpinner message="Loading your memories..." size="large" />
+</View>
+
+// import|
+export { default as LoadingSpinner } from './LoadingSpinner';
