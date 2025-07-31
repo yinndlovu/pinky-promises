@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated } from "react-native";
 
+// interfaces
 interface LoadingSpinnerProps {
   message?: string;
   size?: "small" | "medium" | "large";
@@ -12,6 +13,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = "medium",
   showMessage = true,
 }) => {
+  // animation variables
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const heartBeatAnim = useRef(new Animated.Value(1)).current;
@@ -19,6 +21,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   const particle2Anim = useRef(new Animated.Value(0)).current;
   const particle3Anim = useRef(new Animated.Value(0)).current;
 
+  // use effects
   useEffect(() => {
     const spinAnimation = Animated.loop(
       Animated.timing(spinAnim, {
@@ -28,6 +31,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       })
     );
 
+    // animations
     const pulseAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
@@ -103,6 +107,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
       ])
     );
 
+    // triggers
     spinAnimation.start();
     pulseAnimation.start();
     heartBeatAnimation.start();
@@ -120,6 +125,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
     };
   }, []);
 
+  // helpers
   const getSizeStyles = () => {
     switch (size) {
       case "small":
