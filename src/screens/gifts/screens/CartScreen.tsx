@@ -379,7 +379,9 @@ const CartScreen = () => {
                   <TouchableOpacity
                     style={[
                       styles.saveButton,
-                      (!newItemName.trim() || !newItemValue.trim()) &&
+                      (!newItemName.trim() ||
+                        !newItemValue.trim() ||
+                        addItemMutation.isPending) &&
                         styles.saveButtonDisabled,
                     ]}
                     onPress={handleAddItem}
