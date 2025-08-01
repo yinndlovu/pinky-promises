@@ -61,7 +61,7 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
             style={styles.textArea}
             value={about}
             onChangeText={setAbout}
-            placeholder="Tell us more about you..."
+            placeholder="Tell more stuff about you..."
             placeholderTextColor="#b0b3c6"
             multiline
             numberOfLines={6}
