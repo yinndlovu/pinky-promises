@@ -40,7 +40,6 @@ import ConfirmationModal from "../../../components/modals/selection/Confirmation
 import MessageInputModal from "../../../components/modals/input/MessageInputModal";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // types
 type Props = NativeStackScreenProps<any, any>;
