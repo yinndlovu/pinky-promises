@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 import AlertModal from "../output/AlertModal";
 
+// types
 type UpdateAboutModalProps = {
   visible: boolean;
   initialAbout: string;
@@ -39,7 +41,7 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
     setLoading(true);
     try {
       await onSave(about);
-      setAlertMessage("More about you updated!");
+      setAlertMessage("More about you updated");
       setAlertVisible(true);
     } catch (err) {
       setAlertMessage("Failed to update info");

@@ -229,7 +229,17 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       {!isOnline && (
-        <View style={{ backgroundColor: "red" }}>
+        <View
+          style={{
+            backgroundColor: "red",
+            position: "absolute",
+            top: insets.top,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            paddingVertical: 2,
+          }}
+        >
           <Text style={{ color: "white", textAlign: "center" }}>
             You are offline
           </Text>
@@ -379,7 +389,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: "absolute",
-    bottom: 40,
+    bottom: 10,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",

@@ -14,6 +14,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import {
@@ -42,6 +43,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   // variables
   const { userId } = route.params as { userId: string };
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   // use states
   const [user, setUser] = useState<any>(null);
@@ -270,7 +272,17 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       {!isOnline && (
-        <View style={{ backgroundColor: "red" }}>
+        <View
+          style={{
+            backgroundColor: "red",
+            position: "absolute",
+            top: insets.top,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            paddingVertical: 2,
+          }}
+        >
           <Text style={{ color: "white", textAlign: "center" }}>
             You are offline
           </Text>

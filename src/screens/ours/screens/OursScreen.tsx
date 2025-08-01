@@ -70,10 +70,10 @@ const OursScreen = ({ navigation }: Props) => {
 
   // use states (processing)
   const [refreshing, setRefreshing] = useState(false);
-   const [deleting, setDeleting] = useState(false);
-   const [editingMemory, setEditingMemory] = useState<any | null>(null);
-   const [memoryModalLoading, setMemoryModalLoading] = useState(false);
-   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [editingMemory, setEditingMemory] = useState<any | null>(null);
+  const [memoryModalLoading, setMemoryModalLoading] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   // use states errors
   const [error, setError] = useState<string | null>(null);
@@ -169,9 +169,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || "Failed to add special date"
-      );
+      setError(err?.response?.data?.message || "Failed to add special date");
     }
   };
 
@@ -229,9 +227,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || "Failed to update special date"
-      );
+      setError(err?.response?.data?.message || "Failed to update special date");
     }
     setEditModalVisible(false);
   };
@@ -274,9 +270,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message || "Failed to delete special date"
-      );
+      setError(err?.response?.data?.message || "Failed to delete special date");
     } finally {
       setDeleting(false);
       setDeleteModalVisible(false);
@@ -445,7 +439,17 @@ const OursScreen = ({ navigation }: Props) => {
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       {!isOnline && (
-        <View style={{ backgroundColor: "red" }}>
+        <View
+          style={{
+            backgroundColor: "red",
+            position: "absolute",
+            top: insets.top,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+            paddingVertical: 2,
+          }}
+        >
           <Text style={{ color: "white", textAlign: "center" }}>
             You are offline
           </Text>
@@ -636,7 +640,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: "absolute",
-    bottom: 40,
+    bottom: 10,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",
