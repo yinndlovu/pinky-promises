@@ -421,6 +421,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+
       setEditMessageModalVisible(false);
       setEditingMessage(null);
       setEditTitle("");
@@ -539,7 +540,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         refetchStoredMessages(),
       ]);
 
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["specialDates", user?.id],
       });
     } catch (e) {
@@ -578,6 +579,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", user?.id],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
+      });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save love language");
     }
@@ -600,6 +605,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", user?.id],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
       });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save about");

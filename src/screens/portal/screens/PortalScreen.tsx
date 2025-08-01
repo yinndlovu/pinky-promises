@@ -279,6 +279,10 @@ export default function PortalScreen({ navigation }: Props) {
         setAlertMessage("Vent message stored for your baby to see");
       }
 
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
+      });
+
       setInputModalVisible(false);
       setAlertVisible(true);
     } catch (err: any) {
@@ -376,14 +380,6 @@ export default function PortalScreen({ navigation }: Props) {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
-
-  if (unseenSweetMessageLoading || unseenVentMessageLoading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
-      </View>
-    );
-  }
 
   {
     deleting && (

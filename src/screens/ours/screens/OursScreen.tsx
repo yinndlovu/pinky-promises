@@ -164,6 +164,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", currentUserId],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
+      });
     } catch (err: any) {
       setError(
         err?.response?.data?.message || "Failed to add special date"
@@ -220,6 +224,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", currentUserId],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
+      });
     } catch (err: any) {
       setError(
         err?.response?.data?.message || "Failed to update special date"
@@ -260,6 +268,10 @@ const OursScreen = ({ navigation }: Props) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", currentUserId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
       });
     } catch (err: any) {
       setError(
@@ -307,6 +319,10 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", currentUserId],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
+      });
     } catch (err: any) {
       setError(
         err?.response?.data?.message || "Failed to delete favorite memory"
@@ -344,6 +360,10 @@ const OursScreen = ({ navigation }: Props) => {
 
       await queryClient.invalidateQueries({
         queryKey: ["recentFavoriteMemories", currentUserId],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
       });
 
       await queryClient.invalidateQueries({

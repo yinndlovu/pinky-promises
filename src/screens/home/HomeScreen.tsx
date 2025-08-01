@@ -18,7 +18,7 @@ import { encode } from "base64-arraybuffer";
 import * as Location from "expo-location";
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
@@ -59,6 +59,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // variables
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
+  const queryClient = useQueryClient();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +89,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       await interactWithPartner(token, action);
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
+      });
+
       setAlertMessage(
         getInteractionFeedback(action, partner?.name || "your partner")
       );
