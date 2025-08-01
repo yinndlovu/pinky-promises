@@ -218,7 +218,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  if (setMonthlyGiftLoading || giftLoading) {
+  if (setMonthlyGiftLoading) {
     return (
       <View style={styles.centered}>
         <LoadingSpinner showMessage={false} size="medium" />
