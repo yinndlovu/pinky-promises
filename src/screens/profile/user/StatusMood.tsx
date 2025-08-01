@@ -111,13 +111,18 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
 
       const token = await AsyncStorage.getItem("token");
+      
       await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       setAlertMessage("Home location added");
+
       await queryClient.invalidateQueries({
         queryKey: ["status", userId],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
       });
 
       setAlertVisible(true);
@@ -132,8 +137,19 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const handleSaveMood = async (newMood: string) => {
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
+
       await updateMood(token, newMood);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["moodData", userId],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities"],
+      });
 
       if (onEdit) {
         onEdit();
