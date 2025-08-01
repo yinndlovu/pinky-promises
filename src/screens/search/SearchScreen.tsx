@@ -211,7 +211,7 @@ export default function SearchScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   toast: {
     position: "absolute",
-    bottom: 60,
+    bottom: 40,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",
