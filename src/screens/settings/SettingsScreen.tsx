@@ -1,3 +1,4 @@
+// external
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,9 +10,12 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
+
+// internal
 import { useAuth } from "../../contexts/AuthContext";
 import LogoutModal from "../../components/modals/selection/LogoutModal";
 
+// types
 type SettingsScreenProps = StackScreenProps<any, any>;
 
 const SettingsScreen: React.FC<SettingsScreenProps> = ({
@@ -24,6 +28,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const { logout } = useAuth();
 
+  // handlers
   const handleLogout = async () => {
     setShowLogoutModal(false);
     await logout();
@@ -33,6 +38,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
     });
   };
 
+  // use effects
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       if (route.params?.emailChanged) {
@@ -50,11 +56,12 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       const timer = setTimeout(() => {
         setShowSuccess(false);
         setSuccess(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [success]);
 
+  // options
   const settingsOptions = [
     {
       label: "Change password",

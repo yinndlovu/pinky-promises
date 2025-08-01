@@ -88,7 +88,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);

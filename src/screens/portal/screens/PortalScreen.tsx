@@ -375,7 +375,7 @@ export default function PortalScreen({ navigation }: Props) {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);

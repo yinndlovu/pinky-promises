@@ -75,7 +75,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);

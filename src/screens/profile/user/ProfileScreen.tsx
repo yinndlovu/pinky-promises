@@ -493,7 +493,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowSuccess(false);
         setSuccess(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [success]);
@@ -505,7 +505,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);

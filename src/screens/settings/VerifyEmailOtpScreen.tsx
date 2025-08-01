@@ -38,7 +38,7 @@ const VerifyEmailOtpScreen: React.FC<VerifyEmailOTPScreenProps> = ({
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -49,7 +49,7 @@ const VerifyEmailOtpScreen: React.FC<VerifyEmailOTPScreenProps> = ({
       const timer = setTimeout(() => {
         setShowSuccess(false);
         setSuccess(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [success]);
