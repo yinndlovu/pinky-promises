@@ -416,7 +416,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       checkAndUpdateHomeStatus();
-      const interval = setInterval(checkAndUpdateHomeStatus, 3 * 60 * 1000);
+      const interval = setInterval(checkAndUpdateHomeStatus, 4 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
   );
