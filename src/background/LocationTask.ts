@@ -38,7 +38,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
         home.latitude,
         home.longitude
       );
-      const isAtHome = distance < 150;
+      const isAtHome = distance < 100;
 
       await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
     } catch (err) {}

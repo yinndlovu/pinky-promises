@@ -133,7 +133,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         home.latitude,
         home.longitude
       );
-      const isAtHome = distance < 150;
+      const isAtHome = distance < 100;
 
       await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
     } catch (err) {}
