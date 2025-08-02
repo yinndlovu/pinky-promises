@@ -5,6 +5,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { BASE_URL } from "../configuration/config";
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: false,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: false,
+    shouldShowList: true,
+  }),
+});
+
 export async function registerForPushNotificationsAsync() {
   let token;
 
@@ -56,4 +66,16 @@ export async function registerForPushNotificationsAsync() {
   }
 
   return token;
+}
+
+export function setupNotificationListeners(
+  onNotificationResponse: (response: Notifications.NotificationResponse) => void
+) {
+  const responseListener = Notifications.addNotificationResponseReceivedListener(
+    onNotificationResponse
+  );
+
+  return () => {
+    responseListener.remove();
+  };
 }

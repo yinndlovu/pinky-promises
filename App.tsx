@@ -1,5 +1,8 @@
 // external
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  createNavigationContainerRef,
+} from "@react-navigation/native";
 import {
   createStackNavigator,
   TransitionPresets,
@@ -18,7 +21,6 @@ import Feather from "@expo/vector-icons/build/Feather";
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
 import { NotificationProvider } from "./src/contexts/NotificationContext";
-import { useNotification } from "./src/contexts/NotificationContext"; // do things for notifications
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 import { SSEProvider } from "./src/contexts/SSEContext";
@@ -58,6 +60,7 @@ import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
+export const navigationRef = createNavigationContainerRef();
 
 // navigation bar
 function MainTabs() {
@@ -462,12 +465,14 @@ export default function App() {
           client={queryClient}
           persistOptions={{
             persister: sqlitePersistor,
-            maxAge: 1000 * 60 * 60 * 24 * 4,
+            maxAge: 1000 * 60 * 60 * 24 * 5,
           }}
           onSuccess={() => {}}
         >
           <SSEProvider>
-            <AppContent />
+            <NavigationContainer ref={navigationRef}>
+              <AppContent />
+            </NavigationContainer>
           </SSEProvider>
         </PersistQueryClientProvider>
       </AuthProvider>
