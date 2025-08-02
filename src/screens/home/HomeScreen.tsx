@@ -133,7 +133,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         home.latitude,
         home.longitude
       );
-      const isAtHome = distance < 100;
+      const isAtHome = distance < 150;
 
       await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
     } catch (err) {}
@@ -416,7 +416,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       checkAndUpdateHomeStatus();
-      const interval = setInterval(checkAndUpdateHomeStatus, 4 * 60 * 1000);
+      const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
   );

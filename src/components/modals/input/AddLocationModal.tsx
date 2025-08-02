@@ -54,7 +54,7 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
           await requestLocationPermissions();
 
           let loc = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.BestForNavigation,
+            accuracy: Location.Accuracy.High,
             timeInterval: 1000,
           });
           setLocation({
