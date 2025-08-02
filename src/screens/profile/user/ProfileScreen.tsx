@@ -837,7 +837,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const originalUsername = user?.username || "";
   const originalBio = user?.bio || "";
 
-  if (!user) {
+  if (!user && !profileDataLoading) {
     return (
       <View style={styles.centered}>
         <ScrollView

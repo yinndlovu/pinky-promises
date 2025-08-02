@@ -6,12 +6,7 @@ import {
 } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  View,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { useEffect } from "react";
 import { QueryClient, onlineManager } from "@tanstack/react-query";
@@ -26,6 +21,7 @@ import { NotificationProvider } from "./src/contexts/NotificationContext";
 import { useNotification } from "./src/contexts/NotificationContext"; // do things for notifications
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
+import { SSEProvider } from "./src/contexts/SSEContext";
 
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/PartnerProfileScreen";
@@ -470,7 +466,9 @@ export default function App() {
           }}
           onSuccess={() => {}}
         >
-          <AppContent />
+          <SSEProvider>
+            <AppContent />
+          </SSEProvider>
         </PersistQueryClientProvider>
       </AuthProvider>
     </NotificationProvider>

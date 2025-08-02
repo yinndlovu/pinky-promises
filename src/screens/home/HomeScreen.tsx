@@ -41,6 +41,7 @@ import {
   formatTimeLeft,
 } from "../../helpers/formatDateHelper";
 import { checkLocationPermissions } from "../../services/location/locationPermissionService";
+import { useSSE } from "../../contexts/SSEContext";
 
 // screen content
 import RecentActivity from "./components/RecentActivity";
@@ -60,6 +61,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
+  const { isConnected } = useSSE();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -198,7 +200,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: partnerStatusLoading,
     refetch: refetchPartnerStatus,
   } = useQuery({
-    queryKey: ["partnerStatus", partnerId],
+    queryKey: ["partnerStatus"],
     queryFn: async () => {
       if (!partnerId) {
         return null;
@@ -222,7 +224,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: partnerMoodLoading,
     refetch: refetchPartnerMood,
   } = useQuery({
-    queryKey: ["partnerMood", partnerId],
+    queryKey: ["partnerMood"],
     queryFn: async () => {
       if (!partnerId) {
         return null;

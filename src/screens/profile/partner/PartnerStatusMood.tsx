@@ -41,7 +41,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     isLoading: partnerMoodLoading,
     refetch: refetchPartnerMood,
   } = useQuery({
-    queryKey: ["partnerMood", partnerId],
+    queryKey: ["partnerMood"],
     queryFn: async () => {
       if (!partnerId) {
         return null;
@@ -68,7 +68,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     isLoading: partnerStatusLoading,
     refetch: refetchPartnerStatus,
   } = useQuery({
-    queryKey: ["partnerStatus", partnerId],
+    queryKey: ["partnerStatus"],
     queryFn: async () => {
       if (!partnerId) {
         return null;
