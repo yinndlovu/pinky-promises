@@ -7,10 +7,10 @@ import { BASE_URL } from "../configuration/config";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: false,
+    shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
-    shouldShowBanner: false,
+    shouldShowBanner: true,
     shouldShowList: true,
   }),
 });

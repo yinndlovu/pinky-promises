@@ -39,6 +39,12 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
           navigationRef.navigate("Presents" as never);
         } else if (data?.type === "special_date_created") {
           navigationRef.navigate("Ours" as never);
+        } else if (data?.type === "special_date_updated") {
+          navigationRef.navigate("Ours" as never);
+        } else if (data?.type === "special_date_deleted") {
+          navigationRef.navigate("Ours" as never);
+        } else if (data?.type === "special_date_arrived") {
+          navigationRef.navigate("Home" as never);
         }
       });
 
