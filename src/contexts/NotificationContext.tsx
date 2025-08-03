@@ -1,7 +1,7 @@
 import React, { createContext, useContext, ReactNode, useEffect } from "react";
 import { setupNotificationListeners } from "../utils/notifications";
 import { useAuth } from "./AuthContext";
-import { navigationRef } from "../../App";
+import { navigationRef } from "../utils/navigation";
 
 interface NotificationContextProps {}
 

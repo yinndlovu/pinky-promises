@@ -55,12 +55,12 @@ import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen"
 import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
 import CartScreen from "./src/screens/gifts/screens/CartScreen";
 import LoadingSpinner from "./src/components/loading/LoadingSpinner";
+import { navigationRef } from "./src/utils/navigation";
 
 // variables
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
-export const navigationRef = createNavigationContainerRef();
 
 // navigation bar
 function MainTabs() {
