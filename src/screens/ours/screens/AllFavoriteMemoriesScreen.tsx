@@ -19,7 +19,7 @@ import {
   getFavoriteMemoryById,
   deleteFavoriteMemory,
   updateFavoriteMemory,
-} from "../../../services/favoriteMemoriesService";
+} from "../../../services/api/ours/favoriteMemoriesService";
 import { Memory } from "../../../types/Memory";
 import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY } from "../../../helpers/formatDateHelper";

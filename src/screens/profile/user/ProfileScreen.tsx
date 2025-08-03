@@ -25,24 +25,23 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { fetchUserStatus } from "../../../services/userStatusService";
-import { getMood } from "../../../services/moodService";
+import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
+import { getMood } from "../../../services/api/profiles/moodService";
 import UpdateFavoritesModal from "../../../components/modals/input/UpdateFavoritesModal";
 import {
   getUserFavorites,
   updateUserFavorites,
-} from "../../../services/favoritesService";
+} from "../../../services/api/profiles/favoritesService";
 import { BASE_URL } from "../../../configuration/config";
 import {
   getLoveLanguage,
   updateLoveLanguage,
-} from "../../../services/loveLanguageService";
+} from "../../../services/api/profiles/loveLanguageService";
 import {
   getAboutUser,
   updateAboutUser,
-} from "../../../services/aboutUserService";
-import { getPartner } from "../../../services/partnerService";
-import { getReceivedPartnerRequests } from "../../../services/partnerService";
+} from "../../../services/api/profiles/aboutUserService";
+import { getPartner, getReceivedPartnerRequests } from "../../../services/api/profiles/partnerService";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { FavoritesType } from "../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
@@ -51,7 +50,7 @@ import {
   getStoredMessages,
   updateMessage,
   deleteMessage,
-} from "../../../services/messageStorageService";
+} from "../../../services/api/profiles/messageStorageService";
 
 // screen content
 import UpdateAboutModal from "../../../components/modals/input/UpdateAboutModal";
@@ -152,9 +151,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return res.data.user;
     },
-    retry: 2,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60 * 24 * 2,
   });
 
   const {

@@ -22,7 +22,7 @@ import {
   getSentSweetMessages,
   getReceivedSweetMessages,
   deleteSweetMessage,
-} from "../../../services/sweetMessageService";
+} from "../../../services/api/portal/sweetMessageService";
 import {
   ventToPartner,
   getLastUnseenVentMessage,
@@ -30,7 +30,7 @@ import {
   getSentVentMessages,
   getReceivedVentMessages,
   deleteVentMessage,
-} from "../../../services/ventMessageService";
+} from "../../../services/api/portal/ventMessageService";
 import { Message } from "../../../types/Message";
 
 // screen content

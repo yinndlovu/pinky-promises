@@ -17,20 +17,20 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getNotes } from "../../../services/notesService";
+import { getNotes } from "../../../services/api/ours/notesService";
 import {
   getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
   deleteSpecialDate,
-} from "../../../services/specialDateService";
+} from "../../../services/api/ours/specialDateService";
 import {
   getFavoriteMemoryById,
   createFavoriteMemory,
   updateFavoriteMemory,
   deleteFavoriteMemory,
   getRecentFavoriteMemories,
-} from "../../../services/favoriteMemoriesService";
+} from "../../../services/api/ours/favoriteMemoriesService";
 import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content

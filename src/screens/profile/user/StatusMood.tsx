@@ -30,7 +30,7 @@ import { StatusMoodProps } from "../../../types/StatusMood";
 import AddLocationModal from "../../../components/modals/input/AddLocationModal";
 import UpdateMoodModal from "../../../components/modals/selection/UpdateMoodModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
-import { updateMood } from "../../../services/moodService";
+import { updateMood } from "../../../services/api/profiles/moodService";
 
 const StatusMood: React.FC<StatusMoodProps> = ({
   mood,

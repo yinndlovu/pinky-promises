@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { searchUsers } from "../../services/searchService";
+import { searchUsers } from "../../services/api/home/searchService";
 import { BASE_URL } from "../../configuration/config";
 import { User } from "../../types/User";
 import { ProfilePictureInfo } from "../../types/ProfilePicture";

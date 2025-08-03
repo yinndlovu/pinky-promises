@@ -20,7 +20,7 @@ import {
   NOTIFICATION_TYPES,
   getNotificationPreference,
   setNotificationPreference,
-} from "../../../services/notificationPreferenceService";
+} from "../../../services/api/settings/notificationPreferenceService";
 
 // screen content
 import ReminderIntervalSetting from "./ReminderIntervalSetting";

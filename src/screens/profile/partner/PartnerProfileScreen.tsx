@@ -19,14 +19,14 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getUserFavorites } from "../../../services/favoritesService";
-import { getLoveLanguage } from "../../../services/loveLanguageService";
-import { getAboutUser } from "../../../services/aboutUserService";
-import { removePartner } from "../../../services/partnerService";
+import { getUserFavorites } from "../../../services/api/profiles/favoritesService";
+import { getLoveLanguage } from "../../../services/api/profiles/loveLanguageService";
+import { getAboutUser } from "../../../services/api/profiles/aboutUserService";
+import { removePartner } from "../../../services/api/profiles/partnerService";
 import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
-import { getReceivedMessages } from "../../../services/messageStorageService";
+import { getReceivedMessages } from "../../../services/api/profiles/messageStorageService";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";

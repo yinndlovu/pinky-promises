@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BASE_URL } from "../configuration/config";
+import { BASE_URL } from "../../../configuration/config";
 
 export async function getFavoriteMemoryById(token: string, memoryId: string) {
   const res = await axios.get(

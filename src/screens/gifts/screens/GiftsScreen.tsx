@@ -29,11 +29,11 @@ import {
   getOldestUnclaimedGift,
   claimMonthlyGift,
   getLastFiveClaimedGifts,
-} from "../../../services/monthlyGiftService";
+} from "../../../services/api/gifts/monthlyGiftService";
 import {
   getSetMonthlyGift,
   updateSetMonthlyGift,
-} from "../../../services/setMonthlyGiftService";
+} from "../../../services/api/gifts/setMonthlyGiftService";
 import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY, formatTime } from "../../../helpers/formatDateHelper";
 

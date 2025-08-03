@@ -14,8 +14,8 @@ import Animated, {
 } from "react-native-reanimated";
 
 // internal
-import { fetchUserStatus } from "../../../services/userStatusService";
-import { getUserMood } from "../../../services/moodService";
+import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
+import { getUserMood } from "../../../services/api/profiles/moodService";
 import { PartnerStatusMoodProps } from "../../../types/StatusMood";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({

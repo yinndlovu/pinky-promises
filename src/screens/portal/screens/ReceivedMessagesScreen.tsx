@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getReceivedSweetMessages,
   viewSweetMessage,
-} from "../../../services/sweetMessageService";
+} from "../../../services/api/portal/sweetMessageService";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import { Message } from "../../../types/Message";
 import { formatDateDMY } from "../../../helpers/formatDateHelper";

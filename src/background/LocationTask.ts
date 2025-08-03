@@ -1,7 +1,7 @@
 import * as TaskManager from "expo-task-manager";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getHomeLocation } from "../services/homeLocationService";
-import { updateUserStatus } from "../services/userStatusService";
+import { getHomeLocation } from "../services/api/profiles/homeLocationService";
+import { updateUserStatus } from "../services/api/profiles/userStatusService";
 import { getDistance } from "../utils/locationUtils";
 
 const LOCATION_TASK_NAME = "background-location-task";

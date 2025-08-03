@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   getReminderInterval,
   setReminderInterval,
-} from "../../../services/notificationPreferenceService";
+} from "../../../services/api/settings/notificationPreferenceService";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";

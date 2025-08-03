@@ -10,7 +10,7 @@ import {
   getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
-} from "../../../services/specialDateService";
+} from "../../../services/api/ours/specialDateService";
 import { useAuth } from "../../../contexts/AuthContext";
 import { AnniversaryProps, SpecialDate } from "../../../types/SpecialDate";
 import { formatProfileDisplayDate } from "../../../helpers/formatDateHelper";

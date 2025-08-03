@@ -1,4 +1,4 @@
-import { BASE_URL } from "../configuration/config";
+import { BASE_URL } from "../../../configuration/config";
 import axios from "axios";
 
 export async function sendSweetMessage(token: string, message: string) {

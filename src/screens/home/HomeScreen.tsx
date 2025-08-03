@@ -23,18 +23,19 @@ import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import { BASE_URL } from "../../configuration/config";
-import { getHomeLocation } from "../../services/homeLocationService";
-import { updateUserStatus } from "../../services/userStatusService";
+import { getHomeLocation } from "../../services/api/profiles/homeLocationService";
+import { updateUserStatus } from "../../services/api/profiles/userStatusService";
 import { getDistance } from "../../utils/locationUtils";
-import { fetchUserStatus } from "../../services/userStatusService";
-import { getUserMood } from "../../services/moodService";
-import { getUpcomingSpecialDate } from "../../services/specialDateService";
-import { getRecentActivities } from "../../services/recentActivityService";
+import { fetchUserStatus } from "../../services/api/profiles/userStatusService";
+import { getUserMood } from "../../services/api/profiles/moodService";
+import { getUpcomingSpecialDate } from "../../services/api/ours/specialDateService";
+import { getRecentActivities } from "../../services/api/home/recentActivityService";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 import {
   interactWithPartner,
   getUnseenInteractions,
-} from "../../services/interactionService";
+} from "../../services/api/home/interactionService";
+import { getPartner } from "../../services/api/profiles/partnerService";
 import {
   formatDateDMY,
   formatTime,
@@ -45,7 +46,6 @@ import { checkLocationPermissions } from "../../services/location/locationPermis
 // screen content
 import RecentActivity from "./components/RecentActivity";
 import ActionsModal from "../../components/modals/selection/ActionsModal";
-import { getPartner } from "../../services/partnerService";
 import styles from "./styles/HomeScreen.styles";
 import AlertModal from "../../components/modals/output/AlertModal";
 import PortalPreview from "./components/PortalPreview";

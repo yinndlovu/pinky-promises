@@ -16,7 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getSentSweetMessages,
   viewSweetMessage,
-} from "../../../services/sweetMessageService";
+} from "../../../services/api/portal/sweetMessageService";
 import { Message } from "../../../types/Message";
 
 // content

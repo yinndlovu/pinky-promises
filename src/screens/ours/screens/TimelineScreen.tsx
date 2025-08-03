@@ -20,7 +20,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getTimeline,
   createTimelineRecord,
-} from "../../../services/timelineService";
+} from "../../../services/api/ours/timelineService";
 import { formatDateYearly } from "../../../helpers/formatDateHelper";
 
 const TimelineScreen = () => {
