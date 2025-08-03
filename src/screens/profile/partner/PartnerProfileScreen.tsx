@@ -87,6 +87,8 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       return response.data.partner;
     },
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -142,6 +144,8 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       return response.data.user;
     },
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 60 * 24 * 3,
   });
 
@@ -152,7 +156,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerFavoritesLoading,
     refetch: refetchPartnerFavorites,
   } = useQuery({
-    queryKey: ["partnerFavorites", partner?.id],
+    queryKey: ["partnerFavorites"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -173,7 +177,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: loveLanguageLoading,
     refetch: refetchLoveLanguage,
   } = useQuery({
-    queryKey: ["partnerLoveLanguage", partner?.id],
+    queryKey: ["partnerLoveLanguage"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -192,7 +196,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerAboutLoading,
     refetch: refetchPartnerAbout,
   } = useQuery({
-    queryKey: ["partnerAbout", partner?.id],
+    queryKey: ["partnerAbout"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 

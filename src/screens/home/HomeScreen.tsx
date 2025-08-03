@@ -41,7 +41,6 @@ import {
   formatTimeLeft,
 } from "../../helpers/formatDateHelper";
 import { checkLocationPermissions } from "../../services/location/locationPermissionService";
-import { useSSE } from "../../contexts/SSEContext";
 
 // screen content
 import RecentActivity from "./components/RecentActivity";
@@ -61,7 +60,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
-  const { isConnected } = useSSE();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +156,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       return await getPartner(token);
     },
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 60 * 24,
   });
 

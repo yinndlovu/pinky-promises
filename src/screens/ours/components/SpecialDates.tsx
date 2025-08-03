@@ -11,6 +11,7 @@ import {
 // internal
 import { SpecialDateProps } from "../../../types/SpecialDate";
 import { STANDARD_FIELDS } from "../../../helpers/specialDateHelpers";
+import { formatDateDMY } from "../../../helpers/formatDateHelper";
 
 // helpers
 function formatExtraLabel(key: string): string {
@@ -43,7 +44,7 @@ const SpecialDates: React.FC<SpecialDateProps> = ({
               <View style={styles.dateRow}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.dateLabel}>{item.title}</Text>
-                  <Text style={styles.dateValue}>{item.date}</Text>
+                  <Text style={styles.dateValue}>{formatDateDMY(item.date)}</Text>
                   {item.description ? (
                     <Text style={styles.dateDescription}>
                       {item.description}

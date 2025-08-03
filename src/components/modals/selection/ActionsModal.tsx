@@ -26,7 +26,8 @@ const ACTIONS = [
   { key: "nudge", label: "NUDGE" },
   { key: "caress", label: "CARESS" },
   { key: "embrace", label: "EMBRACE" },
-  { key: "wink", label: "WINK AT"}
+  { key: "wink", label: "WINK AT" },
+  { key: "roll", label: "ROLL EYES" },
 ];
 
 const ActionsModal: React.FC<ActionsModalProps> = ({

@@ -125,7 +125,7 @@ const AllFavoriteMemoriesScreen = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", currentUserId],
+        queryKey: ["recentFavoriteMemories"],
       });
 
       setAlertMessage("Favorite memory deleted");
@@ -162,7 +162,7 @@ const AllFavoriteMemoriesScreen = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", currentUserId],
+        queryKey: ["recentFavoriteMemories"],
       });
 
       setAlertMessage("Favorite memory updated");

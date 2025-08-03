@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
@@ -7,20 +7,15 @@ import { useQuery } from "@tanstack/react-query";
 // internal
 import { getSpecialDates } from "../../../services/specialDateService";
 import { SpecialDate } from "../../../types/SpecialDate";
-import { useAuth } from "../../../contexts/AuthContext";
 
 const PartnerAnniversary = () => {
-  // variables
-  const { user } = useAuth();
-  const currentUserId = user?.id;
-
   // fetch functions
   const {
     data: specialDates = [],
     isLoading: specialDatesLoading,
     refetch: refetchSpecialDates,
   } = useQuery<SpecialDate[]>({
-    queryKey: ["specialDates", currentUserId],
+    queryKey: ["specialDates"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 

@@ -51,7 +51,6 @@ import {
   getStoredMessages,
   updateMessage,
   deleteMessage,
-  viewMessage,
 } from "../../../services/messageStorageService";
 
 // screen content
@@ -152,6 +151,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
     },
+    retry: 2,
+    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 60,
   });
 
@@ -541,7 +542,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       ]);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates", user?.id],
+        queryKey: ["specialDates"],
       });
     } catch (e) {
     } finally {
@@ -837,7 +838,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const originalUsername = user?.username || "";
   const originalBio = user?.bio || "";
 
-  if (!user && !profileDataLoading) {
+  if (profileDataLoading) {
+    return (
+      <View style={styles.centered}>
+        <LoadingSpinner showMessage={false} size="medium" />
+      </View>
+    );
+  }
+
+  if (!profileData && !profileDataLoading) {
     return (
       <View style={styles.centered}>
         <ScrollView
@@ -857,14 +866,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             Something went wrong viewing your profile
           </Text>
         </ScrollView>
-      </View>
-    );
-  }
-
-  if (profileDataLoading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
   }

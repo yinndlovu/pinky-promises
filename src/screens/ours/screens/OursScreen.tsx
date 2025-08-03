@@ -104,7 +104,7 @@ const OursScreen = ({ navigation }: Props) => {
     isLoading: specialDatesLoading,
     refetch: refetchSpecialDates,
   } = useQuery({
-    queryKey: ["specialDates", currentUserId],
+    queryKey: ["specialDates"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -123,7 +123,7 @@ const OursScreen = ({ navigation }: Props) => {
     isLoading: recentMemoriesLoading,
     refetch: refetchRecentMemories,
   } = useQuery({
-    queryKey: ["recentFavoriteMemories", currentUserId],
+    queryKey: ["recentFavoriteMemories"],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -154,7 +154,7 @@ const OursScreen = ({ navigation }: Props) => {
       await createSpecialDate(token, date, title, description);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates", currentUserId],
+        queryKey: ["specialDates"],
       });
 
       await queryClient.invalidateQueries({
@@ -212,7 +212,7 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertVisible(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates", currentUserId],
+        queryKey: ["specialDates"],
       });
 
       await queryClient.invalidateQueries({
@@ -255,7 +255,7 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertVisible(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates", currentUserId],
+        queryKey: ["specialDates"],
       });
 
       await queryClient.invalidateQueries({
@@ -303,7 +303,7 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertVisible(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", currentUserId],
+        queryKey: ["recentFavoriteMemories"],
       });
 
       await queryClient.invalidateQueries({
@@ -353,7 +353,7 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertVisible(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", currentUserId],
+        queryKey: ["recentFavoriteMemories"],
       });
 
       await queryClient.invalidateQueries({
