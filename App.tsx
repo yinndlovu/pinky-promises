@@ -118,37 +118,7 @@ function AppContent() {
   }
 
   return (
-    <NavigationContainer
-      theme={{
-        dark: true,
-        colors: {
-          primary: "#e03487",
-          background: "#23243a",
-          card: "#23243a",
-          text: "#fff",
-          border: "transparent",
-          notification: "#e03487",
-        },
-        fonts: {
-          regular: {
-            fontFamily: "System",
-            fontWeight: "400",
-          },
-          medium: {
-            fontFamily: "System",
-            fontWeight: "500",
-          },
-          bold: {
-            fontFamily: "System",
-            fontWeight: "700",
-          },
-          heavy: {
-            fontFamily: "System",
-            fontWeight: "900",
-          },
-        },
-      }}
-    >
+    <>
       <Stack.Navigator
         initialRouteName={isAuthenticated ? "Main" : "Welcome"}
         screenOptions={{
@@ -447,7 +417,7 @@ function AppContent() {
         />
       </Stack.Navigator>
       <StatusBar style="light" />
-    </NavigationContainer>
+    </>
   );
 }
 
@@ -459,8 +429,8 @@ export default function App() {
   }, []);
 
   return (
-    <NotificationProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <NotificationProvider>
         <PersistQueryClientProvider
           client={queryClient}
           persistOptions={{
@@ -470,13 +440,44 @@ export default function App() {
           onSuccess={() => {}}
         >
           <SSEProvider>
-            <NavigationContainer ref={navigationRef}>
+            <NavigationContainer
+              ref={navigationRef}
+              theme={{
+                dark: true,
+                colors: {
+                  primary: "#e03487",
+                  background: "#23243a",
+                  card: "#23243a",
+                  text: "#fff",
+                  border: "transparent",
+                  notification: "#e03487",
+                },
+                fonts: {
+                  regular: {
+                    fontFamily: "System",
+                    fontWeight: "400",
+                  },
+                  medium: {
+                    fontFamily: "System",
+                    fontWeight: "500",
+                  },
+                  bold: {
+                    fontFamily: "System",
+                    fontWeight: "700",
+                  },
+                  heavy: {
+                    fontFamily: "System",
+                    fontWeight: "900",
+                  },
+                },
+              }}
+            >
               <AppContent />
             </NavigationContainer>
           </SSEProvider>
         </PersistQueryClientProvider>
-      </AuthProvider>
-    </NotificationProvider>
+      </NotificationProvider>
+    </AuthProvider>
   );
 }
 

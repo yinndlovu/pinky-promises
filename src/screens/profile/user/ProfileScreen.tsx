@@ -113,7 +113,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [editMessageModalVisible, setEditMessageModalVisible] = useState(false);
-  const [addMessageModalVisible, setAddMessageModalVisible] = useState(false);
 
   // use states (edit fields)
   const [editName, setEditName] = useState("");
@@ -147,23 +146,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         return;
       }
 
-      return await axios.get(`${BASE_URL}/api/profile/get-profile`, {
+      const res = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      return res.data.user;
     },
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 60 * 24,
   });
-
-  const user = profileData?.data?.user || null;
 
   const {
     data: loveLanguage,
     isLoading: loveLanguageLoading,
     refetch: refetchLoveLanguage,
   } = useQuery({
-    queryKey: ["loveLanguage", user?.id],
+    queryKey: ["loveLanguage", profileData?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -172,9 +171,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         return;
       }
 
-      return await getLoveLanguage(token, user?.id);
+      return await getLoveLanguage(token, profileData?.id);
     },
-    enabled: !!user?.id,
+    enabled: !!profileData?.id,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -183,9 +182,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: statusLoading,
     refetch: refetchStatus,
   } = useQuery({
-    queryKey: ["status", user?.id],
+    queryKey: ["status", profileData?.id],
     queryFn: async () => {
-      if (!user?.id) {
+      if (!profileData?.id) {
         return null;
       }
 
@@ -196,9 +195,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         return;
       }
 
-      return await fetchUserStatus(token, user?.id);
+      return await fetchUserStatus(token, profileData?.id);
     },
-    enabled: !!user?.id,
+    enabled: !!profileData?.id,
     staleTime: 1000 * 60 * 4,
   });
 
@@ -223,7 +222,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: pendingRequestsDataLoading,
     refetch: refetchPendingRequestsData,
   } = useQuery({
-    queryKey: ["pendingRequestCount", user?.id],
+    queryKey: ["pendingRequestCount", profileData?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -234,7 +233,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getReceivedPartnerRequests(token);
     },
-    enabled: !!user?.id,
+    enabled: !!profileData?.id,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -247,11 +246,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: favoritesLoading,
     refetch: refetchFavorites,
   } = useQuery({
-    queryKey: ["favorites", user?.id],
+    queryKey: ["favorites", profileData?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
-      const userId = user?.id;
+      const userId = profileData?.id;
 
       if (!token || !userId) {
         return {};
@@ -259,7 +258,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getUserFavorites(token, userId);
     },
-    enabled: !!user?.id,
+    enabled: !!profileData?.id,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -279,7 +278,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getPartner(token);
     },
-    staleTime: 1000 * 60 * 60 * 24 * 3,
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   const {
@@ -287,7 +286,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: moodDataLoading,
     refetch: refetchMoodData,
   } = useQuery({
-    queryKey: ["moodData", user?.id],
+    queryKey: ["moodData", profileData?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -298,7 +297,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getMood(token);
     },
-    enabled: !!user?.id,
+    enabled: !!profileData?.id,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -307,7 +306,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: aboutLoading,
     refetch: refetchAbout,
   } = useQuery({
-    queryKey: ["about", user?.id],
+    queryKey: ["about", profileData?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -316,22 +315,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         return;
       }
 
-      return await getAboutUser(token, user?.id);
+      return await getAboutUser(token, profileData?.id);
     },
-    enabled: !!user?.id,
-    staleTime: 1000 * 60 * 60,
+    enabled: !!profileData?.id,
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   const fetchProfilePicture = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
 
-      if (!token || !user?.id) {
+      if (!token || !profileData?.id) {
         return;
       }
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${user?.id}`,
+        `${BASE_URL}/api/profile/get-profile-picture/${profileData?.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",
@@ -370,7 +369,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       const response = await getStoredMessages(token);
       return Array.isArray(response) ? response : [];
     },
-    staleTime: 1000 * 60 * 60 * 24 * 2,
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   const storeMessageMutation = useMutation({
@@ -462,7 +461,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // helpers
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt) {
-      const cachedImageUrl = buildCachedImageUrl(user.id, profilePicUpdatedAt);
+      const cachedImageUrl = buildCachedImageUrl(profileData?.id, profilePicUpdatedAt);
 
       return (
         <Image
@@ -512,10 +511,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }, [error]);
 
   useEffect(() => {
-    if (user?.id) {
+    if (profileData?.id) {
       fetchProfilePicture();
     }
-  }, [user?.id]);
+  }, [profileData?.id]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -574,11 +573,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await updateLoveLanguage(token, newLoveLanguage);
 
       await queryClient.invalidateQueries({
-        queryKey: ["loveLanguage", user?.id],
+        queryKey: ["loveLanguage", profileData?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["aiContext", profileData?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -601,11 +600,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await updateAboutUser(token, newAbout);
 
       await queryClient.invalidateQueries({
-        queryKey: ["about", user?.id],
+        queryKey: ["about", profileData?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["aiContext", profileData?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -632,11 +631,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await updateUserFavorites(token, newFavorites);
 
       await queryClient.invalidateQueries({
-        queryKey: ["favorites", user?.id],
+        queryKey: ["favorites", profileData?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["aiContext", profileData?.id],
       });
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to save favorites");
@@ -670,7 +669,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setUploading(true);
 
         const token = await AsyncStorage.getItem("token");
-        const userId = user.id;
+        const userId = profileData?.id;
 
         const mimeType = result.assets[0].mimeType || "image/jpeg";
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
@@ -741,7 +740,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["aiContext", profileData?.id],
       });
     } catch (err: any) {
       setError(`Failed to update ${field}`);
@@ -834,9 +833,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   // fiels for editing
-  const originalName = user?.name || "";
-  const originalUsername = user?.username || "";
-  const originalBio = user?.bio || "";
+  const originalName = profileData?.name || "";
+  const originalUsername = profileData?.username || "";
+  const originalBio = profileData?.bio || "";
 
   if (profileDataLoading) {
     return (
@@ -985,16 +984,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             {renderProfileImage()}
           </TouchableOpacity>
           <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{user.name}</Text>
-            <Text style={styles.username}>@{user.username}</Text>
-            <Text style={styles.bio}>{user.bio || ""}</Text>
+            <Text style={styles.name}>{profileData?.name || ""}</Text>
+            <Text style={styles.username}>@{profileData?.username || ""}</Text>
+            <Text style={styles.bio}>{profileData?.bio || ""}</Text>
           </View>
           <TouchableOpacity
             style={styles.editButton}
             onPress={() => {
-              setEditName(user?.name || "");
-              setEditUsername(user?.username || "");
-              setEditBio(user?.bio || "");
+              setEditName(profileData?.name || "");
+              setEditUsername(profileData?.username || "");
+              setEditBio(profileData?.bio || "");
               setEditModalVisible(true);
             }}
           >
@@ -1267,8 +1266,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <ProfilePictureViewer
             visible={showPictureViewer}
             imageUri={
-              user && profilePicUpdatedAt
-                ? buildCachedImageUrl(user.id, profilePicUpdatedAt)
+              profileData && profilePicUpdatedAt
+                ? buildCachedImageUrl(profileData?.id, profilePicUpdatedAt)
                 : null
             }
             onClose={() => setShowPictureViewer(false)}

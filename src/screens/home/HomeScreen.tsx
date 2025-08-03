@@ -377,6 +377,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return `You just embraced ${partnerName}. Aww, lovebirds 🤍`;
       case "wink":
         return `You just winked at ${partnerName}`;
+      case "roll":
+        return `You just rolled your eyes at ${partnerName} 🙄`;
       default:
         return `You just interacted with ${partnerName}`;
     }

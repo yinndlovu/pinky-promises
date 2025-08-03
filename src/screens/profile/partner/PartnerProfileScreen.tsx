@@ -146,10 +146,8 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     },
     retry: 2,
     retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-    staleTime: 1000 * 60 * 60 * 24 * 3,
+    staleTime: 1000 * 60 * 60 * 24,
   });
-
-  const currentUserName = currentUser?.name || "You";
 
   const {
     data: partnerFavorites = {},
@@ -246,7 +244,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       setShowRemoveModal(false);
 
-      navigation.replace("UserProfile", { userId: partner.id });
+      if (partner?.id) {
+        navigation.replace("UserProfile", { userId: partner.id });
+      }
     } catch (error: any) {
     } finally {
       setRemovingPartner(false);
@@ -426,7 +426,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         <View style={styles.partnerRow}>
           <Text style={styles.partnerText}>
             Partner:{" "}
-            <Text style={styles.partnerName}>{currentUserName || "You"}</Text>
+            <Text style={styles.partnerName}>{currentUser?.name || "You"}</Text>
           </Text>
         </View>
 
