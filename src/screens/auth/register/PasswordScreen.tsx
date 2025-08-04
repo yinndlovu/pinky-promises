@@ -17,9 +17,6 @@ import { Feather } from "@expo/vector-icons";
 import { BASE_URL } from "../../../configuration/config";
 import { useAuth } from "../../../contexts/AuthContext";
 
-const passwordRegex =
-  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
-
 const validateNewPassword = (password: string) => ({
   length: password.length >= 8,
   letter: /[a-zA-Z]/.test(password),
