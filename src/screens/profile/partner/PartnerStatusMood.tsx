@@ -17,6 +17,7 @@ import Animated, {
 import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
 import { getUserMood } from "../../../services/api/profiles/moodService";
 import { PartnerStatusMoodProps } from "../../../types/StatusMood";
+import { formatDistance } from "../../../utils/formatDistance";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   partnerId,
@@ -261,7 +262,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
 
       {partnerStatus?.isAtHome === false && partnerStatus?.distance && (
         <Text style={styles.statusDistance}>
-          {`${partnerStatus.distance} meters away from home`}
+          {`${formatDistance(partnerStatus.distance)} away from home`}
         </Text>
       )}
 
