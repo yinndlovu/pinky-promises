@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BASE_URL } from "../configuration/config";
+import { BASE_URL } from "../../../configuration/config";
 
 export async function addItem(token: string, item: string, value: string) {
   const res = await axios.post(

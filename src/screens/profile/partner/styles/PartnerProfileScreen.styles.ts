@@ -60,9 +60,20 @@ const styles = StyleSheet.create({
   },
   partnerRow: {
     marginBottom: 20,
-    marginLeft: 2,
+    marginLeft: 20,
+    marginRight: 20,
     alignItems: "center",
     marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  distanceText: {
+    fontWeight: "800",
+    color: "#b0b3c6",
+  },
+  apartText: {
+    color: "#b0b3c6",
+    fontWeight: "500"
   },
   partnerText: {
     color: "#b0b3c6",

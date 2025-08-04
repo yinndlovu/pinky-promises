@@ -445,6 +445,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             Partner:{" "}
             <Text style={styles.partnerName}>{currentUser?.name || "You"}</Text>
           </Text>
+          <Text style={styles.distanceText}>
+            70 m{" "}
+            <Text style={styles.apartText}>apart</Text>
+          </Text>
         </View>
 
         <PartnerStatusMood
