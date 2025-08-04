@@ -447,9 +447,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // use effects
   useEffect(() => {
     checkAndUpdateHomeStatus();
-  }, []);
-
-  useEffect(() => {
     initTrackingIfNeeded();
   }, []);
 
