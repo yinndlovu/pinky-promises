@@ -92,8 +92,8 @@ const NotificationsScreen = () => {
       queryClient.invalidateQueries({
         queryKey: ["notificationPreferences"],
       });
-    } catch (e) {
-      setError("Failed to update notification");
+    } catch (e: any) {
+      setError(e.response?.data?.error || "Failed to update notification");
     }
 
     setUpdating((prev) => ({ ...prev, [type]: false }));

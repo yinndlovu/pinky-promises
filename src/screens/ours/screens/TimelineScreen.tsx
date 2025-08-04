@@ -87,7 +87,7 @@ const TimelineScreen = () => {
       setInputValue("");
     },
     onError: (err: any) => {
-      setError(err?.message || "Failed to add timeline event");
+      setError(err.response?.data?.error || "Failed to add timeline event");
     },
   });
 

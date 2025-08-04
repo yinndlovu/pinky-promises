@@ -393,7 +393,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setAlertVisible(true);
     },
     onError: (error: any) => {
-      setAlertMessage(error?.message || "Failed to store message");
+      setAlertMessage(error.response?.data?.error || "Failed to store message");
       setAlertVisible(true);
     },
   });
@@ -427,7 +427,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setAlertVisible(true);
     },
     onError: (error: any) => {
-      setAlertMessage(error?.message || "Failed to update message");
+      setAlertMessage(error.response?.data?.error || "Failed to update message");
       setAlertVisible(true);
     },
   });
@@ -450,7 +450,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setAlertVisible(true);
     },
     onError: (error: any) => {
-      setAlertMessage(error?.message || "Failed to delete message");
+      setAlertMessage(error.response?.data?.error || "Failed to delete message");
       setAlertVisible(true);
     },
   });
@@ -581,7 +581,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to save love language");
+      setError(err.response?.data?.message || "Failed to save love language");
     }
   };
 
@@ -608,7 +608,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to save about");
+      setError(err.response?.data?.message || "Failed to save about");
     }
   };
 
@@ -635,7 +635,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         queryKey: ["aiContext", profileData?.id],
       });
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to save favorites");
+      setError(err.response?.data?.error || "Failed to save favorites");
     }
   };
 
@@ -775,7 +775,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setStoreMessageModalVisible(false);
       setAlertVisible(true);
     } catch (error: any) {
-      setAlertMessage(error?.response?.message || "Failed to store message");
+      setAlertMessage(error.response?.data?.error || "Failed to store message");
       setStoreMessageModalVisible(false);
       setAlertVisible(true);
     } finally {

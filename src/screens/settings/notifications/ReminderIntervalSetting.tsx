@@ -50,7 +50,7 @@ const ReminderIntervalSetting = () => {
       const hours = await getReminderInterval(token);
       setInterval(hours ? String(hours) : "");
     } catch (e: any) {
-      setError(e.message || "Failed to load reminder interval.");
+      setError(e.response?.data?.error || "Failed to load reminder interval.");
     }
     setLoading(false);
   };
@@ -83,7 +83,7 @@ const ReminderIntervalSetting = () => {
       setAlertVisible(true);
       await fetchInterval();
     } catch (e: any) {
-      setAlertMessage("Failed to save interval");
+      setAlertMessage(e.response?.data?.error || "Failed to save interval");
       setAlertVisible(true);
     }
     setSaving(false);

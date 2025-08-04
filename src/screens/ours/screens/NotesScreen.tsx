@@ -11,7 +11,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
-import { getNotes, updateNotes } from "../../../services/notesService";
+import { getNotes, updateNotes } from "../../../services/api/ours/notesService";
 
 // variables
 const AUTO_SAVE_DELAY = 1000;
@@ -43,7 +43,7 @@ const NotesScreen: React.FC = () => {
         const notes = await getNotes(token);
         setContent(notes.content || "");
       } catch (err: any) {
-        setError(err.message || "Failed to load notes");
+        setError(err?.response?.data?.error || "Failed to load notes");
       } finally {
         setLoading(false);
       }

@@ -128,8 +128,8 @@ export default function SearchScreen({ navigation }: Props) {
         })
       );
       setProfilePictures(pics);
-    } catch (err) {
-      setError("Failed to search users");
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to search users");
     }
     setLoading(false);
   };

@@ -18,7 +18,7 @@ import {
   getReceivedPartnerRequests,
   acceptPartnerRequest,
   rejectPartnerRequest,
-} from "../../services/partnerService";
+} from "../../services/api/profiles/partnerService";
 import { BASE_URL } from "../../configuration/config";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 import { PendingRequest } from "../../types/Request";

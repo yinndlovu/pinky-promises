@@ -185,7 +185,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         queryClient.invalidateQueries({ queryKey: ["pastGifts"] });
       }, 1000);
     } catch (err: any) {
-      setToastMessage(err?.response?.data?.message || "Failed to open present");
+      setToastMessage(err.response?.data?.error || "Failed to open present");
     } finally {
       setClaiming(false);
     }
@@ -211,7 +211,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       setAlertVisible(true);
     } catch (err: any) {
       setToastMessage(
-        err?.response?.data?.message || "Failed to save favorite present"
+        err.response?.data?.error || "Failed to save favorite present"
       );
     } finally {
       setModalLoading(false);

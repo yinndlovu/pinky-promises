@@ -169,7 +169,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to add special date");
+      setError(err.response?.data?.error || "Failed to add special date");
     }
   };
 
@@ -227,7 +227,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to update special date");
+      setError(err.response?.data?.error || "Failed to update special date");
     }
     setEditModalVisible(false);
   };
@@ -270,7 +270,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to delete special date");
+      setError(err.response?.data?.error || "Failed to delete special date");
     } finally {
       setDeleting(false);
       setDeleteModalVisible(false);
@@ -319,7 +319,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || "Failed to delete favorite memory"
+        err.response?.data?.error || "Failed to delete favorite memory"
       );
     }
 
@@ -369,7 +369,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || "Failed to save favorite memory"
+        err.response?.data?.error || "Failed to save favorite memory"
       );
     }
 
@@ -391,7 +391,7 @@ const OursScreen = ({ navigation }: Props) => {
       setDetailsMemory(memory);
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || "Failed to view favorite memory"
+        err.response?.data?.error || "Failed to view favorite memory"
       );
       setDetailsMemory(null);
     }

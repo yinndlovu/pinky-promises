@@ -22,7 +22,7 @@ import {
   getCartTotal,
   clearCart,
   deleteItem,
-} from "../../../services/cartService";
+} from "../../../services/api/gifts/cartService";
 import { CartItem } from "../../../types/Cart";
 
 // content
@@ -114,7 +114,9 @@ const CartScreen = () => {
       setAlertVisible(true);
     },
     onError: (error: any) => {
-      setAlertMessage(error?.message || "Failed to add item to cart");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to add item to cart"
+      );
       setAlertVisible(true);
     },
   });
@@ -137,7 +139,9 @@ const CartScreen = () => {
       setToastMessage("Item deleted from cart");
     },
     onError: (error: any) => {
-      setToastMessage(error?.message || "Failed to remove item from cart");
+      setToastMessage(
+        error.response?.data?.error || "Failed to remove item from cart"
+      );
     },
   });
 
@@ -161,7 +165,7 @@ const CartScreen = () => {
     },
     onError: (error: any) => {
       setConfirmationVisible(false);
-      setAlertMessage(error?.message || "Failed to clear cart");
+      setAlertMessage(error.response?.data?.error || "Failed to clear cart");
       setAlertVisible(true);
     },
   });

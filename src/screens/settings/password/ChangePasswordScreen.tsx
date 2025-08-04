@@ -17,7 +17,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
-import { changePassword } from "../../../services/authService";
+import { changePassword } from "../../../services/api/auth/authService";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -123,9 +123,9 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
       setChangeSuccess(true);
     } catch (error: any) {
       setError(
-        error?.response?.data?.message ||
-          error?.response?.data?.error ||
-          error.message
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message || "Something went wrong changing your password"
       );
     } finally {
       setLoading(false);

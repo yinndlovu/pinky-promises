@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
-import { getPortalActivityCount } from "../../../services/countService";
+import { getPortalActivityCount } from "../../../services/api/gifts/countService";
 
 // types
 type PortalPreviewProps = {

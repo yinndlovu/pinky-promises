@@ -37,8 +37,6 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState("");
-  const [checking, setChecking] = useState(false);
-  const [valid, setValid] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
   const [newPasswordValid, setNewPasswordValid] = useState({
     length: false,

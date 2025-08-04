@@ -244,6 +244,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         navigation.replace("UserProfile", { userId: partner.id });
       }
     } catch (error: any) {
+      
     } finally {
       setRemovingPartner(false);
     }

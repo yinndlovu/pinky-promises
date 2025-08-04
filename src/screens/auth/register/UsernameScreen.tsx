@@ -69,9 +69,9 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
 
         setAvailable(res.data.available);
         setError("");
-      } catch (e) {
+      } catch (e: any) {
         setAvailable(null);
-        setError("Error checking username availability");
+        setError(e.response?.data?.error || "Error checking username availability");
       } finally {
         setChecking(false);
       }
