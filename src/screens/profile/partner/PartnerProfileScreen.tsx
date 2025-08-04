@@ -87,8 +87,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       return response.data.partner;
     },
-    retry: 2,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -144,8 +142,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       return response.data.user;
     },
-    retry: 2,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 60 * 24,
   });
 

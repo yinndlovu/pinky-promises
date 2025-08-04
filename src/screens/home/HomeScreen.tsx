@@ -41,7 +41,11 @@ import {
   formatTime,
   formatTimeLeft,
 } from "../../helpers/formatDateHelper";
-import { checkLocationPermissions } from "../../services/location/locationPermissionService";
+import {
+  checkLocationPermissions,
+  startBackgroundLocationTracking,
+} from "../../services/location/locationPermissionService";
+import { LOCATION_TASK_NAME } from "../../background/LocationTask";
 
 // screen content
 import RecentActivity from "./components/RecentActivity";
@@ -139,6 +143,42 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     } catch (err) {}
   };
 
+  const initTrackingIfNeeded = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      const home = await getHomeLocation(token);
+
+      if (!home) {
+        return;
+      }
+
+      const { foreground, background } = await checkLocationPermissions();
+
+      if (foreground !== "granted" || background !== "granted") {
+        return;
+      }
+
+      const isRunning = await Location.hasStartedLocationUpdatesAsync(
+        LOCATION_TASK_NAME
+      );
+
+      if (!isRunning) {
+        await startBackgroundLocationTracking();
+      } else {
+        // background tracking already running
+        console.log("Background tracking is already running");
+      }
+    } catch (err) {
+      // error occured
+      console.log("Something went wrong starting background tracking");
+    }
+  };
+
   // fetch functions
   const {
     data: partner,
@@ -156,8 +196,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       return await getPartner(token);
     },
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -409,6 +447,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // use effects
   useEffect(() => {
     checkAndUpdateHomeStatus();
+  }, []);
+
+  useEffect(() => {
+    initTrackingIfNeeded();
   }, []);
 
   useEffect(() => {

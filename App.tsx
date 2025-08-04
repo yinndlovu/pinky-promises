@@ -1,7 +1,6 @@
 // external
 import {
   NavigationContainer,
-  createNavigationContainerRef,
 } from "@react-navigation/native";
 import {
   createStackNavigator,
@@ -10,8 +9,7 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import React from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { QueryClient, onlineManager } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
