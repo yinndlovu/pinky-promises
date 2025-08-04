@@ -27,6 +27,7 @@ import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
 import { getReceivedMessages } from "../../../services/api/profiles/messageStorageService";
+import { getPartnerDistance } from "../../../services/api/profiles/distanceService";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
@@ -223,6 +224,25 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     staleTime: 1000 * 60 * 60,
   });
 
+  const {
+    data: partnerDistance,
+    isLoading: partnerDistanceLoading,
+    refetch: refetchPartnerDistance,
+  } = useQuery({
+    queryKey: ["partnerDistance"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await getPartnerDistance(token);
+    },
+    enabled: !!partner?.id,
+    staleTime: 1000 * 60 * 60,
+  });
+
   // handlers
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
@@ -244,7 +264,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         navigation.replace("UserProfile", { userId: partner.id });
       }
     } catch (error: any) {
-      
+
     } finally {
       setRemovingPartner(false);
     }
