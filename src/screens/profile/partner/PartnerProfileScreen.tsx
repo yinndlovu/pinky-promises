@@ -240,7 +240,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       return await getPartnerDistance(token);
     },
     enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60,
+    staleTime: 1000 * 60 * 60 * 24,
   });
 
   // handlers

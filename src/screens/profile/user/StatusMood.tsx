@@ -124,10 +124,13 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       await queryClient.invalidateQueries({
         queryKey: ["recentActivities"],
       });
+      await queryClient.invalidateQueries({
+        queryKey: ["partnerDistance"],
+      });
 
       setAlertVisible(true);
-    } catch (err) {
-      setAlertMessage("Failed to add home location");
+    } catch (err: any) {
+      setAlertMessage(err.response?.data?.error || "Failed to add home location");
       setAlertVisible(true);
     } finally {
       setModalVisible(false);
@@ -157,7 +160,8 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       if (onAddHome) {
         onAddHome();
       }
-    } catch (err) {}
+    } catch (err: any) {
+    }
   };
 
   // animated styles
