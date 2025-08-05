@@ -11,6 +11,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 
 // content
 import DeleteAccountModal from "../../../components/modals/input/DeleteAccountModal";
+import { verifyPassword } from "../../../services/api/auth/authService";
 
 type AccountScreenProps = StackScreenProps<any, any>;
 
@@ -27,6 +28,20 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   // handlers
   const handleDeleteAccountPress = () => {
     setDeleteModalVisible(true);
+  };
+
+  const handleVerifyPassword = async (password: string) => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      await verifyPassword(token, password);
+      return true;
+    } catch (error) {
+      return false;
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -95,6 +110,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
         visible={deleteModalVisible}
         onClose={() => setDeleteModalVisible(false)}
         onDelete={handleDeleteAccount}
+        onVerifyPassword={handleVerifyPassword}
         loading={isDeleting}
       />
 

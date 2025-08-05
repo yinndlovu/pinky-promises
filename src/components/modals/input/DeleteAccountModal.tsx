@@ -15,12 +15,14 @@ import { Feather } from "@expo/vector-icons";
 
 // content
 import AlertModal from "../output/AlertModal";
+import PasswordVerificationModal from "./PasswordVerificationModal";
 
 // types
 type Props = {
   visible: boolean;
   onClose: () => void;
   onDelete: () => Promise<void>;
+  onVerifyPassword: (password: string) => Promise<boolean>;
   loading?: boolean;
 };
 
@@ -30,15 +32,38 @@ const DeleteAccountModal: React.FC<Props> = ({
   visible,
   onClose,
   onDelete,
+  onVerifyPassword,
   loading = false,
 }) => {
   // use states
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertVisible, setAlertVisible] = useState(false);
+  const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
   // handlers
+  const handleCheckboxPress = () => {
+    if (!isConfirmed) {
+      setPasswordModalVisible(true);
+    } else {
+      setIsConfirmed(false);
+    }
+  };
+
+  const handlePasswordVerify = async (password: string) => {
+    try {
+      const isValid = await onVerifyPassword(password);
+      if (isValid) {
+        setIsConfirmed(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const handleDelete = async () => {
     if (!isConfirmed) {
       return;
@@ -58,96 +83,103 @@ const DeleteAccountModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
-          <View style={[styles.container, { paddingTop: insets.top + 2 }]}>
-            <View style={styles.handle} />
-            <View style={styles.header}>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={handleClose}
-                disabled={loading}
-              >
-                <Text style={styles.closeButtonText}>✕</Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.content}>
-              <View style={styles.dangerSection}>
-                <Feather name="alert-triangle" size={32} color="#ff4757" />
-                <Text style={styles.dangerTitle}>Account deletion</Text>
-              </View>
-
-              <Text style={styles.description}>
-                Are you sure you want to delete your account? This action cannot
-                be undone and will permanently remove all your data, including
-                messages, memories, and profile information.
-              </Text>
-
-              <View style={styles.warningSection}>
-                <Text style={styles.warningText}>
-                  • All your messages will be permanently deleted
-                </Text>
-                <Text style={styles.warningText}>
-                  • Your profile and settings will be removed
-                </Text>
-                <Text style={styles.warningText}>
-                  • All shared memories and special dates will be lost
-                </Text>
-                <Text style={styles.warningText}>
-                  • This action cannot be reversed
-                </Text>
-                <Text style={styles.warningText}>
-                  • Your history with your partner and your partnership will be removed
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                style={styles.checkboxContainer}
-                onPress={() => setIsConfirmed(!isConfirmed)}
-                disabled={loading}
-              >
-                <View
-                  style={[
-                    styles.checkbox,
-                    isConfirmed && styles.checkboxChecked,
-                  ]}
+    <>
+      <Modal visible={visible} transparent animationType="slide">
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.overlay}>
+            <View style={[styles.container, { paddingTop: insets.top + 2 }]}>
+              <View style={styles.handle} />
+              <View style={styles.content}>
+                <View style={styles.dangerSection}>
+                  <Feather name="alert-triangle" size={32} color="#ff4757" />
+                  <Text style={styles.dangerTitle}>Account deletion</Text>
+                  <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={handleClose}
+                  disabled={loading}
                 >
-                  {isConfirmed && (
-                    <Feather name="check" size={16} color="#fff" />
-                  )}
+                  <Text style={styles.closeButtonText}>✕</Text>
+                </TouchableOpacity>
                 </View>
-                <Text style={styles.checkboxText}>
-                  I understand that this action is permanent and cannot be
-                  undone
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.deleteButton,
-                  (!isConfirmed || loading) && {
-                    opacity: 0.5,
-                  },
-                ]}
-                onPress={handleDelete}
-                disabled={!isConfirmed || loading}
-              >
-                <Text style={styles.deleteButtonText}>
-                  {loading ? "Deleting..." : "Delete"}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
 
-          <AlertModal
-            visible={alertVisible}
-            message={alertMessage || ""}
-            onClose={() => setAlertVisible(false)}
-          />
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+                <Text style={styles.description}>
+                  Are you sure you want to delete your account? This action
+                  cannot be undone and will permanently remove all your data,
+                  including messages, memories, and profile information.
+                </Text>
+
+                <View style={styles.warningSection}>
+                  <Text style={styles.warningText}>
+                    • All your messages will be permanently deleted
+                  </Text>
+                  <Text style={styles.warningText}>
+                    • Your profile and settings will be removed
+                  </Text>
+                  <Text style={styles.warningText}>
+                    • All shared memories and special dates will be lost
+                  </Text>
+                  <Text style={styles.warningText}>
+                    • This action cannot be reversed
+                  </Text>
+                  <Text style={styles.warningText}>
+                    • Your history with your partner and your partnership will
+                    be removed
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.checkboxContainer}
+                  onPress={handleCheckboxPress}
+                  disabled={loading}
+                >
+                  <View
+                    style={[
+                      styles.checkbox,
+                      isConfirmed && styles.checkboxChecked,
+                    ]}
+                  >
+                    {isConfirmed && (
+                      <Feather name="check" size={16} color="#fff" />
+                    )}
+                  </View>
+                  <Text style={styles.checkboxText}>
+                    I understand that this action is permanent and cannot be
+                    undone
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.deleteButton,
+                    (!isConfirmed || loading) && {
+                      opacity: 0.5,
+                    },
+                  ]}
+                  onPress={handleDelete}
+                  disabled={!isConfirmed || loading}
+                >
+                  <Text style={styles.deleteButtonText}>
+                    {loading ? "Deleting..." : "Delete"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <AlertModal
+              visible={alertVisible}
+              message={alertMessage || ""}
+              onClose={() => setAlertVisible(false)}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      <PasswordVerificationModal
+        visible={passwordModalVisible}
+        onClose={() => setPasswordModalVisible(false)}
+        onVerify={handlePasswordVerify}
+        loading={loading}
+      />
+    </>
   );
 };
 
@@ -213,9 +245,9 @@ const styles = StyleSheet.create({
   },
   dangerSection: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    marginBottom: 26,
   },
   dangerTitle: {
     color: "#ff4757",
