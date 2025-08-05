@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -11,8 +12,14 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
+
+// content
 import AlertModal from "../output/AlertModal";
 
+// internal
+import { formatDate } from "../../../helpers/favoriteMemoryModalHelper";
+
+// types
 type UpdateSpecialDateModalProps = {
   visible: boolean;
   onClose: () => void;
@@ -32,6 +39,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   initialDescription = "",
   isEditing = false,
 }) => {
+  // use states
   const [date, setDate] = useState<Date>(
     initialDate ? new Date(initialDate) : new Date()
   );
@@ -42,19 +50,14 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // use effects
   useEffect(() => {
     setDate(initialDate ? new Date(initialDate) : new Date());
     setTitle(initialTitle);
     setDescription(initialDescription);
   }, [initialDate, initialTitle, initialDescription, visible]);
 
-  const formatDate = (date: Date): string => {
-    const day = date.getDate();
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-  };
-
+  // handlers
   const handleSave = async () => {
     if (!title.trim()) {
       return;

@@ -20,8 +20,10 @@ const ClaimedGiftModal: React.FC<ClaimedGiftModalProps> = ({
   message,
   onClose,
 }) => {
+  // use states
   const [showToast, setShowToast] = useState(false);
 
+  // handlers
   const handleCopy = async () => {
     await Clipboard.setStringAsync(value);
     

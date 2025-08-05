@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// external
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -11,6 +12,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
+// types
 type Props = {
   visible: boolean;
   initialGiftName?: string;
@@ -26,9 +28,11 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
   onSave,
   loading = false,
 }) => {
+  // use states
   const [giftName, setGiftName] = useState(initialGiftName);
 
-  React.useEffect(() => {
+  // use effects
+  useEffect(() => {
     setGiftName(initialGiftName);
   }, [visible, initialGiftName]);
 

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// external
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -9,8 +10,11 @@ import {
   TouchableWithoutFeedback
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
+
+// content
 import AlertModal from "../output/AlertModal";
 
+// options
 const MOOD_OPTIONS = [
   "Happy",
   "Excited",
@@ -25,6 +29,7 @@ const MOOD_OPTIONS = [
   "Neutral",
 ];
 
+// types
 type UpdateMoodModalProps = {
   visible: boolean;
   onClose: () => void;
@@ -38,22 +43,26 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   onSave,
   initialMood = "happy",
 }) => {
+  // use states
   const [selectedMood, setSelectedMood] = useState(initialMood);
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  React.useEffect(() => {
+  // use effects
+  useEffect(() => {
     if (visible) {
       setSelectedMood(initialMood);
     }
   }, [visible, initialMood]);
 
+  // helpers
   const data = MOOD_OPTIONS.map((mood) => ({
     key: mood,
     label: mood.charAt(0).toUpperCase() + mood.slice(1),
   }));
 
+  // handlers
   const handleSave = async () => {
     setLoading(true);
     try {

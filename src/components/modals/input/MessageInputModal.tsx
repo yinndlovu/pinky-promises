@@ -9,7 +9,6 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
 } from "react-native";
 
 // content
@@ -43,7 +42,7 @@ const MessageInputModal: React.FC<Props> = ({
     }
 
     try {
-      await onSend(text.trim());
+      onSend(text.trim());
       setText("");
     } catch (err: any) {
       setAlertMessage(err?.message || "Failed to send message");

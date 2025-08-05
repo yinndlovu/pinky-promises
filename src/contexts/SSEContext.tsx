@@ -1,9 +1,13 @@
+// external
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BASE_URL } from "../configuration/config";
 import EventSource from "react-native-sse";
 
+// internal
+import { BASE_URL } from "../configuration/config";
+
+// interfaces
 interface SSEContextType {
   isConnected: boolean;
   reconnect: () => void;
@@ -26,6 +30,7 @@ interface SSEProviderProps {
 }
 
 export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
+  // use states
   const [isConnected, setIsConnected] = useState(false);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);

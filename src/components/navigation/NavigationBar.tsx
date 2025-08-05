@@ -18,6 +18,7 @@ import { BASE_URL } from "../../configuration/config";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
 
+// types
 type Props = {
   navigation: NavigationHelpers<ParamListBase, BottomTabNavigationEventMap>;
   currentRoute: NavItem;

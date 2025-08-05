@@ -1,4 +1,4 @@
-// ... existing code ...
+// external
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -10,10 +10,16 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
-import AlertModal from "../output/AlertModal";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 
+// content
+import AlertModal from "../output/AlertModal";
+
+// internal
+import { formatDate } from "../../../helpers/favoriteMemoryModalHelper";
+
+// types
 type Props = {
   visible: boolean;
   onClose: () => void;
@@ -33,6 +39,7 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
   isEditing = false,
   loading = false,
 }) => {
+  // use states
   const [memory, setMemory] = useState(initialMemory);
   const [date, setDate] = useState<Date>(
     initialDate ? new Date(initialDate) : new Date()
@@ -41,6 +48,7 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // use effects
   useEffect(() => {
     if (visible) {
       setMemory(initialMemory);
@@ -48,13 +56,7 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
     }
   }, [visible, initialMemory, initialDate]);
 
-  const formatDate = (date: Date): string => {
-    const day = date.getDate();
-    const month = date.toLocaleDateString("en-US", { month: "short" });
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-  };
-
+  // handlers
   const handleSave = async () => {
     if (!memory || !date) {
       setAlertMessage("Memory and date are required.");
@@ -67,8 +69,8 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
       await onSave(memory, formattedDate);
 
       onClose();
-    } catch (err) {
-      setAlertMessage("Failed to save memory.");
+    } catch (err: any) {
+      setAlertMessage(err.response?.data?.error || "Failed to save memory.");
       setAlertVisible(true);
     }
   };

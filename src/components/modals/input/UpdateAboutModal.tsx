@@ -41,10 +41,11 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
     setLoading(true);
     try {
       await onSave(about);
+
       setAlertMessage("More about you updated");
       setAlertVisible(true);
-    } catch (err) {
-      setAlertMessage("Failed to update info");
+    } catch (err: any) {
+      setAlertMessage(err.response?.data?.error || "Failed to update info");
       setAlertVisible(true);
     } finally {
       setLoading(false);

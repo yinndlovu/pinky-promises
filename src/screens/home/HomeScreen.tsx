@@ -40,7 +40,7 @@ import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
-} from "../../helpers/formatDateHelper";
+} from "../../utils/formatDate";
 import {
   checkLocationPermissions,
   startBackgroundLocationTracking,

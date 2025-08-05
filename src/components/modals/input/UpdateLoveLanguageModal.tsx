@@ -1,3 +1,4 @@
+// external
 import React, { useState, useEffect } from "react";
 import {
   Modal,
@@ -9,8 +10,11 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback
 } from "react-native";
+
+// content
 import AlertModal from "../output/AlertModal";
 
+// types
 type UpdateLoveLanguageModalProps = {
   visible: boolean;
   initialLoveLanguage: string;
@@ -24,17 +28,20 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   onClose,
   onSave,
 }) => {
+  // use states
   const [loveLanguage, setLoveLanguage] = useState(initialLoveLanguage || "");
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // use effects
   useEffect(() => {
     if (visible) {
       setLoveLanguage(initialLoveLanguage || "");
     }
   }, [visible, initialLoveLanguage]);
 
+  // handlers
   const handleSave = async () => {
     setLoading(true);
     try {

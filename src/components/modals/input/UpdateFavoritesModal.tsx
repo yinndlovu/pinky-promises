@@ -14,6 +14,7 @@ import {
 // content
 import AlertModal from "../output/AlertModal";
 
+// helpers
 const FAVORITE_FIELDS = [
   { key: "favoriteColor", label: "Favorite Color" },
   { key: "favoriteFood", label: "Favorite Food" },
@@ -44,17 +45,20 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
   onClose,
   onSave,
 }) => {
+  // use states
   const [favorites, setFavorites] = useState<Favorites>(initialFavorites || {});
   const [loading, setLoading] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // use effects
   useEffect(() => {
     if (visible) {
       setFavorites(initialFavorites || {});
     }
   }, [visible, initialFavorites]);
 
+  // handlers
   const handleChange = (key: string, value: string) => {
     setFavorites((prev) => ({ ...prev, [key]: value }));
   };
@@ -65,8 +69,10 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
       await onSave(favorites);
       setAlertMessage("Favorites updated");
       setAlertVisible(true);
-    } catch (err) {
-      setAlertMessage("Failed to update favorites");
+    } catch (err: any) {
+      setAlertMessage(
+        err.response?.data?.error || "Failed to update favorites"
+      );
       setAlertVisible(true);
     } finally {
       setLoading(false);

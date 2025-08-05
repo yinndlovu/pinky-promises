@@ -1,6 +1,8 @@
+// external
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
+// types
 type AlertModalProps = {
   visible: boolean;
   message: string;

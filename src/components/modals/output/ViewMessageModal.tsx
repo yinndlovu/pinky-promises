@@ -2,6 +2,9 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
+// internal
+import { formatDateDMYHM } from "../../../utils/formatDate";
+
 // types
 type Props = {
   visible: boolean;
@@ -18,30 +21,6 @@ const ViewMessageModal: React.FC<Props> = ({
   type,
   customTitle,
 }) => {
-  // utils
-  function formatDate(dateString?: string) {
-    if (!dateString) {
-      return "";
-    }
-
-    const date = new Date(dateString);
-
-    if (isNaN(date.getTime())) {
-      return "";
-    }
-
-    return date
-      .toLocaleString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      })
-      .replace(",", "");
-  }
-
   if (!message) {
     return null;
   }
@@ -66,7 +45,7 @@ const ViewMessageModal: React.FC<Props> = ({
         <View style={styles.container}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.message}>{message?.message || ""}</Text>
-          <Text style={styles.meta}>{formatDate(message.createdAt)}</Text>
+          <Text style={styles.meta}>{formatDateDMYHM(message.createdAt)}</Text>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>

@@ -47,10 +47,11 @@ const StoreMessageModal: React.FC<Props> = ({
 
     try {
       await onStore(title.trim(), message.trim());
+
       setTitle("");
       setMessage("");
     } catch (err: any) {
-      setAlertMessage(err?.message || "Failed to store message");
+      setAlertMessage(err.response?.data?.error || "Failed to store message");
       setAlertVisible(true);
     }
   };

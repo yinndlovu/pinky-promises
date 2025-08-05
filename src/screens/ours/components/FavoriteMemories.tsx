@@ -10,7 +10,7 @@ import {
 
 // internal
 import { Memory, FavoriteMemoryProps } from "../../../types/Memory";
-import { formatDateDMY } from "../../../helpers/formatDateHelper";
+import { formatDateDMY } from "../../../utils/formatDate";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";

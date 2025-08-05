@@ -10,6 +10,9 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
+// internal
+import { formatDateDMY } from "../../../utils/formatDate";
+
 // types
 type Props = {
   visible: boolean;
@@ -22,20 +25,6 @@ type Props = {
     updatedAt: string;
   };
   loading?: boolean;
-};
-
-const formatDate = (dateStr?: string) => {
-  if (!dateStr) {
-    return "";
-  }
-
-  const date = new Date(dateStr);
-
-  return date.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
 };
 
 const FavoriteMemoryDetailsModal: React.FC<Props> = ({
@@ -59,7 +48,7 @@ const FavoriteMemoryDetailsModal: React.FC<Props> = ({
           ) : memory ? (
             <>
               <Text style={styles.memoryDateText}>
-                this happened on {formatDate(memory.date)}
+                this happened on {formatDateDMY(memory.date)}
               </Text>
               <Text style={styles.memoryText}>{memory.memory}</Text>
               <Text style={styles.memoryAuthorText}>
@@ -69,10 +58,10 @@ const FavoriteMemoryDetailsModal: React.FC<Props> = ({
               </Text>
               <View style={styles.bottomRow}>
                 <Text style={styles.bottomMeta}>
-                  Created: {formatDate(memory.createdAt)}
+                  Created: {formatDateDMY(memory.createdAt)}
                 </Text>
                 <Text style={styles.bottomMeta}>
-                  Last updated: {formatDate(memory.updatedAt)}
+                  Last updated: {formatDateDMY(memory.updatedAt)}
                 </Text>
               </View>
             </>

@@ -1,8 +1,12 @@
+// external
 import React, { createContext, useContext, ReactNode, useEffect } from "react";
+
+// internal
 import { setupNotificationListeners } from "../utils/notifications";
 import { useAuth } from "./AuthContext";
 import { navigationRef } from "../utils/navigation";
 
+// interfaces
 interface NotificationContextProps {}
 
 const NotificationContext = createContext<NotificationContextProps | undefined>(
@@ -12,6 +16,7 @@ const NotificationContext = createContext<NotificationContextProps | undefined>(
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
 
+  // use effects
   useEffect(() => {
     if (isAuthenticated) {
       const cleanup = setupNotificationListeners((response) => {

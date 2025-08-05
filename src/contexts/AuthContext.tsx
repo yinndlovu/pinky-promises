@@ -1,8 +1,12 @@
+// external
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+
+// internal
 import { BASE_URL } from "../configuration/config";
 
+// interfaces
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -17,10 +21,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // use states
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any | null>(null);
 
+  // use effects
   useEffect(() => {
     checkAuthStatus();
   }, []);
