@@ -22,6 +22,7 @@ import { NotificationProvider } from "./src/contexts/NotificationContext";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 import { SSEProvider } from "./src/contexts/SSEContext";
+import { navigationRef } from "./src/utils/navigation";
 
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/PartnerProfileScreen";
@@ -53,7 +54,6 @@ import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen"
 import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
 import CartScreen from "./src/screens/gifts/screens/CartScreen";
 import LoadingSpinner from "./src/components/loading/LoadingSpinner";
-import { navigationRef } from "./src/utils/navigation";
 
 // variables
 const Stack = createStackNavigator();
