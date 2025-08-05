@@ -19,7 +19,7 @@ import {
 } from "../../../services/api/portal/sweetMessageService";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import { Message } from "../../../types/Message";
-import { formatDateDMY } from "../../../utils/formatDateHelper";
+import { formatDateDMY } from "../../../utils/formatDate";
 
 const ReceivedMessagesScreen = () => {
   // use states

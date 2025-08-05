@@ -28,6 +28,7 @@ import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
 import { getReceivedMessages } from "../../../services/api/profiles/messageStorageService";
 import { getPartnerDistance } from "../../../services/api/profiles/distanceService";
+import { formatDistance } from "../../../utils/formatDistance";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
@@ -264,7 +265,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         navigation.replace("UserProfile", { userId: partner.id });
       }
     } catch (error: any) {
-
     } finally {
       setRemovingPartner(false);
     }
@@ -446,8 +446,14 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             <Text style={styles.partnerName}>{currentUser?.name || "You"}</Text>
           </Text>
           <Text style={styles.distanceText}>
-            70 m{" "}
-            <Text style={styles.apartText}>apart</Text>
+            {partnerDistance?.distance !== undefined
+              ? `${formatDistance(partnerDistance.distance)} `
+              : ""}
+            <Text style={styles.apartText}>
+              {partnerDistance?.distance !== undefined
+                ? "apart"
+                : "Add home location to see"}
+            </Text>
           </Text>
         </View>
 

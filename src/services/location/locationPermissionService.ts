@@ -24,7 +24,7 @@ export async function requestLocationPermissions() {
 export async function startBackgroundLocationTracking() {
   try {
     const isEnabled = await Location.hasServicesEnabledAsync();
-    
+
     if (!isEnabled) {
       throw new Error("Location services are not enabled on your device");
     }
@@ -33,7 +33,7 @@ export async function startBackgroundLocationTracking() {
       accuracy: Location.Accuracy.Balanced,
       timeInterval: 5 * 60 * 1000,
       deferredUpdatesInterval: 10 * 60 * 1000,
-      distanceInterval: 100,
+      distanceInterval: 50,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
         notificationTitle: "Location Service",
