@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   RefreshControl,
+  Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -307,19 +308,25 @@ const CartScreen = () => {
                   <Feather name="plus" size={24} color="#fff" />
                 </TouchableOpacity>
               </View>
-              <View style={styles.cartItemsContainer}>
+              <Pressable
+                android_ripple={{ color: "#212236ff" }}
+                style={styles.cartItemsContainer}
+              >
                 {safeCartItems.map(renderCartItem)}
-              </View>
+              </Pressable>
             </View>
 
-            <View style={styles.totalSection}>
+            <Pressable
+              android_ripple={{ color: "#212236ff" }}
+              style={styles.totalSection}
+            >
               <View style={styles.totalRow}>
                 <Text style={styles.totalLabel}>Total</Text>
                 <Text style={styles.totalValue}>
                   {formatCurrency(cartTotal)}
                 </Text>
               </View>
-            </View>
+            </Pressable>
 
             <View style={styles.actionsSection}>
               <TouchableOpacity
