@@ -15,3 +15,13 @@ export async function changePassword(
 
   return res.data.message;
 }
+
+export async function verifyPassword(token: string, password: string) {
+  const res = await axios.post(
+    `${BASE_URL}/api/auth/verify-password`,
+    { password },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return res.data.message;
+}

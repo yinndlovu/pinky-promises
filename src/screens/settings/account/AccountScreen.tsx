@@ -1,22 +1,69 @@
 // external
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  StatusBar,
-  Pressable,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// internal
+import { deleteAccount } from "../../../services/api/account/accountService";
+import { useAuth } from "../../../contexts/AuthContext";
+
+// content
+import DeleteAccountModal from "../../../components/modals/input/DeleteAccountModal";
 
 type AccountScreenProps = StackScreenProps<any, any>;
 
 const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
+  // use states
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+
+  // variables
+  const { logout } = useAuth();
+
   // handlers
   const handleDeleteAccountPress = () => {
+    setDeleteModalVisible(true);
   };
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      await deleteAccount(token);
+      setDeleteModalVisible(false);
+      await logout();
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Welcome" }],
+      });
+    } catch (error: any) {
+      throw error;
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalVisible(false);
+    }
+  };
+
+  // use effects
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -44,6 +91,18 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
           </Pressable>
         </View>
       </ScrollView>
+      <DeleteAccountModal
+        visible={deleteModalVisible}
+        onClose={() => setDeleteModalVisible(false)}
+        onDelete={handleDeleteAccount}
+        loading={isDeleting}
+      />
+
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -82,7 +141,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: "absolute",
-    top: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 50,
+    bottom: 60,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",
