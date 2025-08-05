@@ -6,20 +6,14 @@ import {
   StyleSheet,
   ScrollView,
   StatusBar,
+  Pressable,
 } from "react-native";
-// internal
-
-// types
+import { Ionicons } from "@expo/vector-icons";
 
 const AccountScreen = () => {
-
   // handlers
-
-
-  // use effects
-
-  // options
-
+  const handleDeleteAccountPress = () => {
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
@@ -27,9 +21,18 @@ const AccountScreen = () => {
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Account Action</Text>
+          <Pressable
+            style={styles.actionRow}
+            onPress={handleDeleteAccountPress}
+            android_ripple={{ color: "#444" }}
+          >
+            <Text style={styles.actionText}>Delete your account</Text>
+            <Ionicons name="chevron-forward" size={22} color="#ccc" />
+          </Pressable>
+        </View>
       </ScrollView>
-      
     </View>
   );
 };
@@ -39,11 +42,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 18,
     paddingBottom: 32,
-    alignItems: "stretch",
     backgroundColor: "#23243a",
     minHeight: "100%",
   },
-
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    color: "#aaa",
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  actionRow: {
+    backgroundColor: "#2e2f4a",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  actionText: {
+    color: "#fff",
+    fontSize: 16,
+  },
   toast: {
     position: "absolute",
     top: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 50,
