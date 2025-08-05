@@ -9,10 +9,19 @@ export function formatDateYearly(dateString: string) {
   const day = date.getDate().toString().padStart(2, "0");
   const month = date.toLocaleString("en-US", { month: "short" });
   const year = date.getFullYear();
-  const hours = date.getHours().toString().padStart(2, "0");
+
+  let hours = date.getHours();
+
   const minutes = date.getMinutes().toString().padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours === 0 ? 12 : hours;
+  const formattedHours = hours.toString().padStart(2, "0");
+
   const showYear = year !== now.getFullYear();
-  return `${day} ${month}${showYear ? " " + year : ""} • ${hours}:${minutes}`;
+  return `${day} ${month}${
+    showYear ? " " + year : ""
+  } • ${formattedHours}:${minutes} ${ampm}`;
 }
 
 // format the date to DD Mon YYYY HH:mm
@@ -34,7 +43,7 @@ export const formatDateDMYHM = (dateStr: string) => {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
+      hour12: true,
     })
     .replace(",", "");
 };
@@ -90,7 +99,7 @@ export const formatTime = (dateString: string): string => {
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
+      hour12: true,
     });
   } catch (error) {
     return "Unknown time";
