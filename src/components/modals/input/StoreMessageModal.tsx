@@ -67,6 +67,7 @@ const StoreMessageModal: React.FC<Props> = ({
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.overlay}>
           <View style={[styles.container, { paddingTop: insets.top + 2 }]}>
+            <View style={styles.handle} />
             <View style={styles.header}>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -145,6 +146,15 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#b0b3c6",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 20,
+    opacity: 0.6,
   },
   header: {
     flexDirection: "row",

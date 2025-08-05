@@ -1,6 +1,13 @@
 // external
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 // types
@@ -35,9 +42,13 @@ const ProfilePictureModal: React.FC<Props> = ({
           <Feather name="eye" size={24} color="#e03487" />
           <Text style={styles.optionText}>View current picture</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+        <Pressable
+          android_ripple={{ color: "#23243a" }}
+          style={styles.cancelButton}
+          onPress={onClose}
+        >
           <Text style={styles.cancelText}>Cancel</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   </Modal>

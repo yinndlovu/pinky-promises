@@ -6,6 +6,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 20,
   },
+  handle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#b0b3c6",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 20,
+    opacity: 0.6,
+  },
   centered: {
     flex: 1,
     backgroundColor: "#23243a",
