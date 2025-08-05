@@ -9,8 +9,11 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import type { StackScreenProps } from "@react-navigation/stack";
 
-const AccountScreen = () => {
+type AccountScreenProps = StackScreenProps<any, any>;
+
+const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   // handlers
   const handleDeleteAccountPress = () => {
   };
@@ -29,6 +32,14 @@ const AccountScreen = () => {
             android_ripple={{ color: "#23243a" }}
           >
             <Text style={styles.actionText}>Delete your account</Text>
+            <Ionicons name="chevron-forward" size={22} color="#ccc" />
+          </Pressable>
+          <Pressable
+            style={styles.actionRow}
+            onPress={() => navigation.navigate("ChangePassword")}
+            android_ripple={{ color: "#23243a" }}
+          >
+            <Text style={styles.actionText}>Change password</Text>
             <Ionicons name="chevron-forward" size={22} color="#ccc" />
           </Pressable>
         </View>
@@ -50,12 +61,14 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    color: "#aaa",
+    color: "#b0b3c6",
     fontWeight: "bold",
     marginBottom: 10,
+    marginLeft: 6,
   },
   actionRow: {
     backgroundColor: "#2e2f4a",
+    marginBottom: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 10,

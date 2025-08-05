@@ -452,7 +452,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             <Text style={styles.apartText}>
               {partnerDistance?.distance !== undefined
                 ? "apart"
-                : "Add home location to see"}
+                : ""}
             </Text>
           </Text>
         </View>
