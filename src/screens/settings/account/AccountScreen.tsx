@@ -26,7 +26,7 @@ const AccountScreen = () => {
           <Pressable
             style={styles.actionRow}
             onPress={handleDeleteAccountPress}
-            android_ripple={{ color: "#444" }}
+            android_ripple={{ color: "#23243a" }}
           >
             <Text style={styles.actionText}>Delete your account</Text>
             <Ionicons name="chevron-forward" size={22} color="#ccc" />
