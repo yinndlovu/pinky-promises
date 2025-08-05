@@ -153,6 +153,11 @@ const OursScreen = ({ navigation }: Props) => {
 
       await createSpecialDate(token, date, title, description);
 
+      setAlertMessage("Special date created");
+      setAddModalVisible(false);
+      setSelectedDate(null);
+      setAlertVisible(true);
+
       await queryClient.invalidateQueries({
         queryKey: ["specialDates"],
       });
@@ -170,6 +175,9 @@ const OursScreen = ({ navigation }: Props) => {
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to add special date");
+      setAddModalVisible(false);
+    } finally {
+      setAddModalVisible(false);
     }
   };
 
@@ -228,8 +236,10 @@ const OursScreen = ({ navigation }: Props) => {
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to update special date");
+      setEditModalVisible(false);
+    } finally {
+      setEditModalVisible(false);
     }
-    setEditModalVisible(false);
   };
 
   const handleDeleteSpecialDate = async () => {

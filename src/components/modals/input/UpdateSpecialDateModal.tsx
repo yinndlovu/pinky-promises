@@ -72,15 +72,9 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
         title.trim(),
         description.trim() || undefined
       );
-      setAlertMessage(
-        isEditing ? "Special date updated!" : "Special date created!"
-      );
-      setAlertVisible(true);
+
     } catch (error: any) {
-      setAlertMessage(
-        error.response?.data?.error || "Failed to save special date"
-      );
-      setAlertVisible(true);
+      throw error;
     } finally {
       setLoading(false);
     }
