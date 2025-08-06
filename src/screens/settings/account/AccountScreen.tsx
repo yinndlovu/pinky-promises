@@ -33,8 +33,10 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const handleVerifyPassword = async (password: string) => {
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
-        throw new Error("No authentication token found");
+        setToastMessage("Session expired, please log in again");
+        return false;
       }
 
       await verifyPassword(token, password);
@@ -50,6 +52,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
+        setToastMessage("Session expired, please log in again")
         return;
       }
 
