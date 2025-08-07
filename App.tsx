@@ -15,6 +15,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Image } from "expo-image";
 import Feather from "@expo/vector-icons/build/Feather";
+import Toast from 'react-native-toast-message'
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";

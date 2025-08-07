@@ -94,12 +94,12 @@ const DeleteAccountModal: React.FC<Props> = ({
                   <Feather name="alert-triangle" size={32} color="#ff4757" />
                   <Text style={styles.dangerTitle}>Account deletion</Text>
                   <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={handleClose}
-                  disabled={loading}
-                >
-                  <Text style={styles.closeButtonText}>✕</Text>
-                </TouchableOpacity>
+                    style={styles.closeButton}
+                    onPress={handleClose}
+                    disabled={loading}
+                  >
+                    <Text style={styles.closeButtonText}>✕</Text>
+                  </TouchableOpacity>
                 </View>
 
                 <Text style={styles.description}>
@@ -110,16 +110,10 @@ const DeleteAccountModal: React.FC<Props> = ({
 
                 <View style={styles.warningSection}>
                   <Text style={styles.warningText}>
-                    • All your messages will be permanently deleted
-                  </Text>
-                  <Text style={styles.warningText}>
                     • Your profile and settings will be removed
                   </Text>
                   <Text style={styles.warningText}>
                     • All shared memories and special dates will be lost
-                  </Text>
-                  <Text style={styles.warningText}>
-                    • This action cannot be reversed
                   </Text>
                   <Text style={styles.warningText}>
                     • Your history with your partner and your partnership will

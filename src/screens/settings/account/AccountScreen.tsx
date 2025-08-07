@@ -1,6 +1,14 @@
 // external
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  ToastAndroid,
+  Platform,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,10 +25,10 @@ type AccountScreenProps = StackScreenProps<any, any>;
 
 const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   // use states
-  const [isDeleting, setIsDeleting] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // variables
   const { logout } = useAuth();
@@ -31,6 +39,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   };
 
   const handleVerifyPassword = async (password: string) => {
+    setLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
 
@@ -43,21 +52,28 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
       return true;
     } catch (error) {
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    setIsDeleting(true);
+    setLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setToastMessage("Session expired, please log in again")
+        setToastMessage("Session expired, please log in again");
         return;
       }
 
       await deleteAccount(token);
       setDeleteModalVisible(false);
+
+      if (Platform.OS === "android") {
+        ToastAndroid.show("Account deleted successfully", ToastAndroid.SHORT);
+      }
+
       await logout();
       navigation.reset({
         index: 0,
@@ -66,7 +82,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
     } catch (error: any) {
       throw error;
     } finally {
-      setIsDeleting(false);
+      setLoading(false);
       setDeleteModalVisible(false);
     }
   };
@@ -114,7 +130,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
         onClose={() => setDeleteModalVisible(false)}
         onDelete={handleDeleteAccount}
         onVerifyPassword={handleVerifyPassword}
-        loading={isDeleting}
+        loading={loading}
       />
 
       {showToast && (
