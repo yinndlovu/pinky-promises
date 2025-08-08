@@ -44,7 +44,9 @@ const SpecialDates: React.FC<SpecialDateProps> = ({
               <View style={styles.dateRow}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.dateLabel}>{item.title}</Text>
-                  <Text style={styles.dateValue}>{formatDateDMY(item.date)}</Text>
+                  <Text style={styles.dateValue}>
+                    {formatDateDMY(item.date)}
+                  </Text>
                   {item.description ? (
                     <Text style={styles.dateDescription}>
                       {item.description}
@@ -54,16 +56,15 @@ const SpecialDates: React.FC<SpecialDateProps> = ({
                     .filter(
                       ([key, value]) =>
                         !STANDARD_FIELDS.includes(key) &&
-                        typeof value === "string" &&
-                        value.trim() !== ""
+                        (typeof value === "string" ||
+                          typeof value === "number") &&
+                        String(value).trim() !== ""
                     )
-                    .map(([key, value]) =>
-                      typeof value === "string" ? (
-                        <Text style={styles.dateExtra} key={key}>
-                          {formatExtraLabel(key)} {value}
-                        </Text>
-                      ) : null
-                    )}
+                    .map(([key, value]) => (
+                      <Text style={styles.dateExtra} key={key}>
+                        {formatExtraLabel(key)} {String(value)}
+                      </Text>
+                    ))}
                 </View>
               </View>
             </TouchableOpacity>
