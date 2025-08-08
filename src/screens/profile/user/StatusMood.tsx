@@ -25,12 +25,12 @@ import Animated, {
 import { BASE_URL } from "../../../configuration/config";
 import { useAuth } from "../../../contexts/AuthContext";
 import { StatusMoodProps } from "../../../types/StatusMood";
+import { updateMood } from "../../../services/api/profiles/moodService";
 
 // screen content
 import AddLocationModal from "../../../components/modals/input/AddLocationModal";
 import UpdateMoodModal from "../../../components/modals/selection/UpdateMoodModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
-import { updateMood } from "../../../services/api/profiles/moodService";
 
 const StatusMood: React.FC<StatusMoodProps> = ({
   mood,
@@ -111,9 +111,11 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
 
       const token = await AsyncStorage.getItem("token");
-      
+
       await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       setAlertMessage("Home location added");
@@ -130,7 +132,9 @@ const StatusMood: React.FC<StatusMoodProps> = ({
 
       setAlertVisible(true);
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.error || "Failed to add home location");
+      setAlertMessage(
+        err.response?.data?.error || "Failed to add home location"
+      );
       setAlertVisible(true);
     } finally {
       setModalVisible(false);
@@ -160,8 +164,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       if (onAddHome) {
         onAddHome();
       }
-    } catch (err: any) {
-    }
+    } catch (err: any) {}
   };
 
   // animated styles
