@@ -144,42 +144,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     } catch (err) {}
   };
 
-  const initTrackingIfNeeded = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const home = await getHomeLocation(token);
-
-      if (!home) {
-        return;
-      }
-
-      const { foreground, background } = await checkLocationPermissions();
-
-      if (foreground !== "granted" || background !== "granted") {
-        return;
-      }
-
-      const isRunning = await Location.hasStartedLocationUpdatesAsync(
-        LOCATION_TASK_NAME
-      );
-
-      if (!isRunning) {
-        await startBackgroundLocationTracking();
-      } else {
-        // background tracking already running
-        console.log("Background tracking is already running");
-      }
-    } catch (err) {
-      // error occured
-      console.log("Something went wrong starting background tracking");
-    }
-  };
-
   // fetch functions
   const {
     data: partner,
@@ -448,7 +412,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // use effects
   useEffect(() => {
     checkAndUpdateHomeStatus();
-    initTrackingIfNeeded();
   }, []);
 
   useEffect(() => {
