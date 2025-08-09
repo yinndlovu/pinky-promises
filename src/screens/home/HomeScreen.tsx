@@ -457,7 +457,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         refetchPartnerMood(),
         refetchPartnerStatus(),
         fetchPartnerProfilePicture(),
-        checkAndUpdateHomeStatus(),
       ]);
     } catch (e) {
     } finally {
@@ -470,7 +469,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     refetchPartnerMood,
     refetchPartnerStatus,
     fetchPartnerProfilePicture,
-    checkAndUpdateHomeStatus,
   ]);
 
   if (partnerLoading) {
