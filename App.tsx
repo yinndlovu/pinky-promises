@@ -1,7 +1,5 @@
 // external
-import {
-  NavigationContainer,
-} from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import {
   createStackNavigator,
   TransitionPresets,
@@ -125,8 +123,14 @@ function AppContent() {
           headerShown: false,
           cardStyle: { backgroundColor: "#23243a" },
           transitionSpec: {
-            open: { animation: "timing", config: { duration: 450 } },
-            close: { animation: "timing", config: { duration: 450 } },
+            open: {
+              animation: "timing",
+              config: { duration: 450 },
+            },
+            close: {
+              animation: "timing",
+              config: { duration: 450 },
+            },
           },
         }}
       >
