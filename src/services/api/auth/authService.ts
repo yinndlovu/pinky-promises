@@ -10,7 +10,11 @@ export async function changePassword(
   const res = await axios.put(
     `${BASE_URL}/api/auth/update-password`,
     { currentPassword, newPassword, confirmPassword },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
 
   return res.data.message;

@@ -17,10 +17,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to location to track your home status and provide location-based features.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to location in the background to track your home status and provide location-based features.",
-        "UIBackgroundModes": [
-          "location",
-          "background-processing"
-        ]
+        "UIBackgroundModes": ["location", "background-processing"]
       }
     },
     "android": {

@@ -5,7 +5,7 @@ export function getDistance(
   lon2: number
 ) {
   const toRad = (v: number) => (v * Math.PI) / 180;
-  const R = 6371e3; 
+  const R = 6371e3;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
   const a =

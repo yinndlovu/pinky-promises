@@ -11,6 +11,7 @@ export async function sendSweetMessage(token: string, message: string) {
       },
     }
   );
+
   return res.data;
 }
 
@@ -18,7 +19,9 @@ export async function getLastUnseenSweetMessage(token: string) {
   const res = await axios.get(
     `${BASE_URL}/api/sweet-messages/get-sweet-message/last-unseen`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -40,7 +43,9 @@ export async function getReceivedSweetMessages(token: string) {
   const res = await axios.get(
     `${BASE_URL}/api/sweet-messages/get-sweet-messages/received`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -51,7 +56,9 @@ export async function viewSweetMessage(token: string, sweetId: string) {
   const res = await axios.get(
     `${BASE_URL}/api/sweet-messages/view-sweet-message/${sweetId}`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -62,9 +69,11 @@ export async function deleteSweetMessage(token: string, sweetId: string) {
   const res = await axios.delete(
     `${BASE_URL}/api/sweet-messages/delete-sweet-message/${sweetId}`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
-  
+
   return res.data;
 }

@@ -71,9 +71,10 @@ export async function registerForPushNotificationsAsync() {
 export function setupNotificationListeners(
   onNotificationResponse: (response: Notifications.NotificationResponse) => void
 ) {
-  const responseListener = Notifications.addNotificationResponseReceivedListener(
-    onNotificationResponse
-  );
+  const responseListener =
+    Notifications.addNotificationResponseReceivedListener(
+      onNotificationResponse
+    );
 
   return () => {
     responseListener.remove();
