@@ -10,14 +10,14 @@ import {
   getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
-} from "../../../services/api/ours/specialDateService";
-import { useAuth } from "../../../contexts/AuthContext";
-import { AnniversaryProps, SpecialDate } from "../../../types/SpecialDate";
-import { formatProfileDisplayDate } from "../../../utils/formatDate";
+} from "../../../../services/api/ours/specialDateService";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { AnniversaryProps, SpecialDate } from "../../../../types/SpecialDate";
+import { formatProfileDisplayDate } from "../../../../utils/formatDate";
 
 // screen content
-import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
-import AlertModal from "../../../components/modals/output/AlertModal";
+import UpdateSpecialDateModal from "../../../../components/modals/input/UpdateSpecialDateModal";
+import AlertModal from "../../../../components/modals/output/AlertModal";
 
 const Anniversary: React.FC<AnniversaryProps> = () => {
   // variables

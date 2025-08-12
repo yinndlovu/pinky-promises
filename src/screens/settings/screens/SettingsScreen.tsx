@@ -13,8 +13,8 @@ import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 
 // internal
-import { useAuth } from "../../contexts/AuthContext";
-import LogoutModal from "../../components/modals/selection/LogoutModal";
+import { useAuth } from "../../../contexts/AuthContext";
+import LogoutModal from "../../../components/modals/selection/LogoutModal";
 
 // types
 type SettingsScreenProps = StackScreenProps<any, any>;

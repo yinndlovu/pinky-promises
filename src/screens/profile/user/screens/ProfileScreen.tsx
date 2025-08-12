@@ -25,51 +25,51 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
-import { getMood } from "../../../services/api/profiles/moodService";
-import UpdateFavoritesModal from "../../../components/modals/input/UpdateFavoritesModal";
+import { fetchUserStatus } from "../../../../services/api/profiles/userStatusService";
+import { getMood } from "../../../../services/api/profiles/moodService";
+import UpdateFavoritesModal from "../../../../components/modals/input/UpdateFavoritesModal";
 import {
   getUserFavorites,
   updateUserFavorites,
-} from "../../../services/api/profiles/favoritesService";
-import { BASE_URL } from "../../../configuration/config";
+} from "../../../../services/api/profiles/favoritesService";
+import { BASE_URL } from "../../../../configuration/config";
 import {
   getLoveLanguage,
   updateLoveLanguage,
-} from "../../../services/api/profiles/loveLanguageService";
+} from "../../../../services/api/profiles/loveLanguageService";
 import {
   getAboutUser,
   updateAboutUser,
-} from "../../../services/api/profiles/aboutUserService";
-import { getPartner, getReceivedPartnerRequests } from "../../../services/api/profiles/partnerService";
-import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
-import { FavoritesType } from "../../../types/Favorites";
-import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
+} from "../../../../services/api/profiles/aboutUserService";
+import { getPartner, getReceivedPartnerRequests } from "../../../../services/api/profiles/partnerService";
+import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { FavoritesType } from "../../../../types/Favorites";
+import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import {
   storeMessage,
   getStoredMessages,
   updateMessage,
   deleteMessage,
-} from "../../../services/api/profiles/messageStorageService";
+} from "../../../../services/api/profiles/messageStorageService";
 
 // screen content
-import UpdateAboutModal from "../../../components/modals/input/UpdateAboutModal";
-import UpdateLoveLanguageModal from "../../../components/modals/input/UpdateLoveLanguageModal";
-import ProfilePictureModal from "../../../components/modals/selection/ProfilePictureModal";
-import ProfilePictureViewer from "../../../components/modals/output/ProfilePictureViewer";
-import StatusMood from "./StatusMood";
-import Anniversary from "./Anniversary";
-import Favorites from "./Favorites";
-import LoveLanguage from "./LoveLanguage";
-import MoreAboutYou from "./MoreAboutYou";
-import styles from "./styles/ProfileScrees.styles";
-import MessageStorage from "./MessageStorage";
-import StoreMessageModal from "../../../components/modals/input/StoreMessageModal";
-import AlertModal from "../../../components/modals/output/AlertModal";
-import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
-import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
-import modalStyles from "./styles/ModalStyles.styles";
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
+import UpdateLoveLanguageModal from "../../../../components/modals/input/UpdateLoveLanguageModal";
+import ProfilePictureModal from "../../../../components/modals/selection/ProfilePictureModal";
+import ProfilePictureViewer from "../../../../components/modals/output/ProfilePictureViewer";
+import StatusMood from "../components/StatusMood";
+import Anniversary from "../components/Anniversary";
+import Favorites from "../components/Favorites";
+import LoveLanguage from "../components/LoveLanguage";
+import MoreAboutYou from "../components/MoreAboutYou";
+import styles from "../styles/ProfileScrees.styles";
+import MessageStorage from "../components/MessageStorage";
+import StoreMessageModal from "../../../../components/modals/input/StoreMessageModal";
+import AlertModal from "../../../../components/modals/output/AlertModal";
+import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
+import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
+import modalStyles from "../styles/ModalStyles.styles";
+import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;

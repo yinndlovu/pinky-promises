@@ -23,39 +23,39 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { BASE_URL } from "../../configuration/config";
-import { getHomeLocation } from "../../services/api/profiles/homeLocationService";
-import { updateUserStatus } from "../../services/api/profiles/userStatusService";
-import { getDistance } from "../../utils/locationUtils";
-import { fetchUserStatus } from "../../services/api/profiles/userStatusService";
-import { getUserMood } from "../../services/api/profiles/moodService";
-import { getUpcomingSpecialDate } from "../../services/api/ours/specialDateService";
-import { getRecentActivities } from "../../services/api/home/recentActivityService";
-import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
+import { BASE_URL } from "../../../configuration/config";
+import { getHomeLocation } from "../../../services/api/profiles/homeLocationService";
+import { updateUserStatus } from "../../../services/api/profiles/userStatusService";
+import { getDistance } from "../../../utils/locationUtils";
+import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
+import { getUserMood } from "../../../services/api/profiles/moodService";
+import { getUpcomingSpecialDate } from "../../../services/api/ours/specialDateService";
+import { getRecentActivities } from "../../../services/api/home/recentActivityService";
+import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import {
   interactWithPartner,
   getUnseenInteractions,
-} from "../../services/api/home/interactionService";
-import { getPartner } from "../../services/api/profiles/partnerService";
+} from "../../../services/api/home/interactionService";
+import { getPartner } from "../../../services/api/profiles/partnerService";
 import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
-} from "../../utils/formatDate";
+} from "../../../utils/formatDate";
 import {
   checkLocationPermissions,
   startBackgroundLocationTracking,
-} from "../../services/location/locationPermissionService";
-import { LOCATION_TASK_NAME } from "../../background/LocationTask";
+} from "../../../services/location/locationPermissionService";
+import { LOCATION_TASK_NAME } from "../../../background/LocationTask";
 
 // screen content
-import RecentActivity from "./components/RecentActivity";
-import ActionsModal from "../../components/modals/selection/ActionsModal";
-import styles from "./styles/HomeScreen.styles";
-import AlertModal from "../../components/modals/output/AlertModal";
-import PortalPreview from "./components/PortalPreview";
-import ProfileCard from "./components/ProfileCard";
-import LoadingSpinner from "../../components/loading/LoadingSpinner";
+import RecentActivity from "../components/RecentActivity";
+import ActionsModal from "../../../components/modals/selection/ActionsModal";
+import styles from "../styles/HomeScreen.styles";
+import AlertModal from "../../../components/modals/output/AlertModal";
+import PortalPreview from "../components/PortalPreview";
+import ProfileCard from "../components/ProfileCard";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // types
 type Props = NativeStackScreenProps<any>;

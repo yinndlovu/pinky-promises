@@ -19,29 +19,29 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getUserFavorites } from "../../../services/api/profiles/favoritesService";
-import { getLoveLanguage } from "../../../services/api/profiles/loveLanguageService";
-import { getAboutUser } from "../../../services/api/profiles/aboutUserService";
-import { removePartner } from "../../../services/api/profiles/partnerService";
-import { BASE_URL } from "../../../configuration/config";
-import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
-import { favoritesObjectToArray } from "../../../helpers/profileHelpers";
-import { getReceivedMessages } from "../../../services/api/profiles/messageStorageService";
-import { getPartnerDistance } from "../../../services/api/profiles/distanceService";
-import { formatDistance } from "../../../utils/formatDistance";
+import { getUserFavorites } from "../../../../services/api/profiles/favoritesService";
+import { getLoveLanguage } from "../../../../services/api/profiles/loveLanguageService";
+import { getAboutUser } from "../../../../services/api/profiles/aboutUserService";
+import { removePartner } from "../../../../services/api/profiles/partnerService";
+import { BASE_URL } from "../../../../configuration/config";
+import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
+import { getReceivedMessages } from "../../../../services/api/profiles/messageStorageService";
+import { getPartnerDistance } from "../../../../services/api/profiles/distanceService";
+import { formatDistance } from "../../../../utils/formatDistance";
 
 // screen content
-import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
-import PartnerMoreAboutYou from "./PartnerMoreAboutYou";
-import ProfilePictureViewer from "../../../components/modals/output/ProfilePictureViewer";
-import PartnerFavorites from "./PartnerFavorites";
-import PartnerLoveLanguage from "./PartnerLoveLanguage";
-import PartnerStatusMood from "./PartnerStatusMood";
-import PartnerAnniversary from "./PartnerAnniversary";
-import styles from "./styles/PartnerProfileScreen.styles";
-import PartnerMessageStorage from "./PartnerMessageStorage";
-import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
+import PartnerMoreAboutYou from "../components/PartnerMoreAboutYou";
+import ProfilePictureViewer from "../../../../components/modals/output/ProfilePictureViewer";
+import PartnerFavorites from "../components/PartnerFavorites";
+import PartnerLoveLanguage from "../components/PartnerLoveLanguage";
+import PartnerStatusMood from "../components/PartnerStatusMood";
+import PartnerAnniversary from "../components/PartnerAnniversary";
+import styles from "../styles/PartnerProfileScreen.styles";
+import PartnerMessageStorage from "../components/PartnerMessageStorage";
+import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
+import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
