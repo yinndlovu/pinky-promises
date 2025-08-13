@@ -3,5 +3,5 @@ export const formatDistance = (distanceInMeters: number): string => {
     const kilometers = (distanceInMeters / 1000).toFixed(1);
     return `${kilometers} km`;
   }
-  return `${distanceInMeters} meters`;
+  return `${distanceInMeters} m`;
 };

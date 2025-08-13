@@ -8,6 +8,7 @@ export async function getSetMonthlyGift(token: string, userId: string) {
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+
   return res.data;
 }
 
@@ -22,5 +23,6 @@ export async function updateSetMonthlyGift(
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+  
   return res.data;
 }

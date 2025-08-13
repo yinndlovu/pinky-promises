@@ -8,6 +8,7 @@ export async function getOldestUnclaimedGift(token: string) {
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+  
   return res.data.gift;
 }
 
@@ -19,15 +20,17 @@ export async function claimMonthlyGift(token: string, giftId: string) {
       headers: { Authorization: `Bearer ${token}` },
     }
   );
+
   return res.data;
 }
 
 export async function getLastFiveClaimedGifts(token: string) {
-    const res = await axios.get(
-      `${BASE_URL}/api/gift/get-last-five-claimed-gifts`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return res.data.gifts;
-  }
+  const res = await axios.get(
+    `${BASE_URL}/api/gift/get-last-five-claimed-gifts`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  return res.data.gifts;
+}

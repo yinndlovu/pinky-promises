@@ -3,7 +3,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 // internal
-import { PartnerLoveLanguageProps } from "../../../types/LoveLanguage";
+import { PartnerLoveLanguageProps } from "../../../../types/LoveLanguage";
 
 const PartnerLoveLanguage: React.FC<PartnerLoveLanguageProps> = ({
   loveLanguage = "",

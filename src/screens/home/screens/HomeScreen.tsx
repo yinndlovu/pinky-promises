@@ -22,39 +22,37 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { BASE_URL } from "../../configuration/config";
-import { getHomeLocation } from "../../services/api/profiles/homeLocationService";
-import { updateUserStatus } from "../../services/api/profiles/userStatusService";
-import { getDistance } from "../../utils/locationUtils";
-import { fetchUserStatus } from "../../services/api/profiles/userStatusService";
-import { getUserMood } from "../../services/api/profiles/moodService";
-import { getUpcomingSpecialDate } from "../../services/api/ours/specialDateService";
-import { getRecentActivities } from "../../services/api/home/recentActivityService";
-import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
+import { BASE_URL } from "../../../configuration/config";
+import { getHomeLocation } from "../../../services/api/profiles/homeLocationService";
+import { updateUserStatus } from "../../../services/api/profiles/userStatusService";
+import { getDistance } from "../../../utils/locationUtils";
+import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
+import { getUserMood } from "../../../services/api/profiles/moodService";
+import { getUpcomingSpecialDate } from "../../../services/api/ours/specialDateService";
+import { getRecentActivities } from "../../../services/api/home/recentActivityService";
+import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import {
   interactWithPartner,
   getUnseenInteractions,
-} from "../../services/api/home/interactionService";
-import { getPartner } from "../../services/api/profiles/partnerService";
+} from "../../../services/api/home/interactionService";
+import { getPartner } from "../../../services/api/profiles/partnerService";
 import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
-} from "../../utils/formatDate";
+} from "../../../utils/formatDate";
 import {
   checkLocationPermissions,
-  startBackgroundLocationTracking,
-} from "../../services/location/locationPermissionService";
-import { LOCATION_TASK_NAME } from "../../background/LocationTask";
+} from "../../../services/location/locationPermissionService";
 
 // screen content
-import RecentActivity from "./components/RecentActivity";
-import ActionsModal from "../../components/modals/selection/ActionsModal";
-import styles from "./styles/HomeScreen.styles";
-import AlertModal from "../../components/modals/output/AlertModal";
-import PortalPreview from "./components/PortalPreview";
-import ProfileCard from "./components/ProfileCard";
-import LoadingSpinner from "../../components/loading/LoadingSpinner";
+import RecentActivity from "../components/RecentActivity";
+import ActionsModal from "../../../components/modals/selection/ActionsModal";
+import styles from "../styles/HomeScreen.styles";
+import AlertModal from "../../../components/modals/output/AlertModal";
+import PortalPreview from "../components/PortalPreview";
+import ProfileCard from "../components/ProfileCard";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -141,42 +139,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
     } catch (err) {}
-  };
-
-  const initTrackingIfNeeded = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const home = await getHomeLocation(token);
-
-      if (!home) {
-        return;
-      }
-
-      const { foreground, background } = await checkLocationPermissions();
-
-      if (foreground !== "granted" || background !== "granted") {
-        return;
-      }
-
-      const isRunning = await Location.hasStartedLocationUpdatesAsync(
-        LOCATION_TASK_NAME
-      );
-
-      if (!isRunning) {
-        await startBackgroundLocationTracking();
-      } else {
-        // background tracking already running
-        console.log("Background tracking is already running");
-      }
-    } catch (err) {
-      // error occured
-      console.log("Something went wrong starting background tracking");
-    }
   };
 
   // fetch functions
@@ -366,7 +328,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <Image
         source={
-          avatarUri ? avatarUri : require("../../assets/default-avatar-two.png")
+          avatarUri ? avatarUri : require("../../../assets/default-avatar-two.png")
         }
         style={styles.avatar}
         contentFit="cover"
@@ -392,6 +354,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return "embraced you";
       case "wink":
         return "winked at you";
+      case "roll":
+        return "rolled their eyes at you";
       default:
         return `interacted with you`;
     }
@@ -447,7 +411,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // use effects
   useEffect(() => {
     checkAndUpdateHomeStatus();
-    initTrackingIfNeeded();
   }, []);
 
   useEffect(() => {
@@ -459,7 +422,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       checkAndUpdateHomeStatus();
-      const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
+      const interval = setInterval(checkAndUpdateHomeStatus, 20 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
   );
@@ -493,7 +456,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         refetchPartnerMood(),
         refetchPartnerStatus(),
         fetchPartnerProfilePicture(),
-        checkAndUpdateHomeStatus(),
       ]);
     } catch (e) {
     } finally {
@@ -506,7 +468,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     refetchPartnerMood,
     refetchPartnerStatus,
     fetchPartnerProfilePicture,
-    checkAndUpdateHomeStatus,
   ]);
 
   if (partnerLoading) {

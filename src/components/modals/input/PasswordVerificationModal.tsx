@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   TouchableWithoutFeedback,
-  Keyboard,
   Dimensions,
+  Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Feather } from "@expo/vector-icons";
 
 // content
 import AlertModal from "../output/AlertModal";
@@ -20,45 +21,50 @@ import AlertModal from "../output/AlertModal";
 type Props = {
   visible: boolean;
   onClose: () => void;
-  onStore: (title: string, message: string) => Promise<void>;
+  onVerify: (password: string) => Promise<boolean>;
   loading?: boolean;
 };
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const StoreMessageModal: React.FC<Props> = ({
+const PasswordVerificationModal: React.FC<Props> = ({
   visible,
   onClose,
-  onStore,
+  onVerify,
   loading = false,
 }) => {
   // use states
-  const [title, setTitle] = useState("");
-  const [message, setMessage] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertVisible, setAlertVisible] = useState(false);
+
+  // variables
   const insets = useSafeAreaInsets();
 
   // handlers
-  const handleStore = async () => {
-    if (!title.trim() || !message.trim()) {
+  const handleVerify = async () => {
+    if (!password.trim()) {
       return;
     }
 
     try {
-      await onStore(title.trim(), message.trim());
-
-      setTitle("");
-      setMessage("");
+      const isValid = await onVerify(password.trim());
+      if (isValid) {
+        setPassword("");
+        onClose();
+      } else {
+        setAlertMessage("Incorrect password. Please try again.");
+        setAlertVisible(true);
+      }
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.error || "Failed to store message");
+      setAlertMessage(err.response?.data?.error || "Failed to verify password");
       setAlertVisible(true);
     }
   };
 
   const handleClose = () => {
-    setTitle("");
-    setMessage("");
+    setPassword("");
     onClose();
   };
 
@@ -77,20 +83,20 @@ const StoreMessageModal: React.FC<Props> = ({
                 <Text style={styles.closeButtonText}>✕</Text>
               </TouchableOpacity>
 
-              <Text style={styles.title}>Store your favorite message</Text>
+              <Text style={styles.title}>Verify Password</Text>
 
               <TouchableOpacity
                 style={[
-                  styles.storeButton,
-                  (!title.trim() || !message.trim() || loading) && {
+                  styles.verifyButton,
+                  (!password.trim() || loading) && {
                     opacity: 0.5,
                   },
                 ]}
-                onPress={handleStore}
-                disabled={!title.trim() || !message.trim() || loading}
+                onPress={handleVerify}
+                disabled={!password.trim() || loading}
               >
-                <Text style={styles.storeButtonText}>
-                  {loading ? "Storing..." : "Store"}
+                <Text style={styles.verifyButtonText}>
+                  {loading ? "Verifying..." : "Verify"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -98,27 +104,32 @@ const StoreMessageModal: React.FC<Props> = ({
             <View style={styles.separator} />
 
             <View style={styles.content}>
-              <TextInput
-                style={styles.titleInput}
-                placeholder="Message title..."
-                placeholderTextColor="#b0b3c6"
-                value={title}
-                onChangeText={setTitle}
-                maxLength={50}
-                editable={!loading}
-              />
+              <Text style={styles.description}>
+                Please enter your password to confirm account deletion
+              </Text>
 
-              <TextInput
-                style={styles.messageInput}
-                placeholder="Type the message here..."
-                placeholderTextColor="#b0b3c6"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-                maxLength={1000}
-                editable={!loading}
-                textAlignVertical="top"
-              />
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.passwordInput}
+                  placeholder="Enter your password..."
+                  placeholderTextColor="#b0b3c6"
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry={!showPassword}
+                  editable={!loading}
+                />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                >
+                  <Feather
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={20}
+                    color="#b0b3c6"
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
@@ -142,7 +153,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#23243a",
     width: screenWidth,
-    height: "75%",
+    height: "50%",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingHorizontal: 20,
@@ -177,13 +188,13 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "bold",
     flex: 1,
     textAlign: "center",
     marginHorizontal: 16,
   },
-  storeButton: {
+  verifyButton: {
     backgroundColor: "#e03487",
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -191,7 +202,7 @@ const styles = StyleSheet.create({
     minWidth: 60,
     alignItems: "center",
   },
-  storeButtonText: {
+  verifyButtonText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
@@ -205,27 +216,35 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 16,
   },
-  titleInput: {
-    backgroundColor: "#1b1c2e",
+  description: {
     color: "#fff",
-    borderRadius: 10,
-    padding: 14,
     fontSize: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#2f3149",
+    lineHeight: 24,
+    marginBottom: 20,
+    textAlign: "center",
   },
-  messageInput: {
+  inputContainer: {
+    position: "relative",
+  },
+  passwordInput: {
     backgroundColor: "#1b1c2e",
     color: "#fff",
     borderRadius: 10,
     padding: 14,
     fontSize: 16,
-    flex: 1,
     borderWidth: 1,
     borderColor: "#2f3149",
-    marginBottom: 16,
+    paddingRight: 50,
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 12,
+    top: 12,
+    width: 24,
+    height: 24,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
-export default StoreMessageModal;
+export default PasswordVerificationModal;

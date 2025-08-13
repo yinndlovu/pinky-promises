@@ -574,7 +574,7 @@ export default function ChatScreen() {
               style={{ paddingVertical: 10, paddingHorizontal: 16 }}
             >
               <Text style={{ color: "#e03487", fontWeight: "bold" }}>
-                Delete
+                Clear chat
               </Text>
             </TouchableOpacity>
           </View>
@@ -584,7 +584,7 @@ export default function ChatScreen() {
       <ConfirmationModal
         visible={showConfirm}
         message="Are you sure you want to delete all chat messages?"
-        confirmText="Delete"
+        confirmText="Clear"
         cancelText="Cancel"
         onConfirm={handleDelete}
         onCancel={() => setShowConfirm(false)}

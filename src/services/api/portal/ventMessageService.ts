@@ -19,7 +19,9 @@ export async function getLastUnseenVentMessage(token: string) {
   const res = await axios.get(
     `${BASE_URL}/api/vent-messages/get-vent-message/last-unseen`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -30,7 +32,9 @@ export async function getSentVentMessages(token: string) {
   const res = await axios.get(
     `${BASE_URL}/api/vent-messages/get-vent-messages/sent`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -41,7 +45,9 @@ export async function getReceivedVentMessages(token: string) {
   const res = await axios.get(
     `${BASE_URL}/api/vent-messages/get-vent-messages/received`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -52,7 +58,9 @@ export async function viewVentMessage(token: string, ventId: string) {
   const res = await axios.get(
     `${BASE_URL}/api/vent-messages/view-vent-message/${ventId}`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -63,7 +71,9 @@ export async function deleteVentMessage(token: string, ventId: string) {
   const res = await axios.delete(
     `${BASE_URL}/api/vent-messages/delete-vent-message/${ventId}`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 

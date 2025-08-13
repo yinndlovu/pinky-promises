@@ -1,14 +1,21 @@
 // external
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
 // internal
-import { PartnerAboutProps } from "../../../types/About";
+import { AboutProps } from "../../../../types/About";
 
-const PartnerMoreAboutYou: React.FC<PartnerAboutProps> = ({ about = "" }) => (
+const MoreAboutYou: React.FC<AboutProps> = ({
+  about = "",
+  onEdit,
+}) => (
   <View style={styles.wrapper}>
     <View style={styles.headerRow}>
       <Text style={styles.label}>More about you</Text>
+      <TouchableOpacity style={styles.editButton} onPress={onEdit}>
+        <Feather name="edit-2" size={18} color="#e03487" />
+      </TouchableOpacity>
     </View>
     <View style={styles.valueRow}>
       {!about ? (
@@ -37,6 +44,14 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 2,
   },
+  editButton: {
+    backgroundColor: "transparent",
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   valueRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -55,4 +70,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PartnerMoreAboutYou;
+export default MoreAboutYou;

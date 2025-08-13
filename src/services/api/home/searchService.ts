@@ -5,8 +5,11 @@ export async function searchUsers(token: string, query: string) {
   const res = await axios.get(
     `${BASE_URL}/api/search/search-users?q=${encodeURIComponent(query)}`,
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
+
   return res.data.users;
 }

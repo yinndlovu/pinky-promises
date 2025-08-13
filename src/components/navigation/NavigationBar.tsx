@@ -1,6 +1,6 @@
 // external
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
   NavigationHelpers,
@@ -131,11 +131,21 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
         {NAV_ITEMS.map((item) => {
           const isActive = currentRoute === item.name;
           return (
-            <TouchableOpacity
+            <Pressable
               key={item.name}
-              style={styles.tab}
               onPress={() => navigation.navigate(item.name)}
-              activeOpacity={0.7}
+              android_ripple={{
+                color: "rgba(167, 72, 130, 0.3)",
+                borderless: true,
+                radius: 30,
+              }}
+              style={({ pressed }) => [
+                styles.tab,
+                {
+                  opacity: pressed ? 0.6 : 1,
+                  transform: [{ scale: pressed ? 0.95 : 1 }],
+                },
+              ]}
             >
               {item.name === "Profile" ? (
                 renderProfileIcon()
@@ -154,7 +164,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
               >
                 {item.name}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -175,6 +185,11 @@ const styles = StyleSheet.create({
   tab: {
     flex: 1,
     alignItems: "center",
+    backgroundColor: "#23243a",
+    borderRadius: 30,
+    overflow: "hidden",
+    padding: 10,
+    justifyContent: "center",
   },
   label: {
     fontSize: 12,

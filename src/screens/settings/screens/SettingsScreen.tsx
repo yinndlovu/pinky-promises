@@ -7,13 +7,14 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
+  Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 
 // internal
-import { useAuth } from "../../contexts/AuthContext";
-import LogoutModal from "../../components/modals/selection/LogoutModal";
+import { useAuth } from "../../../contexts/AuthContext";
+import LogoutModal from "../../../components/modals/selection/LogoutModal";
 
 // types
 type SettingsScreenProps = StackScreenProps<any, any>;
@@ -42,7 +43,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       if (route.params?.emailChanged) {
-        setSuccess("Email address updated successfully!");
+        setSuccess("Email address updated");
         navigation.setParams({ emailChanged: undefined });
       }
     });
@@ -69,11 +70,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       onPress: () => navigation.navigate("AccountScreen"),
     },
     {
-      label: "Change password",
-      icon: "lock",
-      onPress: () => navigation.navigate("ChangePassword"),
-    },
-    {
       label: "Notifications",
       icon: "bell",
       onPress: () => navigation.navigate("NotificationsScreen"),
@@ -93,11 +89,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       >
         <View style={styles.optionsWrapper}>
           {settingsOptions.map((option, idx) => (
-            <TouchableOpacity
+            <Pressable
               key={option.label}
               style={styles.optionRow}
               onPress={option.onPress}
-              activeOpacity={0.7}
+              android_ripple={{ color: "#282942ff" }}
             >
               <Feather
                 name={option.icon as any}
@@ -112,7 +108,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 color="#b0b3c6"
                 style={styles.chevron}
               />
-            </TouchableOpacity>
+            </Pressable>
           ))}
         </View>
         <TouchableOpacity

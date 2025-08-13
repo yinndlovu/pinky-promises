@@ -52,7 +52,9 @@ export const NOTIFICATION_TYPES = [
 export async function getNotificationPreference(token: string, type: string) {
   const res = await axios.get(`${BASE_URL}/api/notifications/preference/get`, {
     params: { type },
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   return res.data.value;
@@ -66,15 +68,23 @@ export async function setNotificationPreference(
   const res = await axios.post(
     `${BASE_URL}/api/notifications/preference/set`,
     { type, value },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
+
   return res.data.value;
 }
 
 export async function getReminderInterval(token: string) {
   const res = await axios.get(`${BASE_URL}/api/notifications/interval/get`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
   return res.data.hours;
 }
 
@@ -82,7 +92,12 @@ export async function setReminderInterval(token: string, hours: number) {
   const res = await axios.post(
     `${BASE_URL}/api/notifications/interval/set`,
     { hours },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
+  
   return res.data.hours;
 }

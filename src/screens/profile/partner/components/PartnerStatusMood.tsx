@@ -1,16 +1,8 @@
 // external
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import { Feather } from "@expo/vector-icons";
+import React, { useEffect } from "react";
+import { View, Text, StyleSheet } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,33 +14,21 @@ import Animated, {
 } from "react-native-reanimated";
 
 // internal
-import { BASE_URL } from "../../../configuration/config";
-import { useAuth } from "../../../contexts/AuthContext";
-import { StatusMoodProps } from "../../../types/StatusMood";
+import { fetchUserStatus } from "../../../../services/api/profiles/userStatusService";
+import { getUserMood } from "../../../../services/api/profiles/moodService";
+import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
+import { formatDistance } from "../../../../utils/formatDistance";
 
-// screen content
-import AddLocationModal from "../../../components/modals/input/AddLocationModal";
-import UpdateMoodModal from "../../../components/modals/selection/UpdateMoodModal";
-import AlertModal from "../../../components/modals/output/AlertModal";
-import { updateMood } from "../../../services/api/profiles/moodService";
-
-const StatusMood: React.FC<StatusMoodProps> = ({
-  mood,
-  moodDescription,
-  status = "unavailable",
-  statusDescription = "You must add your home location to use this feature",
-  onEdit,
-  onAddHome,
-  statusDistance,
+const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
+  partnerId,
+  partnerName,
+  refreshKey,
 }) => {
-  // variables
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
-  const userId = user?.id;
-  const displayMood = mood || "No mood";
-  const displayMoodDescription =
-    moodDescription || "You haven't added a mood yet";
-
+  // use effects
+  useEffect(() => {
+    refetchPartnerMood();
+    refetchPartnerStatus();
+  }, [partnerId, partnerName, refreshKey]);
   // animation variables
   const pulseAnimation = useSharedValue(1);
   const floatAnimation = useSharedValue(0);
@@ -56,15 +36,78 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const moodBounceAnimation = useSharedValue(0);
   const fadeInAnimation = useSharedValue(0);
 
-  // use states
-  const [moodModalVisible, setMoodModalVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [updatingMood, setUpdatingMood] = useState(false);
+  // fetch functions
+  const {
+    data: partnerMood,
+    isLoading: partnerMoodLoading,
+    refetch: refetchPartnerMood,
+  } = useQuery({
+    queryKey: ["partnerMood"],
+    queryFn: async () => {
+      if (!partnerId) {
+        return null;
+      }
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await getUserMood(token, partnerId);
+    },
+    enabled: !!partnerId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const mood = partnerMood?.mood || "No mood";
+  const moodDescription =
+    partnerMood?.description || `${partnerName} hasn't set a mood yet`;
+
+  const {
+    data: partnerStatus,
+    isLoading: partnerStatusLoading,
+    refetch: refetchPartnerStatus,
+  } = useQuery({
+    queryKey: ["partnerStatus"],
+    queryFn: async () => {
+      if (!partnerId) {
+        return null;
+      }
+
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await fetchUserStatus(token, partnerId);
+    },
+    enabled: !!partnerId,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const status = partnerStatus?.unreachable
+    ? "unreachable"
+    : partnerStatus?.isAtHome
+    ? "home"
+    : partnerStatus?.isAtHome === false
+    ? "away"
+    : "unavailable";
+
+  const statusDescription = partnerStatus?.unreachable
+    ? `Can't find ${partnerName}'s current location`
+    : partnerStatus?.isAtHome
+    ? `${partnerName} is currently at home`
+    : partnerStatus?.isAtHome === false
+    ? `${partnerName} is currently not home`
+    : `${partnerName} hasn't set a home location`;
 
   // use effects
   useEffect(() => {
+    refetchPartnerMood();
+    refetchPartnerStatus();
+
     floatAnimation.value = withRepeat(
       withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
       -1,
@@ -75,7 +118,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       duration: 800,
       easing: Easing.out(Easing.cubic),
     });
-  }, []);
+  }, [partnerId, partnerName, refreshKey]);
 
   useEffect(() => {
     const statusValues = { home: 0, away: 1, unreachable: 2, unavailable: 3 };
@@ -94,75 +137,13 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   }, [status]);
 
   useEffect(() => {
-    if (displayMood && displayMood !== "No mood") {
+    if (mood && mood !== "No mood") {
       moodBounceAnimation.value = withSpring(1, {
         damping: 8,
         stiffness: 200,
       });
     }
-  }, [displayMood]);
-
-  // handlers
-  const handleAddHome = async (location: {
-    latitude: number;
-    longitude: number;
-  }) => {
-    try {
-      await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
-
-      const token = await AsyncStorage.getItem("token");
-      
-      await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      setAlertMessage("Home location added");
-
-      await queryClient.invalidateQueries({
-        queryKey: ["status", userId],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["partnerDistance"],
-      });
-
-      setAlertVisible(true);
-    } catch (err: any) {
-      setAlertMessage(err.response?.data?.error || "Failed to add home location");
-      setAlertVisible(true);
-    } finally {
-      setModalVisible(false);
-    }
-  };
-
-  const handleSaveMood = async (newMood: string) => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      await updateMood(token, newMood);
-
-      await queryClient.invalidateQueries({
-        queryKey: ["moodData", userId],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
-      });
-
-      if (onEdit) {
-        onEdit();
-      }
-      if (onAddHome) {
-        onAddHome();
-      }
-    } catch (err: any) {
-    }
-  };
+  }, [mood]);
 
   // animated styles
   const pulseStyle = useAnimatedStyle(() => ({
@@ -243,12 +224,6 @@ const StatusMood: React.FC<StatusMoodProps> = ({
 
   return (
     <Animated.View style={[styles.wrapper, fadeInStyle]}>
-      {updatingMood && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#e03487" />
-        </View>
-      )}
-
       <View style={styles.headerRow}>
         <Text style={styles.statusLabel}>Status</Text>
       </View>
@@ -281,59 +256,25 @@ const StatusMood: React.FC<StatusMoodProps> = ({
               : "Unavailable"}
           </Text>
         </View>
-
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Feather name="plus" size={18} color="#fff" />
-        </TouchableOpacity>
       </Animated.View>
 
       <Text style={styles.statusDescription}>{statusDescription}</Text>
 
-      {status === "away" && statusDistance && (
+      {partnerStatus?.isAtHome === false && partnerStatus?.distance && (
         <Text style={styles.statusDistance}>
-          {`${statusDistance} meters away from home`}
+          {`${formatDistance(partnerStatus.distance)} away from home`}
         </Text>
       )}
 
       <View style={styles.moodRow}>
         <Text style={styles.moodLabel}>Mood</Text>
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => setMoodModalVisible(true)}
-        >
-          <Feather name="edit-2" size={18} color="#e03487" />
-        </TouchableOpacity>
       </View>
 
       <Animated.View style={[styles.moodContentRow, moodBounceStyle]}>
-        <Text style={styles.moodEmoji}>{getMoodEmoji(displayMood)}</Text>
-        <Text style={styles.moodValue}>{displayMood}</Text>
-        <Text style={styles.moodDescription}> - {displayMoodDescription}</Text>
+        <Text style={styles.moodEmoji}>{getMoodEmoji(mood)}</Text>
+        <Text style={styles.moodValue}>{mood}</Text>
+        <Text style={styles.moodDescription}> - {moodDescription}</Text>
       </Animated.View>
-
-      <View style={{ zIndex: 1000 }}>
-        <AddLocationModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          onConfirm={handleAddHome}
-        />
-
-        <UpdateMoodModal
-          visible={moodModalVisible}
-          onClose={() => setMoodModalVisible(false)}
-          onSave={handleSaveMood}
-          initialMood={displayMood}
-        />
-
-        <AlertModal
-          visible={alertVisible}
-          message={alertMessage}
-          onClose={() => setAlertVisible(false)}
-        />
-      </View>
     </Animated.View>
   );
 };
@@ -343,23 +284,20 @@ const styles = StyleSheet.create({
     width: "100%",
     marginBottom: 14,
   },
+  loadingContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 20,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 0,
   },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     marginBottom: 0,
   },
   statusIndicator: {
@@ -380,7 +318,6 @@ const styles = StyleSheet.create({
   statusContent: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
   },
   statusEmoji: {
     fontSize: 20,
@@ -391,6 +328,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     marginRight: 8,
+    marginTop: 5,
   },
   statusDescription: {
     color: "#b0b3c6",
@@ -399,25 +337,18 @@ const styles = StyleSheet.create({
     marginLeft: 2,
     marginTop: 6,
   },
+  statusLabel: {
+    fontSize: 18,
+    color: "#b0b3c6",
+    fontWeight: "bold",
+    marginBottom: 2,
+  },
   statusDistance: {
     color: "#e03487",
     fontSize: 12,
     marginBottom: 12,
     marginLeft: 2,
     opacity: 0.8,
-  },
-  addButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 16,
-    padding: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusLabel: {
-    fontSize: 18,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    marginBottom: 2,
   },
   moodRow: {
     marginTop: 10,
@@ -450,34 +381,6 @@ const styles = StyleSheet.create({
     color: "#b0b3c6",
     marginLeft: 4,
   },
-  editButton: {
-    backgroundColor: "transparent",
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  toast: {
-    position: "absolute",
-    top: 50,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
 });
 
-export default StatusMood;
+export default PartnerStatusMood;
