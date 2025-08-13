@@ -15,7 +15,7 @@ export const buildCachedImageUrl = (
 };
 
 export const preloadProfileImages = (images: CachedImageInfo[]): void => {
-    const { Image } = require('expo-image');
+  const { Image } = require("expo-image");
 
   const imageSources = images.map(({ userId, updatedAt }) => ({
     uri: buildCachedImageUrl(userId, updatedAt),

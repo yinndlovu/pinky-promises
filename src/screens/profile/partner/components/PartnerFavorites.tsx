@@ -1,12 +1,11 @@
 // external
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { View, Text, StyleSheet } from "react-native";
 
 // internal
-import { FavoritesProps } from "../../../types/Favorites";
+import { PartnerFavoritesProps } from "../../../../types/Favorites";
 
-const Favorites: React.FC<FavoritesProps> = ({ favorites, onEdit }) => {
+const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
   const rows = [];
   for (let i = 0; i < favorites.length; i += 2) {
     rows.push(favorites.slice(i, i + 2));
@@ -16,9 +15,6 @@ const Favorites: React.FC<FavoritesProps> = ({ favorites, onEdit }) => {
     <View style={styles.wrapper}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Favorites</Text>
-        <TouchableOpacity style={styles.editButton} onPress={onEdit}>
-          <Feather name="edit-2" size={18} color="#e03487" />
-        </TouchableOpacity>
       </View>
       <View style={styles.divider} />
       {favorites.length === 0 ? (
@@ -56,13 +52,6 @@ const styles = StyleSheet.create({
     color: "#b0b3c6",
     fontWeight: "bold",
   },
-  editButton: {
-    backgroundColor: "transparent",
-    borderRadius: 8,
-    padding: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   divider: {
     width: "100%",
     height: 1,
@@ -98,4 +87,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Favorites;
+export default PartnerFavorites;

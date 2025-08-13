@@ -2,7 +2,7 @@
   "expo": {
     "name": "Pinky Promises",
     "slug": "pinky-promises",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./src/assets/icon.png",
     "userInterfaceStyle": "light",
@@ -17,10 +17,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to location to track your home status and provide location-based features.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to location in the background to track your home status and provide location-based features.",
-        "UIBackgroundModes": [
-          "location",
-          "background-processing"
-        ]
+        "UIBackgroundModes": ["location", "background-processing"]
       }
     },
     "android": {

@@ -22,15 +22,15 @@ import Animated, {
 } from "react-native-reanimated";
 
 // internal
-import { BASE_URL } from "../../../configuration/config";
-import { useAuth } from "../../../contexts/AuthContext";
-import { StatusMoodProps } from "../../../types/StatusMood";
-import { updateMood } from "../../../services/api/profiles/moodService";
+import { BASE_URL } from "../../../../configuration/config";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { StatusMoodProps } from "../../../../types/StatusMood";
+import { updateMood } from "../../../../services/api/profiles/moodService";
 
 // screen content
-import AddLocationModal from "../../../components/modals/input/AddLocationModal";
-import UpdateMoodModal from "../../../components/modals/selection/UpdateMoodModal";
-import AlertModal from "../../../components/modals/output/AlertModal";
+import AddLocationModal from "../../../../components/modals/input/AddLocationModal";
+import UpdateMoodModal from "../../../../components/modals/selection/UpdateMoodModal";
+import AlertModal from "../../../../components/modals/output/AlertModal";
 
 const StatusMood: React.FC<StatusMoodProps> = ({
   mood,

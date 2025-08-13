@@ -18,15 +18,15 @@ import {
   getReceivedPartnerRequests,
   acceptPartnerRequest,
   rejectPartnerRequest,
-} from "../../services/api/profiles/partnerService";
-import { BASE_URL } from "../../configuration/config";
-import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
-import { PendingRequest } from "../../types/Request";
+} from "../../../services/api/profiles/partnerService";
+import { BASE_URL } from "../../../configuration/config";
+import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
+import { PendingRequest } from "../../../types/Request";
 
 // screen content
-import AlertModal from "../../components/modals/output/AlertModal";
-import styles from "./styles/PendingRequestsScreen.styles";
-import LoadingSpinner from "../../components/loading/LoadingSpinner";
+import AlertModal from "../../../components/modals/output/AlertModal";
+import styles from "../styles/PendingRequestsScreen.styles";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // variables
 const fallbackAvatar = require("../../assets/default-avatar-two.png");

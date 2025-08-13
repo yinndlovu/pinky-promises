@@ -5,7 +5,7 @@ import { TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 // internal
-import { LoveLanguageProps } from "../../../types/LoveLanguage";
+import { LoveLanguageProps } from "../../../../types/LoveLanguage";
 
 const LoveLanguage: React.FC<LoveLanguageProps> = ({
   loveLanguage = "",

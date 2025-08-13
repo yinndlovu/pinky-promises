@@ -15,14 +15,22 @@ export async function updateUserStatus(
           homeDistance:
             homeDistance != null ? Math.round(homeDistance) : undefined,
         },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
 }
 
 export async function fetchUserStatus(token: string, userId: string) {
   const res = await axios.get(
     `${BASE_URL}/api/user-status/get-status/${userId}`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
 
   return res.data.status;
