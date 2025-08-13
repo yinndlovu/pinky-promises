@@ -12,11 +12,13 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { encode } from "base64-arraybuffer";
 import { Image } from "expo-image";
+import { useQuery } from "@tanstack/react-query";
 
 // internal
 import { BASE_URL } from "../../configuration/config";
 import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
+import { getOldestUnclaimedGift } from "../../services/api/gifts/monthlyGiftService";
 
 // types
 type Props = {
@@ -84,6 +86,24 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     }
   };
 
+  const {
+    data: gift,
+    isLoading: giftLoading,
+    refetch: refetchGift,
+  } = useQuery({
+    queryKey: ["unclaimedGift"],
+    queryFn: async () => {
+      const token = await AsyncStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      return await getOldestUnclaimedGift(token);
+    },
+    staleTime: 1000 * 60 * 15,
+  });
+
   const renderProfileIcon = () => {
     if (avatarUri && profilePicUpdatedAt && userId) {
       const cachedImageUrl = buildCachedImageUrl(
@@ -125,6 +145,9 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     );
   };
 
+  // check if there is an unclaimed gift
+  const hasUnclaimedGift = !!gift;
+
   return (
     <SafeAreaView edges={["bottom"]} style={{ backgroundColor: "#23243a" }}>
       <View style={styles.container}>
@@ -150,11 +173,26 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
               {item.name === "Profile" ? (
                 renderProfileIcon()
               ) : (
-                <Feather
-                  name={item.icon}
-                  size={26}
-                  color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
-                />
+                <View>
+                  <Feather
+                    name={item.icon}
+                    size={26}
+                    color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
+                  />
+                  {item.name === "Presents" && hasUnclaimedGift && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        top: -2,
+                        right: -2,
+                        width: 8,
+                        height: 8,
+                        borderRadius: 4,
+                        backgroundColor: "#e60000ff",
+                      }}
+                    />
+                  )}
+                </View>
               )}
               <Text
                 style={[
