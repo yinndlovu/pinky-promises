@@ -188,7 +188,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
                         width: 8,
                         height: 8,
                         borderRadius: 4,
-                        backgroundColor: "#e60000ff",
+                        backgroundColor: "#ff1414ff",
                       }}
                     />
                   )}
