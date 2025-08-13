@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Pressable,
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
@@ -44,9 +43,7 @@ import {
 } from "../../../utils/formatDate";
 import {
   checkLocationPermissions,
-  startBackgroundLocationTracking,
 } from "../../../services/location/locationPermissionService";
-import { LOCATION_TASK_NAME } from "../../../background/LocationTask";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -331,7 +328,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <Image
         source={
-          avatarUri ? avatarUri : require("../../assets/default-avatar-two.png")
+          avatarUri ? avatarUri : require("../../../assets/default-avatar-two.png")
         }
         style={styles.avatar}
         contentFit="cover"

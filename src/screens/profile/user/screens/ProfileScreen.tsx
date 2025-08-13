@@ -475,7 +475,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         source={
           avatarUri
             ? { uri: avatarUri }
-            : require("../../../assets/default-avatar-two.png")
+            : require("../../../../assets/default-avatar-two.png")
         }
         style={styles.avatar}
         contentFit="cover"

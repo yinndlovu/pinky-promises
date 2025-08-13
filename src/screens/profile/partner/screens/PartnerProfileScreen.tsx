@@ -296,7 +296,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         source={
           avatarUri
             ? avatarUri
-            : require("../../../assets/default-avatar-two.png")
+            : require("../../../../assets/default-avatar-two.png")
         }
         style={styles.avatar}
         contentFit="cover"

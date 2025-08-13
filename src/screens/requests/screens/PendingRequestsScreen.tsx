@@ -29,7 +29,7 @@ import styles from "../styles/PendingRequestsScreen.styles";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // variables
-const fallbackAvatar = require("../../assets/default-avatar-two.png");
+const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
 const PendingRequestsScreen = ({ navigation }: any) => {
   // variables

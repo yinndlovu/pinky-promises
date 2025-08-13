@@ -5,8 +5,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 
 // internal
-import { getSpecialDates } from "../../../services/api/ours/specialDateService";
-import { SpecialDate } from "../../../types/SpecialDate";
+import { getSpecialDates } from "../../../../services/api/ours/specialDateService";
+import { SpecialDate } from "../../../../types/SpecialDate";
 
 const PartnerAnniversary = () => {
   // fetch functions

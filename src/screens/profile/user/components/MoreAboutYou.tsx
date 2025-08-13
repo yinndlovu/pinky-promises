@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
 // internal
-import { AboutProps } from "../../../types/About";
+import { AboutProps } from "../../../../types/About";
 
 const MoreAboutYou: React.FC<AboutProps> = ({
   about = "",

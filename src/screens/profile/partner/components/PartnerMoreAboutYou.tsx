@@ -3,7 +3,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 // internal
-import { PartnerAboutProps } from "../../../types/About";
+import { PartnerAboutProps } from "../../../../types/About";
 
 const PartnerMoreAboutYou: React.FC<PartnerAboutProps> = ({ about = "" }) => (
   <View style={styles.wrapper}>

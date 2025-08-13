@@ -14,10 +14,10 @@ import Animated, {
 } from "react-native-reanimated";
 
 // internal
-import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
-import { getUserMood } from "../../../services/api/profiles/moodService";
-import { PartnerStatusMoodProps } from "../../../types/StatusMood";
-import { formatDistance } from "../../../utils/formatDistance";
+import { fetchUserStatus } from "../../../../services/api/profiles/userStatusService";
+import { getUserMood } from "../../../../services/api/profiles/moodService";
+import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
+import { formatDistance } from "../../../../utils/formatDistance";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   partnerId,

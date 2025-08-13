@@ -10,12 +10,12 @@ import {
 } from "react-native";
 
 // internal
-import { formatDateDMYHM } from "../../../utils/formatDate";
+import { formatDateDMYHM } from "../../../../utils/formatDate";
 import {
   StoredMessage,
   PartnerMessageStorageProps,
-} from "../../../interfaces/MessageStorage";
-import { getTrimmedText } from "../../../helpers/profileHelpers";
+} from "../../../../interfaces/MessageStorage";
+import { getTrimmedText } from "../../../../helpers/profileHelpers";
 
 const screenWidth = Dimensions.get("window").width;
 
