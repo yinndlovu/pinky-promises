@@ -53,7 +53,7 @@ import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessage
 import CartScreen from "./src/screens/gifts/screens/CartScreen";
 import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 import AccountScreen from "./src/screens/settings/account/AccountScreen";
-import GameListScreen from "./src/games/game-list/GameListScreen";
+import GameListScreen from "./src/games/game-list/screens/GameListScreen";
 import { FontAwesome6 } from "@expo/vector-icons";
 
 // variables
