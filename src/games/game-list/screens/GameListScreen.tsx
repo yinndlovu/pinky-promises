@@ -20,6 +20,13 @@ const GameListScreen = ({ navigation }: any) => {
 
   const handleRequestGame = () => {
     console.log("Request sent for", selectedGame?.name);
+
+    navigation.navigate("GameWaitingScreen", {
+      gameName: selectedGame?.name,
+      yourInfo: { name: "Yin", avatarUrl: "https://example.com/avatar.png" },
+      partnerInfo: null,
+    });
+
     setModalVisible(false);
   };
 

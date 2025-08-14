@@ -55,6 +55,7 @@ import CartScreen from "./src/screens/gifts/screens/CartScreen";
 import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 import AccountScreen from "./src/screens/settings/account/AccountScreen";
 import GameListScreen from "./src/games/game-list/screens/GameListScreen";
+import GameWaitingScreen from "./src/games/room/GameWaitingScreen";
 
 // variables
 const Stack = createStackNavigator();
@@ -453,6 +454,18 @@ function AppContent() {
               </TouchableOpacity>
             ),
           })}
+        />
+        <Stack.Screen
+          name="GameWaitingScreen"
+          component={GameWaitingScreen as any}
+          options={{
+            headerShown: true,
+            title: "Game Room",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
         />
       </Stack.Navigator>
       <StatusBar style="light" />

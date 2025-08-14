@@ -25,7 +25,7 @@ const RequestGameModal: React.FC<RequestGameModalProps> = ({
 }) => {
   return (
     <Modal
-      animationType="slide"
+      animationType="fade"
       transparent
       visible={visible}
       onRequestClose={onClose}
