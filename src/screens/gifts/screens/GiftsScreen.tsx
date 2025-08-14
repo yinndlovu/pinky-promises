@@ -269,12 +269,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
-          onPress={() => {
-            setAlertMessage(
-              "Woo, see someone wants to play some games already... They are currently locked, oops 👀"
-            );
-            setAlertVisible(true);
-          }}
+          onPress={() => navigation.navigate("GameListScreen")}
         >
           <FontAwesome5 name="gamepad" size={22} color="#fff" />
         </TouchableOpacity>

@@ -53,6 +53,8 @@ import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessage
 import CartScreen from "./src/screens/gifts/screens/CartScreen";
 import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 import AccountScreen from "./src/screens/settings/account/AccountScreen";
+import GameListScreen from "./src/games/game-list/GameListScreen";
+import { FontAwesome6 } from "@expo/vector-icons";
 
 // variables
 const Stack = createStackNavigator();
@@ -429,6 +431,28 @@ function AppContent() {
             headerShadowVisible: false,
             headerTitleAlign: "center",
           }}
+        />
+        <Stack.Screen
+          name="GameListScreen"
+          component={GameListScreen}
+          options={({ navigation }) => ({
+            headerShown: true,
+            title: "Games",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.setParams({ showOptions: true } as any)
+                }
+                style={{ marginRight: 16 }}
+              >
+                <FontAwesome6 name="chart-simple" size={22} color="#fff" />
+              </TouchableOpacity>
+            ),
+          })}
         />
       </Stack.Navigator>
       <StatusBar style="light" />
