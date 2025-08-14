@@ -1,11 +1,26 @@
-import React from "react";
+// external
+import React, { useState } from "react";
 import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
-import { GAMES, Game } from "../interfaces/Game";
 import { FontAwesome6 } from "@expo/vector-icons";
 
+// internal
+import { GAMES, Game } from "../../interfaces/Game";
+
+// content
+import RequestGameModal from "../../components/modals/RequestGameModal";
+
 const GameListScreen = ({ navigation }: any) => {
+  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
   const handleSelectGame = (game: Game) => {
-    console.log("Selected game:", game.name);
+    setSelectedGame(game);
+    setModalVisible(true);
+  };
+
+  const handleRequestGame = () => {
+    console.log("Request sent for", selectedGame?.name);
+    setModalVisible(false);
   };
 
   return (
@@ -24,7 +39,11 @@ const GameListScreen = ({ navigation }: any) => {
               { opacity: pressed ? 0.7 : 1 },
             ]}
           >
-            <FontAwesome6 name={game.icon || "gamepad"} size={24} color="#e03487"/>
+            <FontAwesome6
+              name={game.icon || "gamepad"}
+              size={24}
+              color="#e03487"
+            />
             <View style={{ marginLeft: 12, flex: 1 }}>
               <Text style={styles.gameName}>{game.name}</Text>
               {game.description && (
@@ -34,6 +53,13 @@ const GameListScreen = ({ navigation }: any) => {
           </Pressable>
         ))}
       </ScrollView>
+
+      <RequestGameModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onRequestGame={handleRequestGame}
+        gameName={selectedGame?.name || ""}
+      />
     </View>
   );
 };

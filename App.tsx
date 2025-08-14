@@ -13,6 +13,7 @@ import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Image } from "expo-image";
 import Feather from "@expo/vector-icons/build/Feather";
+import { FontAwesome6 } from "@expo/vector-icons";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
@@ -54,7 +55,6 @@ import CartScreen from "./src/screens/gifts/screens/CartScreen";
 import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 import AccountScreen from "./src/screens/settings/account/AccountScreen";
 import GameListScreen from "./src/games/game-list/screens/GameListScreen";
-import { FontAwesome6 } from "@expo/vector-icons";
 
 // variables
 const Stack = createStackNavigator();
