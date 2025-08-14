@@ -21,6 +21,11 @@ type RootStackParamList = {
     yourInfo: { name: string; avatarUrl: string };
     partnerInfo: { name: string; avatarUrl: string } | null;
   };
+  GameSetupScreen: {
+    gameId: number;
+    gameName: string;
+    host: string;
+  };
   TriviaGameScreen: { gameId: number; gameName: string };
 };
 
@@ -29,21 +34,39 @@ type Props = StackScreenProps<RootStackParamList, "GameWaitingScreen">;
 const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const { gameName, yourInfo, partnerInfo } = route.params;
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [partnerInfoState, setPartnerInfo] = useState(partnerInfo);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (partnerInfo) {
-      setCountdown(5);
-      timer = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev && prev > 1) return prev - 1;
-          clearInterval(timer);
-          return null;
+    const joinTimer = setTimeout(() => {
+      setPartnerInfo({
+        name: "Alex",
+        avatarUrl: "https://example.com/avatar.png",
+      });
+    }, 3000);
+    return () => clearTimeout(joinTimer);
+  }, []);
+
+  useEffect(() => {
+    if (!partnerInfoState) return;
+
+    setCountdown(5);
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev && prev > 1) return prev - 1;
+        clearInterval(timer);
+
+        navigation.navigate("GameSetupScreen", {
+          gameId: 123,
+          gameName,
+          host: yourInfo.name,
         });
-      }, 1000);
-    }
+
+        return null;
+      });
+    }, 1000);
+
     return () => clearInterval(timer);
-  }, [partnerInfo]);
+  }, [partnerInfoState]);
 
   return (
     <View style={styles.container}>
@@ -62,13 +85,14 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
         <View style={styles.player}>
           <Image
             source={{
-              uri: partnerInfo?.avatarUrl || "https://via.placeholder.com/80",
+              uri:
+                partnerInfoState?.avatarUrl || "https://via.placeholder.com/80",
             }}
             style={styles.avatar}
           />
-          <Text style={styles.name}>{partnerInfo?.name || "Partner"}</Text>
+          <Text style={styles.name}>{partnerInfoState?.name || "Partner"}</Text>
           <Text style={styles.status}>
-            {partnerInfo ? "Joined" : "Waiting for partner..."}
+            {partnerInfoState ? "Joined" : "Waiting for partner..."}
           </Text>
         </View>
       </View>

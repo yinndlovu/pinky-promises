@@ -56,6 +56,7 @@ import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 import AccountScreen from "./src/screens/settings/account/AccountScreen";
 import GameListScreen from "./src/games/game-list/screens/GameListScreen";
 import GameWaitingScreen from "./src/games/room/GameWaitingScreen";
+import GameSetupScreen from "./src/games/trivia/screens/GameSetupScreen";
 
 // variables
 const Stack = createStackNavigator();
@@ -461,6 +462,18 @@ function AppContent() {
           options={{
             headerShown: true,
             title: "Game Room",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="GameSetupScreen"
+          component={GameSetupScreen}
+          options={{
+            headerShown: true,
+            title: "Account",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
