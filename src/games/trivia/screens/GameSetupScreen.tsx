@@ -28,7 +28,7 @@ const GameSetupScreen = ({ navigation }: any) => {
   const [type, setType] = useState("multiple");
 
   const startGame = () => {
-    navigation.navigate("GameSessionScreen", {
+    navigation.replace("GameSessionScreen", {
       totalQuestions: parseInt(totalQuestions),
       difficulty,
       category,

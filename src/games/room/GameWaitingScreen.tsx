@@ -64,7 +64,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
         if (prev && prev > 1) return prev - 1;
         clearInterval(timer);
 
-        navigation.navigate("GameSetupScreen", {
+        navigation.replace("GameSetupScreen", {
           gameId: 123,
           gameName,
           host: yourInfo.name,
