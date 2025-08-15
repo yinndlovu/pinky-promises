@@ -486,7 +486,7 @@ function AppContent() {
           component={GameSessionScreen}
           options={{
             headerShown: true,
-            title: "Ongoing Game",
+            title: "Playing Trivia",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,
