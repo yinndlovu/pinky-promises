@@ -48,7 +48,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   useEffect(() => {
     const joinTimer = setTimeout(() => {
       setPartnerInfo({
-        name: "Alex",
+        name: "Paris",
         avatarUrl: "https://example.com/avatar.png",
       });
     }, 3000);

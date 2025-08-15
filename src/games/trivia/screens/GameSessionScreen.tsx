@@ -6,6 +6,7 @@ import {
   Pressable,
   StyleSheet,
   Animated,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -22,8 +23,20 @@ const GameSessionScreen = ({ route, navigation }: any) => {
   const { totalQuestions, difficulty, category, type } = route.params;
 
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, name: "Yin", score: 0, avatar: "https://example.com/yin.png", status: null },
-    { id: 2, name: "Alex", score: 0, avatar: "https://example.com/alex.png", status: null },
+    {
+      id: 1,
+      name: "Yin",
+      score: 0,
+      avatar: "https://example.com/yin.png",
+      status: null,
+    },
+    {
+      id: 2,
+      name: "Paris",
+      score: 0,
+      avatar: "https://example.com/alex.png",
+      status: null,
+    },
   ]);
 
   // question and timer state
@@ -69,14 +82,11 @@ const GameSessionScreen = ({ route, navigation }: any) => {
           : p
       )
     );
-
   };
 
   const handleTimeUp = () => {
     setPlayers((prev) =>
-      prev.map((p) =>
-        p.status ? p : { ...p, status: "unanswered" }
-      )
+      prev.map((p) => (p.status ? p : { ...p, status: "unanswered" }))
     );
   };
 
@@ -127,6 +137,7 @@ const GameSessionScreen = ({ route, navigation }: any) => {
       <View style={styles.playersRow}>
         {players.map((p) => (
           <View key={p.id} style={styles.playerCard}>
+            <Image source={{ uri: p.avatar }} style={styles.playerAvatar} />
             <Text style={styles.playerName}>{p.name}</Text>
             <Text style={styles.playerScore}>{p.score}</Text>
             {p.status && (
@@ -160,6 +171,18 @@ const GameSessionScreen = ({ route, navigation }: any) => {
       </View>
 
       {renderAnswers()}
+
+      <View style={styles.emojiRow}>
+        {["😭", "😂", "😲", "😠", "🤍"].map((emoji) => (
+          <Pressable key={emoji} style={styles.emojiButton}>
+            <Text style={styles.emojiText}>{emoji}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <Pressable style={styles.quitButton} onPress={() => navigation.goBack()}>
+        <Text style={styles.quitButtonText}>Quit</Text>
+      </Pressable>
     </View>
   );
 };
@@ -183,6 +206,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     width: "45%",
+  },
+  playerAvatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginBottom: 8,
   },
   playerName: {
     color: "#fff",
@@ -249,5 +278,30 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     textAlign: "center",
+  },
+  emojiRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  emojiButton: {
+    backgroundColor: "transparent",
+    padding: 10,
+    borderRadius: 8,
+  },
+  emojiText: {
+    fontSize: 24,
+  },
+  quitButton: {
+    backgroundColor: "#e20000ff",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  quitButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });
