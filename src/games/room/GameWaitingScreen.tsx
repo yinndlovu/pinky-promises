@@ -91,19 +91,18 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.status}>Ready</Text>
         </View>
 
-        <View style={styles.player}>
-          <Image
-            source={{
-              uri:
-                partnerInfoState?.avatarUrl || "https://via.placeholder.com/80",
-            }}
-            style={styles.avatar}
-          />
-          <Text style={styles.name}>{partnerInfoState?.name || "Partner"}</Text>
-          <Text style={styles.status}>
-            {partnerInfoState ? "Joined" : "Waiting for partner..."}
-          </Text>
-        </View>
+        {partnerInfoState ? (
+          <View style={styles.player}>
+            <Image
+              source={{ uri: partnerInfoState.avatarUrl }}
+              style={styles.avatar}
+            />
+            <Text style={styles.name}>{partnerInfoState.name}</Text>
+            <Text style={styles.status}>Joined</Text>
+          </View>
+        ) : (
+          <Text style={styles.waitingText}>Waiting for partner...</Text>
+        )}
       </View>
 
       {countdown && (
@@ -167,6 +166,12 @@ const styles = StyleSheet.create({
   status: {
     color: "#b0b3c6",
     fontSize: 14,
+  },
+  waitingText: {
+    color: "#b0b3c6",
+    fontSize: 16,
+    fontStyle: "italic",
+    alignSelf: "center",
   },
   countdown: {
     color: "#e03487",
