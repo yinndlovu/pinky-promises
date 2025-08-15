@@ -57,6 +57,7 @@ import AccountScreen from "./src/screens/settings/account/AccountScreen";
 import GameListScreen from "./src/games/game-list/screens/GameListScreen";
 import GameWaitingScreen from "./src/games/room/GameWaitingScreen";
 import GameSetupScreen from "./src/games/trivia/screens/GameSetupScreen";
+import GameSessionScreen from "./src/games/trivia/screens/GameSessionScreen";
 
 // variables
 const Stack = createStackNavigator();
@@ -473,7 +474,19 @@ function AppContent() {
           component={GameSetupScreen}
           options={{
             headerShown: true,
-            title: "Account",
+            title: "Setup",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="GameSessionScreen"
+          component={GameSessionScreen}
+          options={{
+            headerShown: true,
+            title: "Ongoing Game",
             headerTintColor: "#fff",
             headerStyle: { backgroundColor: "transparent" },
             headerShadowVisible: false,

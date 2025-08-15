@@ -1,3 +1,4 @@
+// external
 import React, { useState } from "react";
 import {
   View,
@@ -8,6 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 
+// game categories for trivia
 const categories = [
   { id: 9, name: "General Knowledge" },
   { id: 21, name: "Sports" },
@@ -19,6 +21,7 @@ const categories = [
 ];
 
 const GameSetupScreen = ({ navigation }: any) => {
+  // use states
   const [totalQuestions, setTotalQuestions] = useState("10");
   const [difficulty, setDifficulty] = useState("easy");
   const [category, setCategory] = useState<number | null>(null);

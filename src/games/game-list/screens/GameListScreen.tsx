@@ -10,9 +10,11 @@ import { GAMES, Game } from "../../interfaces/Game";
 import RequestGameModal from "../../components/modals/RequestGameModal";
 
 const GameListScreen = ({ navigation }: any) => {
+  // use states
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // handlers
   const handleSelectGame = (game: Game) => {
     setSelectedGame(game);
     setModalVisible(true);

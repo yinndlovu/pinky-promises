@@ -18,15 +18,24 @@ interface Player {
 type RootStackParamList = {
   GameWaitingScreen: {
     gameName: string;
-    yourInfo: { name: string; avatarUrl: string };
-    partnerInfo: { name: string; avatarUrl: string } | null;
+    yourInfo: {
+      name: string;
+      avatarUrl: string;
+    };
+    partnerInfo: {
+      name: string;
+      avatarUrl: string;
+    } | null;
   };
   GameSetupScreen: {
     gameId: number;
     gameName: string;
     host: string;
   };
-  TriviaGameScreen: { gameId: number; gameName: string };
+  TriviaGameScreen: {
+    gameId: number;
+    gameName: string;
+  };
 };
 
 type Props = StackScreenProps<RootStackParamList, "GameWaitingScreen">;
