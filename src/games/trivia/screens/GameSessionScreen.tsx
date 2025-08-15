@@ -13,6 +13,9 @@ import { Ionicons } from "@expo/vector-icons";
 // internal
 import { Player } from "../types/Player";
 
+// content
+import GameSummaryModal from "../components/GameSummaryModal";
+
 const sampleQuestion = {
   question: "What is the capital of France?",
   correct_answer: "Paris",
@@ -22,6 +25,8 @@ const sampleQuestion = {
 const GameSessionScreen = ({ route, navigation }: any) => {
   const { totalQuestions, difficulty, category, type } = route.params;
 
+  // use states
+  const [showSummary, setShowSummary] = useState(false);
   const [players, setPlayers] = useState<Player[]>([
     {
       id: 1,
@@ -88,6 +93,8 @@ const GameSessionScreen = ({ route, navigation }: any) => {
     setPlayers((prev) =>
       prev.map((p) => (p.status ? p : { ...p, status: "unanswered" }))
     );
+
+    setShowSummary(true);
   };
 
   const renderAnswers = () => {
@@ -183,6 +190,22 @@ const GameSessionScreen = ({ route, navigation }: any) => {
       <Pressable style={styles.quitButton} onPress={() => navigation.goBack()}>
         <Text style={styles.quitButtonText}>Quit</Text>
       </Pressable>
+
+      <GameSummaryModal
+        visible={showSummary}
+        players={players}
+        category={category}
+        totalQuestions={totalQuestions}
+        gameType="Trivia"
+        onClose={() => {
+          setShowSummary(false);
+          navigation.goBack();
+        }}
+        onPlayAgain={() => {
+          setShowSummary(false);
+          setPlayers(players.map((p) => ({ ...p, score: 0, status: null })));
+        }}
+      />
     </View>
   );
 };
