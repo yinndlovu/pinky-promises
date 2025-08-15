@@ -130,11 +130,11 @@ function AppContent() {
           transitionSpec: {
             open: {
               animation: "timing",
-              config: { duration: 450 },
+              config: { duration: 400 },
             },
             close: {
               animation: "timing",
-              config: { duration: 450 },
+              config: { duration: 400 },
             },
           },
         }}
