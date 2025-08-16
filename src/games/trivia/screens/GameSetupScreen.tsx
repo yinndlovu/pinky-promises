@@ -10,17 +10,45 @@ import {
 } from "react-native";
 
 // game categories for trivia
-const categories = [
-  { id: 9, name: "General Knowledge" },
-  { id: 21, name: "Sports" },
-  { id: 23, name: "History" },
-  { id: 17, name: "Science & Nature" },
-  { id: 22, name: "Geography" },
-  { id: 12, name: "Music" },
-  { id: 11, name: "Film" },
-];
+const CATEGORY_ID_TO_KEY: Record<number, string> = {
+  9: "general",
+  10: "books",
+  11: "film",
+  12: "music",
+  15: "videogames",
+  16: "boardgames",
+  17: "science",
+  18: "computers",
+  19: "mathematics",
+  20: "mythology",
+  21: "sports",
+  22: "geography",
+  23: "history",
+  25: "art",
+  26: "celebrities",
+  27: "animals",
+  28: "vehicles",
+  29: "comics",
+  30: "gadgets",
+  31: "anime",
+  32: "cartoons",
+};
 
-const GameSetupScreen = ({ navigation }: any) => {
+const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
+  videogames: "Video games",
+  boardgames: "Board games",
+  general: "General knowledge",
+};
+
+const categories = Object.entries(CATEGORY_ID_TO_KEY).map(([id, key]) => ({
+  id: parseInt(id),
+  name:
+    DISPLAY_NAME_OVERRIDES[key] || key.charAt(0).toUpperCase() + key.slice(1),
+}));
+
+const GameSetupScreen = ({ navigation, route }: any) => {
+  const { roomId, players, gameName, host } = route.params;
+
   // use states
   const [totalQuestions, setTotalQuestions] = useState("10");
   const [difficulty, setDifficulty] = useState("easy");
@@ -28,11 +56,23 @@ const GameSetupScreen = ({ navigation }: any) => {
   const [type, setType] = useState("multiple");
 
   const startGame = () => {
-    navigation.replace("GameSessionScreen", {
-      totalQuestions: parseInt(totalQuestions),
+    if (!category) {
+      return;
+    }
+
+    const options = {
+      amount: parseInt(totalQuestions),
+      category: CATEGORY_ID_TO_KEY[category],
       difficulty,
-      category,
-      type,
+      type: type || undefined,
+    };
+
+    navigation.replace("GameSessionScreen", {
+      roomId,
+      players,
+      options,
+      gameName,
+      host,
     });
   };
 

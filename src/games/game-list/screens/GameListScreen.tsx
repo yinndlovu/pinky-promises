@@ -5,6 +5,8 @@ import { FontAwesome6 } from "@expo/vector-icons";
 
 // internal
 import { GAMES, Game } from "../../interfaces/Game";
+import { fetchCurrentUserProfileAndAvatar } from "../../helpers/userDetailsHelper";
+import { fetchPartnerProfileAndAvatar } from "../../helpers/partnerDetailsHelper";
 
 // content
 import RequestGameModal from "../../components/modals/RequestGameModal";
@@ -20,16 +22,19 @@ const GameListScreen = ({ navigation }: any) => {
     setModalVisible(true);
   };
 
-  const handleRequestGame = () => {
-    console.log("Request sent for", selectedGame?.name);
+  const handleRequestGame = async () => {
+    try {
+      const user = await fetchCurrentUserProfileAndAvatar();
+      const partner = await fetchPartnerProfileAndAvatar();
+      
+      navigation.navigate("GameWaitingScreen", {
+        gameName: selectedGame?.name,
+        yourInfo: user,
+        partnerInfo: partner,
+      });
 
-    navigation.navigate("GameWaitingScreen", {
-      gameName: selectedGame?.name,
-      yourInfo: { name: "Yin", avatarUrl: "https://example.com/avatar.png" },
-      partnerInfo: null,
-    });
-
-    setModalVisible(false);
+      setModalVisible(false);
+    } catch (err) {}
   };
 
   return (

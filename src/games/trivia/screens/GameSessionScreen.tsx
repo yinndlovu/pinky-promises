@@ -12,42 +12,58 @@ import { Ionicons } from "@expo/vector-icons";
 
 // internal
 import { Player } from "../types/Player";
+import {
+  connectTriviaSocket,
+  disconnectTriviaSocket,
+  getTriviaSocket,
+} from "../../../services/games/trivia/triviaSocketService";
+import { useAuth } from "../../../contexts/AuthContext";
+import { Question } from "../interfaces/Question";
 
 // content
 import GameSummaryModal from "../components/GameSummaryModal";
 
-const sampleQuestion = {
-  question: "What is the capital of France?",
-  correct_answer: "Paris",
-  incorrect_answers: ["London", "Berlin", "Madrid"],
+interface GameSessionScreenProps {
+  route: {
+    params: {
+      roomId: string;
+      players: Player[];
+      options: {
+        amount: number;
+        category: string;
+        difficulty: string;
+        type: string;
+      };
+      gameName: string;
+      host: any;
+    };
+  };
+  navigation: any;
+}
+
+const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
+  videogames: "Video Games",
+  boardgames: "Board Games",
+  general: "General Knowledge",
 };
 
-const GameSessionScreen = ({ route, navigation }: any) => {
-  const { totalQuestions, difficulty, category, type } = route.params;
+const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
+  // params
+  const { roomId, players, options, gameName, host } = route.params;
+  const { amount: totalQuestions, category, difficulty, type } = options;
+
+  // variables
+  const { user } = useAuth();
+  const timerAnim = useRef(new Animated.Value(1)).current;
 
   // use states
+  const [question, setQuestion] = useState<Question | null>(null);
+  const [gamePlayers, setGamePlayers] = useState<Player[]>(players);
+  const [gameOver, setGameOver] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
-  const [players, setPlayers] = useState<Player[]>([
-    {
-      id: 1,
-      name: "Yin",
-      score: 0,
-      avatar: "https://example.com/yin.png",
-      status: null,
-    },
-    {
-      id: 2,
-      name: "Paris",
-      score: 0,
-      avatar: "https://example.com/alex.png",
-      status: null,
-    },
-  ]);
-
-  // question and timer state
-  const [currentQuestion, setCurrentQuestion] = useState(sampleQuestion);
   const [timeLeft, setTimeLeft] = useState(15);
-  const timerAnim = useRef(new Animated.Value(1)).current;
+  const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const startTimer = () => {
     setTimeLeft(15);
@@ -59,52 +75,146 @@ const GameSessionScreen = ({ route, navigation }: any) => {
   };
 
   useEffect(() => {
-    startTimer();
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [currentQuestion]);
+    if (!user?.id) {
+      return;
+    }
 
-  const handleAnswer = (answer: string) => {
-    let isCorrect = answer === currentQuestion.correct_answer;
+    setCurrentPlayerId(user.id);
+    setIsLoading(false);
 
-    setPlayers((prev) =>
-      prev.map((p) =>
-        p.id === 1
-          ? {
-              ...p,
-              status: isCorrect ? "correct" : "wrong",
-              score: isCorrect ? p.score + 1 : p.score,
+    const socket = connectTriviaSocket();
+
+    if (players.length > 0) {
+      setCurrentPlayerId(user?.id);
+    }
+
+    socket.on("game_start", () => {
+      setGamePlayers(
+        players.map((p: Player) => ({ ...p, score: 0, status: null }))
+      );
+    });
+
+    socket.on("question", (data) => {
+      setQuestion(data.question);
+      setGamePlayers((prev) => prev.map((p) => ({ ...p, status: null })));
+      startTimer();
+    });
+
+    socket.on("players_update", (updatedPlayers) => {
+      setGamePlayers(updatedPlayers);
+    });
+
+    socket.on("answer_result", (result) => {
+      setGamePlayers((prev) =>
+        prev.map((p) =>
+          p.id === currentPlayerId
+            ? {
+                ...p,
+                status: result.correct ? "correct" : "wrong",
+                score: result.correct ? p.score + 1 : p.score,
+              }
+            : p
+        )
+      );
+    });
+
+    socket.on("game_over", (data) => {
+      setGameOver(true);
+      setShowSummary(true);
+      setGamePlayers(
+        data.players.map((p: Player) => ({
+          ...p,
+          score: data.scores[p.id] || 0,
+        }))
+      );
+    });
+
+    socket.on("player_left", (data) => {
+      setGamePlayers(data.players);
+      setGameOver(true);
+      setShowSummary(true);
+    });
+
+    socket.on("error", (data) => {
+      console.error("Socket error:", data.message);
+    });
+
+    return () => {
+      disconnectTriviaSocket();
+    };
+  }, [players, user]);
+
+  useEffect(() => {
+    if (question) {
+      startTimer();
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            if (question) {
+              handleTimeUp();
             }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [question]);
+
+  const submitAnswer = (answer: string) => {
+    const socket = getTriviaSocket();
+    if (socket && currentPlayerId) {
+      socket.emit("submit_answer", {
+        roomId,
+        playerId: currentPlayerId,
+        answer,
+      });
+    }
+  };
+
+  const handleTimeUp = () => {
+    setGamePlayers((prev) =>
+      prev.map((p) =>
+        p.id === currentPlayerId && !p.status
+          ? { ...p, status: "unanswered" }
           : p
       )
     );
   };
 
-  const handleTimeUp = () => {
-    setPlayers((prev) =>
-      prev.map((p) => (p.status ? p : { ...p, status: "unanswered" }))
-    );
+  const handleQuit = () => {
+    const socket = getTriviaSocket();
+    if (socket && currentPlayerId) {
+      socket.emit("leave_trivia", { roomId, playerId: currentPlayerId });
+    }
+    navigation.goBack();
+  };
 
-    setShowSummary(true);
+  const handleSendReaction = (emoji: string) => {
+    const socket = getTriviaSocket();
+    if (socket && currentPlayerId) {
+      socket.emit("send_reaction", {
+        roomId,
+        playerId: currentPlayerId,
+        emoji,
+      });
+    }
   };
 
   const renderAnswers = () => {
+    if (!question) {
+      return null;
+    }
+
     if (type === "boolean") {
       return (
         <View style={styles.answersRow}>
           {["True", "False"].map((ans) => (
             <Pressable
               key={ans}
-              onPress={() => handleAnswer(ans)}
+              onPress={() => submitAnswer(ans)}
               style={styles.answerButton}
             >
               <Text style={styles.answerText}>{ans}</Text>
@@ -114,8 +224,8 @@ const GameSessionScreen = ({ route, navigation }: any) => {
       );
     } else {
       const allAnswers = [
-        currentQuestion.correct_answer,
-        ...currentQuestion.incorrect_answers,
+        question.correct_answer,
+        ...question.incorrect_answers,
       ].sort(() => Math.random() - 0.5);
 
       return (
@@ -123,7 +233,7 @@ const GameSessionScreen = ({ route, navigation }: any) => {
           {allAnswers.map((ans) => (
             <Pressable
               key={ans}
-              onPress={() => handleAnswer(ans)}
+              onPress={() => submitAnswer(ans)}
               style={styles.answerButton}
             >
               <Text style={styles.answerText}>{ans}</Text>
@@ -139,10 +249,22 @@ const GameSessionScreen = ({ route, navigation }: any) => {
     outputRange: ["0%", "100%"],
   });
 
+  const categoryDisplayName =
+    DISPLAY_NAME_OVERRIDES[category] ||
+    category.charAt(0).toUpperCase() + category.slice(1);
+
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.questionText}>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.playersRow}>
-        {players.map((p) => (
+        {gamePlayers.map((p) => (
           <View key={p.id} style={styles.playerCard}>
             <Image source={{ uri: p.avatar }} style={styles.playerAvatar} />
             <Text style={styles.playerName}>{p.name}</Text>
@@ -164,7 +286,9 @@ const GameSessionScreen = ({ route, navigation }: any) => {
       </View>
 
       <View style={styles.questionContainer}>
-        <Text style={styles.questionText}>{currentQuestion.question}</Text>
+        <Text style={styles.questionText}>
+          {question ? question.question : "Loading question..."}
+        </Text>
       </View>
 
       <View style={styles.timerContainer}>
@@ -181,29 +305,43 @@ const GameSessionScreen = ({ route, navigation }: any) => {
 
       <View style={styles.emojiRow}>
         {["😭", "😂", "😲", "😠", "🤍"].map((emoji) => (
-          <Pressable key={emoji} style={styles.emojiButton}>
+          <Pressable
+            key={emoji}
+            style={styles.emojiButton}
+            onPress={() => handleSendReaction(emoji)}
+          >
             <Text style={styles.emojiText}>{emoji}</Text>
           </Pressable>
         ))}
       </View>
 
-      <Pressable style={styles.quitButton} onPress={() => navigation.goBack()}>
+      <Pressable style={styles.quitButton} onPress={handleQuit}>
         <Text style={styles.quitButtonText}>Quit</Text>
       </Pressable>
 
       <GameSummaryModal
         visible={showSummary}
-        players={players}
-        category={category}
+        players={gamePlayers}
+        category={categoryDisplayName}
         totalQuestions={totalQuestions}
         gameType="Trivia"
         onClose={() => {
           setShowSummary(false);
-          navigation.goBack();
+          handleQuit();
         }}
         onPlayAgain={() => {
           setShowSummary(false);
-          setPlayers(players.map((p) => ({ ...p, score: 0, status: null })));
+          setGamePlayers(
+            players.map((p: Player) => ({ ...p, score: 0, status: null }))
+          );
+          const socket = getTriviaSocket();
+          if (socket) {
+            socket.emit("join_trivia", {
+              roomId,
+              player: players.find((p: Player) => p.id === currentPlayerId),
+              options,
+            });
+          }
         }}
       />
     </View>

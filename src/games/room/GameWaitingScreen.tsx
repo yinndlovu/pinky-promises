@@ -1,81 +1,129 @@
 // external
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, StyleSheet, Image, Pressable, Alert } from "react-native";
 import { StackScreenProps } from "@react-navigation/stack";
+import { v4 as uuidv4 } from "uuid";
 
-interface Player {
-  name: string;
-  avatarUrl?: string;
-}
+// internal
+import {
+  connectTriviaSocket,
+  disconnectTriviaSocket,
+  getTriviaSocket,
+} from "../../services/games/trivia/triviaSocketService";
+import { Player } from "../interfaces/Player";
 
+// types
 type RootStackParamList = {
   GameWaitingScreen: {
     gameName: string;
     yourInfo: {
+      id: string;
       name: string;
       avatarUrl: string;
     };
-    partnerInfo: {
+    partnerInfo?: {
+      id: string;
       name: string;
       avatarUrl: string;
     } | null;
+    roomId?: string;
   };
   GameSetupScreen: {
-    gameId: number;
+    roomId: string;
+    players: Player[];
     gameName: string;
     host: string;
-  };
-  TriviaGameScreen: {
-    gameId: number;
-    gameName: string;
   };
 };
 
 type Props = StackScreenProps<RootStackParamList, "GameWaitingScreen">;
 
 const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { gameName, yourInfo, partnerInfo } = route.params;
-  const [countdown, setCountdown] = useState<number | null>(null);
-  const [partnerInfoState, setPartnerInfo] = useState(partnerInfo);
+  // params
+  const { gameName, yourInfo, partnerInfo, roomId: routeRoomId } = route.params;
 
+  // variables
+  const roomIdRef = useRef(routeRoomId || uuidv4());
+
+  // use states
+  const [players, setPlayers] = useState<Player[]>(
+    partnerInfo ? [yourInfo, partnerInfo] : [yourInfo]
+  );
+  const [countdown, setCountdown] = useState<number | null>(null);
+
+  // use effects
   useEffect(() => {
-    const joinTimer = setTimeout(() => {
-      setPartnerInfo({
-        name: "Paris",
-        avatarUrl: "https://example.com/avatar.png",
-      });
-    }, 3000);
-    return () => clearTimeout(joinTimer);
+    const socket = connectTriviaSocket();
+    const roomId = roomIdRef.current;
+
+    socket.emit("join_trivia", {
+      roomId,
+      player: yourInfo,
+    });
+
+    const handlePlayersUpdate = (playersList: Player[]) => {
+      setPlayers(playersList);
+      if (playersList.length === 2 && !countdown) {
+        setCountdown(5);
+      }
+    };
+
+    socket.on("players_update", handlePlayersUpdate);
+
+    socket.on("player_left", (data) => {
+      Alert.alert(
+        "Player Left",
+        "Your partner left the room. Returning to home."
+      );
+      navigation.popToTop();
+    });
+
+    socket.on("error", (err) => {
+      Alert.alert("Error", err.message || "An error occurred.");
+      navigation.popToTop();
+    });
+
+    return () => {
+      socket.off("players_update", handlePlayersUpdate);
+      socket.off("player_left");
+      socket.off("error");
+      disconnectTriviaSocket();
+    };
   }, []);
 
   useEffect(() => {
-    if (!partnerInfoState) return;
-
-    setCountdown(5);
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev && prev > 1) return prev - 1;
-        clearInterval(timer);
-
-        navigation.replace("GameSetupScreen", {
-          gameId: 123,
-          gameName,
-          host: yourInfo.name,
-        });
-
-        return null;
+    if (countdown === null) return;
+    if (countdown === 0) {
+      navigation.replace("GameSetupScreen", {
+        roomId: roomIdRef.current,
+        players,
+        gameName,
+        host: yourInfo.name,
       });
-    }, 1000);
+      return;
+    }
+    const timer = setTimeout(
+      () => setCountdown((prev) => (prev ? prev - 1 : null)),
+      1000
+    );
+    return () => clearTimeout(timer);
+  }, [countdown, players, navigation, gameName, yourInfo.name]);
 
-    return () => clearInterval(timer);
-  }, [partnerInfoState]);
+  // handlers
+  const handleLeave = () => {
+    const socket = getTriviaSocket();
+    if (socket) {
+      socket.emit("leave_room", {
+        roomId: roomIdRef.current,
+        playerId: yourInfo.id,
+      });
+    }
+    disconnectTriviaSocket();
+    navigation.popToTop();
+  };
+
+  // find partner
+  const partner = players.find((p) => p.id !== yourInfo.id || partnerInfo);
 
   return (
     <View style={styles.container}>
@@ -91,13 +139,15 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.status}>Ready</Text>
         </View>
 
-        {partnerInfoState ? (
+        {partner ? (
           <View style={styles.player}>
             <Image
-              source={{ uri: partnerInfoState.avatarUrl }}
+              source={{
+                uri: partner.avatarUrl || "https://via.placeholder.com/80",
+              }}
               style={styles.avatar}
             />
-            <Text style={styles.name}>{partnerInfoState.name}</Text>
+            <Text style={styles.name}>{partner.name}</Text>
             <Text style={styles.status}>Joined</Text>
           </View>
         ) : (
@@ -116,7 +166,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
             { opacity: pressed ? 0.7 : 1 },
           ]}
           android_ripple={{ color: "#a82f6aff" }}
-          onPress={() => console.log("Leave pressed")}
+          onPress={handleLeave}
         >
           <Text style={styles.leaveButtonText}>Leave</Text>
         </Pressable>

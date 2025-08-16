@@ -1,7 +1,8 @@
-export type Player = {
-  id: number;
+export interface Player {
+  id: string;
   name: string;
-  score: number;
   avatar: string;
+  score: number;
   status: "correct" | "wrong" | "unanswered" | null;
-};
+  socketId?: string;
+}
