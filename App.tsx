@@ -22,6 +22,7 @@ import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 import { SSEProvider } from "./src/contexts/SSEContext";
 import { navigationRef } from "./src/utils/navigation";
+import { InviteProvider } from "./src/games/context/InviteContext";
 
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/screens/PartnerProfileScreen";
@@ -483,7 +484,7 @@ function AppContent() {
         />
         <Stack.Screen
           name="GameSessionScreen"
-          component={GameSessionScreen}
+          component={GameSessionScreen as any}
           options={{
             headerShown: true,
             title: "Playing Trivia",
@@ -509,51 +510,53 @@ export default function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={{
-            persister: sqlitePersistor,
-            maxAge: 1000 * 60 * 60 * 24 * 5,
-          }}
-          onSuccess={() => {}}
-        >
-          <SSEProvider>
-            <NavigationContainer
-              ref={navigationRef}
-              theme={{
-                dark: true,
-                colors: {
-                  primary: "#e03487",
-                  background: "#23243a",
-                  card: "#23243a",
-                  text: "#fff",
-                  border: "transparent",
-                  notification: "#e03487",
-                },
-                fonts: {
-                  regular: {
-                    fontFamily: "System",
-                    fontWeight: "400",
+        <InviteProvider>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{
+              persister: sqlitePersistor,
+              maxAge: 1000 * 60 * 60 * 24 * 5,
+            }}
+            onSuccess={() => {}}
+          >
+            <SSEProvider>
+              <NavigationContainer
+                ref={navigationRef}
+                theme={{
+                  dark: true,
+                  colors: {
+                    primary: "#e03487",
+                    background: "#23243a",
+                    card: "#23243a",
+                    text: "#fff",
+                    border: "transparent",
+                    notification: "#e03487",
                   },
-                  medium: {
-                    fontFamily: "System",
-                    fontWeight: "500",
+                  fonts: {
+                    regular: {
+                      fontFamily: "System",
+                      fontWeight: "400",
+                    },
+                    medium: {
+                      fontFamily: "System",
+                      fontWeight: "500",
+                    },
+                    bold: {
+                      fontFamily: "System",
+                      fontWeight: "700",
+                    },
+                    heavy: {
+                      fontFamily: "System",
+                      fontWeight: "900",
+                    },
                   },
-                  bold: {
-                    fontFamily: "System",
-                    fontWeight: "700",
-                  },
-                  heavy: {
-                    fontFamily: "System",
-                    fontWeight: "900",
-                  },
-                },
-              }}
-            >
-              <AppContent />
-            </NavigationContainer>
-          </SSEProvider>
-        </PersistQueryClientProvider>
+                }}
+              >
+                <AppContent />
+              </NavigationContainer>
+            </SSEProvider>
+          </PersistQueryClientProvider>
+        </InviteProvider>
       </NotificationProvider>
     </AuthProvider>
   );

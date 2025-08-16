@@ -2,16 +2,22 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { v4 as uuidv4 } from "uuid";
 
 // internal
 import { GAMES, Game } from "../../interfaces/Game";
 import { fetchCurrentUserProfileAndAvatar } from "../../helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../helpers/partnerDetailsHelper";
+import { getTriviaSocket } from "../../../services/games/trivia/triviaSocketService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // content
 import RequestGameModal from "../../components/modals/RequestGameModal";
 
 const GameListScreen = ({ navigation }: any) => {
+  // variables
+  const { user } = useAuth();
+
   // use states
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -24,17 +30,34 @@ const GameListScreen = ({ navigation }: any) => {
 
   const handleRequestGame = async () => {
     try {
-      const user = await fetchCurrentUserProfileAndAvatar();
-      const partner = await fetchPartnerProfileAndAvatar();
-      
-      navigation.navigate("GameWaitingScreen", {
-        gameName: selectedGame?.name,
-        yourInfo: user,
-        partnerInfo: partner,
-      });
+      const userInfo = await fetchCurrentUserProfileAndAvatar();
+      const partnerInfo = await fetchPartnerProfileAndAvatar();
+      const roomId = uuidv4();
+
+      const socket = getTriviaSocket();
+      if (socket && user?.id) {
+        socket.emit("send_invite", {
+          inviterId: user.id,
+          partnerId: partnerInfo?.id,
+          inviterName: user.name,
+          gameName: selectedGame?.name,
+          roomId,
+        });
+
+        navigation.navigate("GameWaitingScreen", {
+          gameName: selectedGame?.name,
+          yourInfo: userInfo,
+          partnerInfo,
+          roomId,
+        });
+      } else {
+        throw new Error("Socket or user not available");
+      }
 
       setModalVisible(false);
-    } catch (err) {}
+    } catch (err) {
+      console.error("Error sending invite:", err);
+    }
   };
 
   return (

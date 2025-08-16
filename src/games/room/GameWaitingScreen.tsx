@@ -70,6 +70,21 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
 
     socket.on("players_update", handlePlayersUpdate);
 
+    socket.on("invite_accepted", ({ roomId, gameName, partnerInfo }) => {
+      setPlayers((prev) => {
+        const newPlayers = [...prev, partnerInfo];
+        if (newPlayers.length === 2 && !countdown) {
+          setCountdown(5);
+        }
+        return newPlayers;
+      });
+    });
+
+    socket.on("invite_declined", () => {
+      Alert.alert("Invite Declined", "Your partner declined the invite.");
+      navigation.popToTop();
+    });
+
     socket.on("player_left", (data) => {
       Alert.alert(
         "Player Left",
@@ -85,6 +100,8 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
 
     return () => {
       socket.off("players_update", handlePlayersUpdate);
+      socket.off("invite_accepted");
+      socket.off("invite_declined");
       socket.off("player_left");
       socket.off("error");
       disconnectTriviaSocket();
@@ -113,7 +130,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const handleLeave = () => {
     const socket = getTriviaSocket();
     if (socket) {
-      socket.emit("leave_room", {
+      socket.emit("leave_trivia", {
         roomId: roomIdRef.current,
         playerId: yourInfo.id,
       });
