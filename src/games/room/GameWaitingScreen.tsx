@@ -31,6 +31,7 @@ type RootStackParamList = {
     } | null;
     roomId?: string;
     showToast?: boolean;
+    isInviter?: boolean;
   };
   GameSetupScreen: {
     roomId: string;
@@ -139,11 +140,16 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     }
 
     if (countdown === 0) {
+      const isInviter = route.params.isInviter ?? true;
+      const hostName = isInviter
+        ? yourInfo.name
+        : partner?.name || partnerInfo?.name || "";
+
       navigation.replace("GameSetupScreen", {
         roomId: roomIdRef.current,
         players,
         gameName,
-        host: yourInfo.name,
+        host: hostName,
       });
       return;
     }
@@ -153,7 +159,6 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     );
     return () => clearTimeout(timer);
   }, [countdown, players, navigation, gameName, yourInfo.name]);
-  
 
   // handlers
   const handleLeave = () => {

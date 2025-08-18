@@ -435,6 +435,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             yourInfo,
             partnerInfo,
             roomId: invite.roomId,
+            isInviter: false,
           });
           setInviteAccepted(false);
         } catch (error) {
