@@ -22,10 +22,12 @@ import { Question } from "../interfaces/Question";
 
 // content
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // content
 import GameSummaryModal from "../components/GameSummaryModal";
 
+// interfaces
 interface GameSessionScreenProps {
   route: {
     params: {
@@ -68,6 +70,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // timer animation
   const startTimer = () => {
     setTimeLeft(15);
     Animated.timing(timerAnim, {
@@ -77,6 +80,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     }).start();
   };
 
+  // use effects
   useEffect(() => {
     if (!user?.id) {
       return;
@@ -166,6 +170,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     }
   }, [question]);
 
+  // handlers
   const submitAnswer = (answer: string) => {
     const socket = getTriviaSocket();
     if (socket && currentPlayerId) {
@@ -209,6 +214,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     }
   };
 
+  // helpers
   const renderAnswers = () => {
     if (!question) {
       return null;
@@ -262,7 +268,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.questionText}>Loading...</Text>
+        <LoadingSpinner message="Loading session..." size="medium" />
       </View>
     );
   }

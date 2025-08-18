@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StyleSheet, View } from "react-native";
 
 // internal
 import {
@@ -14,6 +15,7 @@ import { Invite } from "../interfaces/Invite";
 
 // content
 import GameInviteModal from "../components/modals/GameInviteModal";
+import LoadingSpinner from "../../components/loading/LoadingSpinner";
 
 // types
 type RootStackParamList = {
@@ -54,6 +56,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
   // use states
   const [invite, setInvite] = useState<Invite | null>(null);
   const [inviteAccepted, setInviteAccepted] = useState(false);
+  const [joining, setJoining] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -92,7 +95,10 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
+      setJoining(true);
+
       const userInfo = await fetchCurrentUserProfileAndAvatar();
+
       if (!userInfo) {
         alert("Failed to fetch user profile.");
         setInvite(null);
@@ -100,12 +106,13 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const socket = getTriviaSocket();
+
       if (socket) {
         socket.emit("accept_invite", {
           inviteId: invite.inviteId,
           partnerInfo: userInfo,
         });
-        
+
         setInviteAccepted(true);
       } else {
         throw new Error("Socket not available");
@@ -114,6 +121,8 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
       console.error("Error accepting invite:", error);
       alert("Failed to accept invite. Please try again.");
       setInvite(null);
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -142,6 +151,12 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
           onDecline={handleDecline}
         />
       )}
+
+      {joining && (
+        <View style={styles.centered}>
+          <LoadingSpinner message="Joining..." size="medium" />
+        </View>
+      )}
     </InviteContext.Provider>
   );
 };
@@ -153,3 +168,12 @@ export const useInvite = () => {
   }
   return context;
 };
+
+const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    backgroundColor: "#23243a",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
