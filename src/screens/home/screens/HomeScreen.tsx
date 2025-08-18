@@ -44,6 +44,7 @@ import {
 import { checkLocationPermissions } from "../../../services/location/locationPermissionService";
 import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
+import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -419,16 +420,31 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     if (inviteAccepted && invite) {
       (async () => {
-        const userInfo = await fetchCurrentUserProfileAndAvatar();
-        navigation.navigate("GameWaitingScreen", {
-          gameName: invite.gameName,
-          partnerInfo: userInfo,
-          roomId: invite.roomId,
-        });
-        setInviteAccepted(false);
+        try {
+          const yourInfo = await fetchCurrentUserProfileAndAvatar();
+          const partnerInfo = await fetchPartnerProfileAndAvatar();
+  
+          if (!yourInfo || !partnerInfo) {
+            alert("Failed to fetch profile information. Please try again.");
+            setInviteAccepted(false);
+            return;
+          }
+  
+          navigation.navigate("GameWaitingScreen", {
+            gameName: invite.gameName,
+            yourInfo,
+            partnerInfo,
+            roomId: invite.roomId,
+          });
+          setInviteAccepted(false);
+        } catch (error) {
+          console.error("Error navigating to waiting screen:", error);
+          alert("An error occurred. Please try again.");
+          setInviteAccepted(false);
+        }
       })();
     }
-  }, [inviteAccepted]);
+  }, [inviteAccepted, invite, navigation]);
 
   useEffect(() => {
     if (partnerId) {
