@@ -140,7 +140,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     if (countdown === null) {
       return;
     }
-    
+
     if (countdown === 0) {
       navigation.replace("GameSetupScreen", {
         roomId: roomIdRef.current,
