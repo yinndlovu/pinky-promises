@@ -21,6 +21,9 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { Question } from "../interfaces/Question";
 
 // content
+const fallbackAvatar = require("../../../assets/default-avatar-two.png");
+
+// content
 import GameSummaryModal from "../components/GameSummaryModal";
 
 interface GameSessionScreenProps {
@@ -187,7 +190,10 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   const handleQuit = () => {
     const socket = getTriviaSocket();
     if (socket && currentPlayerId) {
-      socket.emit("leave_trivia", { roomId, playerId: currentPlayerId });
+      socket.emit("leave_trivia", {
+        roomId,
+        playerId: currentPlayerId,
+      });
     }
     navigation.goBack();
   };
@@ -266,7 +272,10 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
       <View style={styles.playersRow}>
         {gamePlayers.map((p) => (
           <View key={p.id} style={styles.playerCard}>
-            <Image source={{ uri: p.avatar }} style={styles.playerAvatar} />
+            <Image
+              source={p.avatar ? { uri: p.avatar } : fallbackAvatar}
+              style={styles.playerAvatar}
+            />
             <Text style={styles.playerName}>{p.name}</Text>
             <Text style={styles.playerScore}>{p.score}</Text>
             {p.status && (

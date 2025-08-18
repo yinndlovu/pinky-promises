@@ -12,6 +12,9 @@ import {
 } from "../../services/games/trivia/triviaSocketService";
 import { Player } from "../interfaces/Player";
 
+// content
+const fallbackAvatar = require("../../assets/default-avatar-two.png");
+
 // types
 type RootStackParamList = {
   GameWaitingScreen: {
@@ -147,9 +150,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       <View style={styles.playersContainer}>
         <View style={styles.player}>
           <Image
-            source={{
-              uri: yourInfo.avatarUrl || "https://via.placeholder.com/80",
-            }}
+            source={yourInfo.avatarUrl ? { uri: yourInfo.avatarUrl } : fallbackAvatar}
             style={styles.avatar}
           />
           <Text style={styles.name}>{yourInfo.name}</Text>
@@ -159,9 +160,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
         {partner ? (
           <View style={styles.player}>
             <Image
-              source={{
-                uri: partner.avatarUrl || "https://via.placeholder.com/80",
-              }}
+              source={partner.avatarUrl ? { uri: partner.avatarUrl } : fallbackAvatar}
               style={styles.avatar}
             />
             <Text style={styles.name}>{partner.name}</Text>

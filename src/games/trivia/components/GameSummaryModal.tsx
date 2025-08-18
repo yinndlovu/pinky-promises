@@ -1,3 +1,4 @@
+// external
 import React from "react";
 import {
   View,
@@ -8,8 +9,14 @@ import {
   Image,
   Dimensions,
 } from "react-native";
+
+// internal
 import { Player } from "../types/Player";
 
+// content
+const fallbackAvatar = require("../../../assets/default-avatar-two.png");
+
+// interfaces
 interface GameSummaryModalProps {
   visible: boolean;
   onClose: () => void;
@@ -52,7 +59,7 @@ const GameSummaryModal: React.FC<GameSummaryModalProps> = ({
           <View style={styles.playersRow}>
             {players.map((p) => (
               <View key={p.id} style={styles.playerCard}>
-                <Image source={{ uri: p.avatar }} style={styles.avatar} />
+                <Image source={p.avatar ? { uri: p.avatar} : fallbackAvatar} style={styles.avatar} />
                 <Text style={styles.playerName}>{p.name}</Text>
                 <Text style={styles.playerScore}>{p.score}</Text>
               </View>
