@@ -56,7 +56,11 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const roomIdRef = useRef(routeRoomId || uuidv4());
 
   // use states
-  const [players, setPlayers] = useState<Player[]>([yourInfo]);
+  const [players, setPlayers] = useState<Player[]>(() => {
+    const initialPlayers = [yourInfo];
+    if (partnerInfo) initialPlayers.push(partnerInfo);
+    return initialPlayers;
+  });
   const [countdown, setCountdown] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -98,15 +102,11 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
 
     socket.on("players_update", handlePlayersUpdate);
 
-    socket.on("invite_accepted", ({ roomId, gameName, partnerInfo }) => {
-      setPlayers((prev) => {
-        console.log("PARTNER INFO: ", partnerInfo);
-        const newPlayers = [...prev, partnerInfo];
-        if (newPlayers.length === 2 && !countdown) {
-          setCountdown(5);
-        }
-        return newPlayers;
-      });
+    socket.on("invite_accepted", ({ partnerInfo }) => {
+      if (partnerInfo) {
+        setPlayers((prev) => [...prev, partnerInfo]);
+        if (players.length === 1) setCountdown(5);
+      }
     });
 
     socket.on("invite_declined", () => {
