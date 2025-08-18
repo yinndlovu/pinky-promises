@@ -30,6 +30,7 @@ type RootStackParamList = {
       avatarUrl: string;
     } | null;
     roomId?: string;
+    showToast?: boolean;
   };
   GameSetupScreen: {
     roomId: string;
@@ -43,7 +44,13 @@ type Props = StackScreenProps<RootStackParamList, "GameWaitingScreen">;
 
 const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   // params
-  const { gameName, yourInfo, partnerInfo, roomId: routeRoomId } = route.params;
+  const {
+    gameName,
+    yourInfo,
+    partnerInfo,
+    roomId: routeRoomId,
+    showToast: shouldShowToast,
+  } = route.params;
 
   // variables
   const roomIdRef = useRef(routeRoomId || uuidv4());
@@ -51,6 +58,8 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   // use states
   const [players, setPlayers] = useState<Player[]>([yourInfo]);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -62,6 +71,24 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       player: yourInfo,
     });
 
+    useEffect(() => {
+      if (shouldShowToast) {
+        setToastMessage("Invite sent");
+      }
+    }, [shouldShowToast]);
+
+    useEffect(() => {
+      if (toastMessage) {
+        setShowToast(true);
+        const timer = setTimeout(() => {
+          setShowToast(false);
+          setToastMessage(null);
+        }, 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [toastMessage]);
+
+    // handlers
     const handlePlayersUpdate = (playersList: Player[]) => {
       setPlayers(playersList);
       if (playersList.length === 2 && !countdown) {
@@ -110,7 +137,10 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   }, []);
 
   useEffect(() => {
-    if (countdown === null) return;
+    if (countdown === null) {
+      return;
+    }
+    
     if (countdown === 0) {
       navigation.replace("GameSetupScreen", {
         roomId: roomIdRef.current,
@@ -148,7 +178,9 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       <View style={styles.playersContainer}>
         <View style={styles.player}>
           <Image
-            source={yourInfo.avatarUrl ? { uri: yourInfo.avatarUrl } : fallbackAvatar}
+            source={
+              yourInfo.avatarUrl ? { uri: yourInfo.avatarUrl } : fallbackAvatar
+            }
             style={styles.avatar}
           />
           <Text style={styles.name}>{yourInfo.name}</Text>
@@ -158,7 +190,9 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
         {partner ? (
           <View style={styles.player}>
             <Image
-              source={partner.avatarUrl ? { uri: partner.avatarUrl } : fallbackAvatar}
+              source={
+                partner.avatarUrl ? { uri: partner.avatarUrl } : fallbackAvatar
+              }
               style={styles.avatar}
             />
             <Text style={styles.name}>{partner.name}</Text>
@@ -185,6 +219,11 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.leaveButtonText}>Leave</Text>
         </Pressable>
       </View>
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -250,6 +289,26 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   leaveButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  toast: {
+    position: "absolute",
+    bottom: 60,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,

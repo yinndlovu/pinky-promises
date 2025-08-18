@@ -57,6 +57,7 @@ const GameListScreen = ({ navigation }: any) => {
           yourInfo: userInfo,
           partnerInfo,
           roomId,
+          showToast: true,
         });
       } else {
         throw new Error("Socket or user not available");
