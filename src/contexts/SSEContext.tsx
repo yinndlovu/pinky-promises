@@ -34,6 +34,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   const [isConnected, setIsConnected] = useState(false);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
+
+  // variables
   const queryClient = useQueryClient();
 
   const connectSSE = async () => {
@@ -248,7 +250,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
   const reconnect = () => {
     disconnectSSE();
-    const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000);
+    const delay = Math.min(1000 * Math.pow(4, reconnectAttempts), 30000);
     setTimeout(() => {
       connectSSE();
       setReconnectAttempts((prev) => prev + 1);
