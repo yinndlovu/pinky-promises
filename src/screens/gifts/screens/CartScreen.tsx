@@ -230,7 +230,7 @@ const CartScreen = () => {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 4000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);

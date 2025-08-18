@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 
 // internal
 import {
@@ -57,6 +57,8 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
   const [invite, setInvite] = useState<Invite | null>(null);
   const [inviteAccepted, setInviteAccepted] = useState(false);
   const [joining, setJoining] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -87,10 +89,21 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [user, navigation]);
 
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
   // handlers
   const handleAccept = async () => {
     if (!invite || !user) {
-      alert("No invite or user data available.");
+      setToastMessage("No invite or user data available.");
       return;
     }
 
@@ -100,7 +113,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
       const userInfo = await fetchCurrentUserProfileAndAvatar();
 
       if (!userInfo) {
-        alert("Failed to fetch user profile.");
+        setToastMessage("Failed to fetch user profile.");
         setInvite(null);
         return;
       }
@@ -119,7 +132,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error) {
       console.error("Error accepting invite:", error);
-      alert("Failed to accept invite. Please try again.");
+      setToastMessage("Failed to accept invite. Please try again.");
       setInvite(null);
     } finally {
       setJoining(false);
@@ -157,6 +170,12 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
           <LoadingSpinner message="Joining..." size="medium" />
         </View>
       )}
+
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </InviteContext.Provider>
   );
 };
@@ -175,5 +194,25 @@ const styles = StyleSheet.create({
     backgroundColor: "#23243a",
     alignItems: "center",
     justifyContent: "center",
+  },
+  toast: {
+    position: "absolute",
+    bottom: 10,
+    left: 20,
+    right: 20,
+    backgroundColor: "#e03487",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  toastText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
   },
 });

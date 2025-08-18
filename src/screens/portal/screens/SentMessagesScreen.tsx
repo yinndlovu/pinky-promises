@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -18,21 +18,24 @@ import {
   viewSweetMessage,
 } from "../../../services/api/portal/sweetMessageService";
 import { Message } from "../../../types/Message";
+import { formatDateDMY } from "../../../utils/formatDate";
 
 // content
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 const SentMessagesScreen = () => {
   // use states
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   // use states (processing)
   const [refreshing, setRefreshing] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
 
+  // fetch functions
   const {
     data: messages = [],
     isLoading: messagesLoading,
@@ -48,17 +51,12 @@ const SentMessagesScreen = () => {
       }
 
       const res = await getSentSweetMessages(token);
-      return (res.sweets || res);
+      return res.sweets || res;
     },
     staleTime: 1000 * 60 * 10,
   });
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetchMessages();
-    setRefreshing(false);
-  };
-
+  // handlers
   const handleViewMessage = async (msg: Message) => {
     setViewLoading(true);
 
@@ -73,24 +71,29 @@ const SentMessagesScreen = () => {
       setViewedMessage(res.sweet);
       setViewModalVisible(true);
     } catch (err: any) {
-      setAlertMessage(err?.response?.data?.message || "Failed to load message");
-      setAlertVisible(true);
+      setToastMessage(err?.response?.data?.message || "Failed to load message");
     } finally {
       setViewLoading(false);
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) {
-      return "";
+  // use effects
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
     }
+  }, [toastMessage]);
 
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+  // refresh screen
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetchMessages();
+    setRefreshing(false);
   };
 
   return (
@@ -126,7 +129,7 @@ const SentMessagesScreen = () => {
               <Text style={styles.memoryText}>{item.message}</Text>
               <View style={styles.metaRow}>
                 <Text style={styles.metaText}>
-                  {formatDate(item.createdAt || "")}
+                  {formatDateDMY(item.createdAt || "")}
                 </Text>
               </View>
             </TouchableOpacity>
@@ -159,25 +162,14 @@ const SentMessagesScreen = () => {
       />
 
       {viewLoading && (
-        <View
-          style={{
-            ...StyleSheet.absoluteFillObject,
-            backgroundColor: "rgba(35,36,58,0.7)",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-          }}
-        >
-          <ActivityIndicator size="large" color="#e03487" />
-          <Text style={{ color: "#fff", marginTop: 16, fontWeight: "bold" }}>
-            Loading message...
-          </Text>
+        <View style={styles.centered}>
+          <LoadingSpinner showMessage={false} size="small" />
         </View>
       )}
 
-      {alertVisible && (
+      {showToast && (
         <View style={styles.toast}>
-          <Text style={styles.toastText}>{alertMessage}</Text>
+          <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       )}
     </View>
@@ -185,6 +177,12 @@ const SentMessagesScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    backgroundColor: "#23243a",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   memoryItem: {
     backgroundColor: "#1b1c2e",
     borderRadius: 12,
@@ -209,23 +207,23 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: "absolute",
-    bottom: 20,
+    bottom: 60,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",
-    padding: 16,
-    borderRadius: 8,
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+    zIndex: 100,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
   },
   toastText: {
     color: "#fff",
-    textAlign: "center",
-    fontSize: 16,
     fontWeight: "bold",
+    fontSize: 16,
   },
   separator: {
     height: 1,
