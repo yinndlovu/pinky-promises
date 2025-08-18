@@ -49,9 +49,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const roomIdRef = useRef(routeRoomId || uuidv4());
 
   // use states
-  const [players, setPlayers] = useState<Player[]>(
-    partnerInfo ? [yourInfo, partnerInfo] : [yourInfo]
-  );
+  const [players, setPlayers] = useState<Player[]>([yourInfo]);
   const [countdown, setCountdown] = useState<number | null>(null);
 
   // use effects
@@ -143,7 +141,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   // find partner
-  const partner = players.find((p) => p.id !== yourInfo.id || partnerInfo);
+  const partner = players.find((p) => p.id !== yourInfo.id);
 
   return (
     <View style={styles.container}>
