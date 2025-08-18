@@ -21,6 +21,7 @@ const GameListScreen = ({ navigation }: any) => {
   // use states
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [isRequesting, setIsRequesting] = useState(false);
 
   // handlers
   const handleSelectGame = (game: Game) => {
@@ -30,6 +31,8 @@ const GameListScreen = ({ navigation }: any) => {
 
   const handleRequestGame = async () => {
     try {
+      setIsRequesting(true);
+
       const userInfo = await fetchCurrentUserProfileAndAvatar();
       const partnerInfo = await fetchPartnerProfileAndAvatar();
       const roomId = uuidv4();
@@ -62,6 +65,8 @@ const GameListScreen = ({ navigation }: any) => {
       setModalVisible(false);
     } catch (err) {
       console.error("Error sending invite:", err);
+    } finally {
+      setIsRequesting(false);
     }
   };
 
@@ -98,6 +103,7 @@ const GameListScreen = ({ navigation }: any) => {
 
       <RequestGameModal
         visible={modalVisible}
+        isRequesting={isRequesting}
         onClose={() => setModalVisible(false)}
         onRequestGame={handleRequestGame}
         gameName={selectedGame?.name || ""}

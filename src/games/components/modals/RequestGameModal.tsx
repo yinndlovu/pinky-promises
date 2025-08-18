@@ -12,6 +12,7 @@ import {
 // interfaces
 interface RequestGameModalProps {
   visible: boolean;
+  isRequesting: boolean;
   onClose: () => void;
   onRequestGame: () => void;
   gameName: string;
@@ -20,6 +21,7 @@ interface RequestGameModalProps {
 const RequestGameModal: React.FC<RequestGameModalProps> = ({
   visible,
   onClose,
+  isRequesting,
   onRequestGame,
   gameName,
 }) => {
@@ -44,11 +46,14 @@ const RequestGameModal: React.FC<RequestGameModalProps> = ({
         </Text>
 
         <Pressable
-          style={styles.requestButton}
+          style={[styles.requestButton, isRequesting && { opacity: 0.7 }]}
           onPress={onRequestGame}
           android_ripple={{ color: "#a82f6aff" }}
+          disabled={isRequesting}
         >
-          <Text style={styles.requestButtonText}>Request Game</Text>
+          <Text style={styles.requestButtonText}>
+            {isRequesting ? "Requesting..." : "Request Game"}
+          </Text>
         </Pressable>
 
         <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
