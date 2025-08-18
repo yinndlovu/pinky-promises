@@ -14,6 +14,7 @@ import { Player } from "../interfaces/Player";
 
 // content
 const fallbackAvatar = require("../../assets/default-avatar-two.png");
+import AlertModal from "../../components/modals/output/AlertModal";
 
 // types
 type RootStackParamList = {
@@ -61,6 +62,8 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -107,20 +110,19 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     });
 
     socket.on("invite_declined", () => {
-      Alert.alert("Invite Declined", "Your partner declined the invite.");
+      setAlertMessage("Your partner declined the invite");
+      setAlertVisible(true);
       navigation.popToTop();
     });
 
     socket.on("player_left", (data) => {
-      Alert.alert(
-        "Player Left",
-        "Your partner left the room. Returning to home."
-      );
+      setAlertMessage("Your partner left the game");
+      setAlertVisible(true);
       navigation.popToTop();
     });
 
     socket.on("error", (err) => {
-      Alert.alert("Error", err.message || "An error occurred.");
+      setToastMessage(err.message || "An error occured");
       navigation.popToTop();
     });
 
@@ -130,6 +132,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       socket.off("invite_declined");
       socket.off("player_left");
       socket.off("error");
+
       disconnectTriviaSocket();
     };
   }, []);
@@ -227,6 +230,12 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       )}
+
+      <AlertModal
+        visible={alertVisible}
+        message={alertMessage}
+        onClose={() => setAlertVisible(false)}
+      />
     </View>
   );
 };
