@@ -282,6 +282,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         >
           Presents
         </Text>
+        {/*
         <TouchableOpacity
           style={{
             position: "absolute",
@@ -299,6 +300,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Feather name="shopping-cart" size={22} color="#fff" />
         </TouchableOpacity>
+        */}
       </View>
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
