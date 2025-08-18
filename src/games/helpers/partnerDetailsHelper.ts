@@ -39,10 +39,6 @@ export async function fetchPartnerProfileAndAvatar() {
       avatarUrl,
     };
   } catch (error: any) {
-    console.warn(
-      "Failed to fetch partner avatar:",
-      error.data?.response?.status || error.data?.response?.message
-    );
     return {
       id: partner?.id || uuidv4(),
       name: partner?.name || "Unknown",

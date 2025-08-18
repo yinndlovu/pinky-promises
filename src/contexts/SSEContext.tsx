@@ -217,11 +217,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
               break;
 
             default:
-              console.log("Unknown SSE event type:", data.type);
           }
-        } catch (error) {
-          console.error("Error parsing SSE message:", error);
-        }
+        } catch (error) {}
       });
 
       es.addEventListener("error", (error) => {

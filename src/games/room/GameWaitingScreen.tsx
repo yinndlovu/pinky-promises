@@ -1,6 +1,6 @@
 // external
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, Image, Pressable, Alert } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { StackScreenProps } from "@react-navigation/stack";
 import { v4 as uuidv4 } from "uuid";
 
@@ -95,6 +95,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     // handlers
     const handlePlayersUpdate = (playersList: Player[]) => {
       setPlayers(playersList);
+
       if (playersList.length === 2 && !countdown) {
         setCountdown(5);
       }
@@ -105,7 +106,10 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     socket.on("invite_accepted", ({ partnerInfo }) => {
       if (partnerInfo) {
         setPlayers((prev) => [...prev, partnerInfo]);
-        if (players.length === 1) setCountdown(5);
+
+        if (players.length === 1) {
+          setCountdown(5);
+        }
       }
     });
 
@@ -115,7 +119,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       navigation.popToTop();
     });
 
-    socket.on("player_left", (data) => {
+    socket.on("player_left", () => {
       setAlertMessage("Your partner left the game");
       setAlertVisible(true);
       navigation.popToTop();
@@ -154,6 +158,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
         gameName,
         host: hostName,
       });
+
       return;
     }
     const timer = setTimeout(
@@ -166,12 +171,14 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   // handlers
   const handleLeave = () => {
     const socket = getTriviaSocket();
+
     if (socket) {
       socket.emit("leave_trivia", {
         roomId: roomIdRef.current,
         playerId: yourInfo.id,
       });
     }
+
     disconnectTriviaSocket();
     navigation.popToTop();
   };
