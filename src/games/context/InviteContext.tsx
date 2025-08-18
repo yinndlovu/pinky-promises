@@ -105,8 +105,8 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
           inviteId: invite.inviteId,
           partnerInfo: userInfo,
         });
+        
         setInviteAccepted(true);
-        setInvite(null);
       } else {
         throw new Error("Socket not available");
       }
