@@ -41,9 +41,9 @@ import {
   formatTime,
   formatTimeLeft,
 } from "../../../utils/formatDate";
-import {
-  checkLocationPermissions,
-} from "../../../services/location/locationPermissionService";
+import { checkLocationPermissions } from "../../../services/location/locationPermissionService";
+import { useInvite } from "../../../games/context/InviteContext";
+import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -62,6 +62,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
+  const { invite, inviteAccepted, setInviteAccepted } = useInvite();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -328,7 +329,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <Image
         source={
-          avatarUri ? avatarUri : require("../../../assets/default-avatar-two.png")
+          avatarUri
+            ? avatarUri
+            : require("../../../assets/default-avatar-two.png")
         }
         style={styles.avatar}
         contentFit="cover"
@@ -412,6 +415,20 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     checkAndUpdateHomeStatus();
   }, []);
+
+  useEffect(() => {
+    if (inviteAccepted && invite) {
+      (async () => {
+        const userInfo = await fetchCurrentUserProfileAndAvatar();
+        navigation.navigate("GameWaitingScreen", {
+          gameName: invite.gameName,
+          yourInfo: userInfo,
+          roomId: invite.roomId,
+        });
+        setInviteAccepted(false); // reset flag
+      })();
+    }
+  }, [inviteAccepted]);
 
   useEffect(() => {
     if (partnerId) {

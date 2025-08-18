@@ -510,53 +510,53 @@ export default function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <InviteProvider>
-          <PersistQueryClientProvider
-            client={queryClient}
-            persistOptions={{
-              persister: sqlitePersistor,
-              maxAge: 1000 * 60 * 60 * 24 * 5,
-            }}
-            onSuccess={() => {}}
-          >
-            <SSEProvider>
-              <NavigationContainer
-                ref={navigationRef}
-                theme={{
-                  dark: true,
-                  colors: {
-                    primary: "#e03487",
-                    background: "#23243a",
-                    card: "#23243a",
-                    text: "#fff",
-                    border: "transparent",
-                    notification: "#e03487",
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{
+            persister: sqlitePersistor,
+            maxAge: 1000 * 60 * 60 * 24 * 5,
+          }}
+          onSuccess={() => {}}
+        >
+          <SSEProvider>
+            <NavigationContainer
+              ref={navigationRef}
+              theme={{
+                dark: true,
+                colors: {
+                  primary: "#e03487",
+                  background: "#23243a",
+                  card: "#23243a",
+                  text: "#fff",
+                  border: "transparent",
+                  notification: "#e03487",
+                },
+                fonts: {
+                  regular: {
+                    fontFamily: "System",
+                    fontWeight: "400",
                   },
-                  fonts: {
-                    regular: {
-                      fontFamily: "System",
-                      fontWeight: "400",
-                    },
-                    medium: {
-                      fontFamily: "System",
-                      fontWeight: "500",
-                    },
-                    bold: {
-                      fontFamily: "System",
-                      fontWeight: "700",
-                    },
-                    heavy: {
-                      fontFamily: "System",
-                      fontWeight: "900",
-                    },
+                  medium: {
+                    fontFamily: "System",
+                    fontWeight: "500",
                   },
-                }}
-              >
+                  bold: {
+                    fontFamily: "System",
+                    fontWeight: "700",
+                  },
+                  heavy: {
+                    fontFamily: "System",
+                    fontWeight: "900",
+                  },
+                },
+              }}
+            >
+              <InviteProvider>
                 <AppContent />
-              </NavigationContainer>
-            </SSEProvider>
-          </PersistQueryClientProvider>
-        </InviteProvider>
+              </InviteProvider>
+            </NavigationContainer>
+          </SSEProvider>
+        </PersistQueryClientProvider>
       </NotificationProvider>
     </AuthProvider>
   );

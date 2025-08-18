@@ -37,6 +37,8 @@ type RootStackParamList = {
 interface InviteContextType {
   invite: Invite | null;
   setInvite: (invite: Invite | null) => void;
+  inviteAccepted: boolean;
+  setInviteAccepted: (val: boolean) => void;
 }
 
 const InviteContext = createContext<InviteContextType | undefined>(undefined);
@@ -51,6 +53,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // use states
   const [invite, setInvite] = useState<Invite | null>(null);
+  const [inviteAccepted, setInviteAccepted] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -102,11 +105,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
           inviteId: invite.inviteId,
           partnerInfo: userInfo,
         });
-        navigation.navigate("GameWaitingScreen", {
-          gameName: invite.gameName,
-          yourInfo: userInfo,
-          roomId: invite.roomId,
-        });
+        setInviteAccepted(true);
         setInvite(null);
       } else {
         throw new Error("Socket not available");
@@ -130,7 +129,9 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <InviteContext.Provider value={{ invite, setInvite }}>
+    <InviteContext.Provider
+      value={{ invite, setInvite, inviteAccepted, setInviteAccepted }}
+    >
       {children}
       {invite && (
         <GameInviteModal
