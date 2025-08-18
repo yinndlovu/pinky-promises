@@ -63,6 +63,23 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
 
   // use effects
   useEffect(() => {
+    if (shouldShowToast) {
+      setToastMessage("Invite sent");
+    }
+  }, [shouldShowToast]);
+
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
+  useEffect(() => {
     const socket = connectTriviaSocket();
     const roomId = roomIdRef.current;
 
@@ -70,23 +87,6 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       roomId,
       player: yourInfo,
     });
-
-    useEffect(() => {
-      if (shouldShowToast) {
-        setToastMessage("Invite sent");
-      }
-    }, [shouldShowToast]);
-
-    useEffect(() => {
-      if (toastMessage) {
-        setShowToast(true);
-        const timer = setTimeout(() => {
-          setShowToast(false);
-          setToastMessage(null);
-        }, 3000);
-        return () => clearTimeout(timer);
-      }
-    }, [toastMessage]);
 
     // handlers
     const handlePlayersUpdate = (playersList: Player[]) => {
@@ -100,6 +100,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
 
     socket.on("invite_accepted", ({ roomId, gameName, partnerInfo }) => {
       setPlayers((prev) => {
+        console.log("PARTNER INFO: ", partnerInfo);
         const newPlayers = [...prev, partnerInfo];
         if (newPlayers.length === 2 && !countdown) {
           setCountdown(5);

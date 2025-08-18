@@ -422,10 +422,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         const userInfo = await fetchCurrentUserProfileAndAvatar();
         navigation.navigate("GameWaitingScreen", {
           gameName: invite.gameName,
-          yourInfo: userInfo,
+          partnerInfo: userInfo,
           roomId: invite.roomId,
         });
-        setInviteAccepted(false); // reset flag
+        setInviteAccepted(false);
       })();
     }
   }, [inviteAccepted]);
