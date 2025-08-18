@@ -14,6 +14,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import { Image } from "expo-image";
 import Feather from "@expo/vector-icons/build/Feather";
 import { FontAwesome6 } from "@expo/vector-icons";
+import "react-native-get-random-values";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
