@@ -153,6 +153,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     );
     return () => clearTimeout(timer);
   }, [countdown, players, navigation, gameName, yourInfo.name]);
+  
 
   // handlers
   const handleLeave = () => {
