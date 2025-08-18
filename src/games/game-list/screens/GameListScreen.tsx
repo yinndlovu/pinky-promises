@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { GAMES, Game } from "../../interfaces/Game";
 import { fetchCurrentUserProfileAndAvatar } from "../../helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../helpers/partnerDetailsHelper";
-import { getTriviaSocket } from "../../../services/games/trivia/triviaSocketService";
+import { getTriviaSocket, connectTriviaSocket } from "../../../services/games/trivia/triviaSocketService";
 import { useAuth } from "../../../contexts/AuthContext";
 
 // content
@@ -34,7 +34,12 @@ const GameListScreen = ({ navigation }: any) => {
       const partnerInfo = await fetchPartnerProfileAndAvatar();
       const roomId = uuidv4();
 
-      const socket = getTriviaSocket();
+      let socket = getTriviaSocket();
+
+      if (!socket) {
+        socket = connectTriviaSocket();
+      }
+      
       if (socket && user?.id) {
         socket.emit("send_invite", {
           inviterId: user.id,
