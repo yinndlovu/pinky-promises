@@ -56,11 +56,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const roomIdRef = useRef(routeRoomId || uuidv4());
 
   // use states
-  const [players, setPlayers] = useState<Player[]>(() => {
-    const initialPlayers = [yourInfo];
-    if (partnerInfo) initialPlayers.push(partnerInfo);
-    return initialPlayers;
-  });
+  const [players, setPlayers] = useState<Player[]>([yourInfo]);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
