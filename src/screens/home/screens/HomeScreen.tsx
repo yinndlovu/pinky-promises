@@ -85,8 +85,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const handleInteraction = async (action: string) => {
     setActionsModalVisible(false);
     setInteractionLoading(true);
+
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
         setError("Session expired, please log in again");
         return;
@@ -101,7 +103,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         getInteractionFeedback(action, partner?.name || "your partner")
       );
       setAlertVisible(true);
-      refetchUnseen();
       refetchActivities();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to interact");
