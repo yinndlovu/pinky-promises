@@ -68,7 +68,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   // use effects
   useEffect(() => {
     if (shouldShowToast) {
-      setToastMessage("Invite sent");
+      setToastMessage("Game invitation sent");
     }
   }, [shouldShowToast]);
 
