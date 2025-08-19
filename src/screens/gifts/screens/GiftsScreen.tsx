@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
-import { Feather, FontAwesome5 } from "@expo/vector-icons";
+import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // screen content
@@ -271,7 +271,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
           }}
           onPress={() => navigation.navigate("GameListScreen")}
         >
-          <FontAwesome5 name="gamepad" size={22} color="#fff" />
+          <Ionicons name="game-controller-outline" size={22} color="#fff" />
         </TouchableOpacity>
         <Text
           style={{
@@ -282,7 +282,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         >
           Presents
         </Text>
-        {/*
+
         <TouchableOpacity
           style={{
             position: "absolute",
@@ -300,7 +300,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Feather name="shopping-cart" size={22} color="#fff" />
         </TouchableOpacity>
-        */}
       </View>
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
