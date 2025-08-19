@@ -1,6 +1,6 @@
 export function formatRelativeTime(date: Date | null): string {
   if (!date) {
-    return "Unknown";
+    return ": Unknown";
   }
 
   const now = new Date();

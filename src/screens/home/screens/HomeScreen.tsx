@@ -410,7 +410,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       ? "#db8a47ff"
       : "#b0b3c6";
 
-  const mood = partnerMood?.mood || "No mood";
+  const mood = partnerMood?.mood || null;
   const batteryLevel = partnerStatus?.batteryLevel || null;
   const distanceFromHome = partnerStatus?.distance || null;
 

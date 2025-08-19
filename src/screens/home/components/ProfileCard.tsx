@@ -281,11 +281,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               }}
             >
               <Text style={[styles.statusText, { color: statusColor }]}>
-                Status: {status}
+                {status}
               </Text>
             </Animated.View>
             <Text style={styles.lastSeenText}>
-              Last seen:{" "}
+              Last updated{" "}
               {formatRelativeTime(lastSeen ? new Date(lastSeen) : null)}
             </Text>
             {status === "Away" && (
@@ -295,7 +295,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             )}
           </View>
           <View style={styles.moodGroup}>
-            <Text style={styles.moodText}>Mood: {mood}</Text>
+            <Text style={styles.moodText}>
+              {mood ? `${partner?.name} is ${mood}` : "No mood"}
+            </Text>
             {batteryLevel !== undefined && (
               <View style={styles.batteryContainer}>
                 <MaterialCommunityIcons
