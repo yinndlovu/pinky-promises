@@ -31,7 +31,7 @@ export async function startBackgroundLocationTracking() {
 
     await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
       accuracy: Location.Accuracy.Balanced,
-      timeInterval: 20 * 60 * 1000,
+      timeInterval: 15 * 60 * 1000,
       distanceInterval: 100,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
@@ -39,9 +39,7 @@ export async function startBackgroundLocationTracking() {
         notificationBody: "Tracking your home status...",
       },
     });
-  } catch (error) {
-    console.error("Failed to start background location tracking:", error);
-  }
+  } catch (error) {}
 }
 
 export async function checkLocationPermissions() {
@@ -54,7 +52,6 @@ export async function checkLocationPermissions() {
       background: backgroundStatus.status,
     };
   } catch (error) {
-    console.error("Failed to check location permissions:", error);
     return {
       foreground: "undetermined",
       background: "undetermined",

@@ -13,7 +13,7 @@ import {
 } from "../../../../services/api/ours/specialDateService";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { AnniversaryProps, SpecialDate } from "../../../../types/SpecialDate";
-import { formatProfileDisplayDate } from "../../../../utils/formatDate";
+import { formatProfileDisplayDate } from "../../../../utils/formatters/formatDate";
 
 // screen content
 import UpdateSpecialDateModal from "../../../../components/modals/input/UpdateSpecialDateModal";

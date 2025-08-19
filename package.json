@@ -24,6 +24,7 @@
     "axios": "^1.10.0",
     "base64-arraybuffer": "^1.0.2",
     "expo": "53.0.20",
+    "expo-battery": "^9.1.4",
     "expo-blur": "^14.1.5",
     "expo-clipboard": "^7.1.5",
     "expo-constants": "^17.1.7",
@@ -41,6 +42,7 @@
     "react-native": "0.79.5",
     "react-native-compressor": "^1.12.0",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-get-random-values": "^1.11.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-maps": "1.20.1",
     "react-native-modal-selector": "^2.1.2",
@@ -48,7 +50,9 @@
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "^4.11.1",
     "react-native-sse": "^1.2.1",
-    "react-native-web": "^0.20.0"
+    "react-native-web": "^0.20.0",
+    "socket.io-client": "^4.8.1",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

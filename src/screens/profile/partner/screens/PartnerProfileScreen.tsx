@@ -28,7 +28,7 @@ import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import { getReceivedMessages } from "../../../../services/api/profiles/messageStorageService";
 import { getPartnerDistance } from "../../../../services/api/profiles/distanceService";
-import { formatDistance } from "../../../../utils/formatDistance";
+import { formatDistance } from "../../../../utils/formatters/formatDistance";
 
 // screen content
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";

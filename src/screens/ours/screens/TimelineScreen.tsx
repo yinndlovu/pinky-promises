@@ -21,7 +21,7 @@ import {
   getTimeline,
   createTimelineRecord,
 } from "../../../services/api/ours/timelineService";
-import { formatDateYearly } from "../../../utils/formatDate";
+import { formatDateYearly } from "../../../utils/formatters/formatDate";
 
 const TimelineScreen = () => {
   // variables
@@ -42,7 +42,7 @@ const TimelineScreen = () => {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 4000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);

@@ -13,6 +13,10 @@ import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Image } from "expo-image";
 import Feather from "@expo/vector-icons/build/Feather";
+import { FontAwesome6 } from "@expo/vector-icons";
+import "react-native-get-random-values";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getBatteryLevelAsync } from "expo-battery";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
@@ -21,6 +25,8 @@ import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 import { SSEProvider } from "./src/contexts/SSEContext";
 import { navigationRef } from "./src/utils/navigation";
+import { InviteProvider } from "./src/games/context/InviteContext";
+import { updateBatteryStatus } from "./src/services/api/profiles/batteryStatusService";
 
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/screens/PartnerProfileScreen";
@@ -36,7 +42,7 @@ import UsernameScreen from "./src/screens/auth/register/UsernameScreen";
 import PasswordScreen from "./src/screens/auth/register/PasswordScreen";
 import HomeScreen from "./src/screens/home/screens/HomeScreen";
 import LoginScreen from "./src/screens/auth/login/LoginScreen";
-import NavigationBar from "./src/components/navigation/NavigationBar";
+import NavigationBar from "./src/layouts/NavigationBar";
 import SettingsScreen from "./src/screens/settings/screens/SettingsScreen";
 import ProfileScreen from "./src/screens/profile/user/screens/ProfileScreen";
 import OursScreen from "./src/screens/ours/screens/OursScreen";
@@ -53,6 +59,10 @@ import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessage
 import CartScreen from "./src/screens/gifts/screens/CartScreen";
 import LoadingSpinner from "./src/components/loading/LoadingSpinner";
 import AccountScreen from "./src/screens/settings/account/AccountScreen";
+import GameListScreen from "./src/games/game-list/screens/GameListScreen";
+import GameWaitingScreen from "./src/games/room/GameWaitingScreen";
+import GameSetupScreen from "./src/games/trivia/screens/GameSetupScreen";
+import GameSessionScreen from "./src/games/trivia/screens/GameSessionScreen";
 
 // variables
 const Stack = createStackNavigator();
@@ -96,6 +106,26 @@ function AIHeader() {
   );
 }
 
+async function checkBatteryStatus() {
+  try {
+    const token = await AsyncStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    const batteryLevel = await getBatteryLevelAsync();
+
+    if (batteryLevel === null) {
+      return;
+    }
+
+    const percent = Math.round(batteryLevel * 100);
+
+    await updateBatteryStatus(token, percent);
+  } catch (error) {}
+}
+
 // screens
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -103,6 +133,7 @@ function AppContent() {
   useEffect(() => {
     if (isAuthenticated) {
       registerForPushNotificationsAsync();
+      checkBatteryStatus();
     }
   }, [isAuthenticated]);
 
@@ -125,11 +156,11 @@ function AppContent() {
           transitionSpec: {
             open: {
               animation: "timing",
-              config: { duration: 450 },
+              config: { duration: 400 },
             },
             close: {
               animation: "timing",
-              config: { duration: 450 },
+              config: { duration: 400 },
             },
           },
         }}
@@ -430,6 +461,64 @@ function AppContent() {
             headerTitleAlign: "center",
           }}
         />
+        <Stack.Screen
+          name="GameListScreen"
+          component={GameListScreen}
+          options={({ navigation }) => ({
+            headerShown: true,
+            title: "Games",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+            headerRight: () => (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.setParams({ showOptions: true } as any)
+                }
+                style={{ marginRight: 16 }}
+              >
+                <FontAwesome6 name="chart-simple" size={22} color="#fff" />
+              </TouchableOpacity>
+            ),
+          })}
+        />
+        <Stack.Screen
+          name="GameWaitingScreen"
+          component={GameWaitingScreen as any}
+          options={{
+            headerShown: true,
+            title: "Game Room",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="GameSetupScreen"
+          component={GameSetupScreen}
+          options={{
+            headerShown: true,
+            title: "Setup",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
+        <Stack.Screen
+          name="GameSessionScreen"
+          component={GameSessionScreen as any}
+          options={{
+            headerShown: true,
+            title: "Playing Trivia",
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+            headerTitleAlign: "center",
+          }}
+        />
       </Stack.Navigator>
       <StatusBar style="light" />
     </>
@@ -487,7 +576,9 @@ export default function App() {
                 },
               }}
             >
-              <AppContent />
+              <InviteProvider>
+                <AppContent />
+              </InviteProvider>
             </NavigationContainer>
           </SSEProvider>
         </PersistQueryClientProvider>

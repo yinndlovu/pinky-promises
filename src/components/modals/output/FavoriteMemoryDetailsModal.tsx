@@ -11,7 +11,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 
 // internal
-import { formatDateDMY } from "../../../utils/formatDate";
+import { formatDateDMY } from "../../../utils/formatters/formatDate";
 
 // types
 type Props = {

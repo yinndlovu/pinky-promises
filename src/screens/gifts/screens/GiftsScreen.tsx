@@ -12,7 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
-import { Feather, FontAwesome5 } from "@expo/vector-icons";
+import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // screen content
@@ -35,7 +35,7 @@ import {
   updateSetMonthlyGift,
 } from "../../../services/api/gifts/setMonthlyGiftService";
 import { useAuth } from "../../../contexts/AuthContext";
-import { formatDateDMY, formatTime } from "../../../utils/formatDate";
+import { formatDateDMY, formatTime } from "../../../utils/formatters/formatDate";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -75,7 +75,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 4000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
@@ -269,14 +269,9 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
-          onPress={() => {
-            setAlertMessage(
-              "Woo, see someone wants to play some games already... They are currently locked, oops 👀"
-            );
-            setAlertVisible(true);
-          }}
+          onPress={() => navigation.navigate("GameListScreen")}
         >
-          <FontAwesome5 name="gamepad" size={22} color="#fff" />
+          <Ionicons name="game-controller-outline" size={22} color="#fff" />
         </TouchableOpacity>
         <Text
           style={{
@@ -287,6 +282,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         >
           Presents
         </Text>
+
         <TouchableOpacity
           style={{
             position: "absolute",

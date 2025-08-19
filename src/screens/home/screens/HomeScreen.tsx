@@ -40,10 +40,11 @@ import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
-} from "../../../utils/formatDate";
-import {
-  checkLocationPermissions,
-} from "../../../services/location/locationPermissionService";
+} from "../../../utils/formatters/formatDate";
+import { checkLocationPermissions } from "../../../services/location/locationPermissionService";
+import { useInvite } from "../../../games/context/InviteContext";
+import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
+import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -62,6 +63,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
+  const { invite, inviteAccepted, setInviteAccepted } = useInvite();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -83,8 +85,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const handleInteraction = async (action: string) => {
     setActionsModalVisible(false);
     setInteractionLoading(true);
+
     try {
       const token = await AsyncStorage.getItem("token");
+
       if (!token) {
         setError("Session expired, please log in again");
         return;
@@ -99,7 +103,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         getInteractionFeedback(action, partner?.name || "your partner")
       );
       setAlertVisible(true);
-      refetchUnseen();
       refetchActivities();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to interact");
@@ -135,7 +138,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         home.latitude,
         home.longitude
       );
-      const isAtHome = distance < 100;
+      const isAtHome = distance < 150;
 
       await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
     } catch (err) {}
@@ -328,7 +331,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return (
       <Image
         source={
-          avatarUri ? avatarUri : require("../../../assets/default-avatar-two.png")
+          avatarUri
+            ? avatarUri
+            : require("../../../assets/default-avatar-two.png")
         }
         style={styles.avatar}
         contentFit="cover"
@@ -406,12 +411,46 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       ? "#db8a47ff"
       : "#b0b3c6";
 
-  const mood = partnerMood?.mood || "No mood";
+  const mood = partnerMood?.mood || null;
+  const batteryLevel = partnerStatus?.batteryLevel || null;
+  const distanceFromHome = partnerStatus?.distance || null;
+
+  const lastSeen = partnerStatus?.updatedAt ?? null;
 
   // use effects
   useEffect(() => {
     checkAndUpdateHomeStatus();
   }, []);
+
+  useEffect(() => {
+    if (inviteAccepted && invite) {
+      (async () => {
+        try {
+          const yourInfo = await fetchCurrentUserProfileAndAvatar();
+          const partnerInfo = await fetchPartnerProfileAndAvatar();
+
+          if (!yourInfo || !partnerInfo) {
+            alert("Failed to fetch profile information. Please try again.");
+            setInviteAccepted(false);
+            return;
+          }
+
+          navigation.navigate("GameWaitingScreen", {
+            gameName: invite.gameName,
+            yourInfo,
+            partnerInfo,
+            roomId: invite.roomId,
+            isInviter: false,
+          });
+          setInviteAccepted(false);
+        } catch (error) {
+          console.error("Error navigating to waiting screen:", error);
+          alert("An error occurred. Please try again.");
+          setInviteAccepted(false);
+        }
+      })();
+    }
+  }, [inviteAccepted, invite, navigation]);
 
   useEffect(() => {
     if (partnerId) {
@@ -422,7 +461,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       checkAndUpdateHomeStatus();
-      const interval = setInterval(checkAndUpdateHomeStatus, 20 * 60 * 1000);
+      const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
   );
@@ -433,7 +472,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 4000);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -578,6 +617,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             statusColor={statusColor}
             mood={mood}
             isActive={isActive}
+            batteryLevel={batteryLevel}
+            distanceFromHome={distanceFromHome}
+            lastSeen={lastSeen}
             onPress={() => navigation.navigate("PartnerProfile")}
             renderPartnerImage={renderPartnerImage}
           />
