@@ -9,6 +9,9 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
+// internal
+import { formatRelativeTime } from "../../../utils/formatRelativeTime";
+
 // types
 type ProfileCardProps = {
   partner: any;
@@ -17,6 +20,9 @@ type ProfileCardProps = {
   statusColor: string;
   mood: string;
   isActive: boolean;
+  lastSeen?: string;
+  batteryLevel?: number;
+  distanceFromHome?: string;
   onPress: () => void;
   renderPartnerImage: () => React.ReactNode;
 };
@@ -27,14 +33,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   statusColor,
   mood,
   isActive,
+  lastSeen,
+  batteryLevel = 0,
+  distanceFromHome,
   onPress,
   renderPartnerImage,
 }) => {
-  const lastSeen = "10 minutes ago";
-  const batteryLevel = 75;
-  const distanceFromHome = "2.5 km";
-
-  const getBatteryIcon = (level: number) => {
+  const getBatteryIcon = (
+    level: number
+  ): "battery" | "battery-70" | "battery-30" | "battery-outline" => {
     if (level >= 80) {
       return "battery";
     }
@@ -46,8 +53,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     }
     return "battery-outline";
   };
-
-  const batteryIcon = getBatteryIcon(batteryLevel);
 
   // animation variables
   const breatheAnim = useRef(new Animated.Value(1)).current;
@@ -279,7 +284,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 Status: {status}
               </Text>
             </Animated.View>
-            <Text style={styles.lastSeenText}>Last seen: {lastSeen}</Text>
+            <Text style={styles.lastSeenText}>
+              Last seen:{" "}
+              {formatRelativeTime(lastSeen ? new Date(lastSeen) : null)}
+            </Text>
             {status === "Away" && (
               <Text style={styles.distanceText}>
                 {distanceFromHome} from home
@@ -288,14 +296,16 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </View>
           <View style={styles.moodGroup}>
             <Text style={styles.moodText}>Mood: {mood}</Text>
-            <View style={styles.batteryContainer}>
-              <MaterialCommunityIcons
-                name={batteryIcon}
-                size={18}
-                color="#b0b3c6"
-              />
-              <Text style={styles.batteryText}>{batteryLevel}%</Text>
-            </View>
+            {batteryLevel !== undefined && (
+              <View style={styles.batteryContainer}>
+                <MaterialCommunityIcons
+                  name={getBatteryIcon(batteryLevel)}
+                  size={18}
+                  color="#b0b3c6"
+                />
+                <Text style={styles.batteryText}>{batteryLevel}%</Text>
+              </View>
+            )}
           </View>
         </View>
 

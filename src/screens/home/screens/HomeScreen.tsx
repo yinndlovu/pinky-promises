@@ -411,6 +411,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       : "#b0b3c6";
 
   const mood = partnerMood?.mood || "No mood";
+  const batteryLevel = partnerStatus?.batteryLevel || null;
+  const distanceFromHome = partnerStatus?.distance || null;
+
+  const lastSeen = partnerStatus?.updatedAt ?? null;
 
   // use effects
   useEffect(() => {
@@ -423,13 +427,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         try {
           const yourInfo = await fetchCurrentUserProfileAndAvatar();
           const partnerInfo = await fetchPartnerProfileAndAvatar();
-  
+
           if (!yourInfo || !partnerInfo) {
             alert("Failed to fetch profile information. Please try again.");
             setInviteAccepted(false);
             return;
           }
-  
+
           navigation.navigate("GameWaitingScreen", {
             gameName: invite.gameName,
             yourInfo,
@@ -612,6 +616,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             statusColor={statusColor}
             mood={mood}
             isActive={isActive}
+            batteryLevel={batteryLevel}
+            distanceFromHome={distanceFromHome}
+            lastSeen={lastSeen}
             onPress={() => navigation.navigate("PartnerProfile")}
             renderPartnerImage={renderPartnerImage}
           />

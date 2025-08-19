@@ -15,6 +15,8 @@ import { Image } from "expo-image";
 import Feather from "@expo/vector-icons/build/Feather";
 import { FontAwesome6 } from "@expo/vector-icons";
 import "react-native-get-random-values";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getBatteryLevelAsync } from "expo-battery";
 
 // internal
 import { registerForPushNotificationsAsync } from "./src/utils/notifications";
@@ -24,6 +26,7 @@ import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 import { SSEProvider } from "./src/contexts/SSEContext";
 import { navigationRef } from "./src/utils/navigation";
 import { InviteProvider } from "./src/games/context/InviteContext";
+import { updateBatteryStatus } from "./src/services/api/profiles/batteryStatusService";
 
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/screens/PartnerProfileScreen";
@@ -103,6 +106,26 @@ function AIHeader() {
   );
 }
 
+async function checkBatteryStatus() {
+  try {
+    const token = await AsyncStorage.getItem("token");
+
+    if (!token) {
+      return;
+    }
+
+    const batteryLevel = await getBatteryLevelAsync();
+
+    if (batteryLevel === null) {
+      return;
+    }
+
+    const percent = Math.round(batteryLevel * 100);
+
+    await updateBatteryStatus(token, percent);
+  } catch (error) {}
+}
+
 // screens
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -110,6 +133,7 @@ function AppContent() {
   useEffect(() => {
     if (isAuthenticated) {
       registerForPushNotificationsAsync();
+      checkBatteryStatus();
     }
   }, [isAuthenticated]);
 
