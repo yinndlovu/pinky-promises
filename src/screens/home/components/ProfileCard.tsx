@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 // internal
 import { formatRelativeTime } from "../../../utils/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatDistance";
+import { getBatteryIcon } from "../../../utils/getBatteryIcon";
 
 // types
 type ProfileCardProps = {
@@ -40,21 +41,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onPress,
   renderPartnerImage,
 }) => {
-  const getBatteryIcon = (
-    level: number
-  ): "battery" | "battery-70" | "battery-30" | "battery-outline" => {
-    if (level >= 80) {
-      return "battery";
-    }
-    if (level >= 60) {
-      return "battery-70";
-    }
-    if (level >= 30) {
-      return "battery-30";
-    }
-    return "battery-outline";
-  };
-
   // animation variables
   const breatheAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
