@@ -131,7 +131,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     return (
       <View style={styles.avatarContainer}>
         <Image
-          source={require("../../assets/default-avatar-two.png")}
+          source={require("../assets/default-avatar-two.png")}
           style={[
             styles.avatar,
             {

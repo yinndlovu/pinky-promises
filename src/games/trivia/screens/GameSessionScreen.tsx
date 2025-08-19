@@ -188,6 +188,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
 
   const handleQuit = () => {
     const socket = getTriviaSocket();
+
     if (socket && currentPlayerId) {
       socket.emit("leave_trivia", {
         roomId,
@@ -199,6 +200,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
 
   const handleSendReaction = (emoji: string) => {
     const socket = getTriviaSocket();
+    
     if (socket && currentPlayerId) {
       socket.emit("send_reaction", {
         roomId,
