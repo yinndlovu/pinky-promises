@@ -11,6 +11,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // internal
 import { formatRelativeTime } from "../../../utils/formatRelativeTime";
+import { formatDistance } from "../../../utils/formatDistance";
 
 // types
 type ProfileCardProps = {
@@ -22,7 +23,7 @@ type ProfileCardProps = {
   isActive: boolean;
   lastSeen?: string;
   batteryLevel?: number;
-  distanceFromHome?: string;
+  distanceFromHome: number;
   onPress: () => void;
   renderPartnerImage: () => React.ReactNode;
 };
@@ -288,11 +289,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               Last updated{" "}
               {formatRelativeTime(lastSeen ? new Date(lastSeen) : null)}
             </Text>
-            {status === "Away" && (
-              <Text style={styles.distanceText}>
-                {distanceFromHome} from home
-              </Text>
-            )}
+            {status === "Away" &&
+              typeof distanceFromHome === "number" &&
+              !isNaN(distanceFromHome) && (
+                <Text style={styles.distanceText}>
+                  {formatDistance(distanceFromHome)} from home
+                </Text>
+              )}
           </View>
           <View style={styles.moodGroup}>
             <Text style={styles.moodText}>
