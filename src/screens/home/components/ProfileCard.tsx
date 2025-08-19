@@ -298,7 +298,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Text style={styles.moodText}>
               {mood ? `${partner?.name} is ${mood}` : "No mood"}
             </Text>
-            {batteryLevel !== undefined && (
+            {batteryLevel !== undefined && batteryLevel !== null && (
               <View style={styles.batteryContainer}>
                 <MaterialCommunityIcons
                   name={getBatteryIcon(batteryLevel)}
