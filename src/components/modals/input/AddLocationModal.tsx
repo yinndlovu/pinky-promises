@@ -63,11 +63,15 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
           });
         } catch (e: any) {
           if (e.message?.includes("permission denied")) {
-            setError("Location permission denied. Please enable location access in your device settings.");
+            setError(
+              "Location permission denied. Please enable location access in your device settings."
+            );
           } else if (e.message?.includes("timeout")) {
             setError("Location request timed out. Please try again.");
           } else {
-            setError("Failed to get location. Please check your GPS and try again.");
+            setError(
+              "Failed to get location. Please check your GPS and try again."
+            );
           }
         }
         setLoading(false);
@@ -166,7 +170,9 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
             message={alertMessage}
             onClose={() => {
               setAlertVisible(false);
-              if (alertMessage === "Home location added!") onClose();
+              if (alertMessage === "Home location added") {
+                onClose();
+              }
             }}
           />
         </View>

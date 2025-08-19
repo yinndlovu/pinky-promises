@@ -21,13 +21,25 @@ import LoadingSpinner from "../../components/loading/LoadingSpinner";
 type RootStackParamList = {
   GameWaitingScreen: {
     gameName: string;
-    yourInfo: { id: string; name: string; avatarUrl: string };
-    partnerInfo?: { id: string; name: string; avatarUrl: string } | null;
+    yourInfo: {
+      id: string;
+      name: string;
+      avatarUrl: string;
+    };
+    partnerInfo?: {
+      id: string;
+      name: string;
+      avatarUrl: string;
+    } | null;
     roomId?: string;
   };
   GameSetupScreen: {
     roomId: string;
-    players: { id: string; name: string; avatarUrl: string }[];
+    players: {
+      id: string;
+      name: string;
+      avatarUrl: string;
+    }[];
     gameName: string;
     host: string;
   };
@@ -79,7 +91,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
 
     socket.on("invite_declined", ({ partnerId }) => {
       setInvite(null);
-      alert("Your invite was declined.");
+      alert("Your invite was declined");
     });
 
     return () => {
@@ -103,7 +115,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
   // handlers
   const handleAccept = async () => {
     if (!invite || !user) {
-      setToastMessage("No invite or user data available.");
+      setToastMessage("No invite or user data available");
       return;
     }
 
@@ -113,7 +125,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
       const userInfo = await fetchCurrentUserProfileAndAvatar();
 
       if (!userInfo) {
-        setToastMessage("Failed to fetch user profile.");
+        setToastMessage("Failed to fetch user profile");
         setInvite(null);
         return;
       }
