@@ -15,10 +15,10 @@ import { Image } from "expo-image";
 import { useQuery } from "@tanstack/react-query";
 
 // internal
-import { BASE_URL } from "../../configuration/config";
-import { buildCachedImageUrl } from "../../utils/imageCacheUtils";
+import { BASE_URL } from "../configuration/config";
+import { buildCachedImageUrl } from "../utils/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
-import { getOldestUnclaimedGift } from "../../services/api/gifts/monthlyGiftService";
+import { getOldestUnclaimedGift } from "../services/api/gifts/monthlyGiftService";
 
 // types
 type Props = {

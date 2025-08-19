@@ -9,42 +9,8 @@ import {
   ScrollView,
 } from "react-native";
 
-// game categories for trivia
-const CATEGORY_ID_TO_KEY: Record<number, string> = {
-  9: "general",
-  10: "books",
-  11: "film",
-  12: "music",
-  15: "videogames",
-  16: "boardgames",
-  17: "science",
-  18: "computers",
-  19: "mathematics",
-  20: "mythology",
-  21: "sports",
-  22: "geography",
-  23: "history",
-  25: "art",
-  26: "celebrities",
-  27: "animals",
-  28: "vehicles",
-  29: "comics",
-  30: "gadgets",
-  31: "anime",
-  32: "cartoons",
-};
-
-const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
-  videogames: "Video games",
-  boardgames: "Board games",
-  general: "General knowledge",
-};
-
-const categories = Object.entries(CATEGORY_ID_TO_KEY).map(([id, key]) => ({
-  id: parseInt(id),
-  name:
-    DISPLAY_NAME_OVERRIDES[key] || key.charAt(0).toUpperCase() + key.slice(1),
-}));
+// internal
+import { categories, CATEGORY_ID_TO_KEY } from "../constants/trivia";
 
 const GameSetupScreen = ({ navigation, route }: any) => {
   const { roomId, players, gameName, host } = route.params;

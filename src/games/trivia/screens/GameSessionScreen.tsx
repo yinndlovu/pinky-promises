@@ -19,12 +19,11 @@ import {
 } from "../../../services/games/trivia/triviaSocketService";
 import { useAuth } from "../../../contexts/AuthContext";
 import { Question } from "../interfaces/Question";
+import { DISPLAY_NAME_OVERRIDES } from "../constants/trivia";
 
 // content
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
-
-// content
 import GameSummaryModal from "../components/GameSummaryModal";
 
 // interfaces
@@ -45,12 +44,6 @@ interface GameSessionScreenProps {
   };
   navigation: any;
 }
-
-const DISPLAY_NAME_OVERRIDES: Record<string, string> = {
-  videogames: "Video Games",
-  boardgames: "Board Games",
-  general: "General Knowledge",
-};
 
 const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   // params
@@ -173,6 +166,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   // handlers
   const submitAnswer = (answer: string) => {
     const socket = getTriviaSocket();
+
     if (socket && currentPlayerId) {
       socket.emit("submit_answer", {
         roomId,

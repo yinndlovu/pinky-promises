@@ -39,7 +39,7 @@ import UsernameScreen from "./src/screens/auth/register/UsernameScreen";
 import PasswordScreen from "./src/screens/auth/register/PasswordScreen";
 import HomeScreen from "./src/screens/home/screens/HomeScreen";
 import LoginScreen from "./src/screens/auth/login/LoginScreen";
-import NavigationBar from "./src/components/navigation/NavigationBar";
+import NavigationBar from "./src/components/layouts/NavigationBar";
 import SettingsScreen from "./src/screens/settings/screens/SettingsScreen";
 import ProfileScreen from "./src/screens/profile/user/screens/ProfileScreen";
 import OursScreen from "./src/screens/ours/screens/OursScreen";
