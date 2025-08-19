@@ -18,7 +18,7 @@ import {
   viewSweetMessage,
 } from "../../../services/api/portal/sweetMessageService";
 import { Message } from "../../../types/Message";
-import { formatDateDMY } from "../../../utils/formatDate";
+import { formatDateDMY } from "../../../utils/formatters/formatDate";
 
 // content
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";

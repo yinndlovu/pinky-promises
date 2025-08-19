@@ -40,7 +40,7 @@ import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
-} from "../../../utils/formatDate";
+} from "../../../utils/formatters/formatDate";
 import { checkLocationPermissions } from "../../../services/location/locationPermissionService";
 import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";

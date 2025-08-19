@@ -19,7 +19,7 @@ import {
 } from "../../../services/api/portal/sweetMessageService";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import { Message } from "../../../types/Message";
-import { formatDateDMY } from "../../../utils/formatDate";
+import { formatDateDMY } from "../../../utils/formatters/formatDate";
 
 // content
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";

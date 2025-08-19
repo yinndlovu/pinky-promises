@@ -10,7 +10,7 @@ import {
 } from "react-native";
 
 // internal
-import { formatDateDMYHM } from "../../../../utils/formatDate";
+import { formatDateDMYHM } from "../../../../utils/formatters/formatDate";
 import {
   StoredMessage,
   PartnerMessageStorageProps,

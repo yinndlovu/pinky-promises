@@ -11,7 +11,7 @@ import {
 // internal
 import { SpecialDateProps } from "../../../types/SpecialDate";
 import { STANDARD_FIELDS } from "../../../helpers/specialDateHelpers";
-import { formatDateDMY } from "../../../utils/formatDate";
+import { formatDateDMY } from "../../../utils/formatters/formatDate";
 
 // helpers
 function formatExtraLabel(key: string): string {

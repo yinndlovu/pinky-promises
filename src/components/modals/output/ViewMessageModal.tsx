@@ -3,7 +3,7 @@ import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 
 // internal
-import { formatDateDMYHM } from "../../../utils/formatDate";
+import { formatDateDMYHM } from "../../../utils/formatters/formatDate";
 
 // types
 type Props = {

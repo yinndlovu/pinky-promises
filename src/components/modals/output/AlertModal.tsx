@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
   okButton: {
     backgroundColor: "#e03487",
     borderRadius: 14,
-    paddingVertical: 14,
+    paddingVertical: 12,
     width: "90%",
     alignSelf: "center",
     alignItems: "center",

@@ -10,8 +10,8 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // internal
-import { formatRelativeTime } from "../../../utils/formatRelativeTime";
-import { formatDistance } from "../../../utils/formatDistance";
+import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
+import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/getBatteryIcon";
 
 // types

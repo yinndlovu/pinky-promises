@@ -22,7 +22,7 @@ import {
 } from "../../../services/api/ours/favoriteMemoriesService";
 import { Memory } from "../../../types/Memory";
 import { useAuth } from "../../../contexts/AuthContext";
-import { formatDateDMY } from "../../../utils/formatDate";
+import { formatDateDMY } from "../../../utils/formatters/formatDate";
 
 // confirmation modal
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";

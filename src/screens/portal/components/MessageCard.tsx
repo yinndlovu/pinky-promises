@@ -10,7 +10,7 @@ import {
 
 // internal
 import { Message } from "../../../types/Message";
-import { formatDateDMYHM } from "../../../utils/formatDate";
+import { formatDateDMYHM } from "../../../utils/formatters/formatDate";
 
 // interfaces
 interface Props {

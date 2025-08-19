@@ -35,7 +35,7 @@ import {
   updateSetMonthlyGift,
 } from "../../../services/api/gifts/setMonthlyGiftService";
 import { useAuth } from "../../../contexts/AuthContext";
-import { formatDateDMY, formatTime } from "../../../utils/formatDate";
+import { formatDateDMY, formatTime } from "../../../utils/formatters/formatDate";
 
 // types
 type Props = NativeStackScreenProps<any>;

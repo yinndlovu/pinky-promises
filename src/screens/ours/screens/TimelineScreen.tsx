@@ -21,7 +21,7 @@ import {
   getTimeline,
   createTimelineRecord,
 } from "../../../services/api/ours/timelineService";
-import { formatDateYearly } from "../../../utils/formatDate";
+import { formatDateYearly } from "../../../utils/formatters/formatDate";
 
 const TimelineScreen = () => {
   // variables
