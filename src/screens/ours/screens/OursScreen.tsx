@@ -343,8 +343,7 @@ const OursScreen = ({ navigation }: Props) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        setAlertMessage("Session expired, please log in again");
-        setAlertVisible(true);
+        setError("Session expired, please log in again");
         setMemoryModalLoading(false);
 
         return;
