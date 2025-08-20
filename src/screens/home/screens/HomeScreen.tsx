@@ -45,6 +45,7 @@ import { checkLocationPermissions } from "../../../services/location/locationPer
 import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
+import { updateGeoInfo } from "../../../services/api/profiles/geoInfoService";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -141,6 +142,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const isAtHome = distance < 150;
 
       await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
+      await updateGeoInfo(token, coords.latitude, coords.longitude);
     } catch (err) {}
   };
 
