@@ -328,9 +328,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["recentActivities"],
       });
     } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to delete favorite memory"
-      );
+      setError(err.response?.data?.error || "Failed to delete favorite memory");
     }
 
     setMemoryModalLoading(false);
@@ -377,9 +375,7 @@ const OursScreen = ({ navigation }: Props) => {
         queryKey: ["aiContext", currentUserId],
       });
     } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to save favorite memory"
-      );
+      setError(err.response?.data?.error || "Failed to save favorite memory");
     }
 
     setMemoryModalLoading(false);
@@ -399,9 +395,7 @@ const OursScreen = ({ navigation }: Props) => {
       const memory = await getFavoriteMemoryById(token, memoryId);
       setDetailsMemory(memory);
     } catch (err: any) {
-      setError(
-        err.response?.data?.error || "Failed to view favorite memory"
-      );
+      setError(err.response?.data?.error || "Failed to view favorite memory");
       setDetailsMemory(null);
     }
     setDetailsLoading(false);

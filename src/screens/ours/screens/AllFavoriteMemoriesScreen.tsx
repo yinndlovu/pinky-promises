@@ -168,7 +168,9 @@ const AllFavoriteMemoriesScreen = () => {
       setAlertMessage("Favorite memory updated");
       setAlertVisible(true);
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.error || "Failed to update favorite memory");
+      setAlertMessage(
+        err.response?.data?.error || "Failed to update favorite memory"
+      );
       setAlertVisible(true);
     }
 
