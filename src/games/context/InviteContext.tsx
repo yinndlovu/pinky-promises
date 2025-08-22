@@ -136,6 +136,7 @@ export const InviteProvider: React.FC<{ children: React.ReactNode }> = ({
         socket.emit("accept_invite", {
           inviteId: invite.inviteId,
           partnerInfo: userInfo,
+          roomId: invite.roomId,
         });
 
         setInviteAccepted(true);

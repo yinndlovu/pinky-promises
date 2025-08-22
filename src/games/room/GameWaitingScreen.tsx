@@ -52,6 +52,7 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     partnerInfo,
     roomId: routeRoomId,
     showToast: shouldShowToast,
+    isInviter
   } = route.params;
 
   // variables
