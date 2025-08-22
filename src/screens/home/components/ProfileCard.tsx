@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Image,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -51,6 +52,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   const particle1Anim = useRef(new Animated.Value(0)).current;
   const particle2Anim = useRef(new Animated.Value(0)).current;
   const particle3Anim = useRef(new Animated.Value(0)).current;
+
+  //variables
+  const iconBaseUri = "https://maps.gstatic.com/weather/v1/sunny";
+  const isDarkMode = true;
+  const fileType = "png";
+  const iconUri = `${iconBaseUri}${isDarkMode ? "_dark" : ""}.${fileType}`;
 
   // use effects
   useEffect(() => {
@@ -246,18 +253,53 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           />
         )}
 
-        <View style={styles.profileContainer}>
-          <Animated.View
-            style={[
-              styles.avatarWrapper,
-              {
-                transform: [{ scale: heartBeatAnim }],
-              },
-            ]}
-          >
-            {renderPartnerImage()}
-          </Animated.View>
-          <Text style={styles.name}>{partner?.name || "No partner"}</Text>
+        <View
+          style={[
+            styles.profileContainer,
+            {
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            },
+          ]}
+        >
+          <View style={{ alignItems: "center" }}>
+            <Animated.View
+              style={[
+                styles.avatarWrapper,
+                { transform: [{ scale: heartBeatAnim }] },
+              ]}
+            >
+              {renderPartnerImage()}
+            </Animated.View>
+            <Text style={[styles.name, { marginBottom: 0 }]}>
+              {partner?.name || "No partner"}
+            </Text>
+          </View>
+
+          <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={{ uri: iconUri }}
+                style={{ width: 60, height: 60, marginRight: 12 }}
+              />
+
+              <View style={{ flexDirection: "column" }}>
+                <Text
+                  style={{ fontSize: 14, color: "#b0b3c6", fontWeight: "500" }}
+                >
+                  New York
+                </Text>
+                <Text style={{ fontSize: 12, color: "#b0b3c6" }}>10:45 AM</Text>
+              </View>
+            </View>
+
+            <View style={{ width: "100%", marginTop: 4, marginLeft: 12 }}>
+              <Text style={{ fontSize: 15, color: "#fff", fontWeight: "300" }}>
+                Sunny
+              </Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.statusContainer}>
@@ -272,7 +314,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </Text>
             </Animated.View>
             <Text style={styles.lastSeenText}>
-              Last updated{" "}
               {formatRelativeTime(lastSeen ? new Date(lastSeen) : null)}
             </Text>
             {status === "Away" &&
@@ -408,13 +449,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   name: {
-    fontSize: 26,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 12,
+    marginBottom: 14,
     textAlign: "center",
   },
   statusContainer: {
+    marginTop: 8,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
@@ -431,7 +473,6 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 14,
     color: "#b0b3c6",
-    letterSpacing: 0.5,
   },
   lastSeenText: {
     fontSize: 12,
@@ -446,7 +487,6 @@ const styles = StyleSheet.create({
   moodText: {
     fontSize: 14,
     color: "#b0b3c6",
-    letterSpacing: 0.5,
   },
   batteryContainer: {
     flexDirection: "row",
