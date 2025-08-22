@@ -64,7 +64,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
-  const { invite, inviteAccepted, setInviteAccepted } = useInvite();
+  const { invite, setInvite, inviteAccepted, setInviteAccepted } = useInvite();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -445,6 +445,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             isInviter: false,
           });
           setInviteAccepted(false);
+          setInvite(null);
         } catch (error) {
           console.error("Error navigating to waiting screen:", error);
           alert("An error occurred. Please try again.");
