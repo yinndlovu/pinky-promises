@@ -17,7 +17,7 @@ import { getBatteryIcon } from "../../../utils/getBatteryIcon";
 
 // helpers
 const getWeatherIconBase = (
-  weatherType: string | null,
+  weatherType?: string | null,
   isDaytime: boolean = true
 ) => {
   if (!weatherType) return isDaytime ? "sunny" : "clear";
@@ -57,7 +57,7 @@ const getWeatherIconBase = (
 };
 
 const getWeatherIconUri = (
-  weatherType: string | null,
+  weatherType?: string | null,
   isDaytime: boolean = true
 ) => {
   const base = getWeatherIconBase(weatherType, isDaytime);
