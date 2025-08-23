@@ -14,22 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/getBatteryIcon";
-import { weatherIcons } from "../../../utils/weatherIcons";
-
-const getWeatherIcon = (
-  weatherType?: string | null,
-  isDaytime: boolean = true
-) => {
-  if (!weatherType) {
-    return isDaytime ? weatherIcons["clear"] : weatherIcons["clear_night"];
-  }
-
-  const normalized = weatherType.trim().toLowerCase().replace(/ /g, "_");
-
-  const key = isDaytime ? normalized : `${normalized}_night`;
-
-  return weatherIcons[key] || weatherIcons["clear"];
-};
+import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
 
 // types
 type ProfileCardProps = {
