@@ -418,6 +418,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const distanceFromHome = partnerStatus?.distance || null;
 
   const lastSeen = partnerStatus?.updatedAt ?? null;
+  const currentWeather = partnerStatus?.currentWeather ?? null;
+  const weatherType = partnerStatus?.weatherType || null;
+  const weatherDescription = partnerStatus?.weatherDescription || null;
+  const userLocation = partnerStatus?.userLocation ?? null;
+  const userTimezone = partnerStatus?.userTimezone || null;
+  const isDaytime = partnerStatus?.isDaytime ?? null;
 
   // use effects
   useEffect(() => {
@@ -625,6 +631,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             lastSeen={lastSeen}
             onPress={() => navigation.navigate("PartnerProfile")}
             renderPartnerImage={renderPartnerImage}
+            currentWeather={currentWeather}
+            weatherType={weatherType}
+            weatherDescription={weatherDescription}
+            userLocation={userLocation}
+            userTimezone={userTimezone}
+            isDaytime={isDaytime}
           />
         )}
         <View style={styles.buttonRow}>

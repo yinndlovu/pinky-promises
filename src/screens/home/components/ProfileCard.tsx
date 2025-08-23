@@ -14,54 +14,21 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/getBatteryIcon";
+import { weatherIcons } from "../../../utils/weatherIcons";
 
-// helpers
-const getWeatherIconBase = (
+const getWeatherIcon = (
   weatherType?: string | null,
   isDaytime: boolean = true
 ) => {
-  if (!weatherType) return isDaytime ? "sunny" : "clear";
-
-  const normalized = weatherType.toLowerCase().replace(/ /g, "_");
-
-  const dayNightMap: Record<string, { day: string; night: string }> = {
-    clear: { day: "sunny", night: "clear" },
-    clear_sky: { day: "sunny", night: "clear" },
-    mostly_clear: { day: "mostly_sunny", night: "mostly_clear" },
-    few_clouds: { day: "mostly_sunny", night: "mostly_clear_night" },
-    partly_cloudy: { day: "partly_cloudy", night: "partly_cloudy_night" },
-    scattered_clouds: { day: "partly_cloudy", night: "partly_cloudy_night" },
-    mostly_cloudy: { day: "mostly_cloudy_day", night: "mostly_cloudy_night" },
-    broken_clouds: { day: "mostly_cloudy_day", night: "mostly_cloudy_night" },
-    overcast: { day: "cloudy", night: "cloudy" },
-    scattered_showers: {
-      day: "scattered_showers_day",
-      night: "scattered_showers_night",
-    },
-    light_rain_showers: {
-      day: "scattered_showers_day",
-      night: "scattered_showers_night",
-    },
-    isolated_thunderstorms: {
-      day: "isolated_scattered_tstorms_day",
-      night: "isolated_scattered_tstorms_night",
-    },
-  };
-
-  const mapped = dayNightMap[normalized];
-  if (mapped) {
-    return isDaytime ? mapped.day : mapped.night;
+  if (!weatherType) {
+    return isDaytime ? weatherIcons["clear"] : weatherIcons["clear_night"];
   }
 
-  return normalized;
-};
+  const normalized = weatherType.trim().toLowerCase().replace(/ /g, "_");
 
-const getWeatherIconUri = (
-  weatherType?: string | null,
-  isDaytime: boolean = true
-) => {
-  const base = getWeatherIconBase(weatherType, isDaytime);
-  return `https://maps.gstatic.com/weather/v1/${base}_dark.svg`;
+  const key = isDaytime ? normalized : `${normalized}_night`;
+
+  return weatherIcons[key] || weatherIcons["clear"];
 };
 
 // types
@@ -77,7 +44,7 @@ type ProfileCardProps = {
   distanceFromHome: number;
   onPress: () => void;
   renderPartnerImage: () => React.ReactNode;
-  currentWeather?: string | null;
+  currentWeather?: number | null;
   weatherType?: string | null;
   weatherDescription?: string | null;
   userLocation?: string | null;
@@ -115,7 +82,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   const particle3Anim = useRef(new Animated.Value(0)).current;
 
   /// dynamic variables
-  const iconUri = getWeatherIconUri(weatherType, isDaytime);
+  const iconSource = getWeatherIcon(weatherType, isDaytime);
 
   let currentTime = "Unknown";
   if (userTimezone) {
@@ -337,7 +304,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             },
           ]}
         >
-          {/* Partner section */}
           <View style={{ alignItems: "center" }}>
             <Animated.View
               style={[
@@ -355,7 +321,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Image
-                source={{ uri: iconUri }}
+                source={iconSource}
                 style={{ width: 70, height: 70, marginRight: 12 }}
               />
 
@@ -368,20 +334,22 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                     marginBottom: 2,
                   }}
                 >
-                  25°C
+                  {currentWeather !== null ? `${currentWeather}°C` : "Unknown"}
                 </Text>
                 <Text
                   style={{ fontSize: 14, color: "#b0b3c6", fontWeight: "500" }}
                 >
-                  New York
+                  {userLocation || "Unknown"}
                 </Text>
-                <Text style={{ fontSize: 12, color: "#b0b3c6" }}>10:45 AM</Text>
+                <Text style={{ fontSize: 12, color: "#b0b3c6" }}>
+                  {currentTime}
+                </Text>
               </View>
             </View>
 
             <View style={{ width: "100%", marginTop: 4, marginLeft: 12 }}>
               <Text style={{ fontSize: 15, color: "#fff", fontWeight: "300" }}>
-                Sunny
+                {weatherDescription || "Unknown"}
               </Text>
             </View>
           </View>
