@@ -1,5 +1,5 @@
 // external
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/getBatteryIcon";
 import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
+import { useClockTick } from "../../../hooks/clockTick";
 
 // types
 type ProfileCardProps = {
@@ -60,32 +61,40 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const statusPulseAnim = useRef(new Animated.Value(1)).current;
   const heartBeatAnim = useRef(new Animated.Value(1)).current;
-
   const borderGlowAnim = useRef(new Animated.Value(0)).current;
   const particle1Anim = useRef(new Animated.Value(0)).current;
   const particle2Anim = useRef(new Animated.Value(0)).current;
   const particle3Anim = useRef(new Animated.Value(0)).current;
 
+  // use states
+  const [currentTime, setCurrentTime] = useState<string>("Unknown");
+
   /// dynamic variables
   const iconSource = getWeatherIcon(weatherType, isDaytime);
 
-  let currentTime = "Unknown";
-  if (userTimezone) {
+  // hook
+  useClockTick(30 * 1000);
+
+  // use effects
+  useEffect(() => {
+    if (!userTimezone) {
+      return;
+    }
+
+    const date = new Date();
     try {
-      const date = new Date();
       const formatter = new Intl.DateTimeFormat("en-US", {
         timeZone: userTimezone,
         hour: "numeric",
         minute: "numeric",
         hour12: true,
       });
-      currentTime = formatter.format(date);
-    } catch (e) {
-      currentTime = "Unknown";
+      setCurrentTime(formatter.format(date));
+    } catch {
+      setCurrentTime("Unknown");
     }
-  }
+  }, [userTimezone, Date.now()]);
 
-  // use effects
   useEffect(() => {
     if (isActive) {
       const breatheAnimation = Animated.loop(
