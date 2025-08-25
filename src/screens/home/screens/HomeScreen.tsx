@@ -20,6 +20,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
+import LottieView from "lottie-react-native";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -56,6 +57,10 @@ import PortalPreview from "../components/PortalPreview";
 import ProfileCard from "../components/ProfileCard";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
+
+// animation files
+import { animationMap } from "../../../utils/animations/getAnimation";
+import defaultAnimation from "../../../assets/animations/hug.json";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -680,7 +685,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.interactionCardTitle}>
               LOOK WHAT YOUR BABY JUST DID
             </Text>
-            <View style={styles.interactionCard}>
+            <View style={[styles.interactionCard, { position: "relative" }]}>
               <Feather
                 name="bell"
                 size={22}
@@ -689,8 +694,26 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   position: "absolute",
                   top: 14,
                   right: 16,
+                  zIndex: 2,
                 }}
               />
+              {unseenInteractions[unseenInteractions.length - 1] && (
+                <LottieView
+                  source={
+                    animationMap[
+                      unseenInteractions[unseenInteractions.length - 1].action
+                    ] || defaultAnimation
+                  }
+                  autoPlay
+                  loop
+                  style={{
+                    width: 80,
+                    height: 80,
+                    alignSelf: "center",
+                    zIndex: 1,
+                  }}
+                />
+              )}
               {unseenInteractions.map((interaction: any, idx: number) => (
                 <View
                   key={interaction.id}
@@ -704,7 +727,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                       color: "#fff",
                       fontSize: 16,
                       fontWeight: "bold",
-                      marginTop: 8,
+                      marginTop: 12,
+                      textAlign: "center",
                     }}
                   >
                     {partner?.name || "Your partner"}{" "}
@@ -715,6 +739,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                       color: "#b0b3c6",
                       fontSize: 12,
                       marginTop: 6,
+                      textAlign: "center",
                     }}
                   >
                     {formatDateDMY(interaction.createdAt)} •{" "}
