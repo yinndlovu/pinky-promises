@@ -46,8 +46,10 @@ const AllFavoriteMemoriesScreen = () => {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingMemory, setEditingMemory] = useState<Memory | null>(null);
   const [editLoading, setEditLoading] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
 
   // fetch functions
   const {
@@ -128,11 +130,13 @@ const AllFavoriteMemoriesScreen = () => {
         queryKey: ["recentFavoriteMemories"],
       });
 
+      setAlertTitle("Deleted");
       setAlertMessage("Favorite memory deleted");
-      setAlertVisible(true);
+      setShowSuccess(true);
     } catch (err) {
+      setAlertTitle("Failed");
       setAlertMessage("Failed to delete favorite memory");
-      setAlertVisible(true);
+      setShowError(true);
     }
 
     setEditLoading(false);
@@ -165,13 +169,15 @@ const AllFavoriteMemoriesScreen = () => {
         queryKey: ["recentFavoriteMemories"],
       });
 
+      setAlertTitle("Updated");
       setAlertMessage("Favorite memory updated");
-      setAlertVisible(true);
+      setShowSuccess(true);
     } catch (err: any) {
+      setAlertTitle("Failed");
       setAlertMessage(
         err.response?.data?.error || "Failed to update favorite memory"
       );
-      setAlertVisible(true);
+      setShowError(true);
     }
 
     setEditLoading(false);
@@ -279,9 +285,21 @@ const AllFavoriteMemoriesScreen = () => {
       />
 
       <AlertModal
-        visible={alertVisible}
+        visible={showSuccess}
+        type="success"
+        title={alertTitle}
         message={alertMessage}
-        onClose={() => setAlertVisible(false)}
+        buttonText="Great"
+        onClose={() => setShowSuccess(false)}
+      />
+
+      <AlertModal
+        visible={showError}
+        type="error"
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="Close"
+        onClose={() => setShowError(false)}
       />
 
       {editLoading && !editModalVisible && (

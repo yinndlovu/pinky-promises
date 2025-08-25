@@ -63,10 +63,11 @@ const OursScreen = ({ navigation }: Props) => {
   const [actionModalVisible, setActionModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [memoryModalVisible, setMemoryModalVisible] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
 
   // use states (processing)
   const [refreshing, setRefreshing] = useState(false);
@@ -154,9 +155,10 @@ const OursScreen = ({ navigation }: Props) => {
       await createSpecialDate(token, date, title, description);
 
       setAlertMessage("Special date created");
+      setAlertTitle("Created");
+      setShowSuccess(true);
       setAddModalVisible(false);
       setSelectedDate(null);
-      setAlertVisible(true);
 
       await queryClient.invalidateQueries({
         queryKey: ["specialDates"],
@@ -215,9 +217,10 @@ const OursScreen = ({ navigation }: Props) => {
       await updateSpecialDate(token, selectedDate.id, date, title, description);
 
       setAlertMessage("Special date updated");
+      setAlertTitle("Updated");
       setEditModalVisible(false);
       setSelectedDate(null);
-      setAlertVisible(true);
+      setShowSuccess(true);
 
       await queryClient.invalidateQueries({
         queryKey: ["specialDates"],
@@ -262,7 +265,8 @@ const OursScreen = ({ navigation }: Props) => {
       setDeleteModalVisible(false);
       setSelectedDate(null);
       setAlertMessage("Special date deleted");
-      setAlertVisible(true);
+      setAlertTitle("Deleted");
+      setShowSuccess(true);
 
       await queryClient.invalidateQueries({
         queryKey: ["specialDates"],
@@ -310,7 +314,8 @@ const OursScreen = ({ navigation }: Props) => {
 
       await deleteFavoriteMemory(token, memory.id);
       setAlertMessage("Favorite memory deleted");
-      setAlertVisible(true);
+      setAlertTitle("Deleted");
+      setShowSuccess(true);
 
       await queryClient.invalidateQueries({
         queryKey: ["recentFavoriteMemories"],
@@ -351,13 +356,15 @@ const OursScreen = ({ navigation }: Props) => {
         await updateFavoriteMemory(token, editingMemory.id, memoryText, date);
 
         setAlertMessage("Favorite memory updated");
+        setAlertTitle("Updated");
       } else {
         await createFavoriteMemory(token, memoryText, date);
         setAlertMessage("Favorite memory added");
+        setAlertTitle("Added");
       }
 
       setMemoryModalVisible(false);
-      setAlertVisible(true);
+      setShowSuccess(true);
 
       await queryClient.invalidateQueries({
         queryKey: ["recentFavoriteMemories"],
@@ -598,9 +605,12 @@ const OursScreen = ({ navigation }: Props) => {
       />
 
       <AlertModal
-        visible={alertVisible}
+        visible={showSuccess}
+        type="success"
+        title={alertTitle}
         message={alertMessage}
-        onClose={() => setAlertVisible(false)}
+        buttonText="Great"
+        onClose={() => setShowSuccess(false)}
       />
 
       <FavoriteMemoryDetailsModal

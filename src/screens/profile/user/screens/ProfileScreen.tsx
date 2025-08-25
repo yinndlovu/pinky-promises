@@ -41,7 +41,10 @@ import {
   getAboutUser,
   updateAboutUser,
 } from "../../../../services/api/profiles/aboutUserService";
-import { getPartner, getReceivedPartnerRequests } from "../../../../services/api/profiles/partnerService";
+import {
+  getPartner,
+  getReceivedPartnerRequests,
+} from "../../../../services/api/profiles/partnerService";
 import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
 import { FavoritesType } from "../../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
@@ -110,7 +113,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     useState(false);
   const [storingMessage, setStoringMessage] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [editMessageModalVisible, setEditMessageModalVisible] = useState(false);
 
   // use states (edit fields)
@@ -389,12 +394,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
 
       setStoreMessageModalVisible(false);
-      setAlertMessage("Message stored");
-      setAlertVisible(true);
+      setAlertTitle("Message Stored");
+      setAlertMessage("You have stored a message");
+      setShowSuccessAlert(true);
     },
     onError: (error: any) => {
+      setAlertTitle("Failed");
       setAlertMessage(error.response?.data?.error || "Failed to store message");
-      setAlertVisible(true);
+      setShowErrorAlert(true);
     },
   });
 
@@ -423,12 +430,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setEditingMessage(null);
       setEditTitle("");
       setEditMessageText("");
-      setAlertMessage("Message updated");
-      setAlertVisible(true);
+      setAlertTitle("Message Updated");
+      setAlertMessage("You have updated the message");
+      setShowSuccessAlert(true);
     },
     onError: (error: any) => {
-      setAlertMessage(error.response?.data?.error || "Failed to update message");
-      setAlertVisible(true);
+      setAlertTitle("Failed");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to update message"
+      );
+      setShowErrorAlert(true);
     },
   });
 
@@ -446,19 +457,26 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
 
       setConfirmationVisible(false);
-      setAlertMessage("Message deleted");
-      setAlertVisible(true);
+      setAlertTitle("Message Deleted");
+      setAlertMessage("You have deleted the message");
+      setShowSuccessAlert(true);
     },
     onError: (error: any) => {
-      setAlertMessage(error.response?.data?.error || "Failed to delete message");
-      setAlertVisible(true);
+      setAlertTitle("Failed");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to delete message"
+      );
+      setShowErrorAlert(true);
     },
   });
 
   // helpers
   const renderProfileImage = () => {
     if (avatarUri && profilePicUpdatedAt) {
-      const cachedImageUrl = buildCachedImageUrl(profileData?.id, profilePicUpdatedAt);
+      const cachedImageUrl = buildCachedImageUrl(
+        profileData?.id,
+        profilePicUpdatedAt
+      );
 
       return (
         <Image
@@ -771,13 +789,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       }
 
       await storeMessage(token, title, message);
-      setAlertMessage("Message stored");
+      setAlertTitle("Message Stored");
+      setAlertMessage("You have stored a message");
       setStoreMessageModalVisible(false);
-      setAlertVisible(true);
+      setShowSuccessAlert(true);
     } catch (error: any) {
+      setAlertTitle("Failed");
       setAlertMessage(error.response?.data?.error || "Failed to store message");
       setStoreMessageModalVisible(false);
-      setAlertVisible(true);
+      setShowErrorAlert(true);
     } finally {
       setStoringMessage(false);
     }
@@ -817,8 +837,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const handleSaveEdit = () => {
     if (!editingMessage || !editTitle.trim() || !editMessageText.trim()) {
+      setAlertTitle("Missing Fields");
       setAlertMessage("Please fill in all fields");
-      setAlertVisible(true);
+      setShowErrorAlert(true);
+
       return;
     }
 
@@ -1316,9 +1338,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           />
 
           <AlertModal
-            visible={alertVisible}
+            visible={showSuccessAlert}
+            type="success"
+            title={alertTitle}
             message={alertMessage}
-            onClose={() => setAlertVisible(false)}
+            buttonText="Great"
+            onClose={() => setShowSuccess(false)}
+          />
+
+          <AlertModal
+            visible={showErrorAlert}
+            type="error"
+            title={alertTitle}
+            message={alertMessage}
+            buttonText="Close"
+            onClose={() => setShowError(false)}
           />
         </View>
       </ScrollView>
