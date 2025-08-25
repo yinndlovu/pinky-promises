@@ -14,7 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/getBatteryIcon";
-//import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
+import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
 import { useClockTick } from "../../../hooks/clockTick";
 
 // types
@@ -69,8 +69,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   // use states
   const [currentTime, setCurrentTime] = useState<string>("Unknown");
 
-  /// dynamic variables
-  // const iconSource = getWeatherIcon(weatherType, isDaytime);
+  // dynamic variables
+  const iconSource = getWeatherIcon(weatherType, isDaytime);
 
   // hook
   useClockTick(30 * 1000);
@@ -315,7 +315,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <Image
-                /*source={iconSource}*/
+                source={iconSource}
                 style={{ width: 70, height: 70, marginRight: 12 }}
               />
 
