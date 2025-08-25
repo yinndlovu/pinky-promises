@@ -55,6 +55,7 @@ import AlertModal from "../../../components/modals/output/AlertModal";
 import PortalPreview from "../components/PortalPreview";
 import ProfileCard from "../components/ProfileCard";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -76,11 +77,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
+  const [currentAction, setCurrentAction] = useState<string | null>(null);
 
   // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [animationModalVisible, setAnimationModalVisible] = useState(false);
+  const [animationMessage, setAnimationMessage] = useState("");
 
   // handlers
   const handleInteraction = async (action: string) => {
@@ -100,10 +104,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         queryKey: ["recentActivities"],
       });
 
-      setAlertMessage(
+      setAnimationMessage(
         getInteractionFeedback(action, partner?.name || "your partner")
       );
-      setAlertVisible(true);
+      setAnimationModalVisible(true);
+      setCurrentAction(action);
       refetchActivities();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to interact");
@@ -768,6 +773,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         visible={alertVisible}
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
+      />
+
+      <InteractionAnimationModal
+        visible={animationModalVisible}
+        message={animationMessage}
+        action={currentAction}
+        onClose={() => {
+          setAlertVisible(false);
+          setCurrentAction(null);
+        }}
       />
     </View>
   );
