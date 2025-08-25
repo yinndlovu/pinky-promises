@@ -3,7 +3,7 @@ import { BASE_URL } from "../../../configuration/config";
 
 export async function getFavoriteMemoryById(token: string, memoryId: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/favorite-memories/get-favorite-memory/${memoryId}`,
+    `${BASE_URL}/favorite-memories/get-favorite-memory/${memoryId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -16,7 +16,7 @@ export async function getFavoriteMemoryById(token: string, memoryId: string) {
 
 export async function getAllFavoriteMemories(token: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/favorite-memories/get-favorite-memories`,
+    `${BASE_URL}/favorite-memories/get-favorite-memories`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -28,7 +28,7 @@ export async function getAllFavoriteMemories(token: string) {
 }
 
 export async function getRecentFavoriteMemories(token: string) {
-  const res = await axios.get(`${BASE_URL}/api/favorite-memories/recent`, {
+  const res = await axios.get(`${BASE_URL}/favorite-memories/recent`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -43,7 +43,7 @@ export async function createFavoriteMemory(
   date: string
 ) {
   const res = await axios.post(
-    `${BASE_URL}/api/favorite-memories/add-favorite-memory`,
+    `${BASE_URL}/favorite-memories/add-favorite-memory`,
     { memory, date },
     {
       headers: {
@@ -62,7 +62,7 @@ export async function updateFavoriteMemory(
   date: string
 ) {
   const res = await axios.put(
-    `${BASE_URL}/api/favorite-memories/edit-favorite-memory/${memoryId}`,
+    `${BASE_URL}/favorite-memories/edit-favorite-memory/${memoryId}`,
     { memory, date },
     {
       headers: {
@@ -76,7 +76,7 @@ export async function updateFavoriteMemory(
 
 export async function deleteFavoriteMemory(token: string, memoryId: string) {
   await axios.delete(
-    `${BASE_URL}/api/favorite-memories/delete-favorite-memory/${memoryId}`,
+    `${BASE_URL}/favorite-memories/delete-favorite-memory/${memoryId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

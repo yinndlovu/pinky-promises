@@ -3,7 +3,7 @@ import { BASE_URL } from "../../../configuration/config";
 
 export async function getOldestUnclaimedGift(token: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/gift/get-oldest-unclaimed-gift`,
+    `${BASE_URL}/gift/get-oldest-unclaimed-gift`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -14,7 +14,7 @@ export async function getOldestUnclaimedGift(token: string) {
 
 export async function claimMonthlyGift(token: string, giftId: string) {
   const res = await axios.put(
-    `${BASE_URL}/api/gift/claim-monthly-gift/${giftId}`,
+    `${BASE_URL}/gift/claim-monthly-gift/${giftId}`,
     {},
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -26,7 +26,7 @@ export async function claimMonthlyGift(token: string, giftId: string) {
 
 export async function getLastFiveClaimedGifts(token: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/gift/get-last-five-claimed-gifts`,
+    `${BASE_URL}/gift/get-last-five-claimed-gifts`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }

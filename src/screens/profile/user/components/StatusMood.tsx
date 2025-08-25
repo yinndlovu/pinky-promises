@@ -112,7 +112,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
 
       const token = await AsyncStorage.getItem("token");
 
-      await axios.put(`${BASE_URL}/api/location/add-home-location`, location, {
+      await axios.put(`${BASE_URL}/location/add-home-location`, location, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

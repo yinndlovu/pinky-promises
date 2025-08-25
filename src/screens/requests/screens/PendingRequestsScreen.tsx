@@ -79,7 +79,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
           if (req.sender) {
             try {
               const response = await axios.get(
-                `${BASE_URL}/api/profile/get-profile-picture/${req.sender.id}`,
+                `${BASE_URL}/profile/get-profile-picture/${req.sender.id}`,
                 {
                   headers: { Authorization: `Bearer ${token}` },
                   responseType: "arraybuffer",

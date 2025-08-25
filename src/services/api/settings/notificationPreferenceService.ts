@@ -50,7 +50,7 @@ export const NOTIFICATION_TYPES = [
 ];
 
 export async function getNotificationPreference(token: string, type: string) {
-  const res = await axios.get(`${BASE_URL}/api/notifications/preference/get`, {
+  const res = await axios.get(`${BASE_URL}/notifications/preference/get`, {
     params: { type },
     headers: {
       Authorization: `Bearer ${token}`,
@@ -66,7 +66,7 @@ export async function setNotificationPreference(
   value: boolean
 ) {
   const res = await axios.post(
-    `${BASE_URL}/api/notifications/preference/set`,
+    `${BASE_URL}/notifications/preference/set`,
     { type, value },
     {
       headers: {
@@ -79,7 +79,7 @@ export async function setNotificationPreference(
 }
 
 export async function getReminderInterval(token: string) {
-  const res = await axios.get(`${BASE_URL}/api/notifications/interval/get`, {
+  const res = await axios.get(`${BASE_URL}/notifications/interval/get`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -90,7 +90,7 @@ export async function getReminderInterval(token: string) {
 
 export async function setReminderInterval(token: string, hours: number) {
   const res = await axios.post(
-    `${BASE_URL}/api/notifications/interval/set`,
+    `${BASE_URL}/notifications/interval/set`,
     { hours },
     {
       headers: {

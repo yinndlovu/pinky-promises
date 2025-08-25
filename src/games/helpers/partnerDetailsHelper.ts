@@ -22,7 +22,7 @@ export async function fetchPartnerProfileAndAvatar() {
     }
 
     const pictureRes = await axios.get(
-      `${BASE_URL}/api/profile/get-profile-picture/${partner.id}`,
+      `${BASE_URL}/profile/get-profile-picture/${partner.id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

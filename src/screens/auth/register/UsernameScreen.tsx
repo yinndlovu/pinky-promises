@@ -62,7 +62,7 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await axios.get(
-          `${BASE_URL}/api/auth/validate-username?username=${encodeURIComponent(
+          `${BASE_URL}/auth/validate-username?username=${encodeURIComponent(
             username
           )}`
         );

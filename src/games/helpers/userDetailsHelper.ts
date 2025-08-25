@@ -15,7 +15,7 @@ export async function fetchCurrentUserProfileAndAvatar() {
       return;
     }
 
-    const profileRes = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
+    const profileRes = await axios.get(`${BASE_URL}/profile/get-profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     user = profileRes.data.user;
@@ -25,7 +25,7 @@ export async function fetchCurrentUserProfileAndAvatar() {
     }
 
     const pictureRes = await axios.get(
-      `${BASE_URL}/api/profile/get-profile-picture/${user.id}`,
+      `${BASE_URL}/profile/get-profile-picture/${user.id}`,
       {
         headers: { Authorization: `Bearer ${token}` },
         responseType: "arraybuffer",

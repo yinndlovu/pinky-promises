@@ -188,7 +188,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`,
+        `${BASE_URL}/profile/get-profile-picture/${partnerId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",

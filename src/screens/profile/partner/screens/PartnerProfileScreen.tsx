@@ -81,7 +81,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       }
 
       const response = await axios.get(
-        `${BASE_URL}/api/partnership/get-partner`,
+        `${BASE_URL}/partnership/get-partner`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -104,7 +104,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       }
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${partner?.id}`,
+        `${BASE_URL}/profile/get-profile-picture/${partner?.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",
@@ -138,7 +138,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         return null;
       }
 
-      const response = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
+      const response = await axios.get(`${BASE_URL}/profile/get-profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

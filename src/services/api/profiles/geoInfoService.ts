@@ -7,7 +7,7 @@ export async function updateGeoInfo(
   longitude: number
 ) {
   const res = await axios.put(
-    `${BASE_URL}/api/user-weather/update`,
+    `${BASE_URL}/user-weather/update`,
     { latitude, longitude },
     {
       headers: {

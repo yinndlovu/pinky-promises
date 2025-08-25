@@ -54,7 +54,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       }
 
       const userResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile`,
+        `${BASE_URL}/profile/get-profile`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -64,7 +64,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       setUserId(userId);
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
+        `${BASE_URL}/profile/get-profile-picture/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",

@@ -2,7 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function getTimeline(token: string) {
-  const res = await axios.get(`${BASE_URL}/api/timeline/records`, {
+  const res = await axios.get(`${BASE_URL}/timeline/records`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -13,7 +13,7 @@ export async function getTimeline(token: string) {
 
 export async function createTimelineRecord(token: string, record: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/timeline/add`,
+    `${BASE_URL}/timeline/add`,
     { record },
     {
       headers: {

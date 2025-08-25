@@ -145,7 +145,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         return;
       }
 
-      const res = await axios.get(`${BASE_URL}/api/profile/get-profile`, {
+      const res = await axios.get(`${BASE_URL}/profile/get-profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -327,7 +327,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       }
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${profileData?.id}`,
+        `${BASE_URL}/profile/get-profile-picture/${profileData?.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",
@@ -672,7 +672,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
 
         await axios.put(
-          `${BASE_URL}/api/profile/update-profile-picture`,
+          `${BASE_URL}/profile/update-profile-picture`,
           { image: base64String },
           {
             headers: { Authorization: `Bearer ${token}` },
@@ -716,13 +716,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       let body = {};
 
       if (field === "name") {
-        url = `${BASE_URL}/api/profile/update-name`;
+        url = `${BASE_URL}/profile/update-name`;
         body = { name: value };
       } else if (field === "username") {
-        url = `${BASE_URL}/api/profile/update-username`;
+        url = `${BASE_URL}/profile/update-username`;
         body = { username: value };
       } else if (field === "bio") {
-        url = `${BASE_URL}/api/profile/update-bio`;
+        url = `${BASE_URL}/profile/update-bio`;
         body = { bio: value };
       }
 

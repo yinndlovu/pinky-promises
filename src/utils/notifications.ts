@@ -44,7 +44,7 @@ export async function registerForPushNotificationsAsync() {
       if (authToken) {
         try {
           await axios.post(
-            `${BASE_URL}/api/push-token/save`,
+            `${BASE_URL}/push-token/save`,
             { token },
             { headers: { Authorization: `Bearer ${authToken}` } }
           );
