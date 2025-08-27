@@ -1,4 +1,4 @@
-# Pinky Promises mobile front-end repository
+# Pinky Promises Mobile Repository
 
 This is the mobile application / front end for Pinky Promises.
 
