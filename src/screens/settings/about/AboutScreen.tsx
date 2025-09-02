@@ -1,6 +1,9 @@
+// external
 import React from "react";
 import { Text, StyleSheet, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// internal
 import aboutText from "../../../configuration/aboutText";
 
 const AboutScreen = () => {
