@@ -684,7 +684,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setUploading(true);
 
         const token = await AsyncStorage.getItem("token");
-        const userId = profileData?.id;
 
         const mimeType = result.assets[0].mimeType || "image/jpeg";
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
@@ -1040,7 +1039,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <StatusMood
           status={homeStatus}
           statusDescription={statusDescription}
-          mood={moodData?.mood}
+          mood={moodData?.mood || "No mood set"}
           moodDescription={moodData?.description}
           onEdit={() => refetchMoodData()}
           onAddHome={() => {
