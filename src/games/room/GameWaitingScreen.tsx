@@ -52,7 +52,6 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     partnerInfo,
     roomId: routeRoomId,
     showToast: shouldShowToast,
-    isInviter
   } = route.params;
 
   // variables
@@ -106,11 +105,17 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
 
     socket.on("invite_accepted", ({ partnerInfo }) => {
       if (partnerInfo) {
-        setPlayers((prev) => [...prev, partnerInfo]);
+        setPlayers((prev) => {
+          const next = prev.some((p) => p.id === partnerInfo.id)
+            ? prev
+            : [...prev, partnerInfo];
 
-        if (players.length === 1) {
-          setCountdown(5);
-        }
+          if (next.length === 2 && countdown == null) {
+            setCountdown(5);
+          }
+          
+          return next;
+        });
       }
     });
 
@@ -137,8 +142,6 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       socket.off("invite_declined");
       socket.off("player_left");
       socket.off("error");
-
-      disconnectTriviaSocket();
     };
   }, []);
 
