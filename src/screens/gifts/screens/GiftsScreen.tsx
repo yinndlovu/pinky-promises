@@ -104,7 +104,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: giftLoading,
     refetch: refetchGift,
   } = useQuery({
-    queryKey: ["unclaimedGift"],
+    queryKey: ["unclaimedGift", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -123,7 +123,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: pastGiftsLoading,
     refetch: refetchPastGifts,
   } = useQuery({
-    queryKey: ["pastGifts"],
+    queryKey: ["pastGifts", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -185,8 +185,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       setModalVisible(true);
 
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["unclaimedGift"] });
-        queryClient.invalidateQueries({ queryKey: ["pastGifts"] });
+        queryClient.invalidateQueries({ queryKey: ["unclaimedGift", user?.id] });
+        queryClient.invalidateQueries({ queryKey: ["pastGifts", user?.id] });
       }, 1000);
     } catch (err: any) {
       setToastMessage(err.response?.data?.error || "Failed to open present");

@@ -22,10 +22,12 @@ import {
   createTimelineRecord,
 } from "../../../services/api/ours/timelineService";
 import { formatDateYearly } from "../../../utils/formatters/formatDate";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const TimelineScreen = () => {
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // use states
   const [modalVisible, setModalVisible] = useState(false);
@@ -53,7 +55,7 @@ const TimelineScreen = () => {
     isLoading: isTimelineLoading,
     refetch: refetchTimeline,
   } = useQuery({
-    queryKey: ["timeline"],
+    queryKey: ["timeline", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -77,9 +79,9 @@ const TimelineScreen = () => {
       return await createTimelineRecord(token, record);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["timeline"] });
+      queryClient.invalidateQueries({ queryKey: ["timeline", user?.id] });
       queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
 
       setModalVisible(false);

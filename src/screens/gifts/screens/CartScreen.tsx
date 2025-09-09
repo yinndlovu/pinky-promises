@@ -25,6 +25,7 @@ import {
   deleteItem,
 } from "../../../services/api/gifts/cartService";
 import { CartItem } from "../../../types/Cart";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -34,6 +35,7 @@ import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 const CartScreen = () => {
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // use states
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
@@ -62,7 +64,7 @@ const CartScreen = () => {
     isLoading: cartItemsLoading,
     refetch: refetchCartItems,
   } = useQuery({
-    queryKey: ["cartItems"],
+    queryKey: ["cartItems", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -81,7 +83,7 @@ const CartScreen = () => {
     isLoading: cartTotalLoading,
     refetch: refetchCartTotal,
   } = useQuery({
-    queryKey: ["cartTotal"],
+    queryKey: ["cartTotal", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -107,8 +109,8 @@ const CartScreen = () => {
       return await addItem(token, item, value);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+      queryClient.invalidateQueries({ queryKey: ["cartItems", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal", user?.id] });
 
       setNewItemName("");
       setNewItemValue("");
@@ -137,8 +139,8 @@ const CartScreen = () => {
       return await deleteItem(token, itemId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+      queryClient.invalidateQueries({ queryKey: ["cartItems", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal", user?.id] });
 
       setConfirmationVisible(false);
       setToastMessage("Item deleted from cart");
@@ -161,8 +163,8 @@ const CartScreen = () => {
       return clearCart(token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+      queryClient.invalidateQueries({ queryKey: ["cartItems", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal", user?.id] });
 
       setConfirmationVisible(false);
       setAlertTitle("Cart Cleared");

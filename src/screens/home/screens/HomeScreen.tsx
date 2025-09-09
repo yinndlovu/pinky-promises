@@ -47,6 +47,7 @@ import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
 import { updateGeoInfo } from "../../../services/api/profiles/geoInfoService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -71,6 +72,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
   const { invite, setInvite, inviteAccepted, setInviteAccepted } = useInvite();
+  const { user } = useAuth();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -106,7 +108,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       await interactWithPartner(token, action);
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
 
       setAnimationMessage(
@@ -162,7 +164,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: partnerLoading,
     refetch: refetchPartner,
   } = useQuery({
-    queryKey: ["partnerData"],
+    queryKey: ["partnerData", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -215,7 +217,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: partnerStatusLoading,
     refetch: refetchPartnerStatus,
   } = useQuery({
-    queryKey: ["partnerStatus"],
+    queryKey: ["partnerStatus", user?.id],
     queryFn: async () => {
       if (!partnerId) {
         return null;
@@ -239,7 +241,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: partnerMoodLoading,
     refetch: refetchPartnerMood,
   } = useQuery({
-    queryKey: ["partnerMood"],
+    queryKey: ["partnerMood", user?.id],
     queryFn: async () => {
       if (!partnerId) {
         return null;
@@ -263,7 +265,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: upcomingDateLoading,
     refetch: refetchUpcomingDate,
   } = useQuery({
-    queryKey: ["upcomingSpecialDate"],
+    queryKey: ["upcomingSpecialDate", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -282,7 +284,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: activitiesLoading,
     refetch: refetchActivities,
   } = useQuery({
-    queryKey: ["recentActivities"],
+    queryKey: ["recentActivities", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -308,7 +310,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     isLoading: unseenLoading,
     refetch: refetchUnseen,
   } = useQuery({
-    queryKey: ["unseenInteractions"],
+    queryKey: ["unseenInteractions", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 

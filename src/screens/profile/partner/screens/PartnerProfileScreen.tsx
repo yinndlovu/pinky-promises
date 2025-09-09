@@ -29,6 +29,7 @@ import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import { getReceivedMessages } from "../../../../services/api/profiles/messageStorageService";
 import { getPartnerDistance } from "../../../../services/api/profiles/distanceService";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 // screen content
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
@@ -47,6 +48,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -72,7 +74,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerDataLoading,
     refetch: refetchPartnerData,
   } = useQuery({
-    queryKey: ["partnerData"],
+    queryKey: ["partnerData", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -130,7 +132,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: currentUserLoading,
     refetch: refetchCurrentUser,
   } = useQuery({
-    queryKey: ["profileData"],
+    queryKey: ["profileData", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -152,7 +154,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerFavoritesLoading,
     refetch: refetchPartnerFavorites,
   } = useQuery({
-    queryKey: ["partnerFavorites"],
+    queryKey: ["partnerFavorites", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -173,7 +175,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: loveLanguageLoading,
     refetch: refetchLoveLanguage,
   } = useQuery({
-    queryKey: ["partnerLoveLanguage"],
+    queryKey: ["partnerLoveLanguage", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -192,7 +194,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerAboutLoading,
     refetch: refetchPartnerAbout,
   } = useQuery({
-    queryKey: ["partnerAbout"],
+    queryKey: ["partnerAbout", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -211,7 +213,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerStoredMessagesLoading,
     refetch: refetchPartnerStoredMessages,
   } = useQuery({
-    queryKey: ["partnerStoredMessages"],
+    queryKey: ["partnerStoredMessages", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -230,7 +232,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerDistanceLoading,
     refetch: refetchPartnerDistance,
   } = useQuery({
-    queryKey: ["partnerDistance"],
+    queryKey: ["partnerDistance", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -256,7 +258,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       await removePartner(token);
       await queryClient.invalidateQueries({
-        queryKey: ["partnerData"],
+        queryKey: ["partnerData", user?.id],
       });
 
       setShowRemoveModal(false);

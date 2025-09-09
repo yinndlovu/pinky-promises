@@ -144,7 +144,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
           if (incomingRequestId) {
             await acceptPartnerRequest(token, incomingRequestId);
             await queryClient.invalidateQueries({
-              queryKey: ["partnerData"],
+              queryKey: ["partnerData", user?.id],
             });
 
             setRequestStatus("none");

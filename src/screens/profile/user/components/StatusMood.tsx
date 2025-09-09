@@ -124,10 +124,10 @@ const StatusMood: React.FC<StatusMoodProps> = ({
         queryKey: ["status", userId],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["partnerDistance"],
+        queryKey: ["partnerDistance", user?.id],
       });
 
       setAlertVisible(true);
@@ -155,7 +155,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
         queryKey: ["moodData", userId],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
 
       if (onEdit) {

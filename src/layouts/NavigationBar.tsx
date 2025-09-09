@@ -19,6 +19,7 @@ import { BASE_URL } from "../configuration/config";
 import { buildCachedImageUrl } from "../utils/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
 import { getOldestUnclaimedGift } from "../services/api/gifts/monthlyGiftService";
+import { useAuth } from "../contexts/AuthContext";
 
 // types
 type Props = {
@@ -30,6 +31,9 @@ const ACTIVE_COLOR = "#e03487";
 const INACTIVE_COLOR = "#b0b3c6";
 
 export default function NavigationBar({ navigation, currentRoute }: Props) {
+  // variables
+  const { user } = useAuth();
+
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,7 +95,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     isLoading: giftLoading,
     refetch: refetchGift,
   } = useQuery({
-    queryKey: ["unclaimedGift"],
+    queryKey: ["unclaimedGift", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 

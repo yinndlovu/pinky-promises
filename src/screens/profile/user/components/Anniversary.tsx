@@ -41,7 +41,7 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
     isLoading: specialDatesLoading,
     refetch: refetchSpecialDates,
   } = useQuery<SpecialDate[]>({
-    queryKey: ["specialDates"],
+    queryKey: ["specialDates", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
@@ -148,7 +148,7 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
     }
 
     await queryClient.invalidateQueries({
-      queryKey: ["specialDates"],
+      queryKey: ["specialDates", user?.id],
     });
   };
 

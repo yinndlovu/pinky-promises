@@ -21,6 +21,7 @@ import {
   getNotificationPreference,
   setNotificationPreference,
 } from "../../../services/api/settings/notificationPreferenceService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content
 import ReminderIntervalSetting from "./ReminderIntervalSetting";
@@ -29,6 +30,7 @@ import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 const NotificationsScreen = () => {
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // use states
   const [loading, setLoading] = useState(true);
@@ -66,7 +68,7 @@ const NotificationsScreen = () => {
     isLoading: preferencesLoading,
     refetch: refetchPreferences,
   } = useQuery({
-    queryKey: ["notificationPreferences"],
+    queryKey: ["notificationPreferences", user?.id],
     queryFn: fetchPreferencesQuery,
     staleTime: 1000 * 60 * 60 * 24 * 2,
     retry: false,
@@ -90,7 +92,7 @@ const NotificationsScreen = () => {
       setLocalPreferences((prev) => ({ ...prev, [type]: value }));
 
       queryClient.invalidateQueries({
-        queryKey: ["notificationPreferences"],
+        queryKey: ["notificationPreferences", user?.id],
       });
     } catch (e: any) {
       setError(e.response?.data?.error || "Failed to update notification");

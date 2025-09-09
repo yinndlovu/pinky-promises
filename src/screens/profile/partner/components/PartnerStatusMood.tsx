@@ -18,12 +18,16 @@ import { fetchUserStatus } from "../../../../services/api/profiles/userStatusSer
 import { getUserMood } from "../../../../services/api/profiles/moodService";
 import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   partnerId,
   partnerName,
   refreshKey,
 }) => {
+  // variables
+  const { user } = useAuth();
+
   // use effects
   useEffect(() => {
     refetchPartnerMood();
@@ -42,7 +46,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     isLoading: partnerMoodLoading,
     refetch: refetchPartnerMood,
   } = useQuery({
-    queryKey: ["partnerMood"],
+    queryKey: ["partnerMood", user?.id],
     queryFn: async () => {
       if (!partnerId) {
         return null;
@@ -69,7 +73,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     isLoading: partnerStatusLoading,
     refetch: refetchPartnerStatus,
   } = useQuery({
-    queryKey: ["partnerStatus"],
+    queryKey: ["partnerStatus", user?.id],
     queryFn: async () => {
       if (!partnerId) {
         return null;

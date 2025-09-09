@@ -105,7 +105,7 @@ const OursScreen = ({ navigation }: Props) => {
     isLoading: specialDatesLoading,
     refetch: refetchSpecialDates,
   } = useQuery({
-    queryKey: ["specialDates"],
+    queryKey: ["specialDates", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -124,7 +124,7 @@ const OursScreen = ({ navigation }: Props) => {
     isLoading: recentMemoriesLoading,
     refetch: refetchRecentMemories,
   } = useQuery({
-    queryKey: ["recentFavoriteMemories"],
+    queryKey: ["recentFavoriteMemories", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -161,11 +161,11 @@ const OursScreen = ({ navigation }: Props) => {
       setSelectedDate(null);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates"],
+        queryKey: ["specialDates", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["upcomingSpecialDate"],
+        queryKey: ["upcomingSpecialDate", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -173,7 +173,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to add special date");
@@ -223,11 +223,11 @@ const OursScreen = ({ navigation }: Props) => {
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates"],
+        queryKey: ["specialDates", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["upcomingSpecialDate"],
+        queryKey: ["upcomingSpecialDate", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -235,7 +235,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to update special date");
@@ -269,11 +269,11 @@ const OursScreen = ({ navigation }: Props) => {
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates"],
+        queryKey: ["specialDates", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["upcomingSpecialDate"],
+        queryKey: ["upcomingSpecialDate", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -281,7 +281,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to delete special date");
@@ -318,11 +318,11 @@ const OursScreen = ({ navigation }: Props) => {
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories"],
+        queryKey: ["recentFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["allFavoriteMemories"],
+        queryKey: ["allFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -330,7 +330,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to delete favorite memory");
@@ -367,15 +367,15 @@ const OursScreen = ({ navigation }: Props) => {
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories"],
+        queryKey: ["recentFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["allFavoriteMemories"],
+        queryKey: ["allFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({

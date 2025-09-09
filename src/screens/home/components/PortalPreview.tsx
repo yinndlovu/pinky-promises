@@ -13,6 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { getPortalActivityCount } from "../../../services/api/gifts/countService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // types
 type PortalPreviewProps = {
@@ -30,10 +31,13 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const shadowAnim = useRef(new Animated.Value(0.1)).current;
 
+  // variables
+  const { user } = useAuth();
+
   // fetch functions
   const { data: portalActivityCount, isLoading: portalActivityCountLoading } =
     useQuery({
-      queryKey: ["portalActivityCount"],
+      queryKey: ["portalActivityCount", user?.id],
       queryFn: async () => {
         const token = await AsyncStorage.getItem("token");
 

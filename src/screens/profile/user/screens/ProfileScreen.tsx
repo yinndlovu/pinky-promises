@@ -54,6 +54,7 @@ import {
   updateMessage,
   deleteMessage,
 } from "../../../../services/api/profiles/messageStorageService";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
@@ -82,6 +83,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -141,7 +143,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: profileDataLoading,
     refetch: refetchProfileData,
   } = useQuery({
-    queryKey: ["profileData"],
+    queryKey: ["profileData", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -164,7 +166,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: loveLanguageLoading,
     refetch: refetchLoveLanguage,
   } = useQuery({
-    queryKey: ["loveLanguage", profileData?.id],
+    queryKey: ["loveLanguage", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -175,7 +177,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getLoveLanguage(token, profileData?.id);
     },
-    enabled: !!profileData?.id,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -184,7 +186,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: statusLoading,
     refetch: refetchStatus,
   } = useQuery({
-    queryKey: ["status", profileData?.id],
+    queryKey: ["status", user?.id],
     queryFn: async () => {
       if (!profileData?.id) {
         return null;
@@ -199,7 +201,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await fetchUserStatus(token, profileData?.id);
     },
-    enabled: !!profileData?.id,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 4,
   });
 
@@ -224,7 +226,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: pendingRequestsDataLoading,
     refetch: refetchPendingRequestsData,
   } = useQuery({
-    queryKey: ["pendingRequestCount", profileData?.id],
+    queryKey: ["pendingRequestCount", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -235,7 +237,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getReceivedPartnerRequests(token);
     },
-    enabled: !!profileData?.id,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -248,7 +250,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: favoritesLoading,
     refetch: refetchFavorites,
   } = useQuery({
-    queryKey: ["favorites", profileData?.id],
+    queryKey: ["favorites", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -260,7 +262,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getUserFavorites(token, userId);
     },
-    enabled: !!profileData?.id,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -269,7 +271,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: partnerDataLoading,
     refetch: refetchPartnerData,
   } = useQuery({
-    queryKey: ["partnerData"],
+    queryKey: ["partnerData", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -288,7 +290,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: moodDataLoading,
     refetch: refetchMoodData,
   } = useQuery({
-    queryKey: ["moodData", profileData?.id],
+    queryKey: ["moodData", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -299,7 +301,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getMood(token);
     },
-    enabled: !!profileData?.id,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -308,7 +310,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: aboutLoading,
     refetch: refetchAbout,
   } = useQuery({
-    queryKey: ["about", profileData?.id],
+    queryKey: ["about", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -319,7 +321,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return await getAboutUser(token, profileData?.id);
     },
-    enabled: !!profileData?.id,
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -360,7 +362,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     isLoading: storedMessagesLoading,
     refetch: refetchStoredMessages,
   } = useQuery({
-    queryKey: ["storedMessages"],
+    queryKey: ["storedMessages", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -391,7 +393,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return await storeMessage(token, title, message);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
 
       setStoreMessageModalVisible(false);
       setAlertTitle("Message Stored");
@@ -424,7 +426,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return await updateMessage(token, messageId, title, message);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
 
       setEditMessageModalVisible(false);
       setEditingMessage(null);
@@ -454,7 +456,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return await deleteMessage(token, messageId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
+      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
 
       setConfirmationVisible(false);
       setAlertTitle("Message Deleted");
@@ -556,7 +558,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       ]);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates"],
+        queryKey: ["specialDates", user?.id],
       });
     } catch (e) {
     } finally {
@@ -588,15 +590,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await updateLoveLanguage(token, newLoveLanguage);
 
       await queryClient.invalidateQueries({
-        queryKey: ["loveLanguage", profileData?.id],
+        queryKey: ["loveLanguage", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to save love language");
@@ -615,15 +617,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await updateAboutUser(token, newAbout);
 
       await queryClient.invalidateQueries({
-        queryKey: ["about", profileData?.id],
+        queryKey: ["about", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to save about");
@@ -646,11 +648,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await updateUserFavorites(token, newFavorites);
 
       await queryClient.invalidateQueries({
-        queryKey: ["favorites", profileData?.id],
+        queryKey: ["favorites", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to save favorites");
@@ -750,11 +752,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["profileData"],
+        queryKey: ["profileData", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(`Failed to update ${field}`);

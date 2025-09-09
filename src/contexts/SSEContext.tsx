@@ -6,6 +6,7 @@ import EventSource from "react-native-sse";
 
 // internal
 import { BASE_URL } from "../configuration/config";
+import { useAuth } from "./AuthContext";
 
 // interfaces
 interface SSEContextType {
@@ -37,6 +38,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   const connectSSE = async () => {
     try {
@@ -61,7 +63,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
               break;
 
             case "newInteraction":
-              queryClient.setQueryData(["unseenInteractions"], (old: any) => {
+              queryClient.setQueryData(["unseenInteractions", user?.id], (old: any) => {
                 if (!old) {
                   return [data.data];
                 }
@@ -69,147 +71,147 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
                 return [data.data, ...old];
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "partnerStatusUpdate":
-              queryClient.setQueryData(["partnerStatus"], data.data);
+              queryClient.setQueryData(["partnerStatus", user?.id], data.data);
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "partnerMoodUpdate":
-              queryClient.setQueryData(["partnerMood"], data.data);
+              queryClient.setQueryData(["partnerMood", user?.id], data.data);
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "newVentMessage":
               queryClient.invalidateQueries({
-                queryKey: ["portalActivityCount"],
+                queryKey: ["portalActivityCount", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["unseenVentMessage"],
+                queryKey: ["unseenVentMessage", user?.id],
               });
               break;
 
             case "newSweetMessage":
               queryClient.invalidateQueries({
-                queryKey: ["portalActivityCount"],
+                queryKey: ["portalActivityCount", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["unseenSweetMessage"],
+                queryKey: ["unseenSweetMessage", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "newGiftReceived":
               queryClient.invalidateQueries({
-                queryKey: ["unclaimedGift"],
+                queryKey: ["unclaimedGift", user?.id],
               });
               break;
 
             case "updateFavorites":
-              queryClient.setQueryData(["partnerFavorites"], data.data);
+              queryClient.setQueryData(["partnerFavorites", user?.id], data.data);
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "newSpecialDate":
               queryClient.invalidateQueries({
-                queryKey: ["specialDates"],
+                queryKey: ["specialDates", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "updateSpecialDate":
               queryClient.invalidateQueries({
-                queryKey: ["specialDates"],
+                queryKey: ["specialDates", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "deleteSpecialDate":
               queryClient.invalidateQueries({
-                queryKey: ["specialDates"],
+                queryKey: ["specialDates", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "newFavoriteMemory":
               queryClient.invalidateQueries({
-                queryKey: ["recentFavoriteMemories"],
+                queryKey: ["recentFavoriteMemories", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["allFavoriteMemories"],
+                queryKey: ["allFavoriteMemories", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "deleteFavoriteMemory":
               queryClient.invalidateQueries({
-                queryKey: ["recentFavoriteMemories"],
+                queryKey: ["recentFavoriteMemories", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["allFavoriteMemories"],
+                queryKey: ["allFavoriteMemories", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "updateFavoriteMemory":
               queryClient.invalidateQueries({
-                queryKey: ["recentFavoriteMemories"],
+                queryKey: ["recentFavoriteMemories", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["allFavoriteMemories"],
+                queryKey: ["allFavoriteMemories", user?.id],
               });
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "updateAbout":
-              queryClient.setQueryData(["partnerAbout"], data.data);
+              queryClient.setQueryData(["partnerAbout", user?.id], data.data);
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "updateStoredMessages":
               queryClient.invalidateQueries({
-                queryKey: ["partnerStoredMessages"],
+                queryKey: ["partnerStoredMessages", user?.id],
               });
               break;
 
             case "storedMessages":
               queryClient.invalidateQueries({
-                queryKey: ["partnerStoredMessages"],
+                queryKey: ["partnerStoredMessages", user?.id],
               });
               break;
 
             case "addTimelineRecord":
               queryClient.invalidateQueries({
-                queryKey: ["timeline"],
+                queryKey: ["timeline", user?.id],
               });
 
               queryClient.invalidateQueries({
-                queryKey: ["recentActivities"],
+                queryKey: ["recentActivities", user?.id],
               });
               break;
 

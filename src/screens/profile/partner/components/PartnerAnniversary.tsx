@@ -7,15 +7,19 @@ import { useQuery } from "@tanstack/react-query";
 // internal
 import { getSpecialDates } from "../../../../services/api/ours/specialDateService";
 import { SpecialDate } from "../../../../types/SpecialDate";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 const PartnerAnniversary = () => {
+  // variables
+  const { user } = useAuth();
+  
   // fetch functions
   const {
     data: specialDates = [],
     isLoading: specialDatesLoading,
     refetch: refetchSpecialDates,
   } = useQuery<SpecialDate[]>({
-    queryKey: ["specialDates"],
+    queryKey: ["specialDates", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 

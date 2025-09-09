@@ -20,11 +20,15 @@ import {
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import { Message } from "../../../types/Message";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // content
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 const ReceivedMessagesScreen = () => {
+  // variables
+  const { user } = useAuth();
+
   // use states
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [viewedMessage, setViewedMessage] = useState<string>("");
@@ -42,7 +46,7 @@ const ReceivedMessagesScreen = () => {
     error,
     refetch: refetchMessages,
   } = useQuery<Message[]>({
-    queryKey: ["lastSixReceivedMessages"],
+    queryKey: ["lastSixReceivedMessages", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -62,7 +66,10 @@ const ReceivedMessagesScreen = () => {
     setViewLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
-      if (!token) return;
+      
+      if (!token) {
+        return;
+      }
 
       const res = await viewSweetMessage(token, msg.id);
       setViewedMessage(res.sweet);

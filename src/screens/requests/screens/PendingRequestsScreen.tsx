@@ -22,6 +22,7 @@ import {
 import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { PendingRequest } from "../../../types/Request";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -34,6 +35,7 @@ const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 const PendingRequestsScreen = ({ navigation }: any) => {
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
@@ -146,10 +148,10 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
       await acceptPartnerRequest(token, requestId);
       await queryClient.invalidateQueries({
-        queryKey: ["partnerRequests"],
+        queryKey: ["partnerRequests", user?.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["partnerData"],
+        queryKey: ["partnerData", user?.id],
       });
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
@@ -175,7 +177,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
       await rejectPartnerRequest(token, requestId);
       await queryClient.invalidateQueries({
-        queryKey: ["partnerRequests"],
+        queryKey: ["partnerRequests", user?.id],
       });
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));

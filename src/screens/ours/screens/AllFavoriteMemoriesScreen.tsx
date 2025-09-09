@@ -58,7 +58,7 @@ const AllFavoriteMemoriesScreen = () => {
     error,
     refetch: refetchMemories,
   } = useQuery({
-    queryKey: ["allFavoriteMemories"],
+    queryKey: ["allFavoriteMemories", user?.id],
     queryFn: async () => {
       const token = await AsyncStorage.getItem("token");
 
@@ -123,11 +123,11 @@ const AllFavoriteMemoriesScreen = () => {
       await deleteFavoriteMemory(token, memory.id);
 
       await queryClient.invalidateQueries({
-        queryKey: ["allFavoriteMemories"],
+        queryKey: ["allFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories"],
+        queryKey: ["recentFavoriteMemories", user?.id],
       });
 
       setAlertTitle("Deleted");
@@ -162,11 +162,11 @@ const AllFavoriteMemoriesScreen = () => {
       setEditingMemory(null);
 
       await queryClient.invalidateQueries({
-        queryKey: ["allFavoriteMemories"],
+        queryKey: ["allFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories"],
+        queryKey: ["recentFavoriteMemories", user?.id],
       });
 
       setAlertTitle("Updated");
