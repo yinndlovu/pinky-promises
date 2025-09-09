@@ -160,22 +160,23 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
       });
     });
 
-    socket.on("question", () => {
+    socket.on("question", (payload?: { options?: any }) => {
       if (navigatedRef.current) {
         return;
       }
       navigatedRef.current = true;
-
+    
       const isInviter = route.params.isInviter ?? true;
       const hostName = isInviter ? yourInfo.name : partnerInfo?.name || "";
       const routeOptions = (route.params as any).options;
-
+      const options = routeOptions || payload?.options;
+    
       navigation.replace("GameSessionScreen", {
         roomId: roomIdRef.current,
         players,
         gameName,
         host: hostName,
-        options: routeOptions,
+        options,
       });
     });
 

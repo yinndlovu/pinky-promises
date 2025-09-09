@@ -48,7 +48,12 @@ interface GameSessionScreenProps {
 const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   // params
   const { roomId, players, options, gameName, host } = route.params;
-  const { amount: totalQuestions, category, difficulty, type } = options;
+  const safeOptions = options || {
+    amount: 10,
+    category: "any",
+    difficulty: "easy",
+  };
+  const { amount: totalQuestions, category, difficulty, type } = safeOptions;
 
   // variables
   const { user } = useAuth();
@@ -83,15 +88,6 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     setIsLoading(false);
 
     const socket = connectTriviaSocket();
-
-    const me = players.find((p: any) => p.id === user.id);
-    if (me) {
-      socket.emit("join_trivia", { roomId, player: me });
-    }
-
-    if (players.length > 0) {
-      setCurrentPlayerId(user?.id);
-    }
 
     socket.on("game_start", () => {
       setGamePlayers(
@@ -143,6 +139,11 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     socket.on("error", (data) => {
       console.error("Socket error:", data.message);
     });
+
+    const me = players.find((p: any) => p.id === user.id);
+    if (me) {
+      socket.emit("join_trivia", { roomId, player: me });
+    }
 
     return () => {
       disconnectTriviaSocket();
@@ -262,9 +263,10 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     outputRange: ["0%", "100%"],
   });
 
+  const categoryKey = category || "any";
   const categoryDisplayName =
-    DISPLAY_NAME_OVERRIDES[category] ||
-    category.charAt(0).toUpperCase() + category.slice(1);
+    DISPLAY_NAME_OVERRIDES[categoryKey] ||
+    categoryKey.charAt(0).toUpperCase() + categoryKey.slice(1);
 
   if (isLoading) {
     return (
