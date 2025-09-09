@@ -69,6 +69,9 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   const [isLoading, setIsLoading] = useState(true);
   const [answers, setAnswers] = useState<string[]>([]);
 
+  //refs
+  const currentPlayerIdRef = useRef<string | null>(null);
+
   // timer animation
   const startTimer = () => {
     setTimeLeft(15);
@@ -86,20 +89,20 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     }
 
     setCurrentPlayerId(user.id);
+    currentPlayerIdRef.current = user.id;
     setIsLoading(false);
 
     const socket = connectTriviaSocket();
 
-    socket.on("game_start", () => {
+    const onGameStart = () => {
       setGamePlayers(
         players.map((p: Player) => ({ ...p, score: 0, status: null }))
       );
-    });
+    };
 
-    socket.on("question", (data) => {
+    const onQuestion = (data: any) => {
       setQuestion(data.question);
       setGamePlayers((prev) => prev.map((p) => ({ ...p, status: null })));
-
       if (data.question?.incorrect_answers) {
         const shuffled = [
           data.question.correct_answer,
@@ -110,16 +113,16 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
         setAnswers([]);
       }
       startTimer();
-    });
+    };
 
-    socket.on("players_update", (updatedPlayers) => {
+    const onPlayersUpdate = (updatedPlayers: Player[]) =>
       setGamePlayers(updatedPlayers);
-    });
 
-    socket.on("answer_result", (result) => {
+    const onAnswerResult = (result: any) => {
+      const meId = currentPlayerIdRef.current;
       setGamePlayers((prev) =>
         prev.map((p) =>
-          p.id === currentPlayerId
+          p.id === meId
             ? {
                 ...p,
                 status: result.correct ? "correct" : "wrong",
@@ -128,9 +131,9 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
             : p
         )
       );
-    });
+    };
 
-    socket.on("game_over", (data) => {
+    const onGameOver = (data: any) => {
       setGameOver(true);
       setShowSummary(true);
       setGamePlayers(
@@ -139,63 +142,68 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
           score: data.scores[p.id] || 0,
         }))
       );
-    });
+    };
 
-    socket.on("player_left", (data) => {
+    const onPlayerLeft = (data: any) => {
       setGamePlayers(data.players);
       setGameOver(true);
       setShowSummary(true);
-    });
+    };
 
-    socket.on("error", (data) => {
-      console.error("Socket error:", data.message);
-    });
+    const onError = (data: any) => console.error("Socket error:", data.message);
+
+    socket.on("game_start", onGameStart);
+    socket.on("question", onQuestion);
+    socket.on("players_update", onPlayersUpdate);
+    socket.on("answer_result", onAnswerResult);
+    socket.on("game_over", onGameOver);
+    socket.on("player_left", onPlayerLeft);
+    socket.on("error", onError);
 
     const me = players.find((p: any) => p.id === user.id);
+
     if (me) {
       socket.emit("join_trivia", { roomId, player: me });
     }
 
     return () => {
+      socket.off("game_start", onGameStart);
+      socket.off("question", onQuestion);
+      socket.off("players_update", onPlayersUpdate);
+      socket.off("answer_result", onAnswerResult);
+      socket.off("game_over", onGameOver);
+      socket.off("player_left", onPlayerLeft);
+      socket.off("error", onError);
+
       disconnectTriviaSocket();
     };
   }, [players, user]);
 
   useEffect(() => {
-    if (question) {
-      startTimer();
-      const timer = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            if (question) {
-              handleTimeUp();
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      return () => clearInterval(timer);
-    }
+    if (!question) return;
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          if (question) handleTimeUp();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
   }, [question]);
 
   // handlers
   const submitAnswer = (answer: string) => {
     const socket = getTriviaSocket();
+    const meId = currentPlayerIdRef.current;
+    if (!socket || !meId || !question) return;
 
-    if (!socket || !currentPlayerId || !question) {
-      return;
-    }
-
-    const me = gamePlayers.find((p) => p.id === currentPlayerId);
+    const me = gamePlayers.find((p) => p.id === meId);
     if (me?.status) return;
 
-    socket.emit("submit_answer", {
-      roomId,
-      playerId: currentPlayerId,
-      answer,
-    });
+    socket.emit("submit_answer", { roomId, playerId: meId, answer });
   };
 
   const handleTimeUp = () => {
@@ -232,14 +240,16 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     }
   };
 
+  const disabled =
+    timeLeft <= 0 ||
+    !!gamePlayers.find(
+      (p) => p.id === currentPlayerIdRef.current && !!p.status
+    );
+
   const renderAnswers = () => {
     if (!question) {
       return null;
     }
-
-    const disabled =
-      timeLeft <= 0 ||
-      !!gamePlayers.find((p) => p.id === currentPlayerId && !!p.status);
 
     if (type === "boolean") {
       return (
