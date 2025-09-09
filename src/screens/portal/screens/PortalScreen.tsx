@@ -61,8 +61,9 @@ export default function PortalScreen({ navigation }: Props) {
   const [showToast, setShowToast] = useState(false);
 
   // use states (modals)
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
   const [viewModalVisible, setViewModalVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [inputModalVisible, setInputModalVisible] = useState(false);
@@ -269,12 +270,14 @@ export default function PortalScreen({ navigation }: Props) {
         });
 
         setAlertMessage("Message stored for your baby to find");
+        setAlertTitle("Message Stored");
       } else {
         await ventToPartner(token, text);
         await queryClient.invalidateQueries({
           queryKey: ["ventMessagesSent"],
         });
 
+        setAlertTitle("Vented Successfully");
         setAlertMessage("Vent message stored for your baby to see");
       }
 
@@ -283,7 +286,7 @@ export default function PortalScreen({ navigation }: Props) {
       });
 
       setInputModalVisible(false);
-      setAlertVisible(true);
+      setShowSuccess(true);
     } catch (err: any) {
       setToastMessage(
         err?.response?.data?.message || "Failed to send sweet message"
@@ -435,6 +438,7 @@ export default function PortalScreen({ navigation }: Props) {
           onViewMessage={(msg) => handleViewMessage(msg, "sweet")}
           lastUnseen={unseenSweetMessage}
         />
+
         <VentMessagesSection
           sent={ventMessagesSent}
           received={ventMessagesReceived}
@@ -446,6 +450,7 @@ export default function PortalScreen({ navigation }: Props) {
           onViewMessage={(msg) => handleViewMessage(msg, "vent")}
           lastUnseen={unseenVentMessage}
         />
+
         <ConfirmationModal
           visible={confirmVisible}
           message="Delete this message?"
@@ -456,6 +461,7 @@ export default function PortalScreen({ navigation }: Props) {
           confirmText="Delete"
           cancelText="Cancel"
         />
+
         <MessageInputModal
           visible={inputModalVisible}
           onClose={() => setInputModalVisible(false)}
@@ -463,16 +469,21 @@ export default function PortalScreen({ navigation }: Props) {
           type={inputType}
           loading={loading}
         />
+
         <ViewMessageModal
           visible={viewModalVisible}
           onClose={() => setViewModalVisible(false)}
           message={viewedMessage}
           type={viewType}
         />
+
         <AlertModal
-          visible={alertVisible}
+          visible={showSuccess}
+          type="success"
+          title={alertTitle}
           message={alertMessage}
-          onClose={() => setAlertVisible(false)}
+          buttonText="Great"
+          onClose={() => setShowSuccess(false)}
         />
       </ScrollView>
       {viewLoading && (

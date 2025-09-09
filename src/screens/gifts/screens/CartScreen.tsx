@@ -46,7 +46,9 @@ const CartScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   // use states (modals)
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [confirmationVisible, setConfirmationVisible] = useState(false);
   const [confirmationMessage, setConfirmationMessage] = useState("");
@@ -111,14 +113,16 @@ const CartScreen = () => {
       setNewItemName("");
       setNewItemValue("");
       setAddItemModalVisible(false);
-      setAlertMessage("Item added to cart");
-      setAlertVisible(true);
+      setAlertTitle("Item Added");
+      setAlertMessage("You have added an item to your cart");
+      setShowSuccess(true);
     },
     onError: (error: any) => {
+      setAlertTitle("Failed");
       setAlertMessage(
         error.response?.data?.error || "Failed to add item to cart"
       );
-      setAlertVisible(true);
+      setShowError(true);
     },
   });
 
@@ -161,29 +165,33 @@ const CartScreen = () => {
       queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
 
       setConfirmationVisible(false);
-      setAlertMessage("Cart cleared");
-      setAlertVisible(true);
+      setAlertTitle("Cart Cleared");
+      setAlertMessage("You have cleared your cart");
+      setShowSuccess(true);
     },
     onError: (error: any) => {
       setConfirmationVisible(false);
+      setAlertTitle("Failed");
       setAlertMessage(error.response?.data?.error || "Failed to clear cart");
-      setAlertVisible(true);
+      setShowError(true);
     },
   });
 
   /// handlers
   const handleAddItem = () => {
     if (!newItemName.trim() || !newItemValue.trim()) {
+      setAlertTitle("Missing Fields");
       setAlertMessage("Please fill in all fields");
-      setAlertVisible(true);
+      setShowError(true);
 
       return;
     }
 
     const value = parseFloat(newItemValue);
     if (isNaN(value) || value <= 0) {
+      setAlertTitle("Invalid Price");
       setAlertMessage("Please enter a valid price");
-      setAlertVisible(true);
+      setShowError(true);
 
       return;
     }
@@ -414,9 +422,21 @@ const CartScreen = () => {
       </Modal>
 
       <AlertModal
-        visible={alertVisible}
+        visible={showSuccess}
+        type="success"
+        title={alertTitle}
         message={alertMessage}
-        onClose={() => setAlertVisible(false)}
+        buttonText="Great"
+        onClose={() => setShowSuccess(false)}
+      />
+
+      <AlertModal
+        visible={showError}
+        type="error"
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="Close"
+        onClose={() => setShowError(false)}
       />
 
       <ConfirmationModal

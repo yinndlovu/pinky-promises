@@ -2,7 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function getPartner(token: string) {
-  const res = await axios.get(`${BASE_URL}/api/partnership/get-partner`, {
+  const res = await axios.get(`${BASE_URL}/partnership/get-partner`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -13,7 +13,7 @@ export async function getPartner(token: string) {
 
 export async function sendPartnerRequest(token: string, partnerId: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/partnership/add-partner`,
+    `${BASE_URL}/partnership/add-partner`,
     { partnerId },
     {
       headers: {
@@ -27,7 +27,7 @@ export async function sendPartnerRequest(token: string, partnerId: string) {
 
 export async function checkPendingRequest(token: string, partnerId: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/partnership/check-pending/${partnerId}`,
+    `${BASE_URL}/partnership/check-pending/${partnerId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -40,7 +40,7 @@ export async function checkPendingRequest(token: string, partnerId: string) {
 
 export async function cancelPartnerRequest(token: string, partnerId: string) {
   const res = await axios.delete(
-    `${BASE_URL}/api/partnership/cancel-request/${partnerId}`,
+    `${BASE_URL}/partnership/cancel-request/${partnerId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -53,7 +53,7 @@ export async function cancelPartnerRequest(token: string, partnerId: string) {
 
 export async function getIncomingRequest(token: string, fromUserId: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/partnership/incoming-request/${fromUserId}`,
+    `${BASE_URL}/partnership/incoming-request/${fromUserId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -66,7 +66,7 @@ export async function getIncomingRequest(token: string, fromUserId: string) {
 
 export async function acceptPartnerRequest(token: string, requestId: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/partnership/accept-partner-request`,
+    `${BASE_URL}/partnership/accept-partner-request`,
     { requestId },
     {
       headers: {
@@ -80,7 +80,7 @@ export async function acceptPartnerRequest(token: string, requestId: string) {
 
 export async function getReceivedPartnerRequests(token: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/partnership/get-received-partner-requests`,
+    `${BASE_URL}/partnership/get-received-partner-requests`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -93,7 +93,7 @@ export async function getReceivedPartnerRequests(token: string) {
 
 export async function rejectPartnerRequest(token: string, requestId: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/partnership/reject-partner-request`,
+    `${BASE_URL}/partnership/reject-partner-request`,
     { requestId },
     {
       headers: {
@@ -107,7 +107,7 @@ export async function rejectPartnerRequest(token: string, requestId: string) {
 
 export async function removePartner(token: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/partnership/remove-partner`,
+    `${BASE_URL}/partnership/remove-partner`,
     {},
     {
       headers: {

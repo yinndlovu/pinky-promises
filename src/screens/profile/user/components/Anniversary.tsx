@@ -31,8 +31,9 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   const [modalType, setModalType] = useState<"anniversary" | "dayMet">(
     "anniversary"
   );
-  const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showSuccessAlert, setShowSuccess] = useState(false);
 
   // fetch functions
   const {
@@ -118,6 +119,8 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
     title: string,
     description?: string
   ) => {
+    setModalVisible(false);
+
     const token = await AsyncStorage.getItem("token");
 
     if (!token) {
@@ -126,8 +129,22 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
 
     if (editingDate) {
       await updateSpecialDate(token, editingDate.id, date, title, description);
+      setAlertTitle("Updated");
+      setAlertMessage(
+        modalType === "anniversary"
+          ? "Your anniversary date has been updated."
+          : "The day you met has been updated."
+      );
+      setShowSuccess(true);
     } else {
       await createSpecialDate(token, date, title, description);
+      setAlertTitle("Created");
+      setAlertMessage(
+        modalType === "anniversary"
+          ? "Your anniversary date has been set."
+          : "The day you met has been set."
+      );
+      setShowSuccess(true);
     }
 
     await queryClient.invalidateQueries({
@@ -191,9 +208,12 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
         />
 
         <AlertModal
-          visible={alertVisible}
+          visible={showSuccessAlert}
+          type="success"
+          title={alertTitle}
           message={alertMessage}
-          onClose={() => setAlertVisible(false)}
+          buttonText="Great"
+          onClose={() => setShowSuccess(false)}
         />
       </View>
     </View>

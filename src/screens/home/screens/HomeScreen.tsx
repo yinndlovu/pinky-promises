@@ -20,6 +20,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
+import LottieView from "lottie-react-native";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -45,6 +46,7 @@ import { checkLocationPermissions } from "../../../services/location/locationPer
 import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
+import { updateGeoInfo } from "../../../services/api/profiles/geoInfoService";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -54,6 +56,11 @@ import AlertModal from "../../../components/modals/output/AlertModal";
 import PortalPreview from "../components/PortalPreview";
 import ProfileCard from "../components/ProfileCard";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
+
+// animation files
+import { animationMap } from "../../../utils/animations/getAnimation";
+import defaultAnimation from "../../../assets/animations/hug.json";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -63,7 +70,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
-  const { invite, inviteAccepted, setInviteAccepted } = useInvite();
+  const { invite, setInvite, inviteAccepted, setInviteAccepted } = useInvite();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -75,11 +82,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
+  const [currentAction, setCurrentAction] = useState<string | null>(null);
 
   // use states (modals)
   const [alertVisible, setAlertVisible] = useState(false);
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [animationModalVisible, setAnimationModalVisible] = useState(false);
+  const [animationMessage, setAnimationMessage] = useState("");
 
   // handlers
   const handleInteraction = async (action: string) => {
@@ -99,10 +109,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         queryKey: ["recentActivities"],
       });
 
-      setAlertMessage(
+      setAnimationMessage(
         getInteractionFeedback(action, partner?.name || "your partner")
       );
-      setAlertVisible(true);
+      setAnimationModalVisible(true);
+      setCurrentAction(action);
       refetchActivities();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to interact");
@@ -141,6 +152,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const isAtHome = distance < 150;
 
       await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
+      await updateGeoInfo(token, coords.latitude, coords.longitude);
     } catch (err) {}
   };
 
@@ -176,7 +188,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       const pictureResponse = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${partnerId}`,
+        `${BASE_URL}/profile/get-profile-picture/${partnerId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",
@@ -288,7 +300,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         time: formatTime(activity.createdAt),
       }));
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   });
 
   const {
@@ -308,7 +320,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       return await getUnseenInteractions(token);
     },
     enabled: !!partnerId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 2,
   });
 
   // helpers
@@ -416,6 +428,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const distanceFromHome = partnerStatus?.distance || null;
 
   const lastSeen = partnerStatus?.updatedAt ?? null;
+  const currentWeather = partnerStatus?.currentWeather ?? null;
+  const weatherType = partnerStatus?.weatherType || null;
+  const weatherDescription = partnerStatus?.weatherDescription || null;
+  const userLocation = partnerStatus?.userLocation ?? null;
+  const userTimezone = partnerStatus?.userTimezone || null;
+  const isDaytime = partnerStatus?.isDaytime ?? null;
 
   // use effects
   useEffect(() => {
@@ -443,6 +461,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             isInviter: false,
           });
           setInviteAccepted(false);
+          setInvite(null);
         } catch (error) {
           console.error("Error navigating to waiting screen:", error);
           alert("An error occurred. Please try again.");
@@ -622,6 +641,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             lastSeen={lastSeen}
             onPress={() => navigation.navigate("PartnerProfile")}
             renderPartnerImage={renderPartnerImage}
+            currentWeather={currentWeather}
+            weatherType={weatherType}
+            weatherDescription={weatherDescription}
+            userLocation={userLocation}
+            userTimezone={userTimezone}
+            isDaytime={isDaytime}
           />
         )}
         <View style={styles.buttonRow}>
@@ -660,7 +685,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             <Text style={styles.interactionCardTitle}>
               LOOK WHAT YOUR BABY JUST DID
             </Text>
-            <View style={styles.interactionCard}>
+            <View style={[styles.interactionCard, { position: "relative" }]}>
               <Feather
                 name="bell"
                 size={22}
@@ -669,8 +694,26 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   position: "absolute",
                   top: 14,
                   right: 16,
+                  zIndex: 2,
                 }}
               />
+              {unseenInteractions[unseenInteractions.length - 1] && (
+                <LottieView
+                  source={
+                    animationMap[
+                      unseenInteractions[unseenInteractions.length - 1].action
+                    ] || defaultAnimation
+                  }
+                  autoPlay
+                  loop
+                  style={{
+                    width: 80,
+                    height: 80,
+                    alignSelf: "center",
+                    zIndex: 1,
+                  }}
+                />
+              )}
               {unseenInteractions.map((interaction: any, idx: number) => (
                 <View
                   key={interaction.id}
@@ -684,7 +727,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                       color: "#fff",
                       fontSize: 16,
                       fontWeight: "bold",
-                      marginTop: 8,
+                      marginTop: 12,
+                      textAlign: "center",
                     }}
                   >
                     {partner?.name || "Your partner"}{" "}
@@ -695,6 +739,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                       color: "#b0b3c6",
                       fontSize: 12,
                       marginTop: 6,
+                      textAlign: "center",
                     }}
                   >
                     {formatDateDMY(interaction.createdAt)} •{" "}
@@ -753,6 +798,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         visible={alertVisible}
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
+      />
+
+      <InteractionAnimationModal
+        visible={animationModalVisible}
+        message={animationMessage}
+        action={currentAction}
+        onClose={() => {
+          setAlertVisible(false);
+          setCurrentAction(null);
+        }}
       />
     </View>
   );

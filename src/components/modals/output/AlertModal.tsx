@@ -131,12 +131,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     marginTop: 12,
-    marginBottom: 6,
     textAlign: "center",
     fontWeight: "bold",
   },
   message: {
     color: "#fff",
+    marginTop: 12,
     fontSize: 16,
     marginBottom: 24,
     textAlign: "center",

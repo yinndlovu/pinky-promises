@@ -3,7 +3,7 @@ import { BASE_URL } from "../../../configuration/config";
 
 export async function getUserFavorites(token: string, userId: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/user-favorites/get-user-favorites/${userId}`,
+    `${BASE_URL}/user-favorites/get-user-favorites/${userId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -16,7 +16,7 @@ export async function getUserFavorites(token: string, userId: string) {
 
 export async function updateUserFavorites(token: string, favorites: any) {
   const res = await axios.put(
-    `${BASE_URL}/api/user-favorites/update-user-favorites`,
+    `${BASE_URL}/user-favorites/update-user-favorites`,
     favorites,
     {
       headers: {

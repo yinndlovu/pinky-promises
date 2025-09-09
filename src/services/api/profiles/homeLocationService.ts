@@ -8,7 +8,7 @@ export async function getHomeLocation(token: string) {
     return JSON.parse(local);
   }
 
-  const res = await axios.get(`${BASE_URL}/api/location/get-home-location`, {
+  const res = await axios.get(`${BASE_URL}/location/get-home-location`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -20,7 +20,7 @@ export async function getHomeLocation(token: string) {
 }
 
 export async function removeHomeLocation(token: string) {
-  const res = await axios.delete(`${BASE_URL}/api/location/remove`, {
+  const res = await axios.delete(`${BASE_URL}/location/remove`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

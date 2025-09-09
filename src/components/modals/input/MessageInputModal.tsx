@@ -43,7 +43,6 @@ const MessageInputModal: React.FC<Props> = ({
 
     try {
       onSend(text.trim());
-      setText("");
     } catch (err: any) {
       setAlertMessage(err?.message || "Failed to send message");
       setAlertVisible(true);

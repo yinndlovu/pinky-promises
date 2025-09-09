@@ -1,11 +1,12 @@
 // external
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Image,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -13,6 +14,8 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/getBatteryIcon";
+import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
+import { useClockTick } from "../../../hooks/clockTick";
 
 // types
 type ProfileCardProps = {
@@ -27,6 +30,12 @@ type ProfileCardProps = {
   distanceFromHome: number;
   onPress: () => void;
   renderPartnerImage: () => React.ReactNode;
+  currentWeather?: number | null;
+  weatherType?: string | null;
+  weatherDescription?: string | null;
+  userLocation?: string | null;
+  userTimezone?: string | null;
+  isDaytime?: boolean;
 };
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -40,19 +49,52 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   distanceFromHome,
   onPress,
   renderPartnerImage,
+  currentWeather,
+  weatherType,
+  weatherDescription,
+  userLocation,
+  userTimezone,
+  isDaytime = true,
 }) => {
   // animation variables
   const breatheAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const statusPulseAnim = useRef(new Animated.Value(1)).current;
   const heartBeatAnim = useRef(new Animated.Value(1)).current;
-
   const borderGlowAnim = useRef(new Animated.Value(0)).current;
   const particle1Anim = useRef(new Animated.Value(0)).current;
   const particle2Anim = useRef(new Animated.Value(0)).current;
   const particle3Anim = useRef(new Animated.Value(0)).current;
 
+  // use states
+  const [currentTime, setCurrentTime] = useState<string>("Unknown");
+
+  // dynamic variables
+  const iconSource = getWeatherIcon(weatherType, isDaytime);
+
+  // hook
+  useClockTick(30 * 1000);
+
   // use effects
+  useEffect(() => {
+    if (!userTimezone) {
+      return;
+    }
+
+    const date = new Date();
+    try {
+      const formatter = new Intl.DateTimeFormat("en-US", {
+        timeZone: userTimezone,
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
+      setCurrentTime(formatter.format(date));
+    } catch {
+      setCurrentTime("Unknown");
+    }
+  }, [userTimezone, Date.now()]);
+
   useEffect(() => {
     if (isActive) {
       const breatheAnimation = Animated.loop(
@@ -246,18 +288,65 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           />
         )}
 
-        <View style={styles.profileContainer}>
-          <Animated.View
-            style={[
-              styles.avatarWrapper,
-              {
-                transform: [{ scale: heartBeatAnim }],
-              },
-            ]}
-          >
-            {renderPartnerImage()}
-          </Animated.View>
-          <Text style={styles.name}>{partner?.name || "No partner"}</Text>
+        <View
+          style={[
+            styles.profileContainer,
+            {
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            },
+          ]}
+        >
+          <View style={{ alignItems: "center" }}>
+            <Animated.View
+              style={[
+                styles.avatarWrapper,
+                { transform: [{ scale: heartBeatAnim }] },
+              ]}
+            >
+              {renderPartnerImage()}
+            </Animated.View>
+            <Text style={[styles.name, { marginBottom: 0 }]}>
+              {partner?.name || "No partner"}
+            </Text>
+          </View>
+
+          <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={iconSource}
+                style={{ width: 70, height: 70, marginRight: 12 }}
+              />
+
+              <View style={{ flexDirection: "column" }}>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: "#fff",
+                    fontWeight: "500",
+                    marginBottom: 2,
+                  }}
+                >
+                  {currentWeather !== null ? `${currentWeather}°C` : "Unknown"}
+                </Text>
+                <Text
+                  style={{ fontSize: 14, color: "#b0b3c6", fontWeight: "500" }}
+                >
+                  {userLocation || "Unknown"}
+                </Text>
+                <Text style={{ fontSize: 12, color: "#b0b3c6" }}>
+                  {currentTime}
+                </Text>
+              </View>
+            </View>
+
+            <View style={{ width: "100%", marginTop: 4, marginLeft: 12 }}>
+              <Text style={{ fontSize: 15, color: "#fff", fontWeight: "300" }}>
+                {weatherDescription || "Unknown"}
+              </Text>
+            </View>
+          </View>
         </View>
 
         <View style={styles.statusContainer}>
@@ -272,7 +361,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </Text>
             </Animated.View>
             <Text style={styles.lastSeenText}>
-              Last updated{" "}
               {formatRelativeTime(lastSeen ? new Date(lastSeen) : null)}
             </Text>
             {status === "Away" &&
@@ -408,13 +496,14 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   name: {
-    fontSize: 26,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#fff",
-    marginBottom: 12,
+    marginBottom: 14,
     textAlign: "center",
   },
   statusContainer: {
+    marginTop: 8,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
@@ -431,7 +520,6 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 14,
     color: "#b0b3c6",
-    letterSpacing: 0.5,
   },
   lastSeenText: {
     fontSize: 12,
@@ -446,7 +534,6 @@ const styles = StyleSheet.create({
   moodText: {
     fontSize: 14,
     color: "#b0b3c6",
-    letterSpacing: 0.5,
   },
   batteryContainer: {
     flexDirection: "row",

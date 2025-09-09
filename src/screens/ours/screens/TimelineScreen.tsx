@@ -81,7 +81,7 @@ const TimelineScreen = () => {
       queryClient.invalidateQueries({
         queryKey: ["recentActivities"],
       });
-      
+
       setModalVisible(false);
       setToastMessage("New timeline event added");
       setInputValue("");

@@ -63,6 +63,7 @@ import GameListScreen from "./src/games/game-list/screens/GameListScreen";
 import GameWaitingScreen from "./src/games/room/GameWaitingScreen";
 import GameSetupScreen from "./src/games/trivia/screens/GameSetupScreen";
 import GameSessionScreen from "./src/games/trivia/screens/GameSessionScreen";
+import LoadingAnimation from "./src/components/loading/LoadingAnimation";
 
 // variables
 const Stack = createStackNavigator();
@@ -140,7 +141,7 @@ function AppContent() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <LoadingSpinner message="Starting Paris' App" size="medium" />
+        <LoadingAnimation visible={isLoading} onClose={() => {}} size="large" />
       </View>
     );
   }

@@ -3,7 +3,7 @@ import axios from "axios";
 
 export async function sendSweetMessage(token: string, message: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/sweet-messages/send-sweet-message`,
+    `${BASE_URL}/sweet-messages/send-sweet-message`,
     { message },
     {
       headers: {
@@ -17,7 +17,7 @@ export async function sendSweetMessage(token: string, message: string) {
 
 export async function getLastUnseenSweetMessage(token: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/sweet-messages/get-sweet-message/last-unseen`,
+    `${BASE_URL}/sweet-messages/get-sweet-message/last-unseen`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -30,7 +30,7 @@ export async function getLastUnseenSweetMessage(token: string) {
 
 export async function getSentSweetMessages(token: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/sweet-messages/get-sweet-messages/sent`,
+    `${BASE_URL}/sweet-messages/get-sweet-messages/sent`,
     {
       headers: { Authorization: `Bearer ${token}` },
     }
@@ -41,7 +41,7 @@ export async function getSentSweetMessages(token: string) {
 
 export async function getReceivedSweetMessages(token: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/sweet-messages/get-sweet-messages/received`,
+    `${BASE_URL}/sweet-messages/get-sweet-messages/received`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -54,7 +54,7 @@ export async function getReceivedSweetMessages(token: string) {
 
 export async function viewSweetMessage(token: string, sweetId: string) {
   const res = await axios.get(
-    `${BASE_URL}/api/sweet-messages/view-sweet-message/${sweetId}`,
+    `${BASE_URL}/sweet-messages/view-sweet-message/${sweetId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -67,7 +67,7 @@ export async function viewSweetMessage(token: string, sweetId: string) {
 
 export async function deleteSweetMessage(token: string, sweetId: string) {
   const res = await axios.delete(
-    `${BASE_URL}/api/sweet-messages/delete-sweet-message/${sweetId}`,
+    `${BASE_URL}/sweet-messages/delete-sweet-message/${sweetId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

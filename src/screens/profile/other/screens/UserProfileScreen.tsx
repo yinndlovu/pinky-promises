@@ -72,7 +72,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
         }
 
         const response = await axios.get(
-          `${BASE_URL}/api/profile/get-user-profile/${userId}`,
+          `${BASE_URL}/profile/get-user-profile/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -83,7 +83,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
         try {
           const pictureResponse = await axios.get(
-            `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
+            `${BASE_URL}/profile/get-profile-picture/${userId}`,
             {
               headers: { Authorization: `Bearer ${token}` },
               responseType: "arraybuffer",

@@ -70,7 +70,7 @@ export default function SearchScreen({ navigation }: Props) {
   const fetchProfilePicture = async (userId: string, token: string) => {
     try {
       const response = await axios.get(
-        `${BASE_URL}/api/profile/get-profile-picture/${userId}`,
+        `${BASE_URL}/profile/get-profile-picture/${userId}`,
         {
           headers: { Authorization: `Bearer ${token}` },
           responseType: "arraybuffer",

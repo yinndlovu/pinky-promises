@@ -8,7 +8,7 @@ export async function changePassword(
   confirmPassword: string
 ) {
   const res = await axios.put(
-    `${BASE_URL}/api/auth/update-password`,
+    `${BASE_URL}/auth/update-password`,
     { currentPassword, newPassword, confirmPassword },
     {
       headers: {
@@ -22,7 +22,7 @@ export async function changePassword(
 
 export async function verifyPassword(token: string, password: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/auth/verify-password`,
+    `${BASE_URL}/auth/verify-password`,
     { password },
     { headers: { Authorization: `Bearer ${token}` } }
   );

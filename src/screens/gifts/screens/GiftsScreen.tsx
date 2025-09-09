@@ -35,7 +35,10 @@ import {
   updateSetMonthlyGift,
 } from "../../../services/api/gifts/setMonthlyGiftService";
 import { useAuth } from "../../../contexts/AuthContext";
-import { formatDateDMY, formatTime } from "../../../utils/formatters/formatDate";
+import {
+  formatDateDMY,
+  formatTime,
+} from "../../../utils/formatters/formatDate";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -57,7 +60,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const [modalLoading, setModalLoading] = useState(false);
   const [monthlyGiftModalVisible, setMonthlyGiftModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
 
@@ -207,8 +211,9 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       });
       setMonthlyGiftModalVisible(false);
 
+      setAlertTitle("Favorite Present Set");
       setAlertMessage("You have set your favorite present");
-      setAlertVisible(true);
+      setShowSuccess(true);
     } catch (err: any) {
       setToastMessage(
         err.response?.data?.error || "Failed to save favorite present"
@@ -360,9 +365,12 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       />
 
       <AlertModal
-        visible={alertVisible}
+        visible={showSuccess}
+        type="success"
+        title={alertTitle}
         message={alertMessage}
-        onClose={() => setAlertVisible(false)}
+        buttonText="Great"
+        onClose={() => setShowSuccess(false)}
       />
 
       {showToast && (

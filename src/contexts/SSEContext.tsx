@@ -46,7 +46,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
         return;
       }
 
-      const url = `${BASE_URL}/api/events?token=${token}`;
+      const url = `${BASE_URL}/events?token=${token}`;
       const es = new EventSource(url);
 
       es.addEventListener("open", () => {

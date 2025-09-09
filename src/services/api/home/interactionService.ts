@@ -3,7 +3,7 @@ import { BASE_URL } from "../../../configuration/config";
 
 export async function interactWithPartner(token: string, action: string) {
   const res = await axios.post(
-    `${BASE_URL}/api/interactions/interact/${action}`,
+    `${BASE_URL}/interactions/interact/${action}`,
     {},
     {
       headers: {
@@ -16,7 +16,7 @@ export async function interactWithPartner(token: string, action: string) {
 }
 
 export async function getUnseenInteractions(token: string) {
-  const res = await axios.get(`${BASE_URL}/api/interactions/unseen`, {
+  const res = await axios.get(`${BASE_URL}/interactions/unseen`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

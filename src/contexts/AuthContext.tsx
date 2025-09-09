@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return false;
       }
 
-      const response = await axios.get(`${BASE_URL}/api/auth/validate-token`, {
+      const response = await axios.get(`${BASE_URL}/auth/validate-token`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -11,7 +11,7 @@ export const buildCachedImageUrl = (
 ): string => {
   const timestamp =
     typeof updatedAt === "string" ? updatedAt : updatedAt.toISOString();
-  return `${BASE_URL}/api/profile/get-profile-picture/${userId}?v=${timestamp}`;
+  return `${BASE_URL}/profile/get-profile-picture/${userId}?v=${timestamp}`;
 };
 
 export const preloadProfileImages = (images: CachedImageInfo[]): void => {

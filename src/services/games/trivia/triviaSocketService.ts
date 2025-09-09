@@ -1,7 +1,7 @@
 import { io, Socket } from "socket.io-client";
 import { BASE_URL } from "../../../configuration/config";
 
-const SERVER_URL = BASE_URL;
+const SERVER_URL = BASE_URL.replace(/\/api\/?$/, "");
 
 let socket: Socket | null = null;
 
