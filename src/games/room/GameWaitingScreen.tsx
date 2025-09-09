@@ -33,12 +33,30 @@ type RootStackParamList = {
     roomId?: string;
     showToast?: boolean;
     isInviter?: boolean;
+    options?: {
+      amount: number;
+      category: string;
+      difficulty: string;
+      type?: string;
+    };
   };
   GameSetupScreen: {
     roomId: string;
     players: Player[];
     gameName: string;
     host: string;
+  };
+  GameSessionScreen: {
+    roomId: string;
+    players: Player[];
+    gameName: string;
+    host: string;
+    options: {
+      amount: number;
+      category: string;
+      difficulty: string;
+      type?: string;
+    };
   };
 };
 
@@ -65,6 +83,10 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
 
+  // check if game has started
+  const hasStartedRef = useRef(false);
+  const navigatedRef = useRef(false);
+
   // use effects
   useEffect(() => {
     if (shouldShowToast) {
@@ -87,37 +109,18 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     const socket = connectTriviaSocket();
     const roomId = roomIdRef.current;
 
-    socket.emit("join_trivia", {
-      roomId,
-      player: yourInfo,
-    });
-
-    // handlers
     const handlePlayersUpdate = (playersList: Player[]) => {
       setPlayers(playersList);
 
-      if (playersList.length === 2 && !countdown) {
-        setCountdown(5);
+      const isInviter = route.params.isInviter ?? true;
+      const options = (route.params as any).options;
+      if (!hasStartedRef.current && playersList.length === 2 && isInviter && options) {
+        hasStartedRef.current = true;
+        socket.emit("start_trivia", { roomId, options });
       }
     };
 
     socket.on("players_update", handlePlayersUpdate);
-
-    socket.on("invite_accepted", ({ partnerInfo }) => {
-      if (partnerInfo) {
-        setPlayers((prev) => {
-          const next = prev.some((p) => p.id === partnerInfo.id)
-            ? prev
-            : [...prev, partnerInfo];
-
-          if (next.length === 2 && countdown == null) {
-            setCountdown(5);
-          }
-          
-          return next;
-        });
-      }
-    });
 
     socket.on("invite_declined", () => {
       setAlertMessage("Your partner declined the invite");
@@ -132,45 +135,64 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
     });
 
     socket.on("error", (err) => {
-      setToastMessage(err.message || "An error occured");
+      setToastMessage(err.message || "An error occurred");
       navigation.popToTop();
     });
 
-    return () => {
-      socket.off("players_update", handlePlayersUpdate);
-      socket.off("invite_accepted");
-      socket.off("invite_declined");
-      socket.off("player_left");
-      socket.off("error");
-    };
-  }, []);
+    socket.on("game_start", (payload?: { options?: any }) => {
+      if (navigatedRef.current) {
+        return;
+      }
 
-  useEffect(() => {
-    if (countdown === null) {
-      return;
-    }
+      navigatedRef.current = true;
 
-    if (countdown === 0) {
       const isInviter = route.params.isInviter ?? true;
-      const hostName = isInviter
-        ? yourInfo.name
-        : partner?.name || partnerInfo?.name || "";
+      const hostName = isInviter ? yourInfo.name : partnerInfo?.name || "";
+      const routeOptions = (route.params as any).options;
+      const options = routeOptions || payload?.options;
 
-      navigation.replace("GameSetupScreen", {
+      navigation.replace("GameSessionScreen", {
         roomId: roomIdRef.current,
         players,
         gameName,
         host: hostName,
+        options,
       });
+    });
 
-      return;
-    }
-    const timer = setTimeout(
-      () => setCountdown((prev) => (prev ? prev - 1 : null)),
-      1000
-    );
-    return () => clearTimeout(timer);
-  }, [countdown, players, navigation, gameName, yourInfo.name]);
+    socket.on("question", () => {
+      if (navigatedRef.current) {
+        return;
+      }
+      navigatedRef.current = true;
+
+      const isInviter = route.params.isInviter ?? true;
+      const hostName = isInviter ? yourInfo.name : partnerInfo?.name || "";
+      const routeOptions = (route.params as any).options;
+
+      navigation.replace("GameSessionScreen", {
+        roomId: roomIdRef.current,
+        players,
+        gameName,
+        host: hostName,
+        options: routeOptions,
+      });
+    });
+
+    socket.emit("join_trivia", {
+      roomId,
+      player: yourInfo,
+    });
+
+    return () => {
+      socket.off("players_update", handlePlayersUpdate);
+      socket.off("invite_declined");
+      socket.off("player_left");
+      socket.off("error");
+      socket.off("game_start");
+      socket.off("question");
+    };
+  }, []);
 
   // handlers
   const handleLeave = () => {
@@ -219,10 +241,6 @@ const GameWaitingScreen: React.FC<Props> = ({ navigation, route }) => {
           <Text style={styles.waitingText}>Waiting for partner...</Text>
         )}
       </View>
-
-      {countdown && (
-        <Text style={styles.countdown}>Starting game in {countdown}...</Text>
-      )}
 
       <View style={{ borderRadius: 12, overflow: "hidden", marginTop: 16 }}>
         <Pressable

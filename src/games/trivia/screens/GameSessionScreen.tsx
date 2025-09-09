@@ -36,7 +36,7 @@ interface GameSessionScreenProps {
         amount: number;
         category: string;
         difficulty: string;
-        type: string;
+        type?: string;
       };
       gameName: string;
       host: any;
@@ -83,6 +83,11 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     setIsLoading(false);
 
     const socket = connectTriviaSocket();
+
+    const me = players.find((p: any) => p.id === user.id);
+    if (me) {
+      socket.emit("join_trivia", { roomId, player: me });
+    }
 
     if (players.length > 0) {
       setCurrentPlayerId(user?.id);
@@ -200,7 +205,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
 
   const handleSendReaction = (emoji: string) => {
     const socket = getTriviaSocket();
-    
+
     if (socket && currentPlayerId) {
       socket.emit("send_reaction", {
         roomId,

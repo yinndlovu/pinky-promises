@@ -7,7 +7,7 @@ export const CATEGORY_ID_TO_KEY: Record<number, string> = {
   16: "boardgames",
   17: "science",
   18: "computers",
-  19: "mathematics",
+  19: "math",
   20: "mythology",
   21: "sports",
   22: "geography",

@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,18 +11,48 @@ import {
 
 // internal
 import { categories, CATEGORY_ID_TO_KEY } from "../constants/trivia";
+import { getTriviaSocket } from "../../../services/games/trivia/triviaSocketService";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const GameSetupScreen = ({ navigation, route }: any) => {
   const { roomId, players, gameName, host } = route.params;
+  const { user } = useAuth();
 
   // use states
   const [totalQuestions, setTotalQuestions] = useState("10");
   const [difficulty, setDifficulty] = useState("easy");
   const [category, setCategory] = useState<number | null>(null);
-  const [type, setType] = useState("multiple");
+  const [type, setType] = useState<"multiple" | "boolean" | "any">("any");
+
+  useEffect(() => {
+    const socket = getTriviaSocket();
+
+    if (!socket) {
+      return;
+    }
+
+    socket.on("game_start", () => {
+      navigation.replace("GameSessionScreen", {
+        roomId,
+        players,
+        gameName,
+        host,
+      });
+    });
+
+    socket.on("error", (err) => {
+      alert(err.message || "An error occurred");
+      navigation.popToTop();
+    });
+
+    return () => {
+      socket.off("game_start");
+      socket.off("error");
+    };
+  }, [navigation, roomId, players, gameName, host]);
 
   const startGame = () => {
-    if (!category) {
+    if (!category || user?.name !== host) {
       return;
     }
 
@@ -30,15 +60,44 @@ const GameSetupScreen = ({ navigation, route }: any) => {
       amount: parseInt(totalQuestions),
       category: CATEGORY_ID_TO_KEY[category],
       difficulty,
-      type: type || undefined,
+      type: type === "any" ? undefined : type,
     };
 
-    navigation.replace("GameSessionScreen", {
-      roomId,
-      players,
-      options,
+    const socket = getTriviaSocket();
+
+    if (!socket) {
+      return;
+    }
+
+    const yourPlayer = players.find((p: any) => p.id === user?.id);
+    const partnerPlayer = players.find((p: any) => p.id !== user?.id);
+
+    if (!yourPlayer || !partnerPlayer) {
+      alert("Missing player info");
+      return;
+    }
+
+    socket.emit("send_invite", {
+      inviterId: yourPlayer.id,
+      partnerId: partnerPlayer.id,
+      inviterName: yourPlayer.name,
       gameName,
-      host,
+      roomId,
+    });
+
+    socket.emit("join_trivia", {
+      roomId,
+      player: yourPlayer,
+    });
+
+    navigation.replace("GameWaitingScreen", {
+      gameName,
+      yourInfo: yourPlayer,
+      partnerInfo: partnerPlayer,
+      roomId,
+      showToast: true,
+      isInviter: true,
+      options,
     });
   };
 
@@ -115,6 +174,12 @@ const GameSetupScreen = ({ navigation, route }: any) => {
 
       <Text style={styles.label}>Type</Text>
       <View style={styles.row}>
+        {renderOption(
+          type,
+          "any",
+          () => setType("any"),
+          "Any"
+        )}
         {renderOption(
           type,
           "multiple",
