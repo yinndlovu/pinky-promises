@@ -67,6 +67,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   const [timeLeft, setTimeLeft] = useState(15);
   const [currentPlayerId, setCurrentPlayerId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [answers, setAnswers] = useState<string[]>([]);
 
   // timer animation
   const startTimer = () => {
@@ -98,6 +99,16 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     socket.on("question", (data) => {
       setQuestion(data.question);
       setGamePlayers((prev) => prev.map((p) => ({ ...p, status: null })));
+
+      if (data.question?.incorrect_answers) {
+        const shuffled = [
+          data.question.correct_answer,
+          ...data.question.incorrect_answers,
+        ].sort(() => Math.random() - 0.5);
+        setAnswers(shuffled);
+      } else {
+        setAnswers([]);
+      }
       startTimer();
     });
 
@@ -173,13 +184,18 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   const submitAnswer = (answer: string) => {
     const socket = getTriviaSocket();
 
-    if (socket && currentPlayerId) {
-      socket.emit("submit_answer", {
-        roomId,
-        playerId: currentPlayerId,
-        answer,
-      });
+    if (!socket || !currentPlayerId || !question) {
+      return;
     }
+
+    const me = gamePlayers.find((p) => p.id === currentPlayerId);
+    if (me?.status) return;
+
+    socket.emit("submit_answer", {
+      roomId,
+      playerId: currentPlayerId,
+      answer,
+    });
   };
 
   const handleTimeUp = () => {
@@ -216,11 +232,14 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
     }
   };
 
-  // helpers
   const renderAnswers = () => {
     if (!question) {
       return null;
     }
+
+    const disabled =
+      timeLeft <= 0 ||
+      !!gamePlayers.find((p) => p.id === currentPlayerId && !!p.status);
 
     if (type === "boolean") {
       return (
@@ -230,25 +249,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
               key={ans}
               onPress={() => submitAnswer(ans)}
               style={styles.answerButton}
-            >
-              <Text style={styles.answerText}>{ans}</Text>
-            </Pressable>
-          ))}
-        </View>
-      );
-    } else {
-      const allAnswers = [
-        question.correct_answer,
-        ...question.incorrect_answers,
-      ].sort(() => Math.random() - 0.5);
-
-      return (
-        <View style={styles.answersGrid}>
-          {allAnswers.map((ans) => (
-            <Pressable
-              key={ans}
-              onPress={() => submitAnswer(ans)}
-              style={styles.answerButton}
+              disabled={disabled}
             >
               <Text style={styles.answerText}>{ans}</Text>
             </Pressable>
@@ -256,6 +257,21 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
         </View>
       );
     }
+
+    return (
+      <View style={styles.answersGrid}>
+        {answers.map((ans) => (
+          <Pressable
+            key={ans}
+            onPress={() => submitAnswer(ans)}
+            style={styles.answerButton}
+            disabled={disabled}
+          >
+            <Text style={styles.answerText}>{ans}</Text>
+          </Pressable>
+        ))}
+      </View>
+    );
   };
 
   const progressWidth = timerAnim.interpolate({
