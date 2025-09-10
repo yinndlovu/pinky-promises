@@ -118,18 +118,25 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
       startTimer();
     };
 
-    const onPlayersUpdate = (updatedPlayers: Player[]) =>
-      setGamePlayers(updatedPlayers);
+    const onPlayersUpdate = (updatedPlayers: Player[]) => {
+      setGamePlayers(
+        updatedPlayers.map((p) => ({
+          ...p,
+          score: p.score ?? 0,
+          status: p.status ?? null,
+        }))
+      );
+    };
 
     const onAnswerResult = (result: any) => {
-      const meId = currentPlayerIdRef.current;
+      const { playerId, correct, scores } = result;
       setGamePlayers((prev) =>
         prev.map((p) =>
-          p.id === meId
+          p.id === playerId
             ? {
                 ...p,
-                status: result.correct ? "correct" : "wrong",
-                score: result.correct ? p.score + 1 : p.score,
+                status: correct ? "correct" : "wrong",
+                score: scores[p.id] ?? p.score ?? 0,
               }
             : p
         )
