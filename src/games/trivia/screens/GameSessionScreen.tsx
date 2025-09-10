@@ -7,8 +7,10 @@ import {
   StyleSheet,
   Animated,
   Image,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import { Player } from "../types/Player";
@@ -58,6 +60,7 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   // variables
   const { user } = useAuth();
   const timerAnim = useRef(new Animated.Value(1)).current;
+  const insets = useSafeAreaInsets();
 
   // use states
   const [question, setQuestion] = useState<Question | null>(null);
@@ -303,91 +306,96 @@ const GameSessionScreen = ({ route, navigation }: GameSessionScreenProps) => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.playersRow}>
-        {gamePlayers.map((p) => (
-          <View key={p.id} style={styles.playerCard}>
-            <Image
-              source={p.avatar ? { uri: p.avatar } : fallbackAvatar}
-              style={styles.playerAvatar}
-            />
-            <Text style={styles.playerName}>{p.name}</Text>
-            <Text style={styles.playerScore}>{p.score}</Text>
-            {p.status && (
-              <Text
-                style={[
-                  styles.statusText,
-                  p.status === "correct" && { color: "#4caf50" },
-                  p.status === "wrong" && { color: "#f44336" },
-                  p.status === "unanswered" && { color: "#ffc107" },
-                ]}
-              >
-                {p.status}
-              </Text>
-            )}
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.questionContainer}>
-        <Text style={styles.questionText}>
-          {question ? question.question : "Loading question..."}
-        </Text>
-      </View>
-
-      <View style={styles.timerContainer}>
-        <Ionicons name="time-outline" size={20} color="#fff" />
-        <Text style={styles.timerText}>{timeLeft}s</Text>
-        <View style={styles.progressBarBg}>
-          <Animated.View
-            style={[styles.progressBarFill, { width: progressWidth }]}
-          />
+    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.playersRow}>
+          {gamePlayers.map((p) => (
+            <View key={p.id} style={styles.playerCard}>
+              <Image
+                source={p.avatar ? { uri: p.avatar } : fallbackAvatar}
+                style={styles.playerAvatar}
+              />
+              <Text style={styles.playerName}>{p.name}</Text>
+              <Text style={styles.playerScore}>{p.score}</Text>
+              {p.status && (
+                <Text
+                  style={[
+                    styles.statusText,
+                    p.status === "correct" && { color: "#4caf50" },
+                    p.status === "wrong" && { color: "#f44336" },
+                    p.status === "unanswered" && { color: "#ffc107" },
+                  ]}
+                >
+                  {p.status}
+                </Text>
+              )}
+            </View>
+          ))}
         </View>
-      </View>
 
-      {renderAnswers()}
+        <View style={styles.questionContainer}>
+          <Text style={styles.questionText}>
+            {question ? question.question : "Loading question..."}
+          </Text>
+        </View>
 
-      <View style={styles.emojiRow}>
-        {["😭", "😂", "😲", "😠", "🤍"].map((emoji) => (
-          <Pressable
-            key={emoji}
-            style={styles.emojiButton}
-            onPress={() => handleSendReaction(emoji)}
-          >
-            <Text style={styles.emojiText}>{emoji}</Text>
-          </Pressable>
-        ))}
-      </View>
+        <View style={styles.timerContainer}>
+          <Ionicons name="time-outline" size={20} color="#fff" />
+          <Text style={styles.timerText}>{timeLeft}s</Text>
+          <View style={styles.progressBarBg}>
+            <Animated.View
+              style={[styles.progressBarFill, { width: progressWidth }]}
+            />
+          </View>
+        </View>
 
-      <Pressable style={styles.quitButton} onPress={handleQuit}>
-        <Text style={styles.quitButtonText}>Quit</Text>
-      </Pressable>
+        {renderAnswers()}
 
-      <GameSummaryModal
-        visible={showSummary}
-        players={gamePlayers}
-        category={categoryDisplayName}
-        totalQuestions={totalQuestions}
-        gameType="Trivia"
-        onClose={() => {
-          setShowSummary(false);
-          handleQuit();
-        }}
-        onPlayAgain={() => {
-          setShowSummary(false);
-          setGamePlayers(
-            players.map((p: Player) => ({ ...p, score: 0, status: null }))
-          );
-          const socket = getTriviaSocket();
-          if (socket) {
-            socket.emit("join_trivia", {
-              roomId,
-              player: players.find((p: Player) => p.id === currentPlayerId),
-              options,
-            });
-          }
-        }}
-      />
+        <View style={styles.emojiRow}>
+          {["😭", "😂", "😲", "😠", "🤍"].map((emoji) => (
+            <Pressable
+              key={emoji}
+              style={styles.emojiButton}
+              onPress={() => handleSendReaction(emoji)}
+            >
+              <Text style={styles.emojiText}>{emoji}</Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Pressable style={styles.quitButton} onPress={handleQuit}>
+          <Text style={styles.quitButtonText}>Quit</Text>
+        </Pressable>
+
+        <GameSummaryModal
+          visible={showSummary}
+          players={gamePlayers}
+          category={categoryDisplayName}
+          totalQuestions={totalQuestions}
+          gameType="Trivia"
+          onClose={() => {
+            setShowSummary(false);
+            handleQuit();
+          }}
+          onPlayAgain={() => {
+            setShowSummary(false);
+            setGamePlayers(
+              players.map((p: Player) => ({ ...p, score: 0, status: null }))
+            );
+            const socket = getTriviaSocket();
+            if (socket) {
+              socket.emit("join_trivia", {
+                roomId,
+                player: players.find((p: Player) => p.id === currentPlayerId),
+                options,
+              });
+            }
+          }}
+        />
+      </ScrollView>
     </View>
   );
 };
