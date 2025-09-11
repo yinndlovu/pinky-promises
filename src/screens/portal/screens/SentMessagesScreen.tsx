@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 
 // internal
@@ -20,6 +19,7 @@ import {
 import { Message } from "../../../types/Message";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
 import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // content
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
@@ -28,6 +28,7 @@ import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 const SentMessagesScreen = () => {
   // variables
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [viewModalVisible, setViewModalVisible] = useState(false);
@@ -39,6 +40,10 @@ const SentMessagesScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
 
+  if (!token) {
+    throw new Error("Session expired, please log in again");
+  }
+
   // fetch functions
   const {
     data: messages = [],
@@ -48,12 +53,6 @@ const SentMessagesScreen = () => {
   } = useQuery<Message[]>({
     queryKey: ["lastSixSentMessages", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("Session expired, please log in again");
-      }
-
       const res = await getSentSweetMessages(token);
       return res.sweets || res;
     },
@@ -65,12 +64,6 @@ const SentMessagesScreen = () => {
     setViewLoading(true);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       const res = await viewSweetMessage(token, msg.id);
       setViewedMessage(res.sweet);
       setViewModalVisible(true);

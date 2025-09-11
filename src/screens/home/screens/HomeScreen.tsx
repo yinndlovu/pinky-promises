@@ -48,6 +48,7 @@ import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDet
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
 import { updateGeoInfo } from "../../../services/api/profiles/geoInfoService";
 import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -73,6 +74,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const queryClient = useQueryClient();
   const { invite, setInvite, inviteAccepted, setInviteAccepted } = useInvite();
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -93,19 +95,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [animationModalVisible, setAnimationModalVisible] = useState(false);
   const [animationMessage, setAnimationMessage] = useState("");
 
+  if (!token) {
+    setError("Session expired, please log in again");
+    return;
+  }
+
   // handlers
   const handleInteraction = async (action: string) => {
     setActionsModalVisible(false);
     setInteractionLoading(true);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       await interactWithPartner(token, action);
       await queryClient.invalidateQueries({
         queryKey: ["recentActivities", user?.id],
@@ -126,13 +126,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   const checkAndUpdateHomeStatus = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       const home = await getHomeLocation(token);
 
       if (!home) {
@@ -166,15 +159,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["partnerData", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       return await getPartner(token);
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -182,13 +169,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   const fetchPartnerProfilePicture = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       const pictureResponse = await axios.get(
         `${BASE_URL}/profile/get-profile-picture/${partnerId}`,
         {
@@ -223,13 +203,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return null;
       }
 
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       return await fetchUserStatus(token, partnerId);
     },
     enabled: !!partnerId,
@@ -247,13 +220,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         return null;
       }
 
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       return await getUserMood(token, partnerId);
     },
     enabled: !!partnerId,
@@ -267,15 +233,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["upcomingSpecialDate", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       return await getUpcomingSpecialDate(token);
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 12,
   });
 
@@ -286,13 +246,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["recentActivities", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       const activitiesData = await getRecentActivities(token);
 
       return activitiesData.map((activity: any) => ({
@@ -302,6 +255,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         time: formatTime(activity.createdAt),
       }));
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 2,
   });
 
@@ -312,13 +266,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["unseenInteractions", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       return await getUnseenInteractions(token);
     },
     enabled: !!partnerId,

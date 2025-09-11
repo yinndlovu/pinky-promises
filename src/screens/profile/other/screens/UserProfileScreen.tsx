@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -26,6 +25,7 @@ import {
 } from "../../../../services/api/profiles/partnerService";
 import { BASE_URL } from "../../../../configuration/config";
 import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import useToken from "../../../../hooks/useToken";
 
 // screen content
 import AlertModal from "../../../../components/modals/output/AlertModal";
@@ -44,6 +44,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const { userId } = route.params as { userId: string };
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const token = useToken();
 
   // use states
   const [user, setUser] = useState<any>(null);
@@ -61,16 +62,14 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   );
   const [isOnline, setIsOnline] = useState(true);
 
+  if (!token) {
+    throw new Error("Session expired, please log in again");
+  }
+
   // use effects
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-
-        if (!token) {
-          throw new Error("No token found");
-        }
-
         const response = await axios.get(
           `${BASE_URL}/profile/get-user-profile/${userId}`,
           {
@@ -126,13 +125,6 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     setSendingRequest(true);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Not authenticated");
-        return;
-      }
-
       switch (requestStatus) {
         case "pending":
           await cancelPartnerRequest(token, userId);

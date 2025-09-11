@@ -13,7 +13,6 @@ import {
   RefreshControl,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // internal
@@ -23,11 +22,13 @@ import {
 } from "../../../services/api/ours/timelineService";
 import { formatDateYearly } from "../../../utils/formatters/formatDate";
 import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 const TimelineScreen = () => {
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [modalVisible, setModalVisible] = useState(false);
@@ -36,6 +37,10 @@ const TimelineScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+
+  if (!token) {
+    return;
+  }
 
   // use effects
   useEffect(() => {
@@ -57,12 +62,6 @@ const TimelineScreen = () => {
   } = useQuery({
     queryKey: ["timeline", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await getTimeline(token);
     },
     staleTime: 1000 * 60 * 10,
@@ -70,12 +69,6 @@ const TimelineScreen = () => {
 
   const addTimelineMutation = useMutation({
     mutationFn: async (record: string) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await createTimelineRecord(token, record);
     },
     onSuccess: () => {

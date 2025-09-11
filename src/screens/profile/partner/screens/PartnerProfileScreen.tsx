@@ -7,7 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { encode } from "base64-arraybuffer";
 import { Feather } from "@expo/vector-icons";
@@ -43,12 +42,14 @@ import styles from "../styles/PartnerProfileScreen.styles";
 import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
+import useToken from "../../../../hooks/useToken";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -68,6 +69,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
 
+  if (!token) {
+    return;
+  }
+
   // fetch functions
   const {
     data: partnerData,
@@ -76,12 +81,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["partnerData", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return null;
-      }
-
       const response = await axios.get(
         `${BASE_URL}/partnership/get-partner`,
         {
@@ -91,6 +90,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       return response.data.partner;
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -98,13 +98,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
   const fetchProfilePicture = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token || !partner?.id) {
-        setAvatarUri(null);
-        return;
-      }
-
       const pictureResponse = await axios.get(
         `${BASE_URL}/profile/get-profile-picture/${partner?.id}`,
         {
@@ -134,18 +127,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["profileData", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return null;
-      }
-
       const response = await axios.get(`${BASE_URL}/profile/get-profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       return response.data.user;
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -156,11 +144,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["partnerFavorites", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
       const partnerId = partner?.id;
 
-      if (!token || !partnerId) {
+      if (!partnerId) {
         return {};
       }
 
@@ -177,12 +163,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["partnerLoveLanguage", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await getLoveLanguage(token, partner?.id);
     },
     enabled: !!partner?.id,
@@ -196,12 +176,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["partnerAbout", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await getAboutUser(token, partner?.id);
     },
     enabled: !!partner?.id,
@@ -215,15 +189,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["partnerStoredMessages", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       const response = await getReceivedMessages(token);
       return Array.isArray(response) ? response : [];
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -234,12 +203,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["partnerDistance", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await getPartnerDistance(token);
     },
     enabled: !!partner?.id,
@@ -250,12 +213,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("No token found");
-      }
-
       await removePartner(token);
       await queryClient.invalidateQueries({
         queryKey: ["partnerData", user?.id],

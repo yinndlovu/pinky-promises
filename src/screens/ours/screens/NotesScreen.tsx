@@ -7,11 +7,11 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { getNotes, updateNotes } from "../../../services/api/ours/notesService";
+import useToken from "../../../hooks/useToken";
 
 // variables
 const AUTO_SAVE_DELAY = 1000;
@@ -28,18 +28,19 @@ const NotesScreen: React.FC = () => {
   // use refs
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // variables
+  const token = useToken();
+
+  if (!token) {
+    throw new Error("Session expired, please log in again");
+  }
+
   // use effects
   useEffect(() => {
     const fetchNotes = async () => {
       setLoading(true);
       setError(null);
       try {
-        const token = await AsyncStorage.getItem("token");
-
-        if (!token) {
-          throw new Error("No token found");
-        }
-
         const notes = await getNotes(token);
         setContent(notes.content || "");
       } catch (err: any) {
@@ -64,12 +65,6 @@ const NotesScreen: React.FC = () => {
     setSaving(true);
     saveTimeout.current = setTimeout(async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-
-        if (!token) {
-          return;
-        }
-
         await updateNotes(token, content);
       } catch {}
       setSaving(false);

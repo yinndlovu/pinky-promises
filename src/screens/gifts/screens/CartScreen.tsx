@@ -13,7 +13,6 @@ import {
   Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // internal
@@ -26,6 +25,7 @@ import {
 } from "../../../services/api/gifts/cartService";
 import { CartItem } from "../../../types/Cart";
 import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -36,6 +36,7 @@ const CartScreen = () => {
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
@@ -58,6 +59,11 @@ const CartScreen = () => {
     (() => void) | null
   >(null);
 
+  if (!token) {
+    setToastMessage("Session expired, please log in again");
+    return;
+  }
+
   // fetch functions
   const {
     data: cartItems = [],
@@ -66,12 +72,6 @@ const CartScreen = () => {
   } = useQuery({
     queryKey: ["cartItems", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("Session expired, please log in again");
-      }
-
       const response = await getItems(token);
       return Array.isArray(response) ? response : [];
     },
@@ -85,12 +85,6 @@ const CartScreen = () => {
   } = useQuery({
     queryKey: ["cartTotal", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       const totalData = await getCartTotal(token);
       return totalData.total || 0;
     },
@@ -100,12 +94,6 @@ const CartScreen = () => {
   // mutations
   const addItemMutation = useMutation({
     mutationFn: async ({ item, value }: { item: string; value: string }) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await addItem(token, item, value);
     },
     onSuccess: () => {
@@ -130,12 +118,6 @@ const CartScreen = () => {
 
   const deleteItemMutation = useMutation({
     mutationFn: async (itemId: string) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await deleteItem(token, itemId);
     },
     onSuccess: () => {
@@ -154,12 +136,6 @@ const CartScreen = () => {
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return clearCart(token);
     },
     onSuccess: () => {

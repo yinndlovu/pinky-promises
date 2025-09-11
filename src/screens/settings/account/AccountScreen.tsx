@@ -11,11 +11,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { deleteAccount } from "../../../services/api/account/accountService";
 import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // content
 import DeleteAccountModal from "../../../components/modals/input/DeleteAccountModal";
@@ -32,6 +32,12 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
 
   // variables
   const { logout } = useAuth();
+  const token = useToken();
+
+  if (!token) {
+    setToastMessage("Session expired, please log in again");
+    return;
+  }
 
   // handlers
   const handleDeleteAccountPress = () => {
@@ -41,13 +47,6 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const handleVerifyPassword = async (password: string) => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setToastMessage("Session expired, please log in again");
-        return false;
-      }
-
       await verifyPassword(token, password);
       return true;
     } catch (error) {
@@ -60,13 +59,6 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const handleDeleteAccount = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setToastMessage("Session expired, please log in again");
-        return;
-      }
-
       await deleteAccount(token);
       setDeleteModalVisible(false);
 

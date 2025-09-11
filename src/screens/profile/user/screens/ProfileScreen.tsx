@@ -13,7 +13,6 @@ import {
   RefreshControl,
 } from "react-native";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
@@ -55,6 +54,7 @@ import {
   deleteMessage,
 } from "../../../../services/api/profiles/messageStorageService";
 import { useAuth } from "../../../../contexts/AuthContext";
+import useToken from "../../../../hooks/useToken";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
@@ -84,6 +84,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -137,6 +138,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editTitle, setEditTitle] = useState("");
   const [editMessageText, setEditMessageText] = useState("");
 
+  if (!token) {
+    setError("Session expired, please log in again");
+    return;
+  }
+
   // fetch functions
   const {
     data: profileData,
@@ -145,19 +151,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["profileData", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
       const res = await axios.get(`${BASE_URL}/profile/get-profile`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       return res.data.user;
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24 * 2,
   });
 
@@ -168,16 +168,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["loveLanguage", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
-      return await getLoveLanguage(token, profileData?.id);
+      return await getLoveLanguage(token, user?.id);
     },
-    enabled: !!user?.id,
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -188,20 +181,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["status", user?.id],
     queryFn: async () => {
-      if (!profileData?.id) {
-        return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      return await fetchUserStatus(token, profileData?.id);
+      return await fetchUserStatus(token, user?.id);
     },
-    enabled: !!user?.id,
+    enabled: !!token,
     staleTime: 1000 * 60 * 4,
   });
 
@@ -228,16 +210,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["pendingRequestCount", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
       return await getReceivedPartnerRequests(token);
     },
-    enabled: !!user?.id,
+    enabled: !!token,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -252,17 +227,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["favorites", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      const userId = profileData?.id;
-
-      if (!token || !userId) {
-        return {};
-      }
-
-      return await getUserFavorites(token, userId);
+      return await getUserFavorites(token, user?.id);
     },
-    enabled: !!user?.id,
+    enabled: !!token,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -273,15 +240,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["partnerData", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
       return await getPartner(token);
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -292,16 +253,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["moodData", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
       return await getMood(token);
     },
-    enabled: !!user?.id,
+    enabled: !!token,
     staleTime: 1000 * 60 * 5,
   });
 
@@ -312,27 +266,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["about", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
       return await getAboutUser(token, profileData?.id);
     },
-    enabled: !!user?.id,
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
   const fetchProfilePicture = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token || !profileData?.id) {
-        return;
-      }
-
       const pictureResponse = await axios.get(
         `${BASE_URL}/profile/get-profile-picture/${profileData?.id}`,
         {
@@ -364,15 +305,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["storedMessages", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       const response = await getStoredMessages(token);
       return Array.isArray(response) ? response : [];
     },
+    enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
@@ -384,12 +320,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       title: string;
       message: string;
     }) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await storeMessage(token, title, message);
     },
     onSuccess: () => {
@@ -417,12 +347,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       title: string;
       message: string;
     }) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await updateMessage(token, messageId, title, message);
     },
     onSuccess: () => {
@@ -447,12 +371,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: string) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await deleteMessage(token, messageId);
     },
     onSuccess: () => {
@@ -579,13 +497,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
-
     try {
       await updateLoveLanguage(token, newLoveLanguage);
 
@@ -606,13 +517,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleSaveAbout = async (newAbout: string) => {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
-
     try {
       await updateAboutUser(token, newAbout);
 
@@ -637,13 +541,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleSaveFavorites = async (newFavorites: FavoritesType) => {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
-
     try {
       await updateUserFavorites(token, newFavorites);
 
@@ -684,8 +581,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         }
 
         setUploading(true);
-
-        const token = await AsyncStorage.getItem("token");
 
         const mimeType = result.assets[0].mimeType || "image/jpeg";
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
@@ -730,7 +625,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setLoadingBio(true);
       }
 
-      const token = await AsyncStorage.getItem("token");
       let url = "";
       let body = {};
 
@@ -782,14 +676,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleStoreMessage = async (title: string, message: string) => {
     setStoringMessage(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       await storeMessage(token, title, message);
+
       setAlertTitle("Message Stored");
       setAlertMessage("You have stored a message");
       setStoreMessageModalVisible(false);
@@ -817,7 +705,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleEditMessage = () => {
-    if (!selectedMessage) return;
+    if (!selectedMessage) {
+      return;
+    }
 
     setEditingMessage(selectedMessage);
     setEditTitle(selectedMessage.title);
@@ -827,7 +717,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleDeleteMessage = () => {
-    if (!selectedMessage) return;
+    if (!selectedMessage) {
+      return;
+    }
 
     setConfirmationMessage("Are you sure you want to delete this message?");
     setConfirmationAction(

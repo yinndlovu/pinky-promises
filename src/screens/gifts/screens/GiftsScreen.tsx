@@ -8,11 +8,10 @@ import {
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
-import { Feather, FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // screen content
@@ -39,6 +38,7 @@ import {
   formatDateDMY,
   formatTime,
 } from "../../../utils/formatters/formatDate";
+import useToken from "../../../hooks/useToken";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -50,6 +50,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
   const userId = user?.id;
   const queryClient = useQueryClient();
+  const token = useToken();
 
   // use states
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -64,6 +65,11 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
+
+  if (!token) {
+    setToastMessage("Session expired, please log in again");
+    return;
+  }
 
   // use effects
   useEffect(() => {
@@ -106,13 +112,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["unclaimedGift", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setToastMessage("Session expired, please log in again");
-        return;
-      }
-
       return await getOldestUnclaimedGift(token);
     },
     staleTime: 1000 * 60 * 15,
@@ -125,14 +124,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["pastGifts", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setToastMessage("Session expired, please log in again");
-        return;
-      }
-
       const gifts = await getLastFiveClaimedGifts(token);
+
       return gifts.map((gift: any) => ({
         id: gift.id,
         giftName: gift.name,
@@ -152,12 +145,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   } = useQuery({
     queryKey: ["setMonthlyGift", userId],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token || !userId) {
-        return;
-      }
-
       return await getSetMonthlyGift(token, userId);
     },
     enabled: !!userId,
@@ -173,19 +160,14 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     try {
       setClaiming(true);
 
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setToastMessage("Session expired, please log in again");
-        return;
-      }
-
       const result = await claimMonthlyGift(token, gift.id);
       setClaimedGift(result.gift);
       setModalVisible(true);
 
       setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["unclaimedGift", user?.id] });
+        queryClient.invalidateQueries({
+          queryKey: ["unclaimedGift", user?.id],
+        });
         queryClient.invalidateQueries({ queryKey: ["pastGifts", user?.id] });
       }, 1000);
     } catch (err: any) {
@@ -199,12 +181,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     setModalLoading(true);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       await updateSetMonthlyGift(token, giftName);
       await queryClient.invalidateQueries({
         queryKey: ["setMonthlyGift", userId],

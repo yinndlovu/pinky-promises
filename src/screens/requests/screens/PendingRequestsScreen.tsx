@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { encode } from "base64-arraybuffer";
 import axios from "axios";
 import { Image } from "expo-image";
@@ -23,6 +22,7 @@ import { BASE_URL } from "../../../configuration/config";
 import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
 import { PendingRequest } from "../../../types/Request";
 import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -36,6 +36,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
@@ -53,6 +54,10 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   const [processingAccept, setProcessingAccept] = useState<string | null>(null);
   const [processingReject, setProcessingReject] = useState<string | null>(null);
 
+  if (!token) {
+    return;
+  }
+
   // use effects
   useEffect(() => {
     fetchRequests();
@@ -61,13 +66,6 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   // fetch functions
   const fetchRequests = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Session expired, please log in again");
-        return;
-      }
-
       const requestsData = await getReceivedPartnerRequests(token);
       const pendingRequests = requestsData.filter(
         (req: PendingRequest) => req.status === "pending"
@@ -139,13 +137,6 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     setProcessingAccept(requestId);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Session expired, please log in again");
-        return;
-      }
-
       await acceptPartnerRequest(token, requestId);
       await queryClient.invalidateQueries({
         queryKey: ["partnerRequests", user?.id],
@@ -167,14 +158,6 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   const handleDeclineRequest = async (requestId: string) => {
     setProcessingReject(requestId);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Session expired, please log in again");
-
-        return;
-      }
-
       await rejectPartnerRequest(token, requestId);
       await queryClient.invalidateQueries({
         queryKey: ["partnerRequests", user?.id],
