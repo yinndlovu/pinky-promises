@@ -11,10 +11,10 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { useAuth } from "../../contexts/AuthContext";
@@ -25,6 +25,7 @@ import {
 } from "../../services/ai/aiKeyDetailsService";
 import { favoritesObjectToArray } from "../../helpers/aiHelpers";
 import { ChatMessage } from "../../types/Message";
+import useToken from "../../hooks/useToken";
 
 // screen content
 import styles from "./styles/ChatScreen.styles";
@@ -51,6 +52,7 @@ export default function ChatScreen() {
   const navigation = useNavigation();
   const route = useRoute();
   const queryClient = useQueryClient();
+  const token = useToken();
 
   // use states
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -58,6 +60,10 @@ export default function ChatScreen() {
   const [isSending, setIsSending] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  if (!token) {
+    return;
+  }
 
   // fetch functions
   const {
@@ -67,10 +73,6 @@ export default function ChatScreen() {
   } = useQuery({
     queryKey: ["aiContext", userId],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        throw new Error("No token found");
-      }
       return await getContext(token);
     },
     enabled: !!userId,
@@ -84,10 +86,6 @@ export default function ChatScreen() {
   } = useQuery({
     queryKey: ["keyDetails", userId],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        throw new Error("No token found");
-      }
       return await fetchKeyDetails(token);
     },
     enabled: !!userId,
@@ -376,13 +374,6 @@ export default function ChatScreen() {
         botReply.timestamp
       );
     } catch (err: any) {}
-
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      return;
-    }
-
     if (record && context?.partnerId && token) {
       await saveKeyDetail({
         ...record,

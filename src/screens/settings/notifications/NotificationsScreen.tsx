@@ -12,7 +12,6 @@ import {
   Platform,
   Modal,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
@@ -22,6 +21,7 @@ import {
   setNotificationPreference,
 } from "../../../services/api/settings/notificationPreferenceService";
 import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // screen content
 import ReminderIntervalSetting from "./ReminderIntervalSetting";
@@ -31,6 +31,7 @@ const NotificationsScreen = () => {
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [loading, setLoading] = useState(true);
@@ -44,14 +45,13 @@ const NotificationsScreen = () => {
   // variables
   const isAnyUpdating = Object.values(updating).some(Boolean);
 
+  if (!token) {
+    setError("Session expired, please log in again");
+    return;
+  }
+
   // fetch functions
   const fetchPreferencesQuery = async () => {
-    const token = await AsyncStorage.getItem("token");
-    if (!token) {
-      setError("Session expired, please log in again");
-      return {};
-    }
-
     const prefs: { [key: string]: boolean } = {};
     for (const { key } of NOTIFICATION_TYPES) {
       try {
@@ -77,15 +77,6 @@ const NotificationsScreen = () => {
   // handlers
   const handleToggle = async (type: string, value: boolean) => {
     setUpdating((prev) => ({ ...prev, [type]: true }));
-
-    const token = await AsyncStorage.getItem("token");
-    if (!token) {
-      setError("Session expired, please log in again");
-      setUpdating((prev) => ({ ...prev, [type]: false }));
-
-      return;
-    }
-
     try {
       await setNotificationPreference(token, type, value);
 

@@ -14,10 +14,10 @@ import {
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import { changePassword } from "../../../services/api/auth/authService";
+import useToken from "../../../hooks/useToken";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -50,7 +50,12 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   const [changeSuccess, setChangeSuccess] = useState(false);
 
   // variables
-  const insets = useSafeAreaInsets();
+  const token = useToken();
+
+  if (!token) {
+    setError("Session expired, please log in again");
+    return;
+  }
 
   // validators
   const validateNewPassword = (password: string) => {
@@ -101,14 +106,6 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-
-        return;
-      }
-
       await changePassword(
         token,
         currentPassword,

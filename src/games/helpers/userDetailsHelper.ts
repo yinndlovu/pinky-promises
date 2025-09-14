@@ -1,20 +1,22 @@
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BASE_URL } from "../../configuration/config";
 import { encode } from "base64-arraybuffer";
 import { v4 as uuidv4 } from "uuid";
 
+// internal
+import useToken from "../../hooks/useToken";
+import { BASE_URL } from "../../configuration/config";
+
 export async function fetchCurrentUserProfileAndAvatar() {
+  // variables
+  const token = useToken();
+
+  if (!token) {
+    return;
+  }
+
   let user: { id: string; name: string } | null = null;
 
   try {
-    // Fetch user profile
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      return;
-    }
-
     const profileRes = await axios.get(`${BASE_URL}/profile/get-profile`, {
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -7,6 +7,7 @@ import EventSource from "react-native-sse";
 // internal
 import { BASE_URL } from "../configuration/config";
 import { useAuth } from "./AuthContext";
+import useToken from "../hooks/useToken";
 
 // interfaces
 interface SSEContextType {
@@ -39,15 +40,14 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const token = useToken();
+
+  if (!token) {
+    return;
+  }
 
   const connectSSE = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       const url = `${BASE_URL}/events?token=${token}`;
       const es = new EventSource(url);
 
@@ -63,13 +63,16 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
               break;
 
             case "newInteraction":
-              queryClient.setQueryData(["unseenInteractions", user?.id], (old: any) => {
-                if (!old) {
-                  return [data.data];
-                }
+              queryClient.setQueryData(
+                ["unseenInteractions", user?.id],
+                (old: any) => {
+                  if (!old) {
+                    return [data.data];
+                  }
 
-                return [data.data, ...old];
-              });
+                  return [data.data, ...old];
+                }
+              );
               queryClient.invalidateQueries({
                 queryKey: ["recentActivities", user?.id],
               });
@@ -117,7 +120,10 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
               break;
 
             case "updateFavorites":
-              queryClient.setQueryData(["partnerFavorites", user?.id], data.data);
+              queryClient.setQueryData(
+                ["partnerFavorites", user?.id],
+                data.data
+              );
               queryClient.invalidateQueries({
                 queryKey: ["recentActivities", user?.id],
               });
