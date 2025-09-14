@@ -6,10 +6,7 @@ import { Feather } from "@expo/vector-icons";
 // internal
 import { AboutProps } from "../../../../types/About";
 
-const MoreAboutYou: React.FC<AboutProps> = ({
-  about = "",
-  onEdit,
-}) => (
+const MoreAboutYou: React.FC<AboutProps> = ({ about = "", onEdit }) => (
   <View style={styles.wrapper}>
     <View style={styles.headerRow}>
       <Text style={styles.label}>More about you</Text>

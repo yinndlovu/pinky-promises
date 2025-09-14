@@ -35,7 +35,9 @@ export default function MessageStorage({
         activeOpacity={0.85}
       >
         <Text style={styles.title}>{message.title}</Text>
-        <Text style={styles.messageText}>{getTrimmedText(message.message)}</Text>
+        <Text style={styles.messageText}>
+          {getTrimmedText(message.message)}
+        </Text>
         <Text style={styles.date}>{formatDateDMYHM(message.createdAt)}</Text>
       </TouchableOpacity>
     );

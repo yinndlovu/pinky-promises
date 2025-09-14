@@ -1236,7 +1236,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             title={alertTitle}
             message={alertMessage}
             buttonText="Great"
-            onClose={() => setShowSuccess(false)}
+            onClose={() => setShowSuccessAlert(false)}
           />
 
           <AlertModal
@@ -1245,7 +1245,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             title={alertTitle}
             message={alertMessage}
             buttonText="Close"
-            onClose={() => setShowError(false)}
+            onClose={() => setShowErrorAlert(false)}
           />
         </View>
       </ScrollView>

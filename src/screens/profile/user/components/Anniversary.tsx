@@ -14,6 +14,7 @@ import {
 import { useAuth } from "../../../../contexts/AuthContext";
 import { AnniversaryProps, SpecialDate } from "../../../../types/SpecialDate";
 import { formatProfileDisplayDate } from "../../../../utils/formatters/formatDate";
+import useToken from "../../../../hooks/useToken";
 
 // screen content
 import UpdateSpecialDateModal from "../../../../components/modals/input/UpdateSpecialDateModal";
@@ -23,7 +24,7 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   // variables
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const currentUserId = user?.id;
+  const token = useToken();
 
   // use states
   const [modalVisible, setModalVisible] = useState(false);
@@ -35,6 +36,10 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   const [alertTitle, setAlertTitle] = useState("");
   const [showSuccessAlert, setShowSuccess] = useState(false);
 
+  if (!token) {
+    return;
+  }
+
   // fetch functions
   const {
     data: specialDates = [],
@@ -43,11 +48,6 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   } = useQuery<SpecialDate[]>({
     queryKey: ["specialDates", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        return [];
-      }
-
       return await getSpecialDates(token);
     },
     staleTime: 1000 * 60 * 60 * 24,
@@ -120,12 +120,6 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
     description?: string
   ) => {
     setModalVisible(false);
-
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      throw new Error("No token");
-    }
 
     if (editingDate) {
       await updateSpecialDate(token, editingDate.id, date, title, description);

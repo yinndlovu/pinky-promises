@@ -2,8 +2,10 @@ import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import { BASE_URL } from "../configuration/config";
+
+// internal
+import { saveToken } from "../services/api/expo/tokenService";
+import useToken from "../hooks/useToken";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -39,17 +41,14 @@ export async function registerForPushNotificationsAsync() {
       const tokenObj = await Notifications.getExpoPushTokenAsync();
       const token = tokenObj.data;
 
-      const authToken = await AsyncStorage.getItem("token");
+      const authToken = useToken();
 
       if (authToken) {
         try {
-          await axios.post(
-            `${BASE_URL}/push-token/save`,
-            { token },
-            { headers: { Authorization: `Bearer ${authToken}` } }
-          );
+          await saveToken(authToken, token);
         } catch (error) {}
       } else {
+        return;
       }
     } catch (err) {}
   } else {
