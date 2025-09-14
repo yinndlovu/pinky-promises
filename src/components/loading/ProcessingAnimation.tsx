@@ -12,13 +12,13 @@ import LottieView from "lottie-react-native";
 import catFootprints from "../../assets/animations/cat-footprints.json";
 
 // types
-type LoadingAnimationModalProps = {
+type ProcessingAnimationModalProps = {
   visible: boolean;
   onClose: () => void;
   size?: "small" | "medium" | "large";
 };
 
-const LoadingAnimation: React.FC<LoadingAnimationModalProps> = ({
+const ProcessingAnimation: React.FC<ProcessingAnimationModalProps> = ({
   visible,
   onClose,
   size = "medium",
@@ -67,6 +67,7 @@ const LoadingAnimation: React.FC<LoadingAnimationModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(5, 3, 12, 0.7)",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
@@ -87,4 +88,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoadingAnimation;
+export default ProcessingAnimation;
