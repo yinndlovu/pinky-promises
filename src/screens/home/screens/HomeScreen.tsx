@@ -49,11 +49,11 @@ import { getInteractionMessage, getInteractionFeedback } from "../../../helpers/
 import RecentActivity from "../components/RecentActivity";
 import ActionsModal from "../../../components/modals/selection/ActionsModal";
 import styles from "../styles/HomeScreen.styles";
-import AlertModal from "../../../components/modals/output/AlertModal";
 import PortalPreview from "../components/PortalPreview";
 import ProfileCard from "../components/ProfileCard";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
+import ProcessingAnimation from "../../../components/loading/ProcessingAnimation";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -651,11 +651,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       )}
 
       {interactionLoading && (
-        <View style={styles.absoluteFillObject}>
-          <ActivityIndicator size="large" color="#e03487" />
+        <View style={styles.centered}>
+          <ProcessingAnimation visible={interactionLoading} onClose={() => {}} size="large" />
         </View>
       )}
-      
+
       <InteractionAnimationModal
         visible={animationModalVisible}
         message={animationMessage}
