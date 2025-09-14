@@ -13,9 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { encode } from "base64-arraybuffer";
-import * as Location from "expo-location";
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -24,9 +22,6 @@ import LottieView from "lottie-react-native";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
-import { getHomeLocation } from "../../../services/api/profiles/homeLocationService";
-import { updateUserStatus } from "../../../services/api/profiles/userStatusService";
-import { getDistance } from "../../../utils/locationUtils";
 import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
 import { getUserMood } from "../../../services/api/profiles/moodService";
 import { getUpcomingSpecialDate } from "../../../services/api/ours/specialDateService";
@@ -42,13 +37,12 @@ import {
   formatTime,
   formatTimeLeft,
 } from "../../../utils/formatters/formatDate";
-import { checkLocationPermissions } from "../../../services/location/locationPermissionService";
 import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
-import { updateGeoInfo } from "../../../services/api/profiles/geoInfoService";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { checkAndUpdateHomeStatus } from "../../../helpers/checkHomeStatus";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -122,33 +116,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setInteractionLoading(false);
     }
-  };
-
-  const checkAndUpdateHomeStatus = async () => {
-    try {
-      const home = await getHomeLocation(token);
-
-      if (!home) {
-        return;
-      }
-
-      const { foreground } = await checkLocationPermissions();
-      if (foreground !== "granted") {
-        return;
-      }
-
-      const { coords } = await Location.getCurrentPositionAsync({});
-      const distance = getDistance(
-        coords.latitude,
-        coords.longitude,
-        home.latitude,
-        home.longitude
-      );
-      const isAtHome = distance < 150;
-
-      await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
-      await updateGeoInfo(token, coords.latitude, coords.longitude);
-    } catch (err) {}
   };
 
   // fetch functions
@@ -386,10 +353,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   // use effects
   useEffect(() => {
-    checkAndUpdateHomeStatus();
-  }, []);
-
-  useEffect(() => {
     if (inviteAccepted && invite) {
       (async () => {
         try {
@@ -428,7 +391,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      checkAndUpdateHomeStatus();
+      checkAndUpdateHomeStatus(token);
       const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
