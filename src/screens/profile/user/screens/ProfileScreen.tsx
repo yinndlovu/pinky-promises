@@ -55,6 +55,7 @@ import {
 } from "../../../../services/api/profiles/messageStorageService";
 import { useAuth } from "../../../../contexts/AuthContext";
 import useToken from "../../../../hooks/useToken";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
@@ -87,15 +88,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const token = useToken();
 
   // use states
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [showError, setShowError] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
 
   // use states (processing)
   const [loadingName, setLoadingName] = useState(false);
@@ -272,32 +269,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     staleTime: 1000 * 60 * 60 * 24,
   });
 
-  const fetchProfilePicture = async () => {
-    try {
-      const pictureResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${profileData?.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-      setAvatarUri(base64);
-
-      const lastModified = pictureResponse.headers["last-modified"];
-      setProfilePicUpdatedAt(
-        lastModified ? new Date(lastModified) : new Date()
-      );
-    } catch (picErr: any) {
-      if (picErr.response?.status !== 404) {
-        setError(picErr.response?.data?.error || picErr.message);
-      }
-    }
-  };
-
   const {
     data: storedMessages = [],
     isLoading: storedMessagesLoading,
@@ -389,6 +360,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setShowErrorAlert(true);
     },
   });
+
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchProfilePicture,
+  } = useProfilePicture(user?.id, token);
 
   // helpers
   const renderProfileImage = () => {

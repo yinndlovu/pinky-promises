@@ -12,8 +12,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
-import axios from "axios";
-import { encode } from "base64-arraybuffer";
+
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,7 +20,6 @@ import NetInfo from "@react-native-community/netinfo";
 import LottieView from "lottie-react-native";
 
 // internal
-import { BASE_URL } from "../../../configuration/config";
 import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
 import { getUserMood } from "../../../services/api/profiles/moodService";
 import { getUpcomingSpecialDate } from "../../../services/api/ours/specialDateService";
@@ -43,7 +41,11 @@ import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDeta
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { checkAndUpdateHomeStatus } from "../../../helpers/checkHomeStatus";
-import { getInteractionMessage, getInteractionFeedback } from "../../../helpers/interactions";
+import {
+  getInteractionMessage,
+  getInteractionFeedback,
+} from "../../../helpers/interactions";
+import { useProfilePicture } from "../../../hooks/useProfilePicture";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -73,10 +75,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   // use states
   const [error, setError] = useState<string | null>(null);
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
   const [showError, setShowError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
@@ -133,31 +131,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   });
 
   const partnerId = partner?.id;
-
-  const fetchPartnerProfilePicture = async () => {
-    try {
-      const pictureResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${partnerId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-      setAvatarUri(base64);
-
-      const lastModified = pictureResponse.headers["last-modified"];
-      setProfilePicUpdatedAt(
-        lastModified ? new Date(lastModified) : new Date()
-      );
-    } catch (picErr: any) {
-      if (![404, 500].includes(picErr.response?.status)) {
-      }
-    }
-  };
 
   const {
     data: partnerStatus,
@@ -333,9 +306,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   }, [inviteAccepted, invite, navigation]);
 
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(partnerId, token);
+
   useEffect(() => {
     if (partnerId) {
-      fetchPartnerProfilePicture();
+      fetchPartnerPicture();
     }
   }, [partnerId]);
 
@@ -375,7 +354,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         refetchActivities(),
         refetchPartnerMood(),
         refetchPartnerStatus(),
-        fetchPartnerProfilePicture(),
+        fetchPartnerPicture(),
       ]);
     } catch (e) {
     } finally {
@@ -387,7 +366,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     refetchActivities,
     refetchPartnerMood,
     refetchPartnerStatus,
-    fetchPartnerProfilePicture,
+    fetchPartnerPicture,
   ]);
 
   if (partnerLoading) {
@@ -652,7 +631,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       {interactionLoading && (
         <View style={styles.centered}>
-          <ProcessingAnimation visible={interactionLoading} onClose={() => {}} size="large" />
+          <ProcessingAnimation
+            visible={interactionLoading}
+            onClose={() => {}}
+            size="large"
+          />
         </View>
       )}
 

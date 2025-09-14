@@ -7,8 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import axios from "axios";
-import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,9 +21,10 @@ import {
   getIncomingRequest,
   acceptPartnerRequest,
 } from "../../../../services/api/profiles/partnerService";
-import { BASE_URL } from "../../../../configuration/config";
 import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
 import useToken from "../../../../hooks/useToken";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { getUserProfile } from "../../../../services/api/profiles/profileService";
 
 // screen content
 import AlertModal from "../../../../components/modals/output/AlertModal";
@@ -48,7 +47,6 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
   // use states
   const [user, setUser] = useState<any>(null);
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
   const [requestStatus, setRequestStatus] = useState<RequestStatus>("none");
@@ -57,59 +55,27 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   );
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
   const [isOnline, setIsOnline] = useState(true);
 
   if (!token) {
     throw new Error("Session expired, please log in again");
   }
 
+  const fetchUser = async () => {
+    try {
+      const userData = await getUserProfile(userId, token);
+      setUser(userData);
+
+      await checkRequestStatus(token);
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // use effects
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get(
-          `${BASE_URL}/profile/get-user-profile/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const userData = response.data.profile;
-        setUser(userData);
-
-        try {
-          const pictureResponse = await axios.get(
-            `${BASE_URL}/profile/get-profile-picture/${userId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              responseType: "arraybuffer",
-            }
-          );
-          const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-          const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-          setAvatarUri(base64);
-
-          const lastModified = pictureResponse.headers["last-modified"];
-          setProfilePicUpdatedAt(
-            lastModified ? new Date(lastModified) : new Date()
-          );
-        } catch (picErr: any) {
-          setAvatarUri(null);
-        }
-
-        await checkRequestStatus(token);
-      } catch (err) {
-        setUser(null);
-        setAvatarUri(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUser();
   }, [userId]);
 
@@ -160,6 +126,12 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
       setSendingRequest(false);
     }
   };
+
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(userId, token);
 
   // helpers
   const renderProfileImage = () => {

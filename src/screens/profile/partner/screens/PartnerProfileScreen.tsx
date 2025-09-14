@@ -7,8 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import axios from "axios";
-import { encode } from "base64-arraybuffer";
 import { Feather } from "@expo/vector-icons";
 import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
@@ -21,14 +19,18 @@ import NetInfo from "@react-native-community/netinfo";
 import { getUserFavorites } from "../../../../services/api/profiles/favoritesService";
 import { getLoveLanguage } from "../../../../services/api/profiles/loveLanguageService";
 import { getAboutUser } from "../../../../services/api/profiles/aboutUserService";
-import { removePartner } from "../../../../services/api/profiles/partnerService";
-import { BASE_URL } from "../../../../configuration/config";
+import {
+  removePartner,
+  getPartner,
+} from "../../../../services/api/profiles/partnerService";
 import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import { getReceivedMessages } from "../../../../services/api/profiles/messageStorageService";
 import { getPartnerDistance } from "../../../../services/api/profiles/distanceService";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { getProfile } from "../../../../services/api/profiles/profileService";
 
 // screen content
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
@@ -52,13 +54,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const token = useToken();
 
   // use states
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
   const [isOnline, setIsOnline] = useState(true);
 
   // use states (processing)
@@ -81,44 +79,13 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["partnerData", user?.id],
     queryFn: async () => {
-      const response = await axios.get(
-        `${BASE_URL}/partnership/get-partner`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      return response.data.partner;
+      return await getPartner(token);
     },
     enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 
   const partner = partnerData || null;
-
-  const fetchProfilePicture = async () => {
-    try {
-      const pictureResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${partner?.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-      setAvatarUri(base64);
-
-      const lastModified = pictureResponse.headers["last-modified"];
-      setProfilePicUpdatedAt(
-        lastModified ? new Date(lastModified) : new Date()
-      );
-    } catch (picErr: any) {
-      setAvatarUri(null);
-    }
-  };
 
   const {
     data: currentUser,
@@ -127,11 +94,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   } = useQuery({
     queryKey: ["profileData", user?.id],
     queryFn: async () => {
-      const response = await axios.get(`${BASE_URL}/profile/get-profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      return response.data.user;
+      return await getProfile(token);
     },
     enabled: !!token,
     staleTime: 1000 * 60 * 60 * 24,
@@ -277,10 +240,16 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
   }, [navigation]);
 
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(partner?.id, token);
+
   // use effects
   useEffect(() => {
     if (partner?.id) {
-      fetchProfilePicture();
+      fetchPartnerPicture();
     }
   }, [partner?.id]);
 
@@ -303,7 +272,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           refetchPartnerFavorites(),
           refetchLoveLanguage(),
           refetchPartnerAbout(),
-          fetchProfilePicture(),
+          fetchPartnerPicture(),
           refetchPartnerStoredMessages(),
         ]);
       }
@@ -319,7 +288,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     refetchPartnerFavorites,
     refetchCurrentUser,
     refetchPartnerAbout,
-    fetchProfilePicture,
+    fetchPartnerPicture,
     refetchPartnerStoredMessages,
     partner?.id,
   ]);
@@ -409,9 +378,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
               ? `${formatDistance(partnerDistance.distance)} `
               : ""}
             <Text style={styles.apartText}>
-              {partnerDistance?.distance !== undefined
-                ? "apart"
-                : ""}
+              {partnerDistance?.distance !== undefined ? "apart" : ""}
             </Text>
           </Text>
         </View>
