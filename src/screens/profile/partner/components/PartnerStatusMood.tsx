@@ -1,7 +1,6 @@
 // external
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery } from "@tanstack/react-query";
 import Animated, {
   useSharedValue,
@@ -19,6 +18,7 @@ import { getUserMood } from "../../../../services/api/profiles/moodService";
 import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
 import { useAuth } from "../../../../contexts/AuthContext";
+import useToken from "../../../../hooks/useToken";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   partnerId,
@@ -27,6 +27,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
 }) => {
   // variables
   const { user } = useAuth();
+  const token = useToken();
 
   // use effects
   useEffect(() => {
@@ -40,6 +41,10 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   const moodBounceAnimation = useSharedValue(0);
   const fadeInAnimation = useSharedValue(0);
 
+  if (!token) {
+    return;
+  }
+
   // fetch functions
   const {
     data: partnerMood,
@@ -50,12 +55,6 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     queryFn: async () => {
       if (!partnerId) {
         return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
       }
 
       return await getUserMood(token, partnerId);
@@ -77,12 +76,6 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     queryFn: async () => {
       if (!partnerId) {
         return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
       }
 
       return await fetchUserStatus(token, partnerId);

@@ -1,13 +1,22 @@
+// external
 import * as TaskManager from "expo-task-manager";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
+// internal
 import { getHomeLocation } from "../services/api/profiles/homeLocationService";
 import { updateUserStatus } from "../services/api/profiles/userStatusService";
 import { updateGeoInfo } from "../services/api/profiles/geoInfoService";
 import { getDistance } from "../utils/locationUtils";
+import useToken from "../hooks/useToken";
 
 const LOCATION_TASK_NAME = "background-location-task";
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+  const token = useToken();
+
+  if (!token) {
+    return;
+  }
+
   if (error) {
     return;
   }
@@ -21,12 +30,6 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
     }
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       const home = await getHomeLocation(token);
 
       if (!home) {

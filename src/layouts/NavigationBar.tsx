@@ -20,6 +20,7 @@ import { buildCachedImageUrl } from "../utils/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
 import { getOldestUnclaimedGift } from "../services/api/gifts/monthlyGiftService";
 import { useAuth } from "../contexts/AuthContext";
+import useToken from "../hooks/useToken";
 
 // types
 type Props = {
@@ -33,6 +34,11 @@ const INACTIVE_COLOR = "#b0b3c6";
 export default function NavigationBar({ navigation, currentRoute }: Props) {
   // variables
   const { user } = useAuth();
+  const token = useToken();
+
+  if (!token) {
+    return;
+  }
 
   // use states
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -50,13 +56,6 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   // fetch functions
   const fetchUserAvatar = async () => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       const userResponse = await axios.get(
         `${BASE_URL}/profile/get-profile`,
         {
@@ -97,12 +96,6 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   } = useQuery({
     queryKey: ["unclaimedGift", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await getOldestUnclaimedGift(token);
     },
     staleTime: 1000 * 60 * 15,
