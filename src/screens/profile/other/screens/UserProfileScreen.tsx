@@ -135,25 +135,27 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
   // helpers
   const renderProfileImage = () => {
+    const [failed, setFailed] = useState(false);
+
     if (avatarUri && profilePicUpdatedAt) {
-      const cachedImageUrl = buildCachedImageUrl(userId, profilePicUpdatedAt);
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
+      const cachedImageUrl = buildCachedImageUrl(userId, timestamp);
+
       return (
         <Image
-          source={cachedImageUrl}
+          source={failed ? fallbackAvatar : { uri: cachedImageUrl }}
           style={styles.avatar}
+          cachePolicy="disk"
           contentFit="cover"
           transition={200}
+          onError={() => setFailed(true)}
         />
       );
     }
 
-    return (
-      <Image
-        source={avatarUri ? avatarUri : fallbackAvatar}
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
+    return null;
   };
 
   const checkRequestStatus = async (token: string) => {

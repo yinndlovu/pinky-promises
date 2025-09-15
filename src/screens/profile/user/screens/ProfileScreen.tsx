@@ -369,6 +369,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // helpers
   const renderProfileImage = () => {
+    const [failed, setFailed] = useState(false);
+
     if (avatarUri && profilePicUpdatedAt && user?.id) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
@@ -380,26 +382,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
       return (
         <Image
-          source={cachedImageUrl}
+          source={
+            failed
+              ? require("../../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
           style={styles.avatar}
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
+          onError={() => setFailed(true)}
         />
       );
     }
 
-    return (
-      <Image
-        source={
-          avatarUri
-            ? { uri: avatarUri }
-            : require("../../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
+    return null;
   };
 
   // use effects

@@ -1,5 +1,5 @@
 // external
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
@@ -61,6 +61,8 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   });
 
   const renderProfileIcon = () => {
+    const [failed, setFailed] = useState(false);
+
     if (avatarUri && profilePicUpdatedAt && user?.id) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
@@ -69,10 +71,15 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
         user?.id.toString(),
         timestamp
       );
+
       return (
         <View style={styles.avatarContainer}>
           <Image
-            source={cachedImageUrl}
+            source={
+              failed
+                ? require("../assets/default-avatar-two.png")
+                : { uri: cachedImageUrl }
+            }
             style={[
               styles.avatar,
               {
@@ -88,21 +95,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       );
     }
 
-    return (
-      <View style={styles.avatarContainer}>
-        <Image
-          source={require("../assets/default-avatar-two.png")}
-          style={[
-            styles.avatar,
-            {
-              borderColor:
-                currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
-            },
-          ]}
-          contentFit="cover"
-        />
-      </View>
-    );
+    return null;
   };
 
   // check if there is an unclaimed gift

@@ -214,32 +214,32 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   // helpers
   const renderPartnerImage = () => {
+    const [failed, setFailed] = useState(false);
+
     if (avatarUri && profilePicUpdatedAt && partner) {
-      const cachedImageUrl = buildCachedImageUrl(
-        partner.id,
-        profilePicUpdatedAt
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
       );
+
+      const cachedImageUrl = buildCachedImageUrl(partner.id, timestamp);
+
       return (
         <Image
-          source={cachedImageUrl}
+          source={
+            failed
+              ? require("../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
           style={styles.avatar}
+          cachePolicy="disk"
           contentFit="cover"
           transition={200}
+          onError={() => setFailed(true)}
         />
       );
     }
 
-    return (
-      <Image
-        source={
-          avatarUri
-            ? avatarUri
-            : require("../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
+    return null;
   };
 
   // handle status

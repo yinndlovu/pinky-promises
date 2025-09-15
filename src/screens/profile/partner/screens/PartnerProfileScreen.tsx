@@ -198,6 +198,8 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   };
 
   const renderProfileImage = () => {
+    const [failed, setFailed] = useState(false);
+
     if (avatarUri && profilePicUpdatedAt && partner.id) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
@@ -206,28 +208,24 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         partner.id.toString(),
         timestamp
       );
+
       return (
         <Image
-          source={cachedImageUrl}
+          source={
+            failed
+              ? require("../../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
           style={styles.avatar}
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
+          onError={() => setFailed(true)}
         />
       );
     }
 
-    return (
-      <Image
-        source={
-          avatarUri
-            ? avatarUri
-            : require("../../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
+    return null;
   };
 
   // use layouts
