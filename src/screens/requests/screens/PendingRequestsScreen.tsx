@@ -19,7 +19,7 @@ import {
   rejectPartnerRequest,
 } from "../../../services/api/profiles/partnerService";
 import { BASE_URL } from "../../../configuration/config";
-import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../utils/cache/imageCacheUtils";
 import { PendingRequest } from "../../../types/Request";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";

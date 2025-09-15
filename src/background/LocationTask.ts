@@ -5,7 +5,7 @@ import * as TaskManager from "expo-task-manager";
 import { getHomeLocation } from "../services/api/profiles/homeLocationService";
 import { updateUserStatus } from "../services/api/profiles/userStatusService";
 import { updateGeoInfo } from "../services/api/profiles/geoInfoService";
-import { getDistance } from "../utils/locationUtils";
+import { getDistance } from "../utils/location/locationUtils";
 import useToken from "../hooks/useToken";
 
 const LOCATION_TASK_NAME = "background-location-task";

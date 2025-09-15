@@ -1,7 +1,7 @@
 import { getHomeLocation } from "../services/api/profiles/homeLocationService";
 import { checkLocationPermissions } from "../services/location/locationPermissionService";
 import * as Location from "expo-location";
-import { getDistance } from "../utils/locationUtils";
+import { getDistance } from "../utils/location/locationUtils";
 import { updateUserStatus } from "../services/api/profiles/userStatusService";
 import { updateGeoInfo } from "../services/api/profiles/geoInfoService";
 

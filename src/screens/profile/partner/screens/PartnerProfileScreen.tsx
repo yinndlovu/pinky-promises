@@ -23,7 +23,7 @@ import {
   removePartner,
   getPartner,
 } from "../../../../services/api/profiles/partnerService";
-import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import { getReceivedMessages } from "../../../../services/api/profiles/messageStorageService";
 import { getPartnerDistance } from "../../../../services/api/profiles/distanceService";
@@ -198,15 +198,19 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   };
 
   const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt && partner) {
+    if (avatarUri && profilePicUpdatedAt && partner.id) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
       const cachedImageUrl = buildCachedImageUrl(
-        partner.id,
-        profilePicUpdatedAt
+        partner.id.toString(),
+        timestamp
       );
       return (
         <Image
           source={cachedImageUrl}
           style={styles.avatar}
+          cachePolicy="disk"
           contentFit="cover"
           transition={200}
         />
@@ -430,7 +434,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           visible={showPictureViewer}
           imageUri={
             partner && profilePicUpdatedAt
-              ? buildCachedImageUrl(partner.id, profilePicUpdatedAt)
+              ? buildCachedImageUrl(
+                  partner?.id.toString(),
+                  Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+                )
               : null
           }
           onClose={() => setShowPictureViewer(false)}

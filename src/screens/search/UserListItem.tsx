@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Image } from 'expo-image';
 
 // internal
-import { buildCachedImageUrl } from '../../utils/imageCacheUtils';
+import { buildCachedImageUrl } from '../../utils/cache/imageCacheUtils';
 
 // types
 type User = {

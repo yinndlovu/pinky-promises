@@ -24,7 +24,7 @@ import { fetchUserStatus } from "../../../services/api/profiles/userStatusServic
 import { getUserMood } from "../../../services/api/profiles/moodService";
 import { getUpcomingSpecialDate } from "../../../services/api/ours/specialDateService";
 import { getRecentActivities } from "../../../services/api/home/recentActivityService";
-import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../utils/cache/imageCacheUtils";
 import {
   interactWithPartner,
   getUnseenInteractions,

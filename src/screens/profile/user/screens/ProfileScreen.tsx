@@ -44,7 +44,7 @@ import {
   getPartner,
   getReceivedPartnerRequests,
 } from "../../../../services/api/profiles/partnerService";
-import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { FavoritesType } from "../../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import {
@@ -369,16 +369,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // helpers
   const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt) {
+    if (avatarUri && profilePicUpdatedAt && user?.id) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
       const cachedImageUrl = buildCachedImageUrl(
-        profileData?.id,
-        profilePicUpdatedAt
+        user?.id.toString(),
+        timestamp
       );
 
       return (
         <Image
           source={cachedImageUrl}
           style={styles.avatar}
+          cachePolicy="disk"
           contentFit="cover"
           transition={200}
         />
@@ -1155,8 +1159,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <ProfilePictureViewer
             visible={showPictureViewer}
             imageUri={
-              profileData && profilePicUpdatedAt
-                ? buildCachedImageUrl(profileData?.id, profilePicUpdatedAt)
+              user && profilePicUpdatedAt
+                ? buildCachedImageUrl(
+                    user?.id.toString(),
+                    Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+                  )
                 : null
             }
             onClose={() => setShowPictureViewer(false)}

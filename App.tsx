@@ -22,7 +22,7 @@ import { NotificationProvider } from "./src/contexts/NotificationContext";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";
 import { SSEProvider } from "./src/contexts/SSEContext";
-import { navigationRef } from "./src/utils/navigation";
+import { navigationRef } from "./src/utils/navigation/navigation";
 import { InviteProvider } from "./src/games/context/InviteContext";
 import { checkBatteryStatus } from "./src/helpers/checkBatteryStatus";
 

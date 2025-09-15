@@ -21,7 +21,7 @@ import {
   getIncomingRequest,
   acceptPartnerRequest,
 } from "../../../../services/api/profiles/partnerService";
-import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
 import { getUserProfile } from "../../../../services/api/profiles/profileService";

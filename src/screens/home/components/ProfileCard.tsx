@@ -13,7 +13,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 // internal
 import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatters/formatDistance";
-import { getBatteryIcon } from "../../../utils/getBatteryIcon";
+import { getBatteryIcon } from "../../../utils/icons/getBatteryIcon";
 import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
 import { useClockTick } from "../../../hooks/clockTick";
 
