@@ -14,21 +14,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import LottieView from "lottie-react-native";
 
 // internal
-import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
-import { getUserMood } from "../../../services/api/profiles/moodService";
-import { getUpcomingSpecialDate } from "../../../services/api/ours/specialDateService";
-import { getRecentActivities } from "../../../services/api/home/recentActivityService";
 import { buildCachedImageUrl } from "../../../utils/cache/imageCacheUtils";
 import {
   interactWithPartner,
-  getUnseenInteractions,
 } from "../../../services/api/home/interactionService";
-import { getPartner } from "../../../services/api/profiles/partnerService";
 import {
   formatDateDMY,
   formatTime,
@@ -45,6 +39,12 @@ import {
   getInteractionFeedback,
 } from "../../../helpers/interactions";
 import { useProfilePicture } from "../../../hooks/useProfilePicture";
+import { usePartner } from "../../../hooks/usePartner";
+import { useUserStatus } from "../../../hooks/useStatus";
+import { useUserMood } from "../../../hooks/useMood";
+import { useUpcomingSpecialDate } from "../../../hooks/useSpecialDate";
+import { useUnseenInteractions } from "../../../hooks/useInteraction";
+import { useRecentActivities } from "../../../hooks/useRecentActivity";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -81,7 +81,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [currentAction, setCurrentAction] = useState<string | null>(null);
 
   // use states (modals)
-  const [alertVisible, setAlertVisible] = useState(false);
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [animationModalVisible, setAnimationModalVisible] = useState(false);
   const [animationMessage, setAnimationMessage] = useState("");
@@ -90,6 +89,29 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     setError("Session expired, please log in again");
     return;
   }
+
+  // data
+  const {
+    data: partner,
+    isLoading: partnerLoading,
+    refetch: refetchPartner,
+  } = usePartner(user?.id, token);
+  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
+    partner?.id,
+    user?.id,
+    token
+  );
+  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
+    partner?.id,
+    user?.id,
+    token
+  );
+  const { data: upcomingDate, refetch: refetchUpcomingDate } =
+    useUpcomingSpecialDate(user?.id, token);
+  const { data: unseenInteractions = [], refetch: refetchUnseen } =
+    useUnseenInteractions(user?.id, token);
+  const { data: activities = [], refetch: refetchActivities } =
+    useRecentActivities(user?.id, token);
 
   // handlers
   const handleInteraction = async (action: string) => {
@@ -114,102 +136,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       setInteractionLoading(false);
     }
   };
-
-  // fetch functions
-  const {
-    data: partner,
-    isLoading: partnerLoading,
-    refetch: refetchPartner,
-  } = useQuery({
-    queryKey: ["partnerData", user?.id],
-    queryFn: async () => {
-      return await getPartner(token);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const partnerId = partner?.id;
-
-  const {
-    data: partnerStatus,
-    isLoading: partnerStatusLoading,
-    refetch: refetchPartnerStatus,
-  } = useQuery({
-    queryKey: ["partnerStatus", user?.id],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      return await fetchUserStatus(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const {
-    data: partnerMood,
-    isLoading: partnerMoodLoading,
-    refetch: refetchPartnerMood,
-  } = useQuery({
-    queryKey: ["partnerMood", user?.id],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      return await getUserMood(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const {
-    data: upcomingDate,
-    isLoading: upcomingDateLoading,
-    refetch: refetchUpcomingDate,
-  } = useQuery({
-    queryKey: ["upcomingSpecialDate", user?.id],
-    queryFn: async () => {
-      return await getUpcomingSpecialDate(token);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 12,
-  });
-
-  const {
-    data: activities = [],
-    isLoading: activitiesLoading,
-    refetch: refetchActivities,
-  } = useQuery({
-    queryKey: ["recentActivities", user?.id],
-    queryFn: async () => {
-      const activitiesData = await getRecentActivities(token);
-
-      return activitiesData.map((activity: any) => ({
-        id: activity.id,
-        description: activity.activity,
-        date: formatDateDMY(activity.createdAt),
-        time: formatTime(activity.createdAt),
-      }));
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const {
-    data: unseenInteractions = [],
-    isLoading: unseenLoading,
-    refetch: refetchUnseen,
-  } = useQuery({
-    queryKey: ["unseenInteractions", user?.id],
-    queryFn: async () => {
-      return await getUnseenInteractions(token);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
 
   // helpers
   const renderPartnerImage = () => {
@@ -308,13 +234,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchPartnerPicture,
-  } = useProfilePicture(partnerId, token);
+  } = useProfilePicture(partner?.id, token);
 
   useEffect(() => {
-    if (partnerId) {
+    if (partner?.id) {
       fetchPartnerPicture();
     }
-  }, [partnerId]);
+  }, [partner?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -352,6 +278,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         refetchActivities(),
         refetchPartnerMood(),
         refetchPartnerStatus(),
+        refetchUnseen(),
         fetchPartnerPicture(),
       ]);
     } catch (e) {
@@ -364,6 +291,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     refetchActivities,
     refetchPartnerMood,
     refetchPartnerStatus,
+    refetchUnseen,
     fetchPartnerPicture,
   ]);
 
@@ -642,7 +570,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         message={animationMessage}
         action={currentAction}
         onClose={() => {
-          setAlertVisible(false);
+          setAnimationModalVisible(false);
           setCurrentAction(null);
         }}
       />

@@ -13,12 +13,11 @@ import {
   Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
   addItem,
-  getCartTotal,
   clearCart,
   deleteItem,
 } from "../../../services/api/gifts/cartService";

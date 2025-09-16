@@ -13,19 +13,17 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { useAuth } from "../../contexts/AuthContext";
 import { DEEPSEEK_KEY } from "../../configuration/config";
-import {
-  saveKeyDetail,
-  fetchKeyDetails,
-} from "../../services/ai/aiKeyDetailsService";
+import { saveKeyDetail } from "../../services/ai/aiKeyDetailsService";
 import { favoritesObjectToArray } from "../../helpers/aiHelpers";
 import { ChatMessage } from "../../types/Message";
 import useToken from "../../hooks/useToken";
+import { useAiContext, useKeyDetails } from "../../hooks/useAiContext";
 
 // screen content
 import styles from "./styles/ChatScreen.styles";
@@ -40,12 +38,10 @@ import {
   deleteOldMessages,
   deleteAllMessages,
 } from "../../database/chatdb";
-import { getContext } from "../../services/ai/contextService";
 
 export default function ChatScreen() {
   // variables
   const { user } = useAuth();
-  const userId = user?.id;
   const insets = useSafeAreaInsets();
   const EXTRA_KEYBOARD_PADDING = 50;
   const LAST_CLEANUP_KEY = "lastCleanupDate";
@@ -65,32 +61,15 @@ export default function ChatScreen() {
     return;
   }
 
-  // fetch functions
-  const {
-    data: context,
-    isLoading: contextLoading,
-    refetch: refetchContext,
-  } = useQuery({
-    queryKey: ["aiContext", userId],
-    queryFn: async () => {
-      return await getContext(token);
-    },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 60 * 12,
-  });
-
-  const {
-    data: keyDetails = [],
-    isLoading: keyDetailsLoading,
-    refetch: refetchKeyDetails,
-  } = useQuery({
-    queryKey: ["keyDetails", userId],
-    queryFn: async () => {
-      return await fetchKeyDetails(token);
-    },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 60 * 4,
-  });
+  // data
+  const { data: context, isLoading: contextLoading } = useAiContext(
+    user?.id,
+    token
+  );
+  const { data: keyDetails = [], isLoading: keyDetailsLoading } = useKeyDetails(
+    user?.id,
+    token
+  );
 
   // check if chats have been cleaned that day
   const runCleanupOncePerDay = async () => {
@@ -375,6 +354,12 @@ export default function ChatScreen() {
       );
     } catch (err: any) {}
     if (record && context?.partnerId && token) {
+      const userId = user?.id;
+
+      if (!userId) {
+        return;
+      }
+
       await saveKeyDetail({
         ...record,
         userId,
@@ -383,7 +368,7 @@ export default function ChatScreen() {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["keyDetails", userId],
+        queryKey: ["keyDetails", user?.id],
       });
     }
   };

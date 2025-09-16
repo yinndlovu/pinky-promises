@@ -9,9 +9,9 @@ export function useProfilePicture(userId: string, token: string) {
 
   const fetchPicture = useCallback(async () => {
     try {
-      const { base64, updatedAt } = await fetchProfilePicture(userId, token);
+      const { uri, updatedAt } = await fetchProfilePicture(userId, token);
 
-      setAvatarUri(base64);
+      setAvatarUri(uri);
       setProfilePicUpdatedAt(updatedAt);
     } catch (err: any) {
       if (![404, 500].includes(err.response?.status)) {

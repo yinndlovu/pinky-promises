@@ -9,15 +9,14 @@ import type {
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { useQuery } from "@tanstack/react-query";
 
 // internal
 import { buildCachedImageUrl } from "../utils/cache/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
-import { getOldestUnclaimedGift } from "../services/api/gifts/monthlyGiftService";
 import { useAuth } from "../contexts/AuthContext";
 import useToken from "../hooks/useToken";
 import { useProfilePicture } from "../hooks/useProfilePicture";
+import { useGift } from "../hooks/useGift";
 
 // types
 type Props = {
@@ -37,6 +36,8 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     return;
   }
 
+  const { data: gift } = useGift(user?.id, token);
+
   const {
     avatarUri,
     profilePicUpdatedAt,
@@ -47,18 +48,6 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   useEffect(() => {
     fetchUserAvatar();
   }, []);
-
-  const {
-    data: gift,
-    isLoading: giftLoading,
-    refetch: refetchGift,
-  } = useQuery({
-    queryKey: ["unclaimedGift", user?.id],
-    queryFn: async () => {
-      return await getOldestUnclaimedGift(token);
-    },
-    staleTime: 1000 * 60 * 15,
-  });
 
   const renderProfileIcon = () => {
     const [failed, setFailed] = useState(false);
