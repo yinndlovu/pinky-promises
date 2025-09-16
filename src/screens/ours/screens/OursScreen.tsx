@@ -12,13 +12,11 @@ import {
 import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getNotes } from "../../../services/api/ours/notesService";
 import {
-  getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
   deleteSpecialDate,
@@ -28,10 +26,12 @@ import {
   createFavoriteMemory,
   updateFavoriteMemory,
   deleteFavoriteMemory,
-  getRecentFavoriteMemories,
 } from "../../../services/api/ours/favoriteMemoriesService";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { useRecentMemories } from "../../../hooks/useMemory";
+import { useNotesPreview } from "../../../hooks/useNotes";
+import { useSpecialDates } from "../../../hooks/useSpecialDate";
 
 // screen content
 import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
@@ -50,7 +50,6 @@ const OursScreen = ({ navigation }: Props) => {
   const HEADER_HEIGHT = 60;
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
-  const currentUserId = user?.id;
   const queryClient = useQueryClient();
   const token = useToken();
 
@@ -86,42 +85,15 @@ const OursScreen = ({ navigation }: Props) => {
     return;
   }
 
-  // fetch functions
-  const {
-    data: notesPreview,
-    isLoading: notesPreviewLoading,
-    refetch: refetchNotesPreview,
-  } = useQuery({
-    queryKey: ["notesPreview", currentUserId],
-    queryFn: async () => {
-      return await getNotes(token);
-    },
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const {
-    data: specialDates = [],
-    isLoading: specialDatesLoading,
-    refetch: refetchSpecialDates,
-  } = useQuery({
-    queryKey: ["specialDates", user?.id],
-    queryFn: async () => {
-      return await getSpecialDates(token);
-    },
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: recentMemories = [],
-    isLoading: recentMemoriesLoading,
-    refetch: refetchRecentMemories,
-  } = useQuery({
-    queryKey: ["recentFavoriteMemories", user?.id],
-    queryFn: async () => {
-      return await getRecentFavoriteMemories(token);
-    },
-    staleTime: 1000 * 60 * 60,
-  });
+  // data
+  const { data: recentMemories = [], refetch: refetchRecentMemories } =
+    useRecentMemories(user?.id, token);
+  const { data: notesPreview, refetch: refetchNotesPreview } = useNotesPreview(
+    user?.id,
+    token
+  );
+  const { data: specialDates = [], refetch: refetchSpecialDates } =
+    useSpecialDates(user?.id, token);
 
   // handlers
   const handleAddSpecialDate = async (
@@ -147,7 +119,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", currentUserId],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -202,7 +174,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", currentUserId],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -241,7 +213,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", currentUserId],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -283,7 +255,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", currentUserId],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
@@ -327,7 +299,7 @@ const OursScreen = ({ navigation }: Props) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", currentUserId],
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to save favorite memory");
@@ -488,7 +460,7 @@ const OursScreen = ({ navigation }: Props) => {
 
         <FavoriteMemories
           memories={recentMemories}
-          currentUserId={currentUserId}
+          currentUserId={user?.id}
           onViewAll={() => navigation.navigate("AllFavoriteMemoriesScreen")}
           onViewDetails={handleViewMemoryDetails}
           onAdd={handleAddMemory}

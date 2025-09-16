@@ -13,7 +13,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
-  getAllFavoriteMemories,
   getFavoriteMemoryById,
   deleteFavoriteMemory,
   updateFavoriteMemory,
@@ -22,6 +21,7 @@ import { Memory } from "../../../types/Memory";
 import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
 import useToken from "../../../hooks/useToken";
+import { useMemories } from "../../../hooks/useMemory";
 
 // confirmation modal
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
@@ -55,19 +55,13 @@ const AllFavoriteMemoriesScreen = () => {
     throw new Error("Session expired, please log in again");
   }
 
-  // fetch functions
+  // data
   const {
-    data: memories = [],
+    data: memories,
+    refetch: refetchMemories,
     isLoading: memoriesLoading,
     error,
-    refetch: refetchMemories,
-  } = useQuery({
-    queryKey: ["allFavoriteMemories", user?.id],
-    queryFn: async () => {
-      return await getAllFavoriteMemories(token);
-    },
-    staleTime: 1000 * 60 * 60,
-  });
+  } = useMemories(user?.id, token);
 
   // handlers
   const handleViewMemoryDetails = async (memoryId: string) => {
