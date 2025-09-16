@@ -219,7 +219,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
       );
-
       const cachedImageUrl = buildCachedImageUrl(partner.id, timestamp);
 
       return (

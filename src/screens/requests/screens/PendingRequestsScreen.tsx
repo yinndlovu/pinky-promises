@@ -62,6 +62,8 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   }, []);
 
   const renderProfileImage = (userId: string) => {
+    const [failed, setFailed] = useState(false);
+
     const { avatarUri, profilePicUpdatedAt, fetchPicture } = useProfilePicture(
       userId,
       token
@@ -79,11 +81,12 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
       return (
         <Image
-          source={{ uri: cachedImageUrl }}
+          source={failed ? fallbackAvatar : { uri: cachedImageUrl }}
           style={styles.avatar}
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
+          onError={() => setFailed(true)}
         />
       );
     }
