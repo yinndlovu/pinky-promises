@@ -39,5 +39,5 @@ export async function fetchProfilePicture(userId: string, token: string) {
   const lastModified = response.headers["last-modified"];
   const updatedAt = lastModified ? new Date(lastModified) : new Date();
 
-  return { base64, updatedAt };
+  return { uri: base64, updatedAt };
 }
