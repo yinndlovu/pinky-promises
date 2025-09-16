@@ -16,7 +16,6 @@ import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
-import { encode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";

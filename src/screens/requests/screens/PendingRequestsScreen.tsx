@@ -111,12 +111,14 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     if (profilePictures[userId] && profilePicUpdatedAt[userId]) {
       const cachedImageUrl = buildCachedImageUrl(
         userId,
-        profilePicUpdatedAt[userId]
+        Math.floor(new Date(profilePicUpdatedAt[userId]).getTime() / 1000)
       );
+
       return (
         <Image
           source={cachedImageUrl}
           style={styles.avatar}
+          cachePolicy="disk"
           contentFit="cover"
           transition={200}
         />
