@@ -12,7 +12,6 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
-
 import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
