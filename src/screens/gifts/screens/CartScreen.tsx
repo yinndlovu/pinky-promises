@@ -18,7 +18,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 // internal
 import {
   addItem,
-  getItems,
   getCartTotal,
   clearCart,
   deleteItem,
@@ -26,6 +25,7 @@ import {
 import { CartItem } from "../../../types/Cart";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { useCartItems, useCartTotal } from "../../../hooks/useCart";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -64,32 +64,17 @@ const CartScreen = () => {
     return;
   }
 
-  // fetch functions
+  // data
   const {
-    data: cartItems = [],
-    isLoading: cartItemsLoading,
+    data: cartItems,
     refetch: refetchCartItems,
-  } = useQuery({
-    queryKey: ["cartItems", user?.id],
-    queryFn: async () => {
-      const response = await getItems(token);
-      return Array.isArray(response) ? response : [];
-    },
-    staleTime: 1000 * 60 * 60 * 24 * 3,
-  });
-
+    isLoading: cartItemsLoading,
+  } = useCartItems(user?.id, token);
   const {
-    data: cartTotal = 0,
-    isLoading: cartTotalLoading,
+    data: cartTotal,
     refetch: refetchCartTotal,
-  } = useQuery({
-    queryKey: ["cartTotal", user?.id],
-    queryFn: async () => {
-      const totalData = await getCartTotal(token);
-      return totalData.total || 0;
-    },
-    staleTime: 1000 * 60 * 60 * 24 * 3,
-  });
+    isLoading: cartTotalLoading,
+  } = useCartTotal(user?.id, token);
 
   // mutations
   const addItemMutation = useMutation({

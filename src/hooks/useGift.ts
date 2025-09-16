@@ -12,6 +12,7 @@ export function useGift(userId: string, token: string) {
     queryFn: async () => {
       return await getOldestUnclaimedGift(token);
     },
+    enabled: !!userId && !!token,
     staleTime: 1000 * 60 * 15,
   });
 }
@@ -31,6 +32,7 @@ export function usePastGifts(userId: string, token: string) {
           formatDateDMY(gift.claimDate) + " " + formatTime(gift.claimDate),
       }));
     },
+    enabled: !!userId && !!token,
     staleTime: 1000 * 60 * 60 * 24,
   });
 }
@@ -41,7 +43,7 @@ export function useSetMonthlyGift(userId: string, token: string) {
     queryFn: async () => {
       return await getSetMonthlyGift(token, userId);
     },
-    enabled: !!userId,
+    enabled: !!userId && !!token,
     staleTime: 1000 * 60 * 60 * 24 * 3,
   });
 }
