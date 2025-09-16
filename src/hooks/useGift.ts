@@ -1,0 +1,47 @@
+import { useQuery } from "@tanstack/react-query";
+import {
+  getLastFiveClaimedGifts,
+  getOldestUnclaimedGift,
+} from "../services/api/gifts/monthlyGiftService";
+import { getSetMonthlyGift } from "../services/api/gifts/setMonthlyGiftService";
+import { formatDateDMY, formatTime } from "../utils/formatters/formatDate";
+
+export function useGift(userId: string, token: string) {
+  return useQuery({
+    queryKey: ["unclaimedGift", userId],
+    queryFn: async () => {
+      return await getOldestUnclaimedGift(token);
+    },
+    staleTime: 1000 * 60 * 15,
+  });
+}
+
+export function usePastGifts(userId: string, token: string) {
+  return useQuery({
+    queryKey: ["pastGifts", userId],
+    queryFn: async () => {
+      const gifts = await getLastFiveClaimedGifts(token);
+
+      return gifts.map((gift: any) => ({
+        id: gift.id,
+        giftName: gift.name,
+        receivedAt:
+          formatDateDMY(gift.createdAt) + " " + formatTime(gift.createdAt),
+        claimedAt:
+          formatDateDMY(gift.claimDate) + " " + formatTime(gift.claimDate),
+      }));
+    },
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+}
+
+export function useSetMonthlyGift(userId: string, token: string) {
+  return useQuery({
+    queryKey: ["setMonthlyGift", userId],
+    queryFn: async () => {
+      return await getSetMonthlyGift(token, userId);
+    },
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 60 * 24 * 3,
+  });
+}

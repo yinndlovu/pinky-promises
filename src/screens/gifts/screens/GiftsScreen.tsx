@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -24,21 +24,19 @@ import AlertModal from "../../../components/modals/output/AlertModal";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // internal
-import {
-  getOldestUnclaimedGift,
-  claimMonthlyGift,
-  getLastFiveClaimedGifts,
-} from "../../../services/api/gifts/monthlyGiftService";
-import {
-  getSetMonthlyGift,
-  updateSetMonthlyGift,
-} from "../../../services/api/gifts/setMonthlyGiftService";
+import { claimMonthlyGift } from "../../../services/api/gifts/monthlyGiftService";
+import { updateSetMonthlyGift } from "../../../services/api/gifts/setMonthlyGiftService";
 import { useAuth } from "../../../contexts/AuthContext";
 import {
   formatDateDMY,
   formatTime,
 } from "../../../utils/formatters/formatDate";
 import useToken from "../../../hooks/useToken";
+import {
+  useGift,
+  usePastGifts,
+  useSetMonthlyGift,
+} from "../../../hooks/useGift";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -48,7 +46,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const { user } = useAuth();
-  const userId = user?.id;
   const queryClient = useQueryClient();
   const token = useToken();
 
@@ -70,6 +67,18 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     setToastMessage("Session expired, please log in again");
     return;
   }
+
+  // data
+  const { data: gift, refetch: refetchGift } = useGift(user?.id, token);
+  const { data: pastGifts = [], refetch: refetchPastGifts } = usePastGifts(
+    user?.id,
+    token
+  );
+  const {
+    data: setMonthlyGift,
+    isLoading: setMonthlyGiftLoading,
+    refetch: refetchSetMonthlyGift,
+  } = useSetMonthlyGift(user?.id, token);
 
   // use effects
   useEffect(() => {
@@ -104,53 +113,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  // fetch functions
-  const {
-    data: gift,
-    isLoading: giftLoading,
-    refetch: refetchGift,
-  } = useQuery({
-    queryKey: ["unclaimedGift", user?.id],
-    queryFn: async () => {
-      return await getOldestUnclaimedGift(token);
-    },
-    staleTime: 1000 * 60 * 15,
-  });
-
-  const {
-    data: pastGifts = [],
-    isLoading: pastGiftsLoading,
-    refetch: refetchPastGifts,
-  } = useQuery({
-    queryKey: ["pastGifts", user?.id],
-    queryFn: async () => {
-      const gifts = await getLastFiveClaimedGifts(token);
-
-      return gifts.map((gift: any) => ({
-        id: gift.id,
-        giftName: gift.name,
-        receivedAt:
-          formatDateDMY(gift.createdAt) + " " + formatTime(gift.createdAt),
-        claimedAt:
-          formatDateDMY(gift.claimDate) + " " + formatTime(gift.claimDate),
-      }));
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: setMonthlyGift,
-    isLoading: setMonthlyGiftLoading,
-    refetch: refetchSetMonthlyGift,
-  } = useQuery({
-    queryKey: ["setMonthlyGift", userId],
-    queryFn: async () => {
-      return await getSetMonthlyGift(token, userId);
-    },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 60 * 24 * 3,
-  });
-
   // handlers
   const handleClaim = async () => {
     if (!gift) {
@@ -183,7 +145,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     try {
       await updateSetMonthlyGift(token, giftName);
       await queryClient.invalidateQueries({
-        queryKey: ["setMonthlyGift", userId],
+        queryKey: ["setMonthlyGift", user?.id],
       });
       setMonthlyGiftModalVisible(false);
 
