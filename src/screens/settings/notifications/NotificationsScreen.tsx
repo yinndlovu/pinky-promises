@@ -12,16 +12,16 @@ import {
   Platform,
   Modal,
 } from "react-native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
   NOTIFICATION_TYPES,
-  getNotificationPreference,
   setNotificationPreference,
 } from "../../../services/api/settings/notificationPreferenceService";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { useNotificationPrefs } from "../../../hooks/useNotificationPrefs";
 
 // screen content
 import ReminderIntervalSetting from "./ReminderIntervalSetting";
@@ -34,7 +34,6 @@ const NotificationsScreen = () => {
   const token = useToken();
 
   // use states
-  const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<{ [key: string]: boolean }>({});
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
@@ -45,34 +44,14 @@ const NotificationsScreen = () => {
   // variables
   const isAnyUpdating = Object.values(updating).some(Boolean);
 
+  // data
+  const { data: preferences = {}, isLoading: preferencesLoading } =
+    useNotificationPrefs(user?.id);
+
   if (!token) {
     setError("Session expired, please log in again");
     return;
   }
-
-  // fetch functions
-  const fetchPreferencesQuery = async () => {
-    const prefs: { [key: string]: boolean } = {};
-    for (const { key } of NOTIFICATION_TYPES) {
-      try {
-        prefs[key] = await getNotificationPreference(token, key);
-      } catch {
-        prefs[key] = false;
-      }
-    }
-    return prefs;
-  };
-
-  const {
-    data: preferences = {},
-    isLoading: preferencesLoading,
-    refetch: refetchPreferences,
-  } = useQuery({
-    queryKey: ["notificationPreferences", user?.id],
-    queryFn: fetchPreferencesQuery,
-    staleTime: 1000 * 60 * 60 * 24 * 2,
-    retry: false,
-  });
 
   // handlers
   const handleToggle = async (type: string, value: boolean) => {
