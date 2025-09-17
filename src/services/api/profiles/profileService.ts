@@ -41,3 +41,46 @@ export async function fetchProfilePicture(userId: string, token: string) {
 
   return { uri: base64, updatedAt };
 }
+
+export async function updateProfilePicture(
+  token: string,
+  base64String: string
+) {
+  return axios.put(
+    `${BASE_URL}/profile/update-profile-picture`,
+    { image: base64String },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+}
+
+export async function updateProfileField(
+  field: "name" | "username" | "bio",
+  value: string,
+  token: string
+) {
+  let url = "";
+  let body: Record<string, string> = {};
+
+  switch (field) {
+    case "name":
+      url = `${BASE_URL}/profile/update-name`;
+      body = { name: value };
+      break;
+    case "username":
+      url = `${BASE_URL}/profile/update-username`;
+      body = { username: value };
+      break;
+    case "bio":
+      url = `${BASE_URL}/profile/update-bio`;
+      body = { bio: value };
+      break;
+  }
+
+  return axios.put(url, body, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+}

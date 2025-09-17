@@ -17,7 +17,7 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import "react-native-get-random-values";
 
 // internal
-import { registerForPushNotificationsAsync } from "./src/utils/notifications";
+import { registerForPushNotificationsAsync } from "./src/utils/notifications/notifications";
 import { NotificationProvider } from "./src/contexts/NotificationContext";
 import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
 import { sqlitePersistor } from "./src/database/reactQueryPersistor";

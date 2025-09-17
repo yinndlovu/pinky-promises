@@ -12,32 +12,25 @@ import {
   TouchableWithoutFeedback,
   RefreshControl,
 } from "react-native";
-import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getMood } from "../../../../services/api/profiles/moodService";
 import UpdateFavoritesModal from "../../../../components/modals/input/UpdateFavoritesModal";
 import { updateUserFavorites } from "../../../../services/api/profiles/favoritesService";
-import { BASE_URL } from "../../../../configuration/config";
 import { updateLoveLanguage } from "../../../../services/api/profiles/loveLanguageService";
-import {
-  getAboutUser,
-  updateAboutUser,
-} from "../../../../services/api/profiles/aboutUserService";
+import { updateAboutUser } from "../../../../services/api/profiles/aboutUserService";
 import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { FavoritesType } from "../../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import {
   storeMessage,
-  getStoredMessages,
   updateMessage,
   deleteMessage,
 } from "../../../../services/api/profiles/messageStorageService";
@@ -53,6 +46,8 @@ import { usePartner } from "../../../../hooks/usePartner";
 import { useMood } from "../../../../hooks/useMood";
 import { useAbout } from "../../../../hooks/useAbout";
 import { useStoredMessages } from "../../../../hooks/useStoredMessages";
+import { updateProfilePicture } from "../../../../services/api/profiles/profileService";
+import { updateProfileField } from "../../../../services/api/profiles/profileService";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
@@ -441,13 +436,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         const mimeType = result.assets[0].mimeType || "image/jpeg";
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
 
-        await axios.put(
-          `${BASE_URL}/profile/update-profile-picture`,
-          { image: base64String },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await updateProfilePicture(token, base64String);
 
         setSuccess("Profile picture uploaded");
         await fetchProfilePicture();
@@ -481,30 +470,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setLoadingBio(true);
       }
 
-      let url = "";
-      let body = {};
-
-      if (field === "name") {
-        url = `${BASE_URL}/profile/update-name`;
-        body = { name: value };
-      } else if (field === "username") {
-        url = `${BASE_URL}/profile/update-username`;
-        body = { username: value };
-      } else if (field === "bio") {
-        url = `${BASE_URL}/profile/update-bio`;
-        body = { bio: value };
-      }
-
-      await axios.put(url, body, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await updateProfileField(field, value, token);
 
       await queryClient.invalidateQueries({
         queryKey: ["profileData", user?.id],
       });
-
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", user?.id],
       });

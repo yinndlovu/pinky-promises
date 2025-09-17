@@ -1,13 +1,13 @@
 // external
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import EventSource from "react-native-sse";
 
 // internal
 import { BASE_URL } from "../configuration/config";
 import { useAuth } from "./AuthContext";
 import useToken from "../hooks/useToken";
+import usePartnerId from "../hooks/usePartnerId";
 
 // interfaces
 interface SSEContextType {
@@ -41,6 +41,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const partnerId = usePartnerId();
 
   if (!token) {
     return;
@@ -79,14 +80,14 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
               break;
 
             case "partnerStatusUpdate":
-              queryClient.setQueryData(["partnerStatus", user?.id], data.data);
+              queryClient.setQueryData(["status", partnerId], data.data);
               queryClient.invalidateQueries({
                 queryKey: ["recentActivities", user?.id],
               });
               break;
 
             case "partnerMoodUpdate":
-              queryClient.setQueryData(["partnerMood", user?.id], data.data);
+              queryClient.setQueryData(["partnerMood", partnerId], data.data);
               queryClient.invalidateQueries({
                 queryKey: ["recentActivities", user?.id],
               });
@@ -121,7 +122,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
             case "updateFavorites":
               queryClient.setQueryData(
-                ["partnerFavorites", user?.id],
+                ["favorites", partnerId],
                 data.data
               );
               queryClient.invalidateQueries({
@@ -193,7 +194,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
               break;
 
             case "updateAbout":
-              queryClient.setQueryData(["partnerAbout", user?.id], data.data);
+              queryClient.setQueryData(["about", partnerId], data.data);
               queryClient.invalidateQueries({
                 queryKey: ["recentActivities", user?.id],
               });

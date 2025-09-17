@@ -20,9 +20,7 @@ import LottieView from "lottie-react-native";
 
 // internal
 import { buildCachedImageUrl } from "../../../utils/cache/imageCacheUtils";
-import {
-  interactWithPartner,
-} from "../../../services/api/home/interactionService";
+import { interactWithPartner } from "../../../services/api/home/interactionService";
 import {
   formatDateDMY,
   formatTime,
@@ -98,12 +96,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   } = usePartner(user?.id, token);
   const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
     partner?.id,
-    user?.id,
     token
   );
   const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
     partner?.id,
-    user?.id,
     token
   );
   const { data: upcomingDate, refetch: refetchUpcomingDate } =
