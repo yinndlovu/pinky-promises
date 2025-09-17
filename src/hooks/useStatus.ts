@@ -1,21 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchUserStatus } from "../services/api/profiles/userStatusService";
+import { getPartnerDistance } from "../services/api/profiles/distanceService";
 
 export function useUserStatus(
-  partnerId: string,
   userId: string,
   token: string
 ) {
   return useQuery({
-    queryKey: ["partnerStatus", userId],
+    queryKey: ["status", userId],
     queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      return await fetchUserStatus(token, partnerId);
+      return await fetchUserStatus(token, userId);
     },
-    enabled: !!partnerId && !!token && !!userId,
+    enabled: !!token && !!userId,
     staleTime: 1000 * 60 * 2,
+  });
+}
+
+export function usePartnerDistance(userId: string, token: string) {
+  return useQuery({
+    queryKey: ["partnerDistance", userId],
+    queryFn: async () => {
+      return await getPartnerDistance(token);
+    },
+    enabled: !!userId && !!token,
+    staleTime: 1000 * 60 * 60 * 24,
   });
 }

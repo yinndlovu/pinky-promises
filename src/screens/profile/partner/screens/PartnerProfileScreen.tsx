@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, use } from "react";
 import {
   View,
   Text,
@@ -12,25 +12,23 @@ import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getUserFavorites } from "../../../../services/api/profiles/favoritesService";
-import { getLoveLanguage } from "../../../../services/api/profiles/loveLanguageService";
-import { getAboutUser } from "../../../../services/api/profiles/aboutUserService";
-import {
-  removePartner,
-  getPartner,
-} from "../../../../services/api/profiles/partnerService";
+import { removePartner } from "../../../../services/api/profiles/partnerService";
 import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
-import { getReceivedMessages } from "../../../../services/api/profiles/messageStorageService";
-import { getPartnerDistance } from "../../../../services/api/profiles/distanceService";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
-import { getProfile } from "../../../../services/api/profiles/profileService";
+import { usePartner } from "../../../../hooks/usePartner";
+import { useProfile } from "../../../../hooks/useProfile";
+import { useFavorites } from "../../../../hooks/useFavorites";
+import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
+import { useAbout } from "../../../../hooks/useAbout";
+import { usePartnerDistance } from "../../../../hooks/useStatus";
+import { useReceivedMessages } from "../../../../hooks/useStoredMessages";
 
 // screen content
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
@@ -71,106 +69,32 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     return;
   }
 
-  // fetch functions
+  // data
   const {
-    data: partnerData,
-    isLoading: partnerDataLoading,
+    data: partner,
     refetch: refetchPartnerData,
-  } = useQuery({
-    queryKey: ["partnerData", user?.id],
-    queryFn: async () => {
-      return await getPartner(token);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const partner = partnerData || null;
-
+    isLoading: partnerLoading,
+  } = usePartner(user?.id, token);
   const {
     data: currentUser,
-    isLoading: currentUserLoading,
     refetch: refetchCurrentUser,
-  } = useQuery({
-    queryKey: ["profileData", user?.id],
-    queryFn: async () => {
-      return await getProfile(token);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: partnerFavorites = {},
-    isLoading: partnerFavoritesLoading,
-    refetch: refetchPartnerFavorites,
-  } = useQuery({
-    queryKey: ["partnerFavorites", user?.id],
-    queryFn: async () => {
-      const partnerId = partner?.id;
-
-      if (!partnerId) {
-        return {};
-      }
-
-      return await getUserFavorites(token, partnerId);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: loveLanguage,
-    isLoading: loveLanguageLoading,
-    refetch: refetchLoveLanguage,
-  } = useQuery({
-    queryKey: ["partnerLoveLanguage", user?.id],
-    queryFn: async () => {
-      return await getLoveLanguage(token, partner?.id);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: partnerAbout,
-    isLoading: partnerAboutLoading,
-    refetch: refetchPartnerAbout,
-  } = useQuery({
-    queryKey: ["partnerAbout", user?.id],
-    queryFn: async () => {
-      return await getAboutUser(token, partner?.id);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60,
-  });
-
+    isLoading: currentUserLoading,
+  } = useProfile(user?.id, token);
+  const { data: partnerFavorites = {}, refetch: refetchPartnerFavorites } =
+    useFavorites(partner?.id, token);
+  const { data: loveLanguage, refetch: refetchLoveLanguage } = useLoveLanguage(
+    partner?.id,
+    token
+  );
+  const { data: partnerAbout, refetch: refetchPartnerAbout } = useAbout(
+    partner?.id,
+    token
+  );
+  const { data: partnerDistance } = usePartnerDistance(user?.id, token);
   const {
     data: partnerStoredMessages = [],
-    isLoading: partnerStoredMessagesLoading,
     refetch: refetchPartnerStoredMessages,
-  } = useQuery({
-    queryKey: ["partnerStoredMessages", user?.id],
-    queryFn: async () => {
-      const response = await getReceivedMessages(token);
-      return Array.isArray(response) ? response : [];
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: partnerDistance,
-    isLoading: partnerDistanceLoading,
-    refetch: refetchPartnerDistance,
-  } = useQuery({
-    queryKey: ["partnerDistance", user?.id],
-    queryFn: async () => {
-      return await getPartnerDistance(token);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
+  } = useReceivedMessages(user?.id, token);
 
   // handlers
   const handleRemovePartner = async () => {
@@ -300,7 +224,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const username = partner?.username || "user";
   const bio = partner?.bio || "";
 
-  if (partnerDataLoading || currentUserLoading) {
+  if (partnerLoading || currentUserLoading) {
     return (
       <View style={styles.centered}>
         <LoadingSpinner showMessage={false} size="medium" />
@@ -397,7 +321,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           favorites={favoritesObjectToArray(partnerFavorites)}
         />
 
-        {partnerDataLoading && (
+        {partnerLoading && (
           <View style={styles.centered}>
             <ActivityIndicator color="#5ad1e6" size="large" />
           </View>
