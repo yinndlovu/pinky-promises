@@ -1,7 +1,6 @@
 // external
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useQuery } from "@tanstack/react-query";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -13,12 +12,11 @@ import Animated, {
 } from "react-native-reanimated";
 
 // internal
-import { fetchUserStatus } from "../../../../services/api/profiles/userStatusService";
-import { getUserMood } from "../../../../services/api/profiles/moodService";
 import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
-import { useAuth } from "../../../../contexts/AuthContext";
 import useToken from "../../../../hooks/useToken";
+import { useUserStatus } from "../../../../hooks/useStatus";
+import { useUserMood } from "../../../../hooks/useMood";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   partnerId,
@@ -26,7 +24,6 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   refreshKey,
 }) => {
   // variables
-  const { user } = useAuth();
   const token = useToken();
 
   // use effects
@@ -45,44 +42,19 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     return;
   }
 
-  // fetch functions
-  const {
-    data: partnerMood,
-    isLoading: partnerMoodLoading,
-    refetch: refetchPartnerMood,
-  } = useQuery({
-    queryKey: ["partnerMood", user?.id],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      return await getUserMood(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
+  // data
+  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
+    partnerId,
+    token
+  );
+  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
+    partnerId,
+    token
+  );
 
   const mood = partnerMood?.mood || "No mood";
   const moodDescription =
     partnerMood?.description || `${partnerName} hasn't set a mood yet`;
-
-  const {
-    data: partnerStatus,
-    isLoading: partnerStatusLoading,
-    refetch: refetchPartnerStatus,
-  } = useQuery({
-    queryKey: ["partnerStatus", user?.id],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      return await fetchUserStatus(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
 
   const status = partnerStatus?.unreachable
     ? "unreachable"

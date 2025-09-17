@@ -45,7 +45,6 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const userId = user?.id;
   const displayMood = mood || "No mood";
   const displayMoodDescription =
     moodDescription || "You haven't added a mood yet";
@@ -127,7 +126,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       setAlertMessage("You have added your home location. Your partner can now see when you are home.");
 
       await queryClient.invalidateQueries({
-        queryKey: ["status", userId],
+        queryKey: ["status", user?.id],
       });
       await queryClient.invalidateQueries({
         queryKey: ["recentActivities", user?.id],
@@ -154,7 +153,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       await updateMood(token, newMood);
 
       await queryClient.invalidateQueries({
-        queryKey: ["moodData", userId],
+        queryKey: ["moodData", user?.id],
       });
       await queryClient.invalidateQueries({
         queryKey: ["recentActivities", user?.id],

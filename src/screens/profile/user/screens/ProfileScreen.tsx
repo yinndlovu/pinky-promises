@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, use } from "react";
 import {
   ScrollView,
   View,
@@ -23,26 +23,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { fetchUserStatus } from "../../../../services/api/profiles/userStatusService";
 import { getMood } from "../../../../services/api/profiles/moodService";
 import UpdateFavoritesModal from "../../../../components/modals/input/UpdateFavoritesModal";
-import {
-  getUserFavorites,
-  updateUserFavorites,
-} from "../../../../services/api/profiles/favoritesService";
+import { updateUserFavorites } from "../../../../services/api/profiles/favoritesService";
 import { BASE_URL } from "../../../../configuration/config";
-import {
-  getLoveLanguage,
-  updateLoveLanguage,
-} from "../../../../services/api/profiles/loveLanguageService";
+import { updateLoveLanguage } from "../../../../services/api/profiles/loveLanguageService";
 import {
   getAboutUser,
   updateAboutUser,
 } from "../../../../services/api/profiles/aboutUserService";
-import {
-  getPartner,
-  getReceivedPartnerRequests,
-} from "../../../../services/api/profiles/partnerService";
 import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { FavoritesType } from "../../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
@@ -55,6 +44,15 @@ import {
 import { useAuth } from "../../../../contexts/AuthContext";
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { useProfile } from "../../../../hooks/useProfile";
+import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
+import { useUserStatus } from "../../../../hooks/useStatus";
+import { useRequests } from "../../../../hooks/useRequests";
+import { useFavorites } from "../../../../hooks/useFavorites";
+import { usePartner } from "../../../../hooks/usePartner";
+import { useMood } from "../../../../hooks/useMood";
+import { useAbout } from "../../../../hooks/useAbout";
+import { useStoredMessages } from "../../../../hooks/useStoredMessages";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
@@ -139,49 +137,34 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     return;
   }
 
-  // fetch functions
+  // data
   const {
     data: profileData,
-    isLoading: profileDataLoading,
     refetch: refetchProfileData,
-  } = useQuery({
-    queryKey: ["profileData", user?.id],
-    queryFn: async () => {
-      const res = await axios.get(`${BASE_URL}/profile/get-profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      return res.data.user;
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24 * 2,
-  });
-
-  const {
-    data: loveLanguage,
-    isLoading: loveLanguageLoading,
-    refetch: refetchLoveLanguage,
-  } = useQuery({
-    queryKey: ["loveLanguage", user?.id],
-    queryFn: async () => {
-      return await getLoveLanguage(token, user?.id);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: status,
-    isLoading: statusLoading,
-    refetch: refetchStatus,
-  } = useQuery({
-    queryKey: ["status", user?.id],
-    queryFn: async () => {
-      return await fetchUserStatus(token, user?.id);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 4,
-  });
+    isLoading: profileDataLoading,
+  } = useProfile(user?.id, token);
+  const { data: loveLanguage, refetch: refetchLoveLanguage } = useLoveLanguage(
+    user?.id,
+    token
+  );
+  const { data: status, refetch: refetchStatus } = useUserStatus(
+    user?.id,
+    token
+  );
+  const { data: pendingRequestsData, refetch: refetchPendingRequestsData } =
+    useRequests(user?.id, token);
+  const { data: favorites, refetch: refetchFavorites } = useFavorites(
+    user?.id,
+    token
+  );
+  const { data: partnerData, refetch: refetchPartnerData } = usePartner(
+    user?.id,
+    token
+  );
+  const { data: moodData, refetch: refetchMoodData } = useMood(user?.id, token);
+  const { data: about, refetch: refetchAbout } = useAbout(user?.id, token);
+  const { data: storedMessages = [], refetch: refetchStoredMessages } =
+    useStoredMessages(user?.id, token);
 
   const homeStatus = status?.unreachable
     ? "unreachable"
@@ -199,113 +182,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     ? "You are currently not home"
     : "You must add your home location to use this feature";
 
-  const {
-    data: pendingRequestsData,
-    isLoading: pendingRequestsDataLoading,
-    refetch: refetchPendingRequestsData,
-  } = useQuery({
-    queryKey: ["pendingRequestCount", user?.id],
-    queryFn: async () => {
-      return await getReceivedPartnerRequests(token);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 5,
-  });
-
   const pendingRequestsCount = pendingRequestsData?.filter(
     (req: any) => req.status === "pending"
   ).length;
-
-  const {
-    data: favorites = {},
-    isLoading: favoritesLoading,
-    refetch: refetchFavorites,
-  } = useQuery({
-    queryKey: ["favorites", user?.id],
-    queryFn: async () => {
-      return await getUserFavorites(token, user?.id);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: partnerData,
-    isLoading: partnerDataLoading,
-    refetch: refetchPartnerData,
-  } = useQuery({
-    queryKey: ["partnerData", user?.id],
-    queryFn: async () => {
-      return await getPartner(token);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: moodData,
-    isLoading: moodDataLoading,
-    refetch: refetchMoodData,
-  } = useQuery({
-    queryKey: ["moodData", user?.id],
-    queryFn: async () => {
-      return await getMood(token);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const {
-    data: about,
-    isLoading: aboutLoading,
-    refetch: refetchAbout,
-  } = useQuery({
-    queryKey: ["about", user?.id],
-    queryFn: async () => {
-      return await getAboutUser(token, profileData?.id);
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: storedMessages = [],
-    isLoading: storedMessagesLoading,
-    refetch: refetchStoredMessages,
-  } = useQuery({
-    queryKey: ["storedMessages", user?.id],
-    queryFn: async () => {
-      const response = await getStoredMessages(token);
-      return Array.isArray(response) ? response : [];
-    },
-    enabled: !!token,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const storeMessageMutation = useMutation({
-    mutationFn: async ({
-      title,
-      message,
-    }: {
-      title: string;
-      message: string;
-    }) => {
-      return await storeMessage(token, title, message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
-
-      setStoreMessageModalVisible(false);
-      setAlertTitle("Message Stored");
-      setAlertMessage("You have stored a message");
-      setShowSuccessAlert(true);
-    },
-    onError: (error: any) => {
-      setAlertTitle("Failed");
-      setAlertMessage(error.response?.data?.error || "Failed to store message");
-      setShowErrorAlert(true);
-    },
-  });
 
   const updateMessageMutation = useMutation({
     mutationFn: async ({
