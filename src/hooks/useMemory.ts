@@ -4,10 +4,14 @@ import {
   getRecentFavoriteMemories,
 } from "../services/api/ours/favoriteMemoriesService";
 
-export function useMemories(userId: string, token: string) {
+export function useMemories(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["allFavoriteMemories", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+      
       return await getAllFavoriteMemories(token);
     },
     enabled: !!userId && !!token,

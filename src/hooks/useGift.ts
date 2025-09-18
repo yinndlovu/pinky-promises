@@ -6,10 +6,14 @@ import {
 import { getSetMonthlyGift } from "../services/api/gifts/setMonthlyGiftService";
 import { formatDateDMY, formatTime } from "../utils/formatters/formatDate";
 
-export function useGift(userId: string, token: string) {
+export function useGift(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["unclaimedGift", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+      
       return await getOldestUnclaimedGift(token);
     },
     enabled: !!userId && !!token,

@@ -43,10 +43,6 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   const token = useToken();
   const partnerId = usePartnerId();
 
-  if (!token) {
-    return;
-  }
-
   const connectSSE = async () => {
     try {
       const url = `${BASE_URL}/events?token=${token}`;
@@ -264,12 +260,16 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
+    if (!token) {
+      return;
+    }
+
     connectSSE();
 
     return () => {
       disconnectSSE();
     };
-  }, []);
+  }, [token]);
 
   return (
     <SSEContext.Provider value={{ isConnected, reconnect }}>

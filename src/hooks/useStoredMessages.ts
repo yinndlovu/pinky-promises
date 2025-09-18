@@ -16,10 +16,14 @@ export function useStoredMessages(userId: string, token: string) {
   });
 }
 
-export function useReceivedMessages(userId: string, token: string) {
+export function useReceivedMessages(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["partnerStoredMessages", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       const response = await getReceivedMessages(token);
       return Array.isArray(response) ? response : [];
     },

@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getTimeline } from "../services/api/ours/timelineService";
 
-export function useTimeline(userId: string, token: string) {
+export function useTimeline(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["timeline", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getTimeline(token);
     },
     enabled: !!userId && !!token,

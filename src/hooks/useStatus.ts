@@ -4,11 +4,15 @@ import { getPartnerDistance } from "../services/api/profiles/distanceService";
 
 export function useUserStatus(
   userId: string,
-  token: string
+  token: string | undefined
 ) {
   return useQuery({
     queryKey: ["status", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await fetchUserStatus(token, userId);
     },
     enabled: !!token && !!userId,
@@ -16,10 +20,14 @@ export function useUserStatus(
   });
 }
 
-export function usePartnerDistance(userId: string, token: string) {
+export function usePartnerDistance(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["partnerDistance", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getPartnerDistance(token);
     },
     enabled: !!userId && !!token,

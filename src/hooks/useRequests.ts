@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getReceivedPartnerRequests } from "../services/api/profiles/partnerService";
 
-export function useRequests(userId: string, token: string) {
+export function useRequests(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["pendingRequestCount", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getReceivedPartnerRequests(token);
     },
     enabled: !!token && !!userId,

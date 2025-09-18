@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getNotes } from "../services/api/ours/notesService";
 
-export function useNotesPreview(userId: string, token: string) {
+export function useNotesPreview(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["notesPreview", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+      
       return await getNotes(token);
     },
     enabled: !!userId && !!token,

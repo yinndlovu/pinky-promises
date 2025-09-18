@@ -5,23 +5,22 @@ import {
 } from "../services/api/settings/notificationPreferenceService";
 import useToken from "./useToken";
 
-export function useNotificationPrefs(userId: string) {
+export function useNotificationPrefs(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["notificationPreferences", userId],
-    queryFn: fetchPreferencesQuery,
+    queryFn: async () => {
+      if (!token) {
+        return {};
+      }
+      return fetchPreferencesQuery(token);
+    },
     staleTime: 1000 * 60 * 60 * 24 * 2,
     retry: false,
-    enabled: !!userId,
+    enabled: !!userId && !!token,
   });
 }
 
-const fetchPreferencesQuery = async () => {
-  const token = useToken();
-
-  if (!token) {
-    return;
-  }
-
+const fetchPreferencesQuery = async (token: string) => {
   const prefs: { [key: string]: boolean } = {};
   for (const { key } of NOTIFICATION_TYPES) {
     try {

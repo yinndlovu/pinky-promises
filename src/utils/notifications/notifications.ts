@@ -1,11 +1,10 @@
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { Platform } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
-import { saveToken } from "../services/api/expo/tokenService";
-import useToken from "../hooks/useToken";
+import { saveToken } from "../../services/api/expo/tokenService";
+import useToken from "../../hooks/useToken";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({

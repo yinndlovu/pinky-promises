@@ -4,10 +4,14 @@ import {
   getProfile,
 } from "../services/api/profiles/profileService";
 
-export function useUserProfile(userId: string, token: string) {
+export function useUserProfile(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["userProfile", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getUserProfile(userId, token);
     },
     enabled: !!userId && !!token,
@@ -15,10 +19,14 @@ export function useUserProfile(userId: string, token: string) {
   });
 }
 
-export function useProfile(userId: string, token: string) {
+export function useProfile(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["profileData", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getProfile(token);
     },
     enabled: !!token && !!userId,

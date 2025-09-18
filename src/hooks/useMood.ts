@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getMood, getUserMood } from "../services/api/profiles/moodService";
 
-export function useMood(userId: string, token: string) {
+export function useMood(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["moodData", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+      
       return await getMood(token);
     },
     enabled: !!token,

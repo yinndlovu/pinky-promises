@@ -6,10 +6,7 @@ export default function usePartnerId() {
   const { user } = useAuth();
   const token = useToken();
 
-  if (!token) {
-    return;
-  }
-  const { data: partner } = usePartner(user?.id, token);
+  const { data: partner } = usePartner(user?.id, token ?? undefined);
 
   return partner?.id as string | undefined;
 }

@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { getUserFavorites } from "../services/api/profiles/favoritesService";
 
-export function useFavorites(userId: string, token: string) {
+export function useFavorites(userId: string, token: string | undefined) {
   return useQuery({
     queryKey: ["favorites", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+      
       return await getUserFavorites(token, userId);
     },
     enabled: !!userId && !!token,

@@ -2,10 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { getContext } from "../services/ai/contextService";
 import { fetchKeyDetails } from "../services/ai/aiKeyDetailsService";
 
-export const useAiContext = (userId: string, token: string) => {
+export const useAiContext = (userId: string, token: string | undefined) => {
 return useQuery({
     queryKey: ["aiContext", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getContext(token);
     },
     enabled: !!userId && !!token,
@@ -13,10 +17,14 @@ return useQuery({
   });
 }
 
-export const useKeyDetails = (userId: string, token: string) => {
+export const useKeyDetails = (userId: string, token: string | undefined) => {
   return useQuery({
     queryKey: ["keyDetails", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+      
       return await fetchKeyDetails(token);
     },
     enabled: !!userId && !!token,
