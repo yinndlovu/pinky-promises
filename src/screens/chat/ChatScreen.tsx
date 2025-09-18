@@ -22,13 +22,15 @@ import { DEEPSEEK_KEY } from "../../configuration/config";
 import { saveKeyDetail } from "../../services/ai/aiKeyDetailsService";
 import { favoritesObjectToArray } from "../../helpers/aiHelpers";
 import { ChatMessage } from "../../types/Message";
-import useToken from "../../hooks/useToken";
-import { useAiContext, useKeyDetails } from "../../hooks/useAiContext";
 
 // screen content
 import styles from "./styles/ChatScreen.styles";
 import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
 import LoadingSpinner from "../../components/loading/LoadingSpinner";
+
+// hooks
+import useToken from "../../hooks/useToken";
+import { useAiContext, useKeyDetails } from "../../hooks/useAiContext";
 
 // chats database
 import {

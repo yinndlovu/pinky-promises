@@ -30,19 +30,11 @@ import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
 import { useAuth } from "../../../contexts/AuthContext";
-import useToken from "../../../hooks/useToken";
 import { checkAndUpdateHomeStatus } from "../../../helpers/checkHomeStatus";
 import {
   getInteractionMessage,
   getInteractionFeedback,
 } from "../../../helpers/interactions";
-import { useProfilePicture } from "../../../hooks/useProfilePicture";
-import { usePartner } from "../../../hooks/usePartner";
-import { useUserStatus } from "../../../hooks/useStatus";
-import { useUserMood } from "../../../hooks/useMood";
-import { useUpcomingSpecialDate } from "../../../hooks/useSpecialDate";
-import { useUnseenInteractions } from "../../../hooks/useInteraction";
-import { useRecentActivities } from "../../../hooks/useRecentActivity";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -57,6 +49,16 @@ import ProcessingAnimation from "../../../components/loading/ProcessingAnimation
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
 import defaultAnimation from "../../../assets/animations/hug.json";
+
+// hooks
+import { useProfilePicture } from "../../../hooks/useProfilePicture";
+import { usePartner } from "../../../hooks/usePartner";
+import { useUserStatus } from "../../../hooks/useStatus";
+import { useUserMood } from "../../../hooks/useMood";
+import { useUpcomingSpecialDate } from "../../../hooks/useSpecialDate";
+import { useUnseenInteractions } from "../../../hooks/useInteraction";
+import { useRecentActivities } from "../../../hooks/useRecentActivity";
+import useToken from "../../../hooks/useToken";
 
 // types
 type Props = NativeStackScreenProps<any>;

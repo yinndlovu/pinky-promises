@@ -35,17 +35,6 @@ import {
   deleteMessage,
 } from "../../../../services/api/profiles/messageStorageService";
 import { useAuth } from "../../../../contexts/AuthContext";
-import useToken from "../../../../hooks/useToken";
-import { useProfilePicture } from "../../../../hooks/useProfilePicture";
-import { useProfile } from "../../../../hooks/useProfile";
-import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
-import { useUserStatus } from "../../../../hooks/useStatus";
-import { useRequests } from "../../../../hooks/useRequests";
-import { useFavorites } from "../../../../hooks/useFavorites";
-import { usePartner } from "../../../../hooks/usePartner";
-import { useMood } from "../../../../hooks/useMood";
-import { useAbout } from "../../../../hooks/useAbout";
-import { useStoredMessages } from "../../../../hooks/useStoredMessages";
 import { updateProfilePicture } from "../../../../services/api/profiles/profileService";
 import { updateProfileField } from "../../../../services/api/profiles/profileService";
 
@@ -67,6 +56,19 @@ import ConfirmationModal from "../../../../components/modals/selection/Confirmat
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import modalStyles from "../styles/ModalStyles.styles";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
+
+// hooks
+import useToken from "../../../../hooks/useToken";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { useProfile } from "../../../../hooks/useProfile";
+import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
+import { useUserStatus } from "../../../../hooks/useStatus";
+import { useRequests } from "../../../../hooks/useRequests";
+import { useFavorites } from "../../../../hooks/useFavorites";
+import { usePartner } from "../../../../hooks/usePartner";
+import { useMood } from "../../../../hooks/useMood";
+import { useAbout } from "../../../../hooks/useAbout";
+import { useStoredMessages } from "../../../../hooks/useStoredMessages";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;

@@ -25,6 +25,7 @@ import { SSEProvider } from "./src/contexts/SSEContext";
 import { navigationRef } from "./src/utils/navigation/navigation";
 import { InviteProvider } from "./src/games/context/InviteContext";
 import { checkBatteryStatus } from "./src/helpers/checkBatteryStatus";
+import { RootStackParamList } from "./src/types/RootStackParamList";
 
 // content
 import PartnerProfileScreen from "./src/screens/profile/partner/screens/PartnerProfileScreen";
@@ -63,7 +64,7 @@ import GameSessionScreen from "./src/games/trivia/screens/GameSessionScreen";
 import LoadingAnimation from "./src/components/loading/LoadingAnimation";
 
 // variables
-const Stack = createStackNavigator();
+const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
 

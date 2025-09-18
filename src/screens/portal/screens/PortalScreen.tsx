@@ -85,7 +85,6 @@ export default function PortalScreen({ navigation }: Props) {
   // fetch functions
   const {
     data: unseenSweetMessage,
-    isLoading: unseenSweetMessageLoading,
     refetch: refetchUnseenSweetMessage,
   } = useQuery({
     queryKey: ["unseenSweetMessage", user?.id],
@@ -98,7 +97,6 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: unseenVentMessage,
-    isLoading: unseenVentMessageLoading,
     refetch: refetchUnseenVentMessage,
   } = useQuery({
     queryKey: ["unseenVentMessage", user?.id],
@@ -111,7 +109,6 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: sweetMessagesSent = [],
-    isLoading: sweetMessagesSentLoading,
     refetch: refetchSweetMessagesSent,
   } = useQuery<Message[]>({
     queryKey: ["sweetMessagesSent", user?.id],
@@ -124,7 +121,6 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: sweetMessagesReceived = [],
-    isLoading: sweetMessagesReceivedLoading,
     refetch: refetchSweetMessagesReceived,
   } = useQuery<Message[]>({
     queryKey: ["sweetMessagesReceived", user?.id],
@@ -137,7 +133,6 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: ventMessagesSent = [],
-    isLoading: ventMessagesSentLoading,
     refetch: refetchVentMessagesSent,
   } = useQuery<Message[]>({
     queryKey: ["ventMessagesSent", user?.id],
@@ -150,7 +145,6 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: ventMessagesReceived = [],
-    isLoading: ventMessagesReceivedLoading,
     refetch: refetchVentMessagesReceived,
   } = useQuery<Message[]>({
     queryKey: ["ventMessagesReceived", user?.id],

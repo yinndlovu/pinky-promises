@@ -28,10 +28,6 @@ import {
   deleteFavoriteMemory,
 } from "../../../services/api/ours/favoriteMemoriesService";
 import { useAuth } from "../../../contexts/AuthContext";
-import useToken from "../../../hooks/useToken";
-import { useRecentMemories } from "../../../hooks/useMemory";
-import { useNotesPreview } from "../../../hooks/useNotes";
-import { useSpecialDates } from "../../../hooks/useSpecialDate";
 
 // screen content
 import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
@@ -42,6 +38,12 @@ import NotesCanvas from "../components/NotesCanvas";
 import SpecialDates from "../components/SpecialDates";
 import FavoriteMemories from "../components/FavoriteMemories";
 import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
+
+// hooks
+import useToken from "../../../hooks/useToken";
+import { useRecentMemories } from "../../../hooks/useMemory";
+import { useNotesPreview } from "../../../hooks/useNotes";
+import { useSpecialDates } from "../../../hooks/useSpecialDate";
 
 type Props = NativeStackScreenProps<any>;
 

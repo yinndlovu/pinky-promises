@@ -21,14 +21,6 @@ import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
 import { useAuth } from "../../../../contexts/AuthContext";
-import { useProfilePicture } from "../../../../hooks/useProfilePicture";
-import { usePartner } from "../../../../hooks/usePartner";
-import { useProfile } from "../../../../hooks/useProfile";
-import { useFavorites } from "../../../../hooks/useFavorites";
-import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
-import { useAbout } from "../../../../hooks/useAbout";
-import { usePartnerDistance } from "../../../../hooks/useStatus";
-import { useReceivedMessages } from "../../../../hooks/useStoredMessages";
 
 // screen content
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
@@ -42,7 +34,17 @@ import styles from "../styles/PartnerProfileScreen.styles";
 import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
+
+// hooks
 import useToken from "../../../../hooks/useToken";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { usePartner } from "../../../../hooks/usePartner";
+import { useProfile } from "../../../../hooks/useProfile";
+import { useFavorites } from "../../../../hooks/useFavorites";
+import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
+import { useAbout } from "../../../../hooks/useAbout";
+import { usePartnerDistance } from "../../../../hooks/useStatus";
+import { useReceivedMessages } from "../../../../hooks/useStoredMessages";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
