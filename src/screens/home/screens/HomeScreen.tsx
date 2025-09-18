@@ -85,11 +85,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [animationModalVisible, setAnimationModalVisible] = useState(false);
   const [animationMessage, setAnimationMessage] = useState("");
 
-  if (!token) {
-    setError("Session expired, please log in again");
-    return;
-  }
-
   // data
   const {
     data: partner,

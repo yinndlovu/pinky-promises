@@ -6,14 +6,14 @@ import {
 import { getSetMonthlyGift } from "../services/api/gifts/setMonthlyGiftService";
 import { formatDateDMY, formatTime } from "../utils/formatters/formatDate";
 
-export function useGift(userId: string, token: string | undefined) {
+export function useGift(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["unclaimedGift", userId],
     queryFn: async () => {
       if (!token) {
         return;
       }
-      
+
       return await getOldestUnclaimedGift(token);
     },
     enabled: !!userId && !!token,
@@ -21,10 +21,14 @@ export function useGift(userId: string, token: string | undefined) {
   });
 }
 
-export function usePastGifts(userId: string, token: string) {
+export function usePastGifts(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["pastGifts", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       const gifts = await getLastFiveClaimedGifts(token);
 
       return gifts.map((gift: any) => ({
@@ -41,10 +45,14 @@ export function usePastGifts(userId: string, token: string) {
   });
 }
 
-export function useSetMonthlyGift(userId: string, token: string) {
+export function useSetMonthlyGift(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["setMonthlyGift", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getSetMonthlyGift(token, userId);
     },
     enabled: !!userId && !!token,

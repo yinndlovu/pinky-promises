@@ -62,14 +62,12 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   // use states (processing)
   const [removingPartner, setRemovingPartner] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [loadingPfp, setLoadingPfp] = useState(true);
 
   // use states (message storage)
   const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
-
-  if (!token) {
-    return;
-  }
 
   // data
   const {
@@ -97,62 +95,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     data: partnerStoredMessages = [],
     refetch: refetchPartnerStoredMessages,
   } = useReceivedMessages(user?.id, token);
-
-  // handlers
-  const handleRemovePartner = async () => {
-    setRemovingPartner(true);
-    try {
-      await removePartner(token);
-      await queryClient.invalidateQueries({
-        queryKey: ["partnerData", user?.id],
-      });
-
-      setShowRemoveModal(false);
-
-      if (partner?.id) {
-        navigation.replace("UserProfile", { userId: partner.id });
-      }
-    } catch (error: any) {
-    } finally {
-      setRemovingPartner(false);
-    }
-  };
-
-  const handleViewMessage = (message: any) => {
-    setSelectedMessage(message);
-    setViewMessageModalVisible(true);
-  };
-
-  const renderProfileImage = () => {
-    const [failed, setFailed] = useState(false);
-
-    if (avatarUri && profilePicUpdatedAt && partner.id) {
-      const timestamp = Math.floor(
-        new Date(profilePicUpdatedAt).getTime() / 1000
-      );
-      const cachedImageUrl = buildCachedImageUrl(
-        partner.id.toString(),
-        timestamp
-      );
-
-      return (
-        <Image
-          source={
-            failed
-              ? require("../../../../assets/default-avatar-two.png")
-              : { uri: cachedImageUrl }
-          }
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-          onError={() => setFailed(true)}
-        />
-      );
-    }
-
-    return null;
-  };
 
   // use layouts
   useLayoutEffect(() => {
@@ -187,6 +129,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    setFailed(false);
+    setLoadingPfp(true);
+  }, [avatarUri]);
 
   // refresh screen
   const onRefresh = useCallback(async () => {
@@ -225,6 +172,68 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const name = partner?.name || "User";
   const username = partner?.username || "user";
   const bio = partner?.bio || "";
+
+  // handlers
+  const handleRemovePartner = async () => {
+    setRemovingPartner(true);
+    try {
+      await removePartner(token);
+      await queryClient.invalidateQueries({
+        queryKey: ["partnerData", user?.id],
+      });
+
+      setShowRemoveModal(false);
+
+      if (partner?.id) {
+        navigation.replace("UserProfile", { userId: partner.id });
+      }
+    } catch (error: any) {
+    } finally {
+      setRemovingPartner(false);
+    }
+  };
+
+  const handleViewMessage = (message: any) => {
+    setSelectedMessage(message);
+    setViewMessageModalVisible(true);
+  };
+
+  const renderProfileImage = () => {
+    if (loadingPfp && !failed) {
+      return null;
+    }
+
+    if (avatarUri && profilePicUpdatedAt && partner.id) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id.toString(),
+        timestamp
+      );
+
+      return (
+        <Image
+          source={
+            failed || !avatarUri
+              ? require("../../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+          onLoadEnd={() => setLoadingPfp(false)}
+          onError={() => {
+            setFailed(true);
+            setLoadingPfp(false);
+          }}
+        />
+      );
+    }
+
+    return null;
+  };
 
   if (partnerLoading || currentUserLoading) {
     return (

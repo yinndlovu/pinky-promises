@@ -4,10 +4,14 @@ import {
   getStoredMessages,
 } from "../services/api/profiles/messageStorageService";
 
-export function useStoredMessages(userId: string, token: string) {
+export function useStoredMessages(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["storedMessages", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+      
       const response = await getStoredMessages(token);
       return Array.isArray(response) ? response : [];
     },
@@ -16,7 +20,7 @@ export function useStoredMessages(userId: string, token: string) {
   });
 }
 
-export function useReceivedMessages(userId: string, token: string | undefined) {
+export function useReceivedMessages(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["partnerStoredMessages", userId],
     queryFn: async () => {

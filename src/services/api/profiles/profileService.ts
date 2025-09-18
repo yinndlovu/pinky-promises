@@ -13,7 +13,11 @@ export async function getProfile(token: string) {
   return response.data.user;
 }
 
-export async function getUserProfile(userId: string, token: string) {
+export async function getUserProfile(userId: string, token: string | null) {
+  if (!token) {
+    return;
+  }
+  
   const response = await axios.get(
     `${BASE_URL}/profile/get-user-profile/${userId}`,
     {
@@ -24,7 +28,11 @@ export async function getUserProfile(userId: string, token: string) {
   return response.data.profile;
 }
 
-export async function fetchProfilePicture(userId: string, token: string) {
+export async function fetchProfilePicture(userId: string, token: string | null) {
+  if (!token) {
+    throw new Error("No token provided");
+  }
+
   const response = await axios.get(
     `${BASE_URL}/profile/get-profile-picture/${userId}`,
     {
@@ -43,9 +51,13 @@ export async function fetchProfilePicture(userId: string, token: string) {
 }
 
 export async function updateProfilePicture(
-  token: string,
+  token: string | null,
   base64String: string
 ) {
+  if (!token) {
+    return;
+  }
+
   return axios.put(
     `${BASE_URL}/profile/update-profile-picture`,
     { image: base64String },
@@ -58,8 +70,12 @@ export async function updateProfilePicture(
 export async function updateProfileField(
   field: "name" | "username" | "bio",
   value: string,
-  token: string
+  token: string | null
 ) {
+  if (!token) {
+    return;
+  }
+  
   let url = "";
   let body: Record<string, string> = {};
 

@@ -14,7 +14,11 @@ export async function getUserFavorites(token: string, userId: string) {
   return res.data.favorites;
 }
 
-export async function updateUserFavorites(token: string, favorites: any) {
+export async function updateUserFavorites(token: string | null, favorites: any) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.put(
     `${BASE_URL}/user-favorites/update-user-favorites`,
     favorites,

@@ -61,10 +61,14 @@ export async function getNotificationPreference(token: string, type: string) {
 }
 
 export async function setNotificationPreference(
-  token: string,
+  token: string | null,
   type: string,
   value: boolean
 ) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.post(
     `${BASE_URL}/notifications/preference/set`,
     { type, value },

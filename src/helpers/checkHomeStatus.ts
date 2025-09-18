@@ -5,8 +5,12 @@ import { getDistance } from "../utils/location/locationUtils";
 import { updateUserStatus } from "../services/api/profiles/userStatusService";
 import { updateGeoInfo } from "../services/api/profiles/geoInfoService";
 
-export const checkAndUpdateHomeStatus = async (token: string) => {
+export const checkAndUpdateHomeStatus = async (token: string | null) => {
   try {
+    if (!token) {
+      return;
+    }
+    
     const home = await getHomeLocation(token);
 
     if (!home) {

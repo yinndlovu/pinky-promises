@@ -29,6 +29,54 @@ import styles from "../styles/PendingRequestsScreen.styles";
 // variables
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
+const ProfileImage = ({ userId, token }: { userId: string; token: string }) => {
+  const [failed, setFailed] = useState(false);
+  const [loadingPfp, setLoadingPfp] = useState(true);
+
+  const { avatarUri, profilePicUpdatedAt, fetchPicture } = useProfilePicture(
+    userId,
+    token
+  );
+
+  // use effects
+  useEffect(() => {
+    fetchPicture();
+  }, [fetchPicture]);
+
+  useEffect(() => {
+    setFailed(false);
+    setLoadingPfp(true);
+  }, [avatarUri]);
+
+  if (avatarUri && profilePicUpdatedAt) {
+    if (loadingPfp && !failed) {
+      return null;
+    }
+
+    const cachedImageUrl = buildCachedImageUrl(
+      userId,
+      Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+    );
+
+    return (
+      <Image
+        source={failed || !avatarUri ? fallbackAvatar : { uri: cachedImageUrl }}
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+        onLoadEnd={() => setLoadingPfp(false)}
+        onError={() => {
+          setFailed(true);
+          setLoadingPfp(false);
+        }}
+      />
+    );
+  }
+
+  return null;
+};
+
 const PendingRequestsScreen = ({ navigation }: any) => {
   // variables
   const queryClient = useQueryClient();
@@ -44,11 +92,12 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   const [processingAccept, setProcessingAccept] = useState<string | null>(null);
   const [processingReject, setProcessingReject] = useState<string | null>(null);
 
-  if (!token) {
-    return;
-  }
-
+  // use effects
   useEffect(() => {
+    if (!token) {
+      return;
+    }
+
     (async () => {
       try {
         const requestsData = await getReceivedPartnerRequests(token);
@@ -61,38 +110,9 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     })();
   }, []);
 
-  const renderProfileImage = (userId: string) => {
-    const [failed, setFailed] = useState(false);
-
-    const { avatarUri, profilePicUpdatedAt, fetchPicture } = useProfilePicture(
-      userId,
-      token
-    );
-
-    useEffect(() => {
-      fetchPicture();
-    }, [fetchPicture]);
-
-    if (avatarUri && profilePicUpdatedAt) {
-      const cachedImageUrl = buildCachedImageUrl(
-        userId,
-        Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
-      );
-
-      return (
-        <Image
-          source={failed ? fallbackAvatar : { uri: cachedImageUrl }}
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-          onError={() => setFailed(true)}
-        />
-      );
-    }
-
+  if (!token) {
     return null;
-  };
+  }
 
   const showAlert = (message: string) => {
     setAlertMessage(message);
@@ -105,6 +125,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
     try {
       await acceptPartnerRequest(token, requestId);
+
       await queryClient.invalidateQueries({
         queryKey: ["partnerRequests", user?.id],
       });
@@ -126,6 +147,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     setProcessingReject(requestId);
     try {
       await rejectPartnerRequest(token, requestId);
+
       await queryClient.invalidateQueries({
         queryKey: ["partnerRequests", user?.id],
       });
@@ -153,7 +175,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     return (
       <View style={styles.requestItem}>
         <View style={styles.userInfo}>
-          {renderProfileImage(item.sender.id)}
+          <ProfileImage userId={item.sender.id} token={token!} />
           <View style={styles.userDetails}>
             <Text style={styles.username}>@{item.sender.username}</Text>
             <Text style={styles.requestText}>wants to be your partner</Text>

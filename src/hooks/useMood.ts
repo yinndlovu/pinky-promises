@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getMood, getUserMood } from "../services/api/profiles/moodService";
 
-export function useMood(userId: string, token: string | undefined) {
+export function useMood(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["moodData", userId],
     queryFn: async () => {
@@ -16,11 +16,11 @@ export function useMood(userId: string, token: string | undefined) {
   });
 }
 
-export function useUserMood(partnerId: string, token: string) {
+export function useUserMood(partnerId: string, token: string | null) {
   return useQuery({
     queryKey: ["partnerMood", partnerId],
     queryFn: async () => {
-      if (!partnerId) {
+      if (!partnerId || !token) {
         return null;
       }
 

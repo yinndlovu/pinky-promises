@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getAboutUser } from "../services/api/profiles/aboutUserService";
 
-export function useAbout(userId: string, token: string | undefined) {
+export function useAbout(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["about", userId],
     queryFn: async () => {

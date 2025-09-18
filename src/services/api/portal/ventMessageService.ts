@@ -1,7 +1,11 @@
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
-export async function ventToPartner(token: string, message: string) {
+export async function ventToPartner(token: string | null, message: string) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.post(
     `${BASE_URL}/vent-messages/send-vent-message`,
     { message },
@@ -15,7 +19,11 @@ export async function ventToPartner(token: string, message: string) {
   return res.data;
 }
 
-export async function getLastUnseenVentMessage(token: string) {
+export async function getLastUnseenVentMessage(token: string | null) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/vent-messages/get-vent-message/last-unseen`,
     {
@@ -28,7 +36,11 @@ export async function getLastUnseenVentMessage(token: string) {
   return res.data;
 }
 
-export async function getSentVentMessages(token: string) {
+export async function getSentVentMessages(token: string | null) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/vent-messages/get-vent-messages/sent`,
     {
@@ -41,8 +53,12 @@ export async function getSentVentMessages(token: string) {
   return res.data;
 }
 
-export async function getReceivedVentMessages(token: string) {
-  const res = await axios.get(
+export async function getReceivedVentMessages(token: string | null) {
+  if (!token) {
+    return;
+  }
+
+  const res = await axios.get( 
     `${BASE_URL}/vent-messages/get-vent-messages/received`,
     {
       headers: {
@@ -54,7 +70,11 @@ export async function getReceivedVentMessages(token: string) {
   return res.data;
 }
 
-export async function viewVentMessage(token: string, ventId: string) {
+export async function viewVentMessage(token: string | null, ventId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/vent-messages/view-vent-message/${ventId}`,
     {
@@ -67,7 +87,11 @@ export async function viewVentMessage(token: string, ventId: string) {
   return res.data;
 }
 
-export async function deleteVentMessage(token: string, ventId: string) {
+export async function deleteVentMessage(token: string | null, ventId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.delete(
     `${BASE_URL}/vent-messages/delete-vent-message/${ventId}`,
     {

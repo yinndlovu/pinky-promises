@@ -77,11 +77,6 @@ export default function PortalScreen({ navigation }: Props) {
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (!token) {
-    setToastMessage("Session expired, please log in again");
-    return;
-  }
-
   // fetch functions
   const {
     data: unseenSweetMessage,

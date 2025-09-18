@@ -82,11 +82,6 @@ const OursScreen = ({ navigation }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
 
-  if (!token) {
-    setError("Session expired, please log in again");
-    return;
-  }
-
   // data
   const { data: recentMemories = [], refetch: refetchRecentMemories } =
     useRecentMemories(user?.id, token);

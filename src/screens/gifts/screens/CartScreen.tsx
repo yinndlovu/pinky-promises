@@ -58,11 +58,6 @@ const CartScreen = () => {
     (() => void) | null
   >(null);
 
-  if (!token) {
-    setToastMessage("Session expired, please log in again");
-    return;
-  }
-
   // data
   const {
     data: cartItems,

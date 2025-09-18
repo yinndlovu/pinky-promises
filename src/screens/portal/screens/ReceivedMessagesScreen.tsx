@@ -40,10 +40,6 @@ const ReceivedMessagesScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
 
-  if (!token) {
-    throw new Error("Session expired, please log in again");
-  }
-
   // fetch functions
   const {
     data: messages = [],

@@ -46,11 +46,6 @@ export default function SearchScreen({ navigation }: Props) {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
-  if (!token) {
-    setError("Session expired, please log in again")
-    return;
-  }
-
   // use effects
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {

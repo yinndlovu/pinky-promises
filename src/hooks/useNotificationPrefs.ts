@@ -3,9 +3,8 @@ import {
   NOTIFICATION_TYPES,
   getNotificationPreference,
 } from "../services/api/settings/notificationPreferenceService";
-import useToken from "./useToken";
 
-export function useNotificationPrefs(userId: string, token: string | undefined) {
+export function useNotificationPrefs(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["notificationPreferences", userId],
     queryFn: async () => {

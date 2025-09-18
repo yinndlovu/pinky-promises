@@ -1,7 +1,11 @@
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
-export async function getSpecialDates(token: string) {
+export async function getSpecialDates(token: string | null) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/special-dates/get-special-dates`,
     {
@@ -15,11 +19,15 @@ export async function getSpecialDates(token: string) {
 }
 
 export async function createSpecialDate(
-  token: string,
+  token: string | null,
   date: string,
   title: string,
   description?: string
 ) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.post(
     `${BASE_URL}/special-dates/add-special-date`,
     { date, title, description },
@@ -34,12 +42,16 @@ export async function createSpecialDate(
 }
 
 export async function updateSpecialDate(
-  token: string,
+  token: string | null,
   dateId: string,
   date: string,
   title: string,
   description?: string
 ) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.put(
     `${BASE_URL}/special-dates/update-special-date/${dateId}`,
     { date, title, description },
@@ -53,7 +65,11 @@ export async function updateSpecialDate(
   return res.data;
 }
 
-export async function deleteSpecialDate(token: string, dateId: string) {
+export async function deleteSpecialDate(token: string | null, dateId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.delete(
     `${BASE_URL}/special-dates/delete-special-date/${dateId}`,
     {
@@ -66,7 +82,11 @@ export async function deleteSpecialDate(token: string, dateId: string) {
   return res.data;
 }
 
-export async function getUpcomingSpecialDate(token: string) {
+export async function getUpcomingSpecialDate(token: string | null) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/special-dates/upcoming-special-date`,
     {

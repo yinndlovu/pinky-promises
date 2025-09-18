@@ -46,12 +46,7 @@ const NotificationsScreen = () => {
 
   // data
   const { data: preferences = {}, isLoading: preferencesLoading } =
-    useNotificationPrefs(user?.id);
-
-  if (!token) {
-    setError("Session expired, please log in again");
-    return;
-  }
+    useNotificationPrefs(user?.id, token);
 
   // handlers
   const handleToggle = async (type: string, value: boolean) => {

@@ -59,10 +59,6 @@ export default function ChatScreen() {
   const [showOptions, setShowOptions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  if (!token) {
-    return;
-  }
-
   // data
   const { data: context, isLoading: contextLoading } = useAiContext(
     user?.id,

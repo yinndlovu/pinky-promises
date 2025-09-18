@@ -4,7 +4,7 @@ import { getPartnerDistance } from "../services/api/profiles/distanceService";
 
 export function useUserStatus(
   userId: string,
-  token: string | undefined
+  token: string | null
 ) {
   return useQuery({
     queryKey: ["status", userId],
@@ -20,7 +20,7 @@ export function useUserStatus(
   });
 }
 
-export function usePartnerDistance(userId: string, token: string | undefined) {
+export function usePartnerDistance(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["partnerDistance", userId],
     queryFn: async () => {

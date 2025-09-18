@@ -14,7 +14,11 @@ export async function getLoveLanguage(token: string, userId: string) {
   return res.data.loveLanguage;
 }
 
-export async function updateLoveLanguage(token: string, loveLanguage: string) {
+export async function updateLoveLanguage(token: string | null, loveLanguage: string) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.put(
     `${BASE_URL}/love-language/update-love-language`,
     { loveLanguage },

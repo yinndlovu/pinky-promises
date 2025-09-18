@@ -50,11 +50,7 @@ const AllFavoriteMemoriesScreen = () => {
   const [showError, setShowError] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
-
-  if (!token) {
-    throw new Error("Session expired, please log in again");
-  }
-
+  
   // data
   const {
     data: memories,

@@ -35,19 +35,15 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   const { user } = useAuth();
   const token = useToken();
 
-  if (!token) {
-    return;
-  }
-
   // fetch functions
-  const { data: portalActivityCount, isLoading: portalActivityCountLoading } =
+  const { data: portalActivityCount } =
     useQuery({
       queryKey: ["portalActivityCount", user?.id],
       queryFn: async () => {
         return getPortalActivityCount(token);
       },
       staleTime: 1000 * 60,
-      enabled: !!partner,
+      enabled: !!partner && !!token,
     });
 
   const totalUnseen = portalActivityCount?.total || 0;

@@ -4,7 +4,7 @@ import {
   getUpcomingSpecialDate,
 } from "../services/api/ours/specialDateService";
 
-export function useSpecialDates(userId: string, token: string | undefined) {
+export function useSpecialDates(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["specialDates", userId],
     queryFn: async () => {
@@ -19,7 +19,7 @@ export function useSpecialDates(userId: string, token: string | undefined) {
   });
 }
 
-export function useUpcomingSpecialDate(userId: string, token: string | undefined) {
+export function useUpcomingSpecialDate(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["upcomingSpecialDate", userId],
     queryFn: async () => {

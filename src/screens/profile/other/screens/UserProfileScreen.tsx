@@ -14,17 +14,11 @@ import NetInfo from "@react-native-community/netinfo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
-import {
-  sendPartnerRequest,
-  checkPendingRequest,
-  cancelPartnerRequest,
-  getIncomingRequest,
-  acceptPartnerRequest,
-} from "../../../../services/api/profiles/partnerService";
 import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
 import { getUserProfile } from "../../../../services/api/profiles/profileService";
+import { usePartnerRequestStatus } from "../../../../hooks/usePartnerRequestStatus";
 
 // screen content
 import AlertModal from "../../../../components/modals/output/AlertModal";
@@ -36,7 +30,6 @@ const fallbackAvatar = require("../../../../assets/default-avatar-two.png");
 
 // types
 type Props = NativeStackScreenProps<any, "UserProfile">;
-type RequestStatus = "none" | "pending" | "incoming";
 
 const UserProfileScreen = ({ route, navigation }: Props) => {
   // variables
@@ -49,42 +42,34 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
-  const [requestStatus, setRequestStatus] = useState<RequestStatus>("none");
-  const [incomingRequestId, setIncomingRequestId] = useState<string | null>(
-    null
-  );
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [loadingPfp, setLoadingPfp] = useState(true);
 
-  if (!token) {
-    throw new Error("Session expired, please log in again");
-  }
+  // hook
+  const {
+    cancelRequest,
+    acceptRequest,
+    sendRequest,
+    requestStatus,
+    incomingRequestId,
+    checkRequestStatus,
+  } = usePartnerRequestStatus();
 
   const fetchUser = async () => {
     try {
       const userData = await getUserProfile(userId, token);
       setUser(userData);
 
-      await checkRequestStatus(token);
-    } catch (err) {
+      await checkRequestStatus(token, userId);
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
-
-  // use effects
-  useEffect(() => {
-    fetchUser();
-  }, [userId]);
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOnline(!!state.isConnected);
-    });
-    return () => unsubscribe();
-  }, []);
 
   // handlers
   const handlePartnerAction = async () => {
@@ -93,28 +78,23 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     try {
       switch (requestStatus) {
         case "pending":
-          await cancelPartnerRequest(token, userId);
-          setRequestStatus("none");
+          await cancelRequest(token, userId);
           showAlert("Partner request cancelled");
           break;
 
         case "incoming":
           if (incomingRequestId) {
-            await acceptPartnerRequest(token, incomingRequestId);
+            await acceptRequest(token, incomingRequestId);
             await queryClient.invalidateQueries({
               queryKey: ["partnerData", user?.id],
             });
 
-            setRequestStatus("none");
-            setIncomingRequestId(null);
-
-            navigation.replace("PartnerProfile", { userId: userId });
+            navigation.replace("PartnerProfile", { userId });
           }
           break;
 
         case "none":
-          await sendPartnerRequest(token, userId);
-          setRequestStatus("pending");
+          await sendRequest(token, userId);
           showAlert("Partner request sent");
           break;
       }
@@ -130,55 +110,61 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const {
     avatarUri,
     profilePicUpdatedAt,
-    fetchPicture: fetchPartnerPicture,
+    fetchPicture: fetchUserPicture,
   } = useProfilePicture(userId, token);
+
+  // use effects
+  useEffect(() => {
+    fetchUser();
+
+    if (token && userId) {
+      fetchUserPicture();
+    }
+  }, [userId, token]);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+  
+  useEffect(() => {
+    setFailed(false);
+    setLoadingPfp(true);
+  }, [avatarUri]);
 
   // helpers
   const renderProfileImage = () => {
-    const [failed, setFailed] = useState(false);
+    if (loadingPfp && !failed) {
+      return null;
+    }
 
     if (avatarUri && profilePicUpdatedAt) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
       );
-      const cachedImageUrl = buildCachedImageUrl(userId, timestamp);
+      const cachedImageUrl = buildCachedImageUrl(userId.toString(), timestamp);
 
       return (
         <Image
-          source={failed ? fallbackAvatar : { uri: cachedImageUrl }}
+          source={
+            failed || !avatarUri ? fallbackAvatar : { uri: cachedImageUrl }
+          }
           style={styles.avatar}
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
-          onError={() => setFailed(true)}
+          onLoadEnd={() => setLoadingPfp(false)}
+          onError={() => {
+            setFailed(true);
+            setLoadingPfp(false);
+          }}
         />
       );
     }
 
     return null;
-  };
-
-  const checkRequestStatus = async (token: string) => {
-    try {
-      const pendingResponse = await checkPendingRequest(token, userId);
-
-      if (pendingResponse.hasPendingRequest) {
-        setRequestStatus("pending");
-        return;
-      }
-
-      const incomingResponse = await getIncomingRequest(token, userId);
-
-      if (incomingResponse.hasIncomingRequest) {
-        setRequestStatus("incoming");
-        setIncomingRequestId(incomingResponse.requestId);
-        return;
-      }
-
-      setRequestStatus("none");
-    } catch (err) {
-      setRequestStatus("none");
-    }
   };
 
   const showAlert = (message: string) => {

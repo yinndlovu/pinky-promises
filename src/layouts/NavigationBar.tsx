@@ -32,10 +32,6 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   const { user } = useAuth();
   const token = useToken();
 
-  if (!token) {
-    return;
-  }
-
   const { data: gift } = useGift(user?.id, token);
 
   const {
@@ -44,14 +40,17 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     fetchPicture: fetchUserAvatar,
   } = useProfilePicture(user?.id, token);
 
+  // use states
+  const [failed, setFailed] = useState(false);
+
   // use effects
   useEffect(() => {
-    fetchUserAvatar();
-  }, []);
+    if (token) {
+      fetchUserAvatar();
+    }
+  }, [token]);
 
   const renderProfileIcon = () => {
-    const [failed, setFailed] = useState(false);
-
     if (avatarUri && profilePicUpdatedAt && user?.id) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
@@ -79,6 +78,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
             cachePolicy="disk"
             contentFit="cover"
             transition={200}
+            onError={() => setFailed(true)}
           />
         </View>
       );

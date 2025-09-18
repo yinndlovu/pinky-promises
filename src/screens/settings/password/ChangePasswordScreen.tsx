@@ -51,12 +51,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 
   // variables
   const token = useToken();
-
-  if (!token) {
-    setError("Session expired, please log in again");
-    return;
-  }
-
+  
   // validators
   const validateNewPassword = (password: string) => {
     return {

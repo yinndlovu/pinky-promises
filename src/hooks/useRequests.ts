@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getReceivedPartnerRequests } from "../services/api/profiles/partnerService";
 
-export function useRequests(userId: string, token: string | undefined) {
+export function useRequests(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["pendingRequestCount", userId],
     queryFn: async () => {

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getLoveLanguage } from "../services/api/profiles/loveLanguageService";
 
-export function useLoveLanguage(userId: string, token: string | undefined) {
+export function useLoveLanguage(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["loveLanguage", userId],
     queryFn: async () => {

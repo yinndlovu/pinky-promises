@@ -38,10 +38,6 @@ const TimelineScreen = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
-  if (!token) {
-    return;
-  }
-
   // data
   const {
     data: timeline = [],

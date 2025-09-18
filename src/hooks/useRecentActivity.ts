@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRecentActivities } from "../services/api/home/recentActivityService";
 import { formatDateDMY, formatTime } from "../utils/formatters/formatDate";
 
-export function useRecentActivities(userId: string, token: string | undefined) {
+export function useRecentActivities(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["recentActivities", userId],
     queryFn: async () => {

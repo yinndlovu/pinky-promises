@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPartner } from "../services/api/profiles/partnerService";
 
-export function usePartner(userId: string, token: string | undefined) {
+export function usePartner(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["partnerData", userId],
     queryFn: async () => {

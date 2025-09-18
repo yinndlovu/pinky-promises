@@ -4,7 +4,7 @@ import {
   getRecentFavoriteMemories,
 } from "../services/api/ours/favoriteMemoriesService";
 
-export function useMemories(userId: string, token: string | undefined) {
+export function useMemories(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["allFavoriteMemories", userId],
     queryFn: async () => {
@@ -19,10 +19,14 @@ export function useMemories(userId: string, token: string | undefined) {
   });
 }
 
-export function useRecentMemories(userId: string, token: string) {
+export function useRecentMemories(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["recentFavoriteMemories", userId],
     queryFn: async () => {
+      if (!token) {
+        return;
+      }
+
       return await getRecentFavoriteMemories(token);
     },
     enabled: !!userId && !!token,

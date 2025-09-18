@@ -34,11 +34,6 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   const { logout } = useAuth();
   const token = useToken();
 
-  if (!token) {
-    setToastMessage("Session expired, please log in again");
-    return;
-  }
-
   // handlers
   const handleDeleteAccountPress = () => {
     setDeleteModalVisible(true);

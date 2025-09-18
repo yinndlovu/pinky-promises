@@ -63,11 +63,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
 
-  if (!token) {
-    setToastMessage("Session expired, please log in again");
-    return;
-  }
-
   // data
   const { data: gift, refetch: refetchGift } = useGift(user?.id, token);
   const { data: pastGifts = [], refetch: refetchPastGifts } = usePastGifts(

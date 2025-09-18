@@ -31,10 +31,6 @@ const NotesScreen: React.FC = () => {
   // variables
   const token = useToken();
 
-  if (!token) {
-    throw new Error("Session expired, please log in again");
-  }
-
   // use effects
   useEffect(() => {
     const fetchNotes = async () => {

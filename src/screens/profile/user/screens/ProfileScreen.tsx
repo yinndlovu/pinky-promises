@@ -94,6 +94,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loadingBio, setLoadingBio] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [loadingPfp, setLoadingPfp] = useState(true);
 
   // use states (modals)
   const [showPictureModal, setShowPictureModal] = useState(false);
@@ -129,11 +131,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editTitle, setEditTitle] = useState("");
   const [editMessageText, setEditMessageText] = useState("");
 
-  if (!token) {
-    setError("Session expired, please log in again");
-    return;
-  }
-
   // data
   const {
     data: profileData,
@@ -162,6 +159,90 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const { data: about, refetch: refetchAbout } = useAbout(user?.id, token);
   const { data: storedMessages = [], refetch: refetchStoredMessages } =
     useStoredMessages(user?.id, token);
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchProfilePicture,
+  } = useProfilePicture(user?.id, token);
+
+  // use effects
+  useEffect(() => {
+    if (success) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+        setSuccess(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  useEffect(() => {
+    if (error) {
+      setShowError(true);
+
+      const timer = setTimeout(() => {
+        setShowError(false);
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (profileData?.id) {
+      fetchProfilePicture();
+    }
+  }, [profileData?.id]);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    setFailed(false);
+    setLoadingPfp(true);
+  }, [avatarUri]);
+
+  // refresh screen
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        refetchLoveLanguage(),
+        refetchProfileData(),
+        refetchStatus(),
+        refetchPendingRequestsData(),
+        refetchFavorites(),
+        refetchPartnerData(),
+        refetchMoodData(),
+        refetchAbout(),
+        fetchProfilePicture(),
+        refetchStoredMessages(),
+      ]);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["specialDates", user?.id],
+      });
+    } catch (e) {
+    } finally {
+      setRefreshing(false);
+    }
+  }, [
+    refetchLoveLanguage,
+    refetchPartnerData,
+    refetchAbout,
+    refetchMoodData,
+    refetchFavorites,
+    refetchStatus,
+    refetchProfileData,
+    refetchPendingRequestsData,
+    fetchProfilePicture,
+    refetchStoredMessages,
+  ]);
 
   const homeStatus = status?.unreachable
     ? "unreachable"
@@ -236,15 +317,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     },
   });
 
-  const {
-    avatarUri,
-    profilePicUpdatedAt,
-    fetchPicture: fetchProfilePicture,
-  } = useProfilePicture(user?.id, token);
-
   // helpers
   const renderProfileImage = () => {
-    const [failed, setFailed] = useState(false);
+    if (loadingPfp && !failed) {
+      return null;
+    }
 
     if (avatarUri && profilePicUpdatedAt && user?.id) {
       const timestamp = Math.floor(
@@ -258,7 +335,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return (
         <Image
           source={
-            failed
+            failed || !avatarUri
               ? require("../../../../assets/default-avatar-two.png")
               : { uri: cachedImageUrl }
           }
@@ -266,87 +343,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
-          onError={() => setFailed(true)}
+          onLoadEnd={() => setLoadingPfp(false)}
+          onError={() => {
+            setFailed(true);
+            setLoadingPfp(false);
+          }}
         />
       );
     }
 
     return null;
   };
-
-  // use effects
-  useEffect(() => {
-    if (success) {
-      setShowSuccess(true);
-      const timer = setTimeout(() => {
-        setShowSuccess(false);
-        setSuccess(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [success]);
-
-  useEffect(() => {
-    if (error) {
-      setShowError(true);
-
-      const timer = setTimeout(() => {
-        setShowError(false);
-        setError(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
-
-  useEffect(() => {
-    if (profileData?.id) {
-      fetchProfilePicture();
-    }
-  }, [profileData?.id]);
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOnline(!!state.isConnected);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchLoveLanguage(),
-        refetchProfileData(),
-        refetchStatus(),
-        refetchPendingRequestsData(),
-        refetchFavorites(),
-        refetchPartnerData(),
-        refetchMoodData(),
-        refetchAbout(),
-        fetchProfilePicture(),
-        refetchStoredMessages(),
-      ]);
-
-      await queryClient.invalidateQueries({
-        queryKey: ["specialDates", user?.id],
-      });
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [
-    refetchLoveLanguage,
-    refetchPartnerData,
-    refetchAbout,
-    refetchMoodData,
-    refetchFavorites,
-    refetchStatus,
-    refetchProfileData,
-    refetchPendingRequestsData,
-    fetchProfilePicture,
-    refetchStoredMessages,
-  ]);
 
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {

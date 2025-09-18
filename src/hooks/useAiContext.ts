@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getContext } from "../services/ai/contextService";
 import { fetchKeyDetails } from "../services/ai/aiKeyDetailsService";
 
-export const useAiContext = (userId: string, token: string | undefined) => {
+export const useAiContext = (userId: string, token: string | null) => {
 return useQuery({
     queryKey: ["aiContext", userId],
     queryFn: async () => {
@@ -17,7 +17,7 @@ return useQuery({
   });
 }
 
-export const useKeyDetails = (userId: string, token: string | undefined) => {
+export const useKeyDetails = (userId: string, token: string | null) => {
   return useQuery({
     queryKey: ["keyDetails", userId],
     queryFn: async () => {

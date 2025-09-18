@@ -4,7 +4,7 @@ import {
   getProfile,
 } from "../services/api/profiles/profileService";
 
-export function useUserProfile(userId: string, token: string | undefined) {
+export function useUserProfile(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["userProfile", userId],
     queryFn: async () => {
@@ -19,7 +19,7 @@ export function useUserProfile(userId: string, token: string | undefined) {
   });
 }
 
-export function useProfile(userId: string, token: string | undefined) {
+export function useProfile(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["profileData", userId],
     queryFn: async () => {

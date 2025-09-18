@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { getItems, getCartTotal } from "../services/api/gifts/cartService";
 
-export function useCartItems(userId: string, token: string | undefined) {
+export function useCartItems(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["cartItems", userId],
     queryFn: async () => {
@@ -17,7 +17,7 @@ export function useCartItems(userId: string, token: string | undefined) {
   });
 }
 
-export function useCartTotal(userId: string, token: string | undefined) {
+export function useCartTotal(userId: string, token: string | null) {
   return useQuery({
     queryKey: ["cartTotal", userId],
     queryFn: async () => {
