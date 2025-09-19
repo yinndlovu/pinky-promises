@@ -32,8 +32,8 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   const { user } = useAuth();
   const token = useToken();
 
+  // data
   const { data: gift } = useGift(user?.id, token);
-
   const {
     avatarUri,
     profilePicUpdatedAt,
@@ -50,6 +50,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     }
   }, [token]);
 
+  // helpers
   const renderProfileIcon = () => {
     if (avatarUri && profilePicUpdatedAt && user?.id) {
       const timestamp = Math.floor(
@@ -84,7 +85,25 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       );
     }
 
-    return null;
+    return (
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../assets/default-avatar-two.png")
+        }
+        style={[
+          styles.avatar,
+          {
+            borderColor:
+              currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
+          },
+        ]}
+        contentFit="cover"
+        cachePolicy="disk"
+        onError={() => setFailed(true)}
+      />
+    );
   };
 
   // check if there is an unclaimed gift

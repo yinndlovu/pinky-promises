@@ -12,7 +12,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
-import { useFocusEffect } from "@react-navigation/native";
+import { TabRouter, useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -80,7 +80,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  const [loadingPfp, setLoadingPfp] = useState(true);
 
   // use states (modals)
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
@@ -112,104 +111,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     profilePicUpdatedAt,
     fetchPicture: fetchPartnerPicture,
   } = useProfilePicture(partner?.id, token);
-
-  // handlers
-  const handleInteraction = async (action: string) => {
-    setActionsModalVisible(false);
-    setInteractionLoading(true);
-
-    try {
-      await interactWithPartner(token, action);
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
-      });
-
-      setAnimationMessage(
-        getInteractionFeedback(action, partner?.name || "your partner")
-      );
-      setAnimationModalVisible(true);
-      setCurrentAction(action);
-      refetchActivities();
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to interact");
-    } finally {
-      setInteractionLoading(false);
-    }
-  };
-
-  // helpers
-  const renderPartnerImage = () => {
-    return (
-      <View style={styles.avatarContainer}>
-        {loadingPfp && !failed ? (
-          <View style={styles.avatarPlaceholder}>
-            <View style={styles.avatarCircle} />
-          </View>
-        ) : avatarUri && profilePicUpdatedAt && partner ? (
-          <Image
-            source={
-              failed || !avatarUri
-                ? require("../../../assets/default-avatar-two.png")
-                : {
-                    uri: buildCachedImageUrl(
-                      partner.id.toString(),
-                      Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
-                    ),
-                  }
-            }
-            style={styles.avatar}
-            cachePolicy="disk"
-            contentFit="cover"
-            transition={200}
-            onLoadEnd={() => setLoadingPfp(false)}
-            onError={() => {
-              setFailed(true);
-              setLoadingPfp(false);
-            }}
-          />
-        ) : (
-          <Image
-            source={require("../../../assets/default-avatar-two.png")}
-            style={styles.avatar}
-            cachePolicy="disk"
-            contentFit="cover"
-          />
-        )}
-      </View>
-    );
-  };
-
-  // handle status
-  const status = partnerStatus?.unreachable
-    ? "Unreachable"
-    : partnerStatus?.isAtHome
-    ? "Home"
-    : partnerStatus?.isAtHome === false
-    ? "Away"
-    : "Unavailable";
-
-  const isActive = status === "Home" || status === "Unavailable";
-
-  const statusColor =
-    status === "Home"
-      ? "#4caf50"
-      : status === "Away"
-      ? "#e03487"
-      : status === "Unreachable"
-      ? "#db8a47ff"
-      : "#b0b3c6";
-
-  const mood = partnerMood?.mood || null;
-  const batteryLevel = partnerStatus?.batteryLevel || null;
-  const distanceFromHome = partnerStatus?.distance || null;
-
-  const lastSeen = partnerStatus?.updatedAt ?? null;
-  const currentWeather = partnerStatus?.currentWeather ?? null;
-  const weatherType = partnerStatus?.weatherType || null;
-  const weatherDescription = partnerStatus?.weatherDescription || null;
-  const userLocation = partnerStatus?.userLocation ?? null;
-  const userTimezone = partnerStatus?.userTimezone || null;
-  const isDaytime = partnerStatus?.isDaytime ?? null;
 
   // use effects
   useEffect(() => {
@@ -248,11 +149,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       fetchPartnerPicture();
     }
   }, [partner?.id]);
-
-  useEffect(() => {
-    setFailed(false);
-    setLoadingPfp(true);
-  }, [avatarUri]);
 
   useFocusEffect(
     useCallback(() => {
@@ -306,6 +202,104 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     refetchUnseen,
     fetchPartnerPicture,
   ]);
+
+  // handlers
+  const handleInteraction = async (action: string) => {
+    setActionsModalVisible(false);
+    setInteractionLoading(true);
+
+    try {
+      await interactWithPartner(token, action);
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities", user?.id],
+      });
+
+      setAnimationMessage(
+        getInteractionFeedback(action, partner?.name || "your partner")
+      );
+      setAnimationModalVisible(true);
+      setCurrentAction(action);
+      refetchActivities();
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to interact");
+    } finally {
+      setInteractionLoading(false);
+    }
+  };
+
+  // helpers
+  const renderPartnerImage = () => {
+    if (avatarUri && profilePicUpdatedAt && partner) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id.toString(),
+        timestamp
+      );
+
+      return (
+        <Image
+          source={
+            failed
+              ? require("../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+          onError={() => setFailed(true)}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        onError={() => setFailed(true)}
+      />
+    );
+  };
+
+  // handle status
+  const status = partnerStatus?.unreachable
+    ? "Unreachable"
+    : partnerStatus?.isAtHome
+    ? "Home"
+    : partnerStatus?.isAtHome === false
+    ? "Away"
+    : "Unavailable";
+
+  const isActive = status === "Home" || status === "Unavailable";
+
+  const statusColor =
+    status === "Home"
+      ? "#4caf50"
+      : status === "Away"
+      ? "#e03487"
+      : status === "Unreachable"
+      ? "#db8a47ff"
+      : "#b0b3c6";
+
+  const mood = partnerMood?.mood || null;
+  const batteryLevel = partnerStatus?.batteryLevel || null;
+  const distanceFromHome = partnerStatus?.distance || null;
+
+  const lastSeen = partnerStatus?.updatedAt ?? null;
+  const currentWeather = partnerStatus?.currentWeather ?? null;
+  const weatherType = partnerStatus?.weatherType || null;
+  const weatherDescription = partnerStatus?.weatherDescription || null;
+  const userLocation = partnerStatus?.userLocation ?? null;
+  const userTimezone = partnerStatus?.userTimezone || null;
+  const isDaytime = partnerStatus?.isDaytime ?? null;
 
   if (partnerLoading) {
     return (
