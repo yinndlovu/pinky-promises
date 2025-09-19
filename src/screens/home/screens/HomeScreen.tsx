@@ -79,6 +79,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+  const [loadingPfp, setLoadingPfp] = useState(true);
 
   // use states (modals)
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
@@ -105,6 +107,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     useUnseenInteractions(user?.id, token);
   const { data: activities = [], refetch: refetchActivities } =
     useRecentActivities(user?.id, token);
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(partner?.id, token);
 
   // handlers
   const handleInteraction = async (action: string) => {
@@ -132,31 +139,44 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   // helpers
   const renderPartnerImage = () => {
-    const [failed, setFailed] = useState(false);
-
-    if (avatarUri && profilePicUpdatedAt && partner) {
-      const timestamp = Math.floor(
-        new Date(profilePicUpdatedAt).getTime() / 1000
-      );
-      const cachedImageUrl = buildCachedImageUrl(partner.id, timestamp);
-
-      return (
-        <Image
-          source={
-            failed
-              ? require("../../../assets/default-avatar-two.png")
-              : { uri: cachedImageUrl }
-          }
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-          onError={() => setFailed(true)}
-        />
-      );
-    }
-
-    return null;
+    return (
+      <View style={styles.avatarContainer}>
+        {loadingPfp && !failed ? (
+          <View style={styles.avatarPlaceholder}>
+            <View style={styles.avatarCircle} />
+          </View>
+        ) : avatarUri && profilePicUpdatedAt && partner ? (
+          <Image
+            source={
+              failed || !avatarUri
+                ? require("../../../assets/default-avatar-two.png")
+                : {
+                    uri: buildCachedImageUrl(
+                      partner.id.toString(),
+                      Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+                    ),
+                  }
+            }
+            style={styles.avatar}
+            cachePolicy="disk"
+            contentFit="cover"
+            transition={200}
+            onLoadEnd={() => setLoadingPfp(false)}
+            onError={() => {
+              setFailed(true);
+              setLoadingPfp(false);
+            }}
+          />
+        ) : (
+          <Image
+            source={require("../../../assets/default-avatar-two.png")}
+            style={styles.avatar}
+            cachePolicy="disk"
+            contentFit="cover"
+          />
+        )}
+      </View>
+    );
   };
 
   // handle status
@@ -223,17 +243,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   }, [inviteAccepted, invite, navigation]);
 
-  const {
-    avatarUri,
-    profilePicUpdatedAt,
-    fetchPicture: fetchPartnerPicture,
-  } = useProfilePicture(partner?.id, token);
-
   useEffect(() => {
     if (partner?.id) {
       fetchPartnerPicture();
     }
   }, [partner?.id]);
+
+  useEffect(() => {
+    setFailed(false);
+    setLoadingPfp(true);
+  }, [avatarUri]);
 
   useFocusEffect(
     useCallback(() => {
