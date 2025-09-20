@@ -10,7 +10,7 @@ export function useUserStatus(
     queryKey: ["status", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await fetchUserStatus(token, userId);
@@ -25,7 +25,7 @@ export function usePartnerDistance(userId: string, token: string | null) {
     queryKey: ["partnerDistance", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getPartnerDistance(token);

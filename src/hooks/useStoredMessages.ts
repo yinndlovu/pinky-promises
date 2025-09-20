@@ -9,7 +9,7 @@ export function useStoredMessages(userId: string, token: string | null) {
     queryKey: ["storedMessages", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
       
       const response = await getStoredMessages(token);
@@ -25,7 +25,7 @@ export function useReceivedMessages(userId: string, token: string | null) {
     queryKey: ["partnerStoredMessages", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
 
       const response = await getReceivedMessages(token);

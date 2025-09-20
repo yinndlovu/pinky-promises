@@ -6,7 +6,7 @@ export function useMood(userId: string, token: string | null) {
     queryKey: ["moodData", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
       
       return await getMood(token);
@@ -16,7 +16,7 @@ export function useMood(userId: string, token: string | null) {
   });
 }
 
-export function useUserMood(partnerId: string, token: string | null) {
+export function useUserMood(partnerId: string | undefined, token: string | null) {
   return useQuery({
     queryKey: ["partnerMood", partnerId],
     queryFn: async () => {

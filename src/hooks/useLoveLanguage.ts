@@ -6,7 +6,7 @@ export function useLoveLanguage(userId: string, token: string | null) {
     queryKey: ["loveLanguage", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
       
       return await getLoveLanguage(token, userId);

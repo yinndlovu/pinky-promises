@@ -43,8 +43,9 @@ import { useProfile } from "../../../../hooks/useProfile";
 import { useFavorites } from "../../../../hooks/useFavorites";
 import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
 import { useAbout } from "../../../../hooks/useAbout";
-import { usePartnerDistance } from "../../../../hooks/useStatus";
+import { usePartnerDistance, useUserStatus } from "../../../../hooks/useStatus";
 import { useReceivedMessages } from "../../../../hooks/useStoredMessages";
+import { useUserMood } from "../../../../hooks/useMood";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
@@ -56,7 +57,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   // use states
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [isOnline, setIsOnline] = useState(true);
 
   // use states (processing)
@@ -80,6 +80,14 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     refetch: refetchCurrentUser,
     isLoading: currentUserLoading,
   } = useProfile(user?.id, token);
+  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
+    partner?.id,
+    token
+  );
+  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
+    partner?.id,
+    token
+  );
   const { data: partnerFavorites = {}, refetch: refetchPartnerFavorites } =
     useFavorites(partner?.id, token);
   const { data: loveLanguage, refetch: refetchLoveLanguage } = useLoveLanguage(
@@ -95,6 +103,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     data: partnerStoredMessages = [],
     refetch: refetchPartnerStoredMessages,
   } = useReceivedMessages(user?.id, token);
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(partner?.id, token);
 
   // use layouts
   useLayoutEffect(() => {
@@ -110,18 +123,12 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
   }, [navigation]);
 
-  const {
-    avatarUri,
-    profilePicUpdatedAt,
-    fetchPicture: fetchPartnerPicture,
-  } = useProfilePicture(partner?.id, token);
-
   // use effects
   useEffect(() => {
-    if (partner?.id) {
+    if (token && partner?.id) {
       fetchPartnerPicture();
     }
-  }, [partner?.id]);
+  }, [partner?.id, token]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -151,8 +158,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           refetchPartnerStoredMessages(),
         ]);
       }
-
-      setRefreshKey((k) => k + 1);
     } catch (e) {
     } finally {
       setRefreshing(false);
@@ -168,10 +173,30 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     partner?.id,
   ]);
 
-  // declarations
+  // format data
   const name = partner?.name || "User";
   const username = partner?.username || "user";
   const bio = partner?.bio || "";
+
+  const mood = partnerMood?.mood || "No mood";
+  const moodDescription =
+    partnerMood?.description || `${partner?.name} hasn't set a mood yet`;
+
+  const status = partnerStatus?.unreachable
+    ? "unreachable"
+    : partnerStatus?.isAtHome
+    ? "home"
+    : partnerStatus?.isAtHome === false
+    ? "away"
+    : "unavailable";
+
+  const statusDescription = partnerStatus?.unreachable
+    ? `Can't find ${partner?.name}'s current location`
+    : partnerStatus?.isAtHome
+    ? `${partner?.name} is currently at home`
+    : partnerStatus?.isAtHome === false
+    ? `${partner?.id} is currently not home`
+    : `${partner?.id} hasn't set a home location`;
 
   // handlers
   const handleRemovePartner = async () => {
@@ -320,11 +345,15 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           </Text>
         </View>
 
-        <PartnerStatusMood
-          partnerId={partner.id}
-          partnerName={name}
-          refreshKey={refreshKey}
-        />
+        {partner?.id && (
+          <PartnerStatusMood
+            status={status}
+            statusDescription={statusDescription}
+            mood={mood || "No mood"}
+            moodDescription={moodDescription}
+            statusDistance={partnerStatus.distance}
+          />
+        )}
 
         <PartnerAnniversary />
 

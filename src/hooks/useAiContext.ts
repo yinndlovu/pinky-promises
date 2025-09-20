@@ -7,7 +7,7 @@ return useQuery({
     queryKey: ["aiContext", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getContext(token);
@@ -22,7 +22,7 @@ export const useKeyDetails = (userId: string, token: string | null) => {
     queryKey: ["keyDetails", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
       
       return await fetchKeyDetails(token);

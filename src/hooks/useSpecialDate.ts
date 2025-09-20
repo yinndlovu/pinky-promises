@@ -9,7 +9,7 @@ export function useSpecialDates(userId: string, token: string | null) {
     queryKey: ["specialDates", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
 
       return await getSpecialDates(token);
@@ -24,7 +24,7 @@ export function useUpcomingSpecialDate(userId: string, token: string | null) {
     queryKey: ["upcomingSpecialDate", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getUpcomingSpecialDate(token);

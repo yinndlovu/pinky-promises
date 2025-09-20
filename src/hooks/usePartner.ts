@@ -6,7 +6,7 @@ export function usePartner(userId: string, token: string | null) {
     queryKey: ["partnerData", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getPartner(token);

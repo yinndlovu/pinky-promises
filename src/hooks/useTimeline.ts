@@ -6,7 +6,7 @@ export function useTimeline(userId: string, token: string | null) {
     queryKey: ["timeline", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
 
       return await getTimeline(token);

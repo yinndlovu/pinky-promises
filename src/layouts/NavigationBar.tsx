@@ -101,7 +101,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
         ]}
         contentFit="cover"
         cachePolicy="disk"
-        onError={() => setFailed(true)}
+        transition={200}
       />
     );
   };

@@ -53,7 +53,7 @@ const AllFavoriteMemoriesScreen = () => {
   
   // data
   const {
-    data: memories,
+    data: memories = [],
     refetch: refetchMemories,
     isLoading: memoriesLoading,
     error,

@@ -6,7 +6,7 @@ export function useUnseenInteractions(userId: string, token: string | null) {
     queryKey: ["unseenInteractions", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
       
       return await getUnseenInteractions(token);

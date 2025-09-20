@@ -11,7 +11,7 @@ export function useGift(userId: string, token: string | null) {
     queryKey: ["unclaimedGift", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getOldestUnclaimedGift(token);
@@ -26,7 +26,7 @@ export function usePastGifts(userId: string, token: string | null) {
     queryKey: ["pastGifts", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
 
       const gifts = await getLastFiveClaimedGifts(token);
@@ -50,7 +50,7 @@ export function useSetMonthlyGift(userId: string, token: string | null) {
     queryKey: ["setMonthlyGift", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getSetMonthlyGift(token, userId);

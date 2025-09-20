@@ -11,6 +11,7 @@ export function useNotificationPrefs(userId: string, token: string | null) {
       if (!token) {
         return {};
       }
+      
       return fetchPreferencesQuery(token);
     },
     staleTime: 1000 * 60 * 60 * 24 * 2,

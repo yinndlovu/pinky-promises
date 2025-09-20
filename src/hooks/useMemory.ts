@@ -9,7 +9,7 @@ export function useMemories(userId: string, token: string | null) {
     queryKey: ["allFavoriteMemories", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
       
       return await getAllFavoriteMemories(token);
@@ -24,7 +24,7 @@ export function useRecentMemories(userId: string, token: string | null) {
     queryKey: ["recentFavoriteMemories", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
 
       return await getRecentFavoriteMemories(token);

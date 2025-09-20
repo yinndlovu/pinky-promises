@@ -6,7 +6,7 @@ export function useNotesPreview(userId: string, token: string | null) {
     queryKey: ["notesPreview", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
       
       return await getNotes(token);

@@ -7,7 +7,7 @@ export function useRecentActivities(userId: string, token: string | null) {
     queryKey: ["recentActivities", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
 
       const activitiesData = await getRecentActivities(token);

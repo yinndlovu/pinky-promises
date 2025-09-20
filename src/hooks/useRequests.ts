@@ -6,7 +6,7 @@ export function useRequests(userId: string, token: string | null) {
     queryKey: ["pendingRequestCount", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return 0;
       }
 
       return await getReceivedPartnerRequests(token);

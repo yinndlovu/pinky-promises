@@ -6,7 +6,7 @@ export function useCartItems(userId: string, token: string | null) {
     queryKey: ["cartItems", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return [];
       }
 
       const response = await getItems(token);

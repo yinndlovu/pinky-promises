@@ -14,15 +14,9 @@ const PartnerAnniversary = () => {
   const { user } = useAuth();
   const token = useToken();
 
-  if (!token) {
-    return;
-  }
-  
   // fetch functions
   const {
     data: specialDates = [],
-    isLoading: specialDatesLoading,
-    refetch: refetchSpecialDates,
   } = useQuery<SpecialDate[]>({
     queryKey: ["specialDates", user?.id],
     queryFn: async () => {

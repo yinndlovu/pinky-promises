@@ -9,7 +9,7 @@ export function useUserProfile(userId: string, token: string | null) {
     queryKey: ["userProfile", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getUserProfile(userId, token);
@@ -24,7 +24,7 @@ export function useProfile(userId: string, token: string | null) {
     queryKey: ["profileData", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
 
       return await getProfile(token);

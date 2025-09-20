@@ -6,7 +6,7 @@ export function useFavorites(userId: string, token: string | null) {
     queryKey: ["favorites", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return {};
       }
       
       return await getUserFavorites(token, userId);

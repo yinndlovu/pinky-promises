@@ -6,7 +6,7 @@ export function useAbout(userId: string, token: string | null) {
     queryKey: ["about", userId],
     queryFn: async () => {
       if (!token) {
-        return;
+        return null;
       }
       
       return await getAboutUser(token, userId);

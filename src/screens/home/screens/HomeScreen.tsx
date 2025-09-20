@@ -144,11 +144,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   }, [inviteAccepted, invite, navigation]);
 
-  useEffect(() => {
-    if (partner?.id) {
-      fetchPartnerPicture();
-    }
-  }, [partner?.id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (partner?.id && token) {
+        fetchPartnerPicture();
+      }
+    }, [partner?.id, token])
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -264,7 +266,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.avatar}
         cachePolicy="disk"
         contentFit="cover"
-        onError={() => setFailed(true)}
+        transition={200}
       />
     );
   };
