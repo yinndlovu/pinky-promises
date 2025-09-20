@@ -95,7 +95,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [loadingPfp, setLoadingPfp] = useState(true);
 
   // use states (modals)
   const [showPictureModal, setShowPictureModal] = useState(false);
@@ -147,7 +146,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   );
   const { data: pendingRequestsData, refetch: refetchPendingRequestsData } =
     useRequests(user?.id, token);
-  const { data: favorites, refetch: refetchFavorites } = useFavorites(
+  const { data: favorites = {}, refetch: refetchFavorites } = useFavorites(
     user?.id,
     token
   );
@@ -190,10 +189,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }, [error]);
 
   useEffect(() => {
-    if (profileData?.id) {
+    if (user?.id && token) {
       fetchProfilePicture();
     }
-  }, [profileData?.id]);
+  }, [user?.id, token]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -201,11 +200,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     });
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    setFailed(false);
-    setLoadingPfp(true);
-  }, [avatarUri]);
 
   // refresh screen
   const onRefresh = useCallback(async () => {
@@ -319,10 +313,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // helpers
   const renderProfileImage = () => {
-    if (loadingPfp && !failed) {
-      return null;
-    }
-
     if (avatarUri && profilePicUpdatedAt && user?.id) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
@@ -335,7 +325,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return (
         <Image
           source={
-            failed || !avatarUri
+            failed
               ? require("../../../../assets/default-avatar-two.png")
               : { uri: cachedImageUrl }
           }
@@ -343,16 +333,24 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
-          onLoadEnd={() => setLoadingPfp(false)}
-          onError={() => {
-            setFailed(true);
-            setLoadingPfp(false);
-          }}
+          onError={() => setFailed(true)}
         />
       );
     }
 
-    return null;
+    return (
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+      />
+    );
   };
 
   // handlers

@@ -10,7 +10,7 @@ export function useProfilePicture(userId: string, token: string | null) {
   const fetchPicture = useCallback(async () => {
     try {
       if (!token) {
-        return;
+        return null;
       }
 
       const { uri, updatedAt } = await fetchProfilePicture(userId, token);

@@ -3,10 +3,14 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function addHomeLocation(
-  token: string,
+  token: string | null,
   latitude: number,
   longitude: number
 ) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.put(
     `${BASE_URL}/location/add-home-location`,
     { latitude, longitude },

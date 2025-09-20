@@ -66,11 +66,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [updatingMood, setUpdatingMood] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  if (!token) {
-    return;
-  }
-
+  
   // use effects
   useEffect(() => {
     floatAnimation.value = withRepeat(

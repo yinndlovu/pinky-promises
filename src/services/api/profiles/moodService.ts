@@ -11,7 +11,11 @@ export async function getMood(token: string) {
   return res.data.mood;
 }
 
-export async function updateMood(token: string, mood: string) {
+export async function updateMood(token: string | null, mood: string) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.put(
     `${BASE_URL}/mood/update-mood`,
     { mood },

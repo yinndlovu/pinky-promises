@@ -11,7 +11,7 @@ export function useMood(userId: string, token: string | null) {
       
       return await getMood(token);
     },
-    enabled: !!token,
+    enabled: !!token && !!userId,
     staleTime: 1000 * 60 * 5,
   });
 }

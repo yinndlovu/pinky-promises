@@ -63,7 +63,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [removingPartner, setRemovingPartner] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [failed, setFailed] = useState(false);
-  const [loadingPfp, setLoadingPfp] = useState(true);
 
   // use states (message storage)
   const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
@@ -136,11 +135,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    setFailed(false);
-    setLoadingPfp(true);
-  }, [avatarUri]);
 
   // refresh screen
   const onRefresh = useCallback(async () => {
@@ -224,10 +218,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   };
 
   const renderProfileImage = () => {
-    if (loadingPfp && !failed) {
-      return null;
-    }
-
     if (avatarUri && profilePicUpdatedAt && partner.id) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
@@ -240,7 +230,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       return (
         <Image
           source={
-            failed || !avatarUri
+            failed
               ? require("../../../../assets/default-avatar-two.png")
               : { uri: cachedImageUrl }
           }
@@ -248,16 +238,24 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
-          onLoadEnd={() => setLoadingPfp(false)}
-          onError={() => {
-            setFailed(true);
-            setLoadingPfp(false);
-          }}
+          onError={() => setFailed(true)}
         />
       );
     }
 
-    return null;
+    return (
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+      />
+    );
   };
 
   if (partnerLoading || currentUserLoading) {
