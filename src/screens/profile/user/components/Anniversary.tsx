@@ -1,19 +1,19 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { TouchableOpacity } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
-  getSpecialDates,
   createSpecialDate,
   updateSpecialDate,
 } from "../../../../services/api/ours/specialDateService";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { AnniversaryProps, SpecialDate } from "../../../../types/SpecialDate";
 import { formatProfileDisplayDate } from "../../../../utils/formatters/formatDate";
+import useToken from "../../../../hooks/useToken";
+import { useSpecialDates } from "../../../../hooks/useSpecialDate";
 
 // screen content
 import UpdateSpecialDateModal from "../../../../components/modals/input/UpdateSpecialDateModal";
@@ -23,7 +23,7 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   // variables
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const currentUserId = user?.id;
+  const token = useToken();
 
   // use states
   const [modalVisible, setModalVisible] = useState(false);
@@ -35,23 +35,8 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   const [alertTitle, setAlertTitle] = useState("");
   const [showSuccessAlert, setShowSuccess] = useState(false);
 
-  // fetch functions
-  const {
-    data: specialDates = [],
-    isLoading: specialDatesLoading,
-    refetch: refetchSpecialDates,
-  } = useQuery<SpecialDate[]>({
-    queryKey: ["specialDates"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        return [];
-      }
-
-      return await getSpecialDates(token);
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-  });
+  // data
+  const { data: specialDates = [] } = useSpecialDates(user?.id, token);
 
   // helpers
   const getAnniversaryDisplay = () => {
@@ -121,12 +106,6 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   ) => {
     setModalVisible(false);
 
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      throw new Error("No token");
-    }
-
     if (editingDate) {
       await updateSpecialDate(token, editingDate.id, date, title, description);
       setAlertTitle("Updated");
@@ -148,7 +127,7 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
     }
 
     await queryClient.invalidateQueries({
-      queryKey: ["specialDates"],
+      queryKey: ["specialDates", user?.id],
     });
   };
 

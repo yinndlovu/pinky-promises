@@ -7,9 +7,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { encode } from "base64-arraybuffer";
-import axios from "axios";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -19,113 +16,103 @@ import {
   acceptPartnerRequest,
   rejectPartnerRequest,
 } from "../../../services/api/profiles/partnerService";
-import { BASE_URL } from "../../../configuration/config";
-import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../utils/cache/imageCacheUtils";
 import { PendingRequest } from "../../../types/Request";
+import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
+import { useProfilePicture } from "../../../hooks/useProfilePicture";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
 import styles from "../styles/PendingRequestsScreen.styles";
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // variables
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
+const ProfileImage = ({ userId, token }: { userId: string; token: string }) => {
+  const [failed, setFailed] = useState(false);
+  const [loadingPfp, setLoadingPfp] = useState(true);
+
+  const { avatarUri, profilePicUpdatedAt, fetchPicture } = useProfilePicture(
+    userId,
+    token
+  );
+
+  // use effects
+  useEffect(() => {
+    fetchPicture();
+  }, [fetchPicture]);
+
+  useEffect(() => {
+    setFailed(false);
+    setLoadingPfp(true);
+  }, [avatarUri]);
+
+  if (avatarUri && profilePicUpdatedAt) {
+    if (loadingPfp && !failed) {
+      return null;
+    }
+
+    const cachedImageUrl = buildCachedImageUrl(
+      userId,
+      Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+    );
+
+    return (
+      <Image
+        source={failed || !avatarUri ? fallbackAvatar : { uri: cachedImageUrl }}
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+        onLoadEnd={() => setLoadingPfp(false)}
+        onError={() => {
+          setFailed(true);
+          setLoadingPfp(false);
+        }}
+      />
+    );
+  }
+
+  return null;
+};
+
 const PendingRequestsScreen = ({ navigation }: any) => {
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
-  const [profilePictures, setProfilePictures] = useState<{
-    [userId: string]: string;
-  }>({});
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<{
-    [userId: string]: Date;
-  }>({});
 
   // use states (processing)
-  const [loading, setLoading] = useState(true);
   const [processingAccept, setProcessingAccept] = useState<string | null>(null);
   const [processingReject, setProcessingReject] = useState<string | null>(null);
 
   // use effects
   useEffect(() => {
-    fetchRequests();
+    if (!token) {
+      return;
+    }
+
+    (async () => {
+      try {
+        const requestsData = await getReceivedPartnerRequests(token);
+        setRequests(
+          requestsData.filter((r: PendingRequest) => r.status === "pending")
+        );
+      } catch (err) {
+        console.error("failed to fetch requests", err);
+      }
+    })();
   }, []);
 
-  // fetch functions
-  const fetchRequests = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Session expired, please log in again");
-        return;
-      }
-
-      const requestsData = await getReceivedPartnerRequests(token);
-      const pendingRequests = requestsData.filter(
-        (req: PendingRequest) => req.status === "pending"
-      );
-      setRequests(pendingRequests);
-
-      const pics: { [userId: string]: string } = {};
-      const updatedAts: { [userId: string]: Date } = {};
-      await Promise.all(
-        requestsData.map(async (req: PendingRequest) => {
-          if (req.sender) {
-            try {
-              const response = await axios.get(
-                `${BASE_URL}/profile/get-profile-picture/${req.sender.id}`,
-                {
-                  headers: { Authorization: `Bearer ${token}` },
-                  responseType: "arraybuffer",
-                }
-              );
-              const mime = response.headers["content-type"] || "image/jpeg";
-              const base64 = `data:${mime};base64,${encode(response.data)}`;
-              pics[req.sender.id] = base64;
-
-              const lastModified = response.headers["last-modified"];
-              updatedAts[req.sender.id] = lastModified
-                ? new Date(lastModified)
-                : new Date();
-            } catch (err) {}
-          }
-        })
-      );
-      setProfilePictures(pics);
-      setProfilePicUpdatedAt(updatedAts);
-    } catch (error: any) {
-      showAlert(error.response?.data?.error || "Failed to fetch requests");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // helpers
-  const renderProfileImage = (userId: string) => {
-    if (profilePictures[userId] && profilePicUpdatedAt[userId]) {
-      const cachedImageUrl = buildCachedImageUrl(
-        userId,
-        profilePicUpdatedAt[userId]
-      );
-      return (
-        <Image
-          source={cachedImageUrl}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-    return (
-      <Image source={fallbackAvatar} style={styles.avatar} contentFit="cover" />
-    );
-  };
+  if (!token) {
+    return null;
+  }
 
   const showAlert = (message: string) => {
     setAlertMessage(message);
@@ -137,19 +124,13 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     setProcessingAccept(requestId);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Session expired, please log in again");
-        return;
-      }
-
       await acceptPartnerRequest(token, requestId);
+
       await queryClient.invalidateQueries({
-        queryKey: ["partnerRequests"],
+        queryKey: ["partnerRequests", user?.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["partnerData"],
+        queryKey: ["partnerData", user?.id],
       });
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
@@ -165,17 +146,10 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   const handleDeclineRequest = async (requestId: string) => {
     setProcessingReject(requestId);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Session expired, please log in again");
-
-        return;
-      }
-
       await rejectPartnerRequest(token, requestId);
+
       await queryClient.invalidateQueries({
-        queryKey: ["partnerRequests"],
+        queryKey: ["partnerRequests", user?.id],
       });
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
@@ -201,7 +175,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     return (
       <View style={styles.requestItem}>
         <View style={styles.userInfo}>
-          {renderProfileImage(item.sender.id)}
+          <ProfileImage userId={item.sender.id} token={token!} />
           <View style={styles.userDetails}>
             <Text style={styles.username}>@{item.sender.username}</Text>
             <Text style={styles.requestText}>wants to be your partner</Text>
@@ -234,14 +208,6 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       </View>
     );
   };
-
-  if (loading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>

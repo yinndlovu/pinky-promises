@@ -7,9 +7,6 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,15 +14,11 @@ import NetInfo from "@react-native-community/netinfo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
-import {
-  sendPartnerRequest,
-  checkPendingRequest,
-  cancelPartnerRequest,
-  getIncomingRequest,
-  acceptPartnerRequest,
-} from "../../../../services/api/profiles/partnerService";
-import { BASE_URL } from "../../../../configuration/config";
-import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
+import useToken from "../../../../hooks/useToken";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { getUserProfile } from "../../../../services/api/profiles/profileService";
+import { usePartnerRequestStatus } from "../../../../hooks/usePartnerRequestStatus";
 
 // screen content
 import AlertModal from "../../../../components/modals/output/AlertModal";
@@ -37,126 +30,71 @@ const fallbackAvatar = require("../../../../assets/default-avatar-two.png");
 
 // types
 type Props = NativeStackScreenProps<any, "UserProfile">;
-type RequestStatus = "none" | "pending" | "incoming";
 
 const UserProfileScreen = ({ route, navigation }: Props) => {
   // variables
   const { userId } = route.params as { userId: string };
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const token = useToken();
 
   // use states
   const [user, setUser] = useState<any>(null);
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
-  const [requestStatus, setRequestStatus] = useState<RequestStatus>("none");
-  const [incomingRequestId, setIncomingRequestId] = useState<string | null>(
-    null
-  );
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
   const [isOnline, setIsOnline] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [loadingPfp, setLoadingPfp] = useState(true);
 
-  // use effects
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = await AsyncStorage.getItem("token");
+  // hook
+  const {
+    cancelRequest,
+    acceptRequest,
+    sendRequest,
+    requestStatus,
+    incomingRequestId,
+    checkRequestStatus,
+  } = usePartnerRequestStatus();
 
-        if (!token) {
-          throw new Error("No token found");
-        }
+  const fetchUser = async () => {
+    try {
+      const userData = await getUserProfile(userId, token);
+      setUser(userData);
 
-        const response = await axios.get(
-          `${BASE_URL}/profile/get-user-profile/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        const userData = response.data.profile;
-        setUser(userData);
-
-        try {
-          const pictureResponse = await axios.get(
-            `${BASE_URL}/profile/get-profile-picture/${userId}`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-              responseType: "arraybuffer",
-            }
-          );
-          const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-          const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-          setAvatarUri(base64);
-
-          const lastModified = pictureResponse.headers["last-modified"];
-          setProfilePicUpdatedAt(
-            lastModified ? new Date(lastModified) : new Date()
-          );
-        } catch (picErr: any) {
-          setAvatarUri(null);
-        }
-
-        await checkRequestStatus(token);
-      } catch (err) {
-        setUser(null);
-        setAvatarUri(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [userId]);
-
-  useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsOnline(!!state.isConnected);
-    });
-    return () => unsubscribe();
-  }, []);
+      await checkRequestStatus(token, userId);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // handlers
   const handlePartnerAction = async () => {
     setSendingRequest(true);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        showAlert("Not authenticated");
-        return;
-      }
-
       switch (requestStatus) {
         case "pending":
-          await cancelPartnerRequest(token, userId);
-          setRequestStatus("none");
+          await cancelRequest(token, userId);
           showAlert("Partner request cancelled");
           break;
 
         case "incoming":
           if (incomingRequestId) {
-            await acceptPartnerRequest(token, incomingRequestId);
+            await acceptRequest(token, incomingRequestId);
             await queryClient.invalidateQueries({
-              queryKey: ["partnerData"],
+              queryKey: ["partnerData", user?.id],
             });
 
-            setRequestStatus("none");
-            setIncomingRequestId(null);
-
-            navigation.replace("PartnerProfile", { userId: userId });
+            navigation.replace("PartnerProfile", { userId });
           }
           break;
 
         case "none":
-          await sendPartnerRequest(token, userId);
-          setRequestStatus("pending");
+          await sendRequest(token, userId);
           showAlert("Partner request sent");
           break;
       }
@@ -169,50 +107,64 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     }
   };
 
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchUserPicture,
+  } = useProfilePicture(userId, token);
+
+  // use effects
+  useEffect(() => {
+    fetchUser();
+
+    if (token && userId) {
+      fetchUserPicture();
+    }
+  }, [userId, token]);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+  
+  useEffect(() => {
+    setFailed(false);
+    setLoadingPfp(true);
+  }, [avatarUri]);
+
   // helpers
   const renderProfileImage = () => {
+    if (loadingPfp && !failed) {
+      return null;
+    }
+
     if (avatarUri && profilePicUpdatedAt) {
-      const cachedImageUrl = buildCachedImageUrl(userId, profilePicUpdatedAt);
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
+      const cachedImageUrl = buildCachedImageUrl(userId.toString(), timestamp);
+
       return (
         <Image
-          source={cachedImageUrl}
+          source={
+            failed || !avatarUri ? fallbackAvatar : { uri: cachedImageUrl }
+          }
           style={styles.avatar}
+          cachePolicy="disk"
           contentFit="cover"
           transition={200}
+          onLoadEnd={() => setLoadingPfp(false)}
+          onError={() => {
+            setFailed(true);
+            setLoadingPfp(false);
+          }}
         />
       );
     }
 
-    return (
-      <Image
-        source={avatarUri ? avatarUri : fallbackAvatar}
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
-  };
-
-  const checkRequestStatus = async (token: string) => {
-    try {
-      const pendingResponse = await checkPendingRequest(token, userId);
-
-      if (pendingResponse.hasPendingRequest) {
-        setRequestStatus("pending");
-        return;
-      }
-
-      const incomingResponse = await getIncomingRequest(token, userId);
-
-      if (incomingResponse.hasIncomingRequest) {
-        setRequestStatus("incoming");
-        setIncomingRequestId(incomingResponse.requestId);
-        return;
-      }
-
-      setRequestStatus("none");
-    } catch (err) {
-      setRequestStatus("none");
-    }
+    return null;
   };
 
   const showAlert = (message: string) => {

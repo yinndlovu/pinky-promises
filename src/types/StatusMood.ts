@@ -9,7 +9,9 @@ export type StatusMoodProps = {
 };
 
 export type PartnerStatusMoodProps = {
-  partnerId: string;
-  partnerName: string;
-  refreshKey?: number;
+  mood?: string;
+  moodDescription?: string;
+  status?: "home" | "away" | "unreachable" | "unavailable";
+  statusDescription?: string;
+  statusDistance?: number;
 };

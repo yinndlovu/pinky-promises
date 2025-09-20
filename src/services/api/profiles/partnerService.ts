@@ -1,7 +1,11 @@
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
-export async function getPartner(token: string) {
+export async function getPartner(token: string | null) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(`${BASE_URL}/partnership/get-partner`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -11,7 +15,11 @@ export async function getPartner(token: string) {
   return res.data.partner;
 }
 
-export async function sendPartnerRequest(token: string, partnerId: string) {
+export async function sendPartnerRequest(token: string | null, partnerId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.post(
     `${BASE_URL}/partnership/add-partner`,
     { partnerId },
@@ -25,7 +33,11 @@ export async function sendPartnerRequest(token: string, partnerId: string) {
   return res.data;
 }
 
-export async function checkPendingRequest(token: string, partnerId: string) {
+export async function checkPendingRequest(token: string | null, partnerId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/partnership/check-pending/${partnerId}`,
     {
@@ -38,7 +50,11 @@ export async function checkPendingRequest(token: string, partnerId: string) {
   return res.data;
 }
 
-export async function cancelPartnerRequest(token: string, partnerId: string) {
+export async function cancelPartnerRequest(token: string | null, partnerId: string) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.delete(
     `${BASE_URL}/partnership/cancel-request/${partnerId}`,
     {
@@ -51,7 +67,11 @@ export async function cancelPartnerRequest(token: string, partnerId: string) {
   return res.data;
 }
 
-export async function getIncomingRequest(token: string, fromUserId: string) {
+export async function getIncomingRequest(token: string | null, fromUserId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/partnership/incoming-request/${fromUserId}`,
     {
@@ -64,7 +84,11 @@ export async function getIncomingRequest(token: string, fromUserId: string) {
   return res.data;
 }
 
-export async function acceptPartnerRequest(token: string, requestId: string) {
+export async function acceptPartnerRequest(token: string | null, requestId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.post(
     `${BASE_URL}/partnership/accept-partner-request`,
     { requestId },
@@ -78,7 +102,11 @@ export async function acceptPartnerRequest(token: string, requestId: string) {
   return res.data;
 }
 
-export async function getReceivedPartnerRequests(token: string) {
+export async function getReceivedPartnerRequests(token: string | null) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(
     `${BASE_URL}/partnership/get-received-partner-requests`,
     {
@@ -91,7 +119,11 @@ export async function getReceivedPartnerRequests(token: string) {
   return res.data.requests;
 }
 
-export async function rejectPartnerRequest(token: string, requestId: string) {
+export async function rejectPartnerRequest(token: string | null, requestId: string) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.post(
     `${BASE_URL}/partnership/reject-partner-request`,
     { requestId },
@@ -105,7 +137,11 @@ export async function rejectPartnerRequest(token: string, requestId: string) {
   return res.data;
 }
 
-export async function removePartner(token: string) {
+export async function removePartner(token: string | null) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.post(
     `${BASE_URL}/partnership/remove-partner`,
     {},

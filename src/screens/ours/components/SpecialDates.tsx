@@ -10,7 +10,7 @@ import {
 
 // internal
 import { SpecialDateProps } from "../../../types/SpecialDate";
-import { STANDARD_FIELDS } from "../../../helpers/specialDateHelpers";
+import { STANDARD_FIELDS } from "../../../constants/specialDate";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
 
 // helpers

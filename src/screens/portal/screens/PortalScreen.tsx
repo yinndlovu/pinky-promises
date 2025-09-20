@@ -9,7 +9,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -32,6 +31,8 @@ import {
   deleteVentMessage,
 } from "../../../services/api/portal/ventMessageService";
 import { Message } from "../../../types/Message";
+import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // screen content
 import SweetMessagesSection from "../components/SweetMessagesSection";
@@ -48,6 +49,8 @@ export default function PortalScreen({ navigation }: Props) {
   // variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [selectedMessage, setSelectedMessage] = useState<Message | undefined>(
@@ -77,18 +80,10 @@ export default function PortalScreen({ navigation }: Props) {
   // fetch functions
   const {
     data: unseenSweetMessage,
-    isLoading: unseenSweetMessageLoading,
     refetch: refetchUnseenSweetMessage,
   } = useQuery({
-    queryKey: ["unseenSweetMessage"],
+    queryKey: ["unseenSweetMessage", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setToastMessage("Session expired, please log in again");
-        return [];
-      }
-
       const unseenSweet = await getLastUnseenSweetMessage(token);
       return unseenSweet.sweet || null;
     },
@@ -97,17 +92,10 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: unseenVentMessage,
-    isLoading: unseenVentMessageLoading,
     refetch: refetchUnseenVentMessage,
   } = useQuery({
-    queryKey: ["unseenVentMessage"],
+    queryKey: ["unseenVentMessage", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return [];
-      }
-
       const unseenVent = await getLastUnseenVentMessage(token);
       return unseenVent.vent || null;
     },
@@ -116,17 +104,10 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: sweetMessagesSent = [],
-    isLoading: sweetMessagesSentLoading,
     refetch: refetchSweetMessagesSent,
   } = useQuery<Message[]>({
-    queryKey: ["sweetMessagesSent"],
+    queryKey: ["sweetMessagesSent", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return [];
-      }
-
       const sentSweet = await getSentSweetMessages(token);
       return sentSweet.sweets || sentSweet;
     },
@@ -135,17 +116,10 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: sweetMessagesReceived = [],
-    isLoading: sweetMessagesReceivedLoading,
     refetch: refetchSweetMessagesReceived,
   } = useQuery<Message[]>({
-    queryKey: ["sweetMessagesReceived"],
+    queryKey: ["sweetMessagesReceived", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return [];
-      }
-
       const receivedSweet = await getReceivedSweetMessages(token);
       return receivedSweet.sweets || receivedSweet;
     },
@@ -154,17 +128,10 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: ventMessagesSent = [],
-    isLoading: ventMessagesSentLoading,
     refetch: refetchVentMessagesSent,
   } = useQuery<Message[]>({
-    queryKey: ["ventMessagesSent"],
+    queryKey: ["ventMessagesSent", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return [];
-      }
-
       const sentVent = await getSentVentMessages(token);
       return sentVent.vents || sentVent;
     },
@@ -173,17 +140,10 @@ export default function PortalScreen({ navigation }: Props) {
 
   const {
     data: ventMessagesReceived = [],
-    isLoading: ventMessagesReceivedLoading,
     refetch: refetchVentMessagesReceived,
   } = useQuery<Message[]>({
-    queryKey: ["ventMessagesReceived"],
+    queryKey: ["ventMessagesReceived", user?.id],
     queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return [];
-      }
-
       const receivedVent = await getReceivedVentMessages(token);
       return receivedVent.vents || receivedVent;
     },
@@ -199,23 +159,17 @@ export default function PortalScreen({ navigation }: Props) {
 
       setDeleting(true);
 
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       if (inputType === "sweet") {
         await deleteSweetMessage(token, selectedMessage.id);
         await queryClient.invalidateQueries({
-          queryKey: ["sweetMessagesSent"],
+          queryKey: ["sweetMessagesSent", user?.id],
         });
 
         setToastMessage("Sweet message deleted");
       } else {
         await deleteVentMessage(token, selectedMessage.id);
         await queryClient.invalidateQueries({
-          queryKey: ["ventMessagesSent"],
+          queryKey: ["ventMessagesSent", user?.id],
         });
 
         setToastMessage("Vent message deleted");
@@ -257,16 +211,10 @@ export default function PortalScreen({ navigation }: Props) {
   const handleSendMessage = async (text: string) => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       if (inputType === "sweet") {
         await sendSweetMessage(token, text);
         await queryClient.invalidateQueries({
-          queryKey: ["sweetMessagesSent"],
+          queryKey: ["sweetMessagesSent", user?.id],
         });
 
         setAlertMessage("Message stored for your baby to find");
@@ -274,7 +222,7 @@ export default function PortalScreen({ navigation }: Props) {
       } else {
         await ventToPartner(token, text);
         await queryClient.invalidateQueries({
-          queryKey: ["ventMessagesSent"],
+          queryKey: ["ventMessagesSent", user?.id],
         });
 
         setAlertTitle("Vented Successfully");
@@ -282,7 +230,7 @@ export default function PortalScreen({ navigation }: Props) {
       }
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
 
       setInputModalVisible(false);
@@ -299,12 +247,6 @@ export default function PortalScreen({ navigation }: Props) {
   const handleViewMessage = async (msg: Message, type: "sweet" | "vent") => {
     setViewLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       let messageData;
 
       if (type === "sweet") {
@@ -344,13 +286,13 @@ export default function PortalScreen({ navigation }: Props) {
     if (!viewModalVisible && viewType) {
       queryClient.invalidateQueries({
         queryKey: [
-          viewType === "sweet" ? "unseenSweetMessage" : "unseenVentMessage",
+          viewType === "sweet" ? "unseenSweetMessage" : "unseenVentMessage", user?.id
         ],
       });
 
       queryClient.invalidateQueries({
         queryKey: [
-          viewType === "sweet" ? "sweetMessagesSent" : "ventMessagesSent",
+          viewType === "sweet" ? "sweetMessagesSent" : "ventMessagesSent", user?.id
         ],
       });
 
@@ -359,6 +301,7 @@ export default function PortalScreen({ navigation }: Props) {
           viewType === "sweet"
             ? "sweetMessagesReceived"
             : "ventMessagesReceived",
+            user?.id
         ],
       });
       setViewType(null);

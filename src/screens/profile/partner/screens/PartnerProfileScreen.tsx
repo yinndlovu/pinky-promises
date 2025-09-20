@@ -7,28 +7,20 @@ import {
   ScrollView,
   TouchableOpacity,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
-import { encode } from "base64-arraybuffer";
 import { Feather } from "@expo/vector-icons";
 import { useLayoutEffect } from "react";
 import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { getUserFavorites } from "../../../../services/api/profiles/favoritesService";
-import { getLoveLanguage } from "../../../../services/api/profiles/loveLanguageService";
-import { getAboutUser } from "../../../../services/api/profiles/aboutUserService";
 import { removePartner } from "../../../../services/api/profiles/partnerService";
-import { BASE_URL } from "../../../../configuration/config";
-import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
-import { getReceivedMessages } from "../../../../services/api/profiles/messageStorageService";
-import { getPartnerDistance } from "../../../../services/api/profiles/distanceService";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 // screen content
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
@@ -43,266 +35,78 @@ import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 
+// hooks
+import useToken from "../../../../hooks/useToken";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { usePartner } from "../../../../hooks/usePartner";
+import { useProfile } from "../../../../hooks/useProfile";
+import { useFavorites } from "../../../../hooks/useFavorites";
+import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
+import { useAbout } from "../../../../hooks/useAbout";
+import { usePartnerDistance, useUserStatus } from "../../../../hooks/useStatus";
+import { useReceivedMessages } from "../../../../hooks/useStoredMessages";
+import { useUserMood } from "../../../../hooks/useMood";
+
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const token = useToken();
 
   // use states
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
   const [isOnline, setIsOnline] = useState(true);
 
   // use states (processing)
   const [removingPartner, setRemovingPartner] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   // use states (message storage)
   const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
 
-  // fetch functions
+  // data
   const {
-    data: partnerData,
-    isLoading: partnerDataLoading,
+    data: partner,
     refetch: refetchPartnerData,
-  } = useQuery({
-    queryKey: ["partnerData"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return null;
-      }
-
-      const response = await axios.get(
-        `${BASE_URL}/partnership/get-partner`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      return response.data.partner;
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const partner = partnerData || null;
-
-  const fetchProfilePicture = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token || !partner?.id) {
-        setAvatarUri(null);
-        return;
-      }
-
-      const pictureResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${partner?.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-      setAvatarUri(base64);
-
-      const lastModified = pictureResponse.headers["last-modified"];
-      setProfilePicUpdatedAt(
-        lastModified ? new Date(lastModified) : new Date()
-      );
-    } catch (picErr: any) {
-      setAvatarUri(null);
-    }
-  };
-
+    isLoading: partnerLoading,
+  } = usePartner(user?.id, token);
   const {
     data: currentUser,
-    isLoading: currentUserLoading,
     refetch: refetchCurrentUser,
-  } = useQuery({
-    queryKey: ["profileData"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return null;
-      }
-
-      const response = await axios.get(`${BASE_URL}/profile/get-profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      return response.data.user;
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: partnerFavorites = {},
-    isLoading: partnerFavoritesLoading,
-    refetch: refetchPartnerFavorites,
-  } = useQuery({
-    queryKey: ["partnerFavorites"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      const partnerId = partner?.id;
-
-      if (!token || !partnerId) {
-        return {};
-      }
-
-      return await getUserFavorites(token, partnerId);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: loveLanguage,
-    isLoading: loveLanguageLoading,
-    refetch: refetchLoveLanguage,
-  } = useQuery({
-    queryKey: ["partnerLoveLanguage"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await getLoveLanguage(token, partner?.id);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: partnerAbout,
-    isLoading: partnerAboutLoading,
-    refetch: refetchPartnerAbout,
-  } = useQuery({
-    queryKey: ["partnerAbout"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await getAboutUser(token, partner?.id);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60,
-  });
-
+    isLoading: currentUserLoading,
+  } = useProfile(user?.id, token);
+  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
+    partner?.id,
+    token
+  );
+  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
+    partner?.id,
+    token
+  );
+  const { data: partnerFavorites = {}, refetch: refetchPartnerFavorites } =
+    useFavorites(partner?.id, token);
+  const { data: loveLanguage, refetch: refetchLoveLanguage } = useLoveLanguage(
+    partner?.id,
+    token
+  );
+  const { data: partnerAbout, refetch: refetchPartnerAbout } = useAbout(
+    partner?.id,
+    token
+  );
+  const { data: partnerDistance } = usePartnerDistance(user?.id, token);
   const {
     data: partnerStoredMessages = [],
-    isLoading: partnerStoredMessagesLoading,
     refetch: refetchPartnerStoredMessages,
-  } = useQuery({
-    queryKey: ["partnerStoredMessages"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const response = await getReceivedMessages(token);
-      return Array.isArray(response) ? response : [];
-    },
-    staleTime: 1000 * 60 * 60,
-  });
-
+  } = useReceivedMessages(user?.id, token);
   const {
-    data: partnerDistance,
-    isLoading: partnerDistanceLoading,
-    refetch: refetchPartnerDistance,
-  } = useQuery({
-    queryKey: ["partnerDistance"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await getPartnerDistance(token);
-    },
-    enabled: !!partner?.id,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  // handlers
-  const handleRemovePartner = async () => {
-    setRemovingPartner(true);
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("No token found");
-      }
-
-      await removePartner(token);
-      await queryClient.invalidateQueries({
-        queryKey: ["partnerData"],
-      });
-
-      setShowRemoveModal(false);
-
-      if (partner?.id) {
-        navigation.replace("UserProfile", { userId: partner.id });
-      }
-    } catch (error: any) {
-    } finally {
-      setRemovingPartner(false);
-    }
-  };
-
-  const handleViewMessage = (message: any) => {
-    setSelectedMessage(message);
-    setViewMessageModalVisible(true);
-  };
-
-  const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt && partner) {
-      const cachedImageUrl = buildCachedImageUrl(
-        partner.id,
-        profilePicUpdatedAt
-      );
-      return (
-        <Image
-          source={cachedImageUrl}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? avatarUri
-            : require("../../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
-  };
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(partner?.id, token);
 
   // use layouts
   useLayoutEffect(() => {
@@ -320,10 +124,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
   // use effects
   useEffect(() => {
-    if (partner?.id) {
-      fetchProfilePicture();
+    if (token && partner?.id) {
+      fetchPartnerPicture();
     }
-  }, [partner?.id]);
+  }, [partner?.id, token]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -344,12 +148,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           refetchPartnerFavorites(),
           refetchLoveLanguage(),
           refetchPartnerAbout(),
-          fetchProfilePicture(),
+          fetchPartnerPicture(),
           refetchPartnerStoredMessages(),
         ]);
       }
-
-      setRefreshKey((k) => k + 1);
     } catch (e) {
     } finally {
       setRefreshing(false);
@@ -360,17 +162,99 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     refetchPartnerFavorites,
     refetchCurrentUser,
     refetchPartnerAbout,
-    fetchProfilePicture,
+    fetchPartnerPicture,
     refetchPartnerStoredMessages,
     partner?.id,
   ]);
 
-  // declarations
-  const name = partner?.name || "User";
-  const username = partner?.username || "user";
-  const bio = partner?.bio || "";
+  // format data
+  const mood = partnerMood?.mood || "No mood";
+  const moodDescription =
+    partnerMood?.description || `${partner?.name} hasn't set a mood yet`;
 
-  if (partnerDataLoading || currentUserLoading) {
+  const status = partnerStatus?.unreachable
+    ? "unreachable"
+    : partnerStatus?.isAtHome
+    ? "home"
+    : partnerStatus?.isAtHome === false
+    ? "away"
+    : "unavailable";
+
+  const statusDescription = partnerStatus?.unreachable
+    ? `Can't find ${partner?.name}'s current location`
+    : partnerStatus?.isAtHome
+    ? `${partner?.name} is currently at home`
+    : partnerStatus?.isAtHome === false
+    ? `${partner?.name} is currently not home`
+    : `${partner?.name} hasn't set a home location`;
+
+  // handlers
+  const handleRemovePartner = async () => {
+    setRemovingPartner(true);
+    try {
+      await removePartner(token);
+      await queryClient.invalidateQueries({
+        queryKey: ["partnerData", user?.id],
+      });
+
+      setShowRemoveModal(false);
+
+      if (partner?.id) {
+        navigation.replace("UserProfile", { userId: partner.id });
+      }
+    } catch (error: any) {
+    } finally {
+      setRemovingPartner(false);
+    }
+  };
+
+  const handleViewMessage = (message: any) => {
+    setSelectedMessage(message);
+    setViewMessageModalVisible(true);
+  };
+
+  const renderProfileImage = () => {
+    if (avatarUri && profilePicUpdatedAt && partner.id) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id.toString(),
+        timestamp
+      );
+
+      return (
+        <Image
+          source={
+            failed
+              ? require("../../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+          onError={() => setFailed(true)}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+      />
+    );
+  };
+
+  if (partnerLoading || currentUserLoading) {
     return (
       <View style={styles.centered}>
         <LoadingSpinner showMessage={false} size="medium" />
@@ -427,9 +311,15 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
           <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{name}</Text>
-            {username ? <Text style={styles.username}>@{username}</Text> : null}
-            {bio ? <Text style={styles.bio}>{bio}</Text> : null}
+            <Text style={styles.name}>{partner?.name || "User"}</Text>
+            {partner?.username ? (
+              <Text style={styles.username}>
+                @{partner?.username || "user"}
+              </Text>
+            ) : null}
+            {partner?.bio ? (
+              <Text style={styles.bio}>{partner?.bio}</Text>
+            ) : null}
           </View>
           <TouchableOpacity
             style={styles.removeButton}
@@ -450,18 +340,20 @@ const PartnerProfileScreen = ({ navigation }: any) => {
               ? `${formatDistance(partnerDistance.distance)} `
               : ""}
             <Text style={styles.apartText}>
-              {partnerDistance?.distance !== undefined
-                ? "apart"
-                : ""}
+              {partnerDistance?.distance !== undefined ? "apart" : ""}
             </Text>
           </Text>
         </View>
 
-        <PartnerStatusMood
-          partnerId={partner.id}
-          partnerName={name}
-          refreshKey={refreshKey}
-        />
+        {partner?.id && (
+          <PartnerStatusMood
+            status={status}
+            statusDescription={statusDescription}
+            mood={mood || "No mood"}
+            moodDescription={moodDescription}
+            statusDistance={partnerStatus.distance}
+          />
+        )}
 
         <PartnerAnniversary />
 
@@ -469,7 +361,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           favorites={favoritesObjectToArray(partnerFavorites)}
         />
 
-        {partnerDataLoading && (
+        {partnerLoading && (
           <View style={styles.centered}>
             <ActivityIndicator color="#5ad1e6" size="large" />
           </View>
@@ -482,7 +374,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         <PartnerMoreAboutYou about={partnerAbout} />
 
         <PartnerMessageStorage
-          name={name}
+          name={partner?.name}
           messages={partnerStoredMessages}
           onPress={handleViewMessage}
         />
@@ -504,7 +396,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           visible={showPictureViewer}
           imageUri={
             partner && profilePicUpdatedAt
-              ? buildCachedImageUrl(partner.id, profilePicUpdatedAt)
+              ? buildCachedImageUrl(
+                  partner?.id.toString(),
+                  Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+                )
               : null
           }
           onClose={() => setShowPictureViewer(false)}

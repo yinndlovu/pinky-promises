@@ -8,18 +8,16 @@ import {
   ActivityIndicator,
   Text,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { encode } from "base64-arraybuffer";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import axios from "axios";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import { searchUsers } from "../../services/api/home/searchService";
-import { BASE_URL } from "../../configuration/config";
 import { User } from "../../types/User";
 import { ProfilePictureInfo } from "../../types/ProfilePicture";
+import useToken from "../../hooks/useToken";
+import { fetchProfilePicture } from "../../services/api/profiles/profileService";
 
 // screen content
 import AlertModal from "../../components/modals/output/AlertModal";
@@ -31,6 +29,7 @@ type Props = NativeStackScreenProps<any>;
 export default function SearchScreen({ navigation }: Props) {
   // variables
   const insets = useSafeAreaInsets();
+  const token = useToken();
 
   // use states
   const [query, setQuery] = useState("");
@@ -66,31 +65,6 @@ export default function SearchScreen({ navigation }: Props) {
     }
   }, [error]);
 
-  // fetch functions
-  const fetchProfilePicture = async (userId: string, token: string) => {
-    try {
-      const response = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-      const mime = response.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(response.data)}`;
-
-      const lastModified = response.headers["last-modified"];
-      const updatedAt = lastModified ? new Date(lastModified) : new Date();
-
-      return {
-        uri: base64,
-        updatedAt,
-      };
-    } catch {
-      return null;
-    }
-  };
-
   // helpers
   const showAlert = (message: string) => {
     setAlertMessage(message);
@@ -109,14 +83,6 @@ export default function SearchScreen({ navigation }: Props) {
     setError(null);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        setLoading(false);
-        return;
-      }
-
       const results = await searchUsers(token, text);
       setUsers(results);
 
@@ -124,7 +90,9 @@ export default function SearchScreen({ navigation }: Props) {
       await Promise.all(
         results.map(async (user: User) => {
           const pic = await fetchProfilePicture(user.id, token);
-          if (pic) pics[user.id] = pic;
+          if (pic) {
+            pics[user.id] = pic;
+          }
         })
       );
       setProfilePictures(pics);

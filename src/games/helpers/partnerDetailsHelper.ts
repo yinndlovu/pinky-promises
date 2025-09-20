@@ -1,20 +1,24 @@
+// external
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { BASE_URL } from "../../configuration/config";
 import { encode } from "base64-arraybuffer";
-import { getPartner } from "../../services/api/profiles/partnerService";
 import { v4 as uuidv4 } from "uuid";
 
+// internal
+import useToken from "../../hooks/useToken";
+import { getPartner } from "../../services/api/profiles/partnerService";
+import { BASE_URL } from "../../configuration/config";
+
 export async function fetchPartnerProfileAndAvatar() {
+  // variables
+  const token = useToken();
+
+  if (!token) {
+    return;
+  }
+
   let partner: { id: string; name: string } | null = null;
 
   try {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      return;
-    }
-
     partner = await getPartner(token);
 
     if (!partner?.id) {

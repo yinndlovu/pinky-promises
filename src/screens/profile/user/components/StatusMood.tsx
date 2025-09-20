@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 import Animated, {
   useSharedValue,
@@ -22,10 +21,12 @@ import Animated, {
 } from "react-native-reanimated";
 
 // internal
-import { BASE_URL } from "../../../../configuration/config";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { StatusMoodProps } from "../../../../types/StatusMood";
 import { updateMood } from "../../../../services/api/profiles/moodService";
+import { addHomeLocation } from "../../../../services/api/profiles/homeLocationService";
+import useToken from "../../../../hooks/useToken";
+import { startBackgroundLocationTracking } from "../../../../services/location/locationPermissionService";
 
 // screen content
 import AddLocationModal from "../../../../components/modals/input/AddLocationModal";
@@ -44,10 +45,10 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   // variables
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const userId = user?.id;
   const displayMood = mood || "No mood";
   const displayMoodDescription =
     moodDescription || "You haven't added a mood yet";
+  const token = useToken();
 
   // animation variables
   const pulseAnimation = useSharedValue(1);
@@ -59,10 +60,13 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   // use states
   const [moodModalVisible, setMoodModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [updatingMood, setUpdatingMood] = useState(false);
-
+  const [saving, setSaving] = useState(false);
+  
   // use effects
   useEffect(() => {
     floatAnimation.value = withRepeat(
@@ -108,54 +112,47 @@ const StatusMood: React.FC<StatusMoodProps> = ({
     longitude: number;
   }) => {
     try {
+      setSaving(true);
+
       await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
+      await addHomeLocation(token, location.latitude, location.longitude);
+      await startBackgroundLocationTracking();
 
-      const token = await AsyncStorage.getItem("token");
-
-      await axios.put(`${BASE_URL}/location/add-home-location`, location, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setAlertMessage("Home location added");
+      setAlertTitle("Home location added");
+      setAlertMessage("You have added your home location. Your partner can now see when you are home.");
 
       await queryClient.invalidateQueries({
-        queryKey: ["status", userId],
+        queryKey: ["status", user?.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["partnerDistance"],
+        queryKey: ["partnerDistance", user?.id],
       });
 
-      setAlertVisible(true);
+      setShowSuccessAlert(true);
     } catch (err: any) {
+      setAlertTitle("Failed");
       setAlertMessage(
         err.response?.data?.error || "Failed to add home location"
       );
-      setAlertVisible(true);
+      setShowErrorAlert(true);
     } finally {
       setModalVisible(false);
+      setSaving(false);
     }
   };
 
   const handleSaveMood = async (newMood: string) => {
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       await updateMood(token, newMood);
 
       await queryClient.invalidateQueries({
-        queryKey: ["moodData", userId],
+        queryKey: ["moodData", user?.id],
       });
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
 
       if (onEdit) {
@@ -322,6 +319,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           onConfirm={handleAddHome}
+          saving={saving}
         />
 
         <UpdateMoodModal
@@ -332,9 +330,21 @@ const StatusMood: React.FC<StatusMoodProps> = ({
         />
 
         <AlertModal
-          visible={alertVisible}
+          visible={showSuccessAlert}
+          type="success"
+          title={alertTitle}
           message={alertMessage}
-          onClose={() => setAlertVisible(false)}
+          buttonText="Great"
+          onClose={() => setShowSuccessAlert(false)}
+        />
+
+        <AlertModal
+          visible={showErrorAlert}
+          type="error"
+          title={alertTitle}
+          message={alertMessage}
+          buttonText="Close"
+          onClose={() => setShowErrorAlert(false)}
         />
       </View>
     </Animated.View>

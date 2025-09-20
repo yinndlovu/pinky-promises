@@ -46,11 +46,31 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginRight: 16,
   },
+  avatarContainer: {
+    width: 100,
+    height: 100,
+    position: "relative",
+  },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
     borderColor: "#e03487",
+  },
+  avatarPlaceholder: {
+    width: 100,
+    height: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#2c2d4a",
+    borderWidth: 2,
+    borderColor: "#e03487",
+    borderStyle: "dashed",
   },
   infoWrapper: {
     flex: 1,

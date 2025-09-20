@@ -8,17 +8,15 @@ import type {
 } from "@react-navigation/native";
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { encode } from "base64-arraybuffer";
 import { Image } from "expo-image";
-import { useQuery } from "@tanstack/react-query";
 
 // internal
-import { BASE_URL } from "../configuration/config";
-import { buildCachedImageUrl } from "../utils/imageCacheUtils";
+import { buildCachedImageUrl } from "../utils/cache/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
-import { getOldestUnclaimedGift } from "../services/api/gifts/monthlyGiftService";
+import { useAuth } from "../contexts/AuthContext";
+import useToken from "../hooks/useToken";
+import { useProfilePicture } from "../hooks/useProfilePicture";
+import { useGift } from "../hooks/useGift";
 
 // types
 type Props = {
@@ -30,90 +28,47 @@ const ACTIVE_COLOR = "#e03487";
 const INACTIVE_COLOR = "#b0b3c6";
 
 export default function NavigationBar({ navigation, currentRoute }: Props) {
+  // variables
+  const { user } = useAuth();
+  const token = useToken();
+
+  // data
+  const { data: gift } = useGift(user?.id, token);
+  const {
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchUserAvatar,
+  } = useProfilePicture(user?.id, token);
+
   // use states
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
-  const [userId, setUserId] = useState<number | null>(null);
+  const [failed, setFailed] = useState(false);
 
   // use effects
   useEffect(() => {
-    fetchUserAvatar();
-  }, []);
-
-  // fetch functions
-  const fetchUserAvatar = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      const userResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      const userId = userResponse.data.user.id;
-      setUserId(userId);
-
-      const pictureResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-      setAvatarUri(base64);
-
-      const lastModified = pictureResponse.headers["last-modified"];
-      setProfilePicUpdatedAt(
-        lastModified ? new Date(lastModified) : new Date()
-      );
-    } catch (error: any) {
-    } finally {
-      setLoading(false);
+    if (token) {
+      fetchUserAvatar();
     }
-  };
+  }, [token]);
 
-  const {
-    data: gift,
-    isLoading: giftLoading,
-    refetch: refetchGift,
-  } = useQuery({
-    queryKey: ["unclaimedGift"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await getOldestUnclaimedGift(token);
-    },
-    staleTime: 1000 * 60 * 15,
-  });
-
+  // helpers
   const renderProfileIcon = () => {
-    if (avatarUri && profilePicUpdatedAt && userId) {
-      const cachedImageUrl = buildCachedImageUrl(
-        userId.toString(),
-        profilePicUpdatedAt
+    if (avatarUri && profilePicUpdatedAt && user?.id) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
       );
+      const cachedImageUrl = buildCachedImageUrl(
+        user?.id.toString(),
+        timestamp
+      );
+
       return (
         <View style={styles.avatarContainer}>
           <Image
-            source={cachedImageUrl}
+            source={
+              failed
+                ? require("../assets/default-avatar-two.png")
+                : { uri: cachedImageUrl }
+            }
             style={[
               styles.avatar,
               {
@@ -121,27 +76,33 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
                   currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
               },
             ]}
+            cachePolicy="disk"
             contentFit="cover"
             transition={200}
+            onError={() => setFailed(true)}
           />
         </View>
       );
     }
 
     return (
-      <View style={styles.avatarContainer}>
-        <Image
-          source={require("../assets/default-avatar-two.png")}
-          style={[
-            styles.avatar,
-            {
-              borderColor:
-                currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
-            },
-          ]}
-          contentFit="cover"
-        />
-      </View>
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../assets/default-avatar-two.png")
+        }
+        style={[
+          styles.avatar,
+          {
+            borderColor:
+              currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
+          },
+        ]}
+        contentFit="cover"
+        cachePolicy="disk"
+        transition={200}
+      />
     );
   };
 

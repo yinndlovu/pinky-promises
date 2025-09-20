@@ -2,6 +2,28 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
+export async function addHomeLocation(
+  token: string | null,
+  latitude: number,
+  longitude: number
+) {
+  if (!token) {
+    return;
+  }
+  
+  const res = await axios.put(
+    `${BASE_URL}/location/add-home-location`,
+    { latitude, longitude },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return res.data;
+}
+
 export async function getHomeLocation(token: string) {
   const local = await AsyncStorage.getItem("homeLocation");
   if (local) {

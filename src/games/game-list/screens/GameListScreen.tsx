@@ -47,21 +47,11 @@ const GameListScreen = ({ navigation }: any) => {
       }
 
       if (socket && user?.id) {
-        socket.emit("send_invite", {
-          inviterId: user.id,
-          partnerId: partnerInfo?.id,
-          inviterName: user.name,
-          gameName: selectedGame?.name,
+        navigation.navigate("GameSetupScreen", {
           roomId,
-        });
-
-        navigation.navigate("GameWaitingScreen", {
+          players: [userInfo, partnerInfo],
           gameName: selectedGame?.name,
-          yourInfo: userInfo,
-          partnerInfo,
-          roomId,
-          showToast: true,
-          isInviter: true,
+          host: user.name,
         });
       } else {
         throw new Error("Socket or user not available");
@@ -69,7 +59,7 @@ const GameListScreen = ({ navigation }: any) => {
 
       setModalVisible(false);
     } catch (err) {
-      console.error("Error sending invite:", err);
+      console.error("Error preparing game:", err);
     } finally {
       setIsRequesting(false);
     }

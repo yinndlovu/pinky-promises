@@ -18,26 +18,26 @@ import AlertModal from "../output/AlertModal";
 // internal
 import {
   requestLocationPermissions,
-  startBackgroundLocationTracking,
 } from "../../../services/location/locationPermissionService";
 
 type AddLocationModalProps = {
   visible: boolean;
   onClose: () => void;
   onConfirm: (location: { latitude: number; longitude: number }) => void;
+  saving?: boolean;
 };
 
 const AddLocationModal: React.FC<AddLocationModalProps> = ({
   visible,
   onClose,
   onConfirm,
+  saving = false,
 }) => {
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -47,7 +47,6 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
       (async () => {
         setLoading(true);
         setError(null);
-        setSaving(false);
         setAlertVisible(false);
         setAlertMessage("");
         try {
@@ -78,26 +77,6 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
       })();
     }
   }, [visible]);
-
-  const handleConfirm = async () => {
-    if (!location) {
-      return;
-    }
-
-    setSaving(true);
-    try {
-      await startBackgroundLocationTracking();
-
-      onConfirm(location);
-      setAlertMessage("Home location added");
-      setAlertVisible(true);
-    } catch (e) {
-      setAlertMessage("Failed to add location");
-      setAlertVisible(true);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
@@ -134,7 +113,6 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={[styles.confirmButton, saving && { opacity: 0.5 }]}
-                  onPress={handleConfirm}
                   disabled={saving}
                 >
                   <Text style={styles.confirmButtonText}>

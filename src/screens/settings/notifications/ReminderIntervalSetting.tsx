@@ -8,13 +8,13 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import {
   getReminderInterval,
   setReminderInterval,
 } from "../../../services/api/settings/notificationPreferenceService";
+import useToken from "../../../hooks/useToken";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -29,6 +29,14 @@ const ReminderIntervalSetting = () => {
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
+  // variables
+  const token = useToken();
+
+  if (!token) {
+    setError("Session expired, please log in again");
+    return;
+  }
+
   // use effects
   useEffect(() => {
     fetchInterval();
@@ -39,14 +47,6 @@ const ReminderIntervalSetting = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        setSaving(false);
-        return;
-      }
-
       const hours = await getReminderInterval(token);
       setInterval(hours ? String(hours) : "");
     } catch (e: any) {
@@ -66,14 +66,6 @@ const ReminderIntervalSetting = () => {
 
       if (isNaN(hours) || hours < 1) {
         setError("Please enter a valid positive number");
-        setSaving(false);
-        return;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
         setSaving(false);
         return;
       }

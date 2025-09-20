@@ -1,17 +1,20 @@
-import { BASE_URL } from "../configuration/config";
+import { BASE_URL } from "../../configuration/config";
 
 export interface CachedImageInfo {
   userId: string;
-  updatedAt: string | Date;
+  updatedAt: string | number;
 }
 
 export const buildCachedImageUrl = (
   userId: string,
-  updatedAt: string | Date
+  updatedAt: string | number
 ): string => {
-  const timestamp =
-    typeof updatedAt === "string" ? updatedAt : updatedAt.toISOString();
-  return `${BASE_URL}/profile/get-profile-picture/${userId}?v=${timestamp}`;
+  const version =
+    typeof updatedAt === "number"
+      ? updatedAt
+      : Math.floor(new Date(updatedAt).getTime() / 1000);
+
+  return `${BASE_URL}/profile/get-profile-picture/${userId}?v=${version}`;
 };
 
 export const preloadProfileImages = (images: CachedImageInfo[]): void => {

@@ -12,13 +12,13 @@ import LottieView from "lottie-react-native";
 import catFootprints from "../../assets/animations/cat-footprints.json";
 
 // types
-type InteractionAnimationModalProps = {
+type LoadingAnimationModalProps = {
   visible: boolean;
   onClose: () => void;
   size?: "small" | "medium" | "large";
 };
 
-const LoadingAnimation: React.FC<InteractionAnimationModalProps> = ({
+const LoadingAnimation: React.FC<LoadingAnimationModalProps> = ({
   visible,
   onClose,
   size = "medium",

@@ -11,18 +11,15 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { useAuth } from "../../contexts/AuthContext";
 import { DEEPSEEK_KEY } from "../../configuration/config";
-import {
-  saveKeyDetail,
-  fetchKeyDetails,
-} from "../../services/ai/aiKeyDetailsService";
+import { saveKeyDetail } from "../../services/ai/aiKeyDetailsService";
 import { favoritesObjectToArray } from "../../helpers/aiHelpers";
 import { ChatMessage } from "../../types/Message";
 
@@ -30,6 +27,10 @@ import { ChatMessage } from "../../types/Message";
 import styles from "./styles/ChatScreen.styles";
 import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
 import LoadingSpinner from "../../components/loading/LoadingSpinner";
+
+// hooks
+import useToken from "../../hooks/useToken";
+import { useAiContext, useKeyDetails } from "../../hooks/useAiContext";
 
 // chats database
 import {
@@ -39,18 +40,17 @@ import {
   deleteOldMessages,
   deleteAllMessages,
 } from "../../database/chatdb";
-import { getContext } from "../../services/ai/contextService";
 
 export default function ChatScreen() {
   // variables
   const { user } = useAuth();
-  const userId = user?.id;
   const insets = useSafeAreaInsets();
   const EXTRA_KEYBOARD_PADDING = 50;
   const LAST_CLEANUP_KEY = "lastCleanupDate";
   const navigation = useNavigation();
   const route = useRoute();
   const queryClient = useQueryClient();
+  const token = useToken();
 
   // use states
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -59,40 +59,15 @@ export default function ChatScreen() {
   const [showOptions, setShowOptions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  // fetch functions
-  const {
-    data: context,
-    isLoading: contextLoading,
-    refetch: refetchContext,
-  } = useQuery({
-    queryKey: ["aiContext", userId],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        throw new Error("No token found");
-      }
-      return await getContext(token);
-    },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 60 * 12,
-  });
-
-  const {
-    data: keyDetails = [],
-    isLoading: keyDetailsLoading,
-    refetch: refetchKeyDetails,
-  } = useQuery({
-    queryKey: ["keyDetails", userId],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        throw new Error("No token found");
-      }
-      return await fetchKeyDetails(token);
-    },
-    enabled: !!userId,
-    staleTime: 1000 * 60 * 60 * 4,
-  });
+  // data
+  const { data: context, isLoading: contextLoading } = useAiContext(
+    user?.id,
+    token
+  );
+  const { data: keyDetails = [], isLoading: keyDetailsLoading } = useKeyDetails(
+    user?.id,
+    token
+  );
 
   // check if chats have been cleaned that day
   const runCleanupOncePerDay = async () => {
@@ -376,14 +351,13 @@ export default function ChatScreen() {
         botReply.timestamp
       );
     } catch (err: any) {}
-
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      return;
-    }
-
     if (record && context?.partnerId && token) {
+      const userId = user?.id;
+
+      if (!userId) {
+        return;
+      }
+
       await saveKeyDetail({
         ...record,
         userId,
@@ -392,7 +366,7 @@ export default function ChatScreen() {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["keyDetails", userId],
+        queryKey: ["keyDetails", user?.id],
       });
     }
   };

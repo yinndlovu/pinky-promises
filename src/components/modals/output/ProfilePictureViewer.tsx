@@ -34,6 +34,7 @@ const ProfilePictureViewer: React.FC<ProfilePictureViewerProps> = ({
           <Image
             source={imageUri || require("../../../assets/default-avatar-two.png")}
             style={styles.fullImage}
+            cachePolicy="disk"
             contentFit="contain"
             transition={200}
           />

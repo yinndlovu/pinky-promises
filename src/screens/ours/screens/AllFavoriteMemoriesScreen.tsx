@@ -9,13 +9,10 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
-  getAllFavoriteMemories,
   getFavoriteMemoryById,
   deleteFavoriteMemory,
   updateFavoriteMemory,
@@ -23,6 +20,8 @@ import {
 import { Memory } from "../../../types/Memory";
 import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
+import useToken from "../../../hooks/useToken";
+import { useMemories } from "../../../hooks/useMemory";
 
 // confirmation modal
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
@@ -35,6 +34,7 @@ const AllFavoriteMemoriesScreen = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const currentUserId = user?.id;
+  const token = useToken();
 
   // use states
   const [refreshing, setRefreshing] = useState(false);
@@ -50,38 +50,20 @@ const AllFavoriteMemoriesScreen = () => {
   const [showError, setShowError] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
-
-  // fetch functions
+  
+  // data
   const {
     data: memories = [],
+    refetch: refetchMemories,
     isLoading: memoriesLoading,
     error,
-    refetch: refetchMemories,
-  } = useQuery({
-    queryKey: ["allFavoriteMemories"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("Session expired, please log in again");
-      }
-
-      return await getAllFavoriteMemories(token);
-    },
-    staleTime: 1000 * 60 * 60,
-  });
+  } = useMemories(user?.id, token);
 
   // handlers
   const handleViewMemoryDetails = async (memoryId: string) => {
     setDetailsLoading(true);
     setDetailsModalVisible(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       const memory = await getFavoriteMemoryById(token, memoryId);
       setDetailsMemory(memory);
     } catch (err) {
@@ -114,20 +96,14 @@ const AllFavoriteMemoriesScreen = () => {
     setActionModalVisible(false);
 
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       await deleteFavoriteMemory(token, memory.id);
 
       await queryClient.invalidateQueries({
-        queryKey: ["allFavoriteMemories"],
+        queryKey: ["allFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories"],
+        queryKey: ["recentFavoriteMemories", user?.id],
       });
 
       setAlertTitle("Deleted");
@@ -150,23 +126,17 @@ const AllFavoriteMemoriesScreen = () => {
 
     setEditLoading(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       await updateFavoriteMemory(token, editingMemory.id, memoryText, date);
 
       setEditModalVisible(false);
       setEditingMemory(null);
 
       await queryClient.invalidateQueries({
-        queryKey: ["allFavoriteMemories"],
+        queryKey: ["allFavoriteMemories", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories"],
+        queryKey: ["recentFavoriteMemories", user?.id],
       });
 
       setAlertTitle("Updated");

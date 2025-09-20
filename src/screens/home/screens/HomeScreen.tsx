@@ -12,55 +12,53 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { encode } from "base64-arraybuffer";
-import * as Location from "expo-location";
-import { useFocusEffect } from "@react-navigation/native";
+import { TabRouter, useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import LottieView from "lottie-react-native";
 
 // internal
-import { BASE_URL } from "../../../configuration/config";
-import { getHomeLocation } from "../../../services/api/profiles/homeLocationService";
-import { updateUserStatus } from "../../../services/api/profiles/userStatusService";
-import { getDistance } from "../../../utils/locationUtils";
-import { fetchUserStatus } from "../../../services/api/profiles/userStatusService";
-import { getUserMood } from "../../../services/api/profiles/moodService";
-import { getUpcomingSpecialDate } from "../../../services/api/ours/specialDateService";
-import { getRecentActivities } from "../../../services/api/home/recentActivityService";
-import { buildCachedImageUrl } from "../../../utils/imageCacheUtils";
-import {
-  interactWithPartner,
-  getUnseenInteractions,
-} from "../../../services/api/home/interactionService";
-import { getPartner } from "../../../services/api/profiles/partnerService";
+import { buildCachedImageUrl } from "../../../utils/cache/imageCacheUtils";
+import { interactWithPartner } from "../../../services/api/home/interactionService";
 import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
 } from "../../../utils/formatters/formatDate";
-import { checkLocationPermissions } from "../../../services/location/locationPermissionService";
 import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
-import { updateGeoInfo } from "../../../services/api/profiles/geoInfoService";
+import { useAuth } from "../../../contexts/AuthContext";
+import { checkAndUpdateHomeStatus } from "../../../helpers/checkHomeStatus";
+import {
+  getInteractionMessage,
+  getInteractionFeedback,
+} from "../../../helpers/interactions";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
 import ActionsModal from "../../../components/modals/selection/ActionsModal";
 import styles from "../styles/HomeScreen.styles";
-import AlertModal from "../../../components/modals/output/AlertModal";
 import PortalPreview from "../components/PortalPreview";
 import ProfileCard from "../components/ProfileCard";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
+import ProcessingAnimation from "../../../components/loading/ProcessingAnimation";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
 import defaultAnimation from "../../../assets/animations/hug.json";
+
+// hooks
+import { useProfilePicture } from "../../../hooks/useProfilePicture";
+import { usePartner } from "../../../hooks/usePartner";
+import { useUserStatus } from "../../../hooks/useStatus";
+import { useUserMood } from "../../../hooks/useMood";
+import { useUpcomingSpecialDate } from "../../../hooks/useSpecialDate";
+import { useUnseenInteractions } from "../../../hooks/useInteraction";
+import { useRecentActivities } from "../../../hooks/useRecentActivity";
+import useToken from "../../../hooks/useToken";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -71,375 +69,50 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
   const { invite, setInvite, inviteAccepted, setInviteAccepted } = useInvite();
+  const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [error, setError] = useState<string | null>(null);
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
   const [showError, setShowError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
 
   // use states (modals)
-  const [alertVisible, setAlertVisible] = useState(false);
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
   const [animationModalVisible, setAnimationModalVisible] = useState(false);
   const [animationMessage, setAnimationMessage] = useState("");
 
-  // handlers
-  const handleInteraction = async (action: string) => {
-    setActionsModalVisible(false);
-    setInteractionLoading(true);
-
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      await interactWithPartner(token, action);
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
-      });
-
-      setAnimationMessage(
-        getInteractionFeedback(action, partner?.name || "your partner")
-      );
-      setAnimationModalVisible(true);
-      setCurrentAction(action);
-      refetchActivities();
-    } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to interact");
-    } finally {
-      setInteractionLoading(false);
-    }
-  };
-
-  const checkAndUpdateHomeStatus = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      const home = await getHomeLocation(token);
-
-      if (!home) {
-        return;
-      }
-
-      const { foreground } = await checkLocationPermissions();
-      if (foreground !== "granted") {
-        return;
-      }
-
-      const { coords } = await Location.getCurrentPositionAsync({});
-      const distance = getDistance(
-        coords.latitude,
-        coords.longitude,
-        home.latitude,
-        home.longitude
-      );
-      const isAtHome = distance < 150;
-
-      await updateUserStatus(token, isAtHome, isAtHome ? undefined : distance);
-      await updateGeoInfo(token, coords.latitude, coords.longitude);
-    } catch (err) {}
-  };
-
-  // fetch functions
+  // data
   const {
     data: partner,
     isLoading: partnerLoading,
     refetch: refetchPartner,
-  } = useQuery({
-    queryKey: ["partnerData"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      return await getPartner(token);
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const partnerId = partner?.id;
-
-  const fetchPartnerProfilePicture = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      const pictureResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${partnerId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-      setAvatarUri(base64);
-
-      const lastModified = pictureResponse.headers["last-modified"];
-      setProfilePicUpdatedAt(
-        lastModified ? new Date(lastModified) : new Date()
-      );
-    } catch (picErr: any) {
-      if (![404, 500].includes(picErr.response?.status)) {
-      }
-    }
-  };
-
+  } = usePartner(user?.id, token);
+  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
+    partner?.id,
+    token
+  );
+  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
+    partner?.id,
+    token
+  );
+  const { data: upcomingDate, refetch: refetchUpcomingDate } =
+    useUpcomingSpecialDate(user?.id, token);
+  const { data: unseenInteractions = [], refetch: refetchUnseen } =
+    useUnseenInteractions(user?.id, token);
+  const { data: activities = [], refetch: refetchActivities } =
+    useRecentActivities(user?.id, token);
   const {
-    data: partnerStatus,
-    isLoading: partnerStatusLoading,
-    refetch: refetchPartnerStatus,
-  } = useQuery({
-    queryKey: ["partnerStatus"],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      return await fetchUserStatus(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const {
-    data: partnerMood,
-    isLoading: partnerMoodLoading,
-    refetch: refetchPartnerMood,
-  } = useQuery({
-    queryKey: ["partnerMood"],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      return await getUserMood(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const {
-    data: upcomingDate,
-    isLoading: upcomingDateLoading,
-    refetch: refetchUpcomingDate,
-  } = useQuery({
-    queryKey: ["upcomingSpecialDate"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      return await getUpcomingSpecialDate(token);
-    },
-    staleTime: 1000 * 60 * 60 * 12,
-  });
-
-  const {
-    data: activities = [],
-    isLoading: activitiesLoading,
-    refetch: refetchActivities,
-  } = useQuery({
-    queryKey: ["recentActivities"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      const activitiesData = await getRecentActivities(token);
-
-      return activitiesData.map((activity: any) => ({
-        id: activity.id,
-        description: activity.activity,
-        date: formatDateDMY(activity.createdAt),
-        time: formatTime(activity.createdAt),
-      }));
-    },
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const {
-    data: unseenInteractions = [],
-    isLoading: unseenLoading,
-    refetch: refetchUnseen,
-  } = useQuery({
-    queryKey: ["unseenInteractions"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      return await getUnseenInteractions(token);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  // helpers
-  const renderPartnerImage = () => {
-    if (avatarUri && profilePicUpdatedAt && partner) {
-      const cachedImageUrl = buildCachedImageUrl(
-        partner.id,
-        profilePicUpdatedAt
-      );
-      return (
-        <Image
-          source={cachedImageUrl}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? avatarUri
-            : require("../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
-  };
-
-  function getInteractionMessage(action: string) {
-    switch (action) {
-      case "kiss":
-        return "just gave you a kiss";
-      case "hug":
-        return "gave you a hug";
-      case "cuddle":
-        return "cuddled you";
-      case "hold":
-        return "held your hand";
-      case "nudge":
-        return "nudged you";
-      case "caress":
-        return "caressed you";
-      case "embrace":
-        return "embraced you";
-      case "wink":
-        return "winked at you";
-      case "roll":
-        return "rolled their eyes at you";
-      default:
-        return `interacted with you`;
-    }
-  }
-
-  function getInteractionFeedback(action: string, partnerName: string) {
-    switch (action) {
-      case "kiss":
-        return `Mwah! You just gave ${partnerName} a kiss! Aww 🤍`;
-      case "hug":
-        return `You just gave ${partnerName} a hug! So sweet`;
-      case "cuddle":
-        return `You just cuddled with ${partnerName}. So cozy 🤍`;
-      case "hold":
-        return `You just held hands with ${partnerName}. Aww, cuties!`;
-      case "nudge":
-        return `You just nudged ${partnerName}`;
-      case "caress":
-        return `You just caressed ${partnerName} 🤍`;
-      case "embrace":
-        return `You just embraced ${partnerName}. Aww, lovebirds 🤍`;
-      case "wink":
-        return `You just winked at ${partnerName}`;
-      case "roll":
-        return `You just rolled your eyes at ${partnerName} 🙄`;
-      default:
-        return `You just interacted with ${partnerName}`;
-    }
-  }
-
-  // handle status
-  const status = partnerStatus?.unreachable
-    ? "Unreachable"
-    : partnerStatus?.isAtHome
-    ? "Home"
-    : partnerStatus?.isAtHome === false
-    ? "Away"
-    : "Unavailable";
-
-  const isActive = status === "Home" || status === "Unavailable";
-
-  const statusColor =
-    status === "Home"
-      ? "#4caf50"
-      : status === "Away"
-      ? "#e03487"
-      : status === "Unreachable"
-      ? "#db8a47ff"
-      : "#b0b3c6";
-
-  const mood = partnerMood?.mood || null;
-  const batteryLevel = partnerStatus?.batteryLevel || null;
-  const distanceFromHome = partnerStatus?.distance || null;
-
-  const lastSeen = partnerStatus?.updatedAt ?? null;
-  const currentWeather = partnerStatus?.currentWeather ?? null;
-  const weatherType = partnerStatus?.weatherType || null;
-  const weatherDescription = partnerStatus?.weatherDescription || null;
-  const userLocation = partnerStatus?.userLocation ?? null;
-  const userTimezone = partnerStatus?.userTimezone || null;
-  const isDaytime = partnerStatus?.isDaytime ?? null;
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(partner?.id, token);
 
   // use effects
-  useEffect(() => {
-    checkAndUpdateHomeStatus();
-  }, []);
-
   useEffect(() => {
     if (inviteAccepted && invite) {
       (async () => {
@@ -471,15 +144,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   }, [inviteAccepted, invite, navigation]);
 
-  useEffect(() => {
-    if (partnerId) {
-      fetchPartnerProfilePicture();
-    }
-  }, [partnerId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (partner?.id && token) {
+        fetchPartnerPicture();
+      }
+    }, [partner?.id, token])
+  );
 
   useFocusEffect(
     useCallback(() => {
-      checkAndUpdateHomeStatus();
+      checkAndUpdateHomeStatus(token);
       const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
       return () => clearInterval(interval);
     }, [])
@@ -513,7 +188,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         refetchActivities(),
         refetchPartnerMood(),
         refetchPartnerStatus(),
-        fetchPartnerProfilePicture(),
+        refetchUnseen(),
+        fetchPartnerPicture(),
       ]);
     } catch (e) {
     } finally {
@@ -525,8 +201,107 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     refetchActivities,
     refetchPartnerMood,
     refetchPartnerStatus,
-    fetchPartnerProfilePicture,
+    refetchUnseen,
+    fetchPartnerPicture,
   ]);
+
+  // handlers
+  const handleInteraction = async (action: string) => {
+    setActionsModalVisible(false);
+    setInteractionLoading(true);
+
+    try {
+      await interactWithPartner(token, action);
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities", user?.id],
+      });
+
+      setAnimationMessage(
+        getInteractionFeedback(action, partner?.name || "your partner")
+      );
+      setAnimationModalVisible(true);
+      setCurrentAction(action);
+      refetchActivities();
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to interact");
+    } finally {
+      setInteractionLoading(false);
+    }
+  };
+
+  // helpers
+  const renderPartnerImage = () => {
+    if (avatarUri && profilePicUpdatedAt && partner) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
+      const cachedImageUrl = buildCachedImageUrl(
+        partner.id.toString(),
+        timestamp
+      );
+
+      return (
+        <Image
+          source={
+            failed
+              ? require("../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+          onError={() => setFailed(true)}
+        />
+      );
+    }
+
+    return (
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+      />
+    );
+  };
+
+  // handle status
+  const status = partnerStatus?.unreachable
+    ? "Unreachable"
+    : partnerStatus?.isAtHome
+    ? "Home"
+    : partnerStatus?.isAtHome === false
+    ? "Away"
+    : "Unavailable";
+
+  const isActive = status === "Home" || status === "Unavailable";
+
+  const statusColor =
+    status === "Home"
+      ? "#4caf50"
+      : status === "Away"
+      ? "#e03487"
+      : status === "Unreachable"
+      ? "#db8a47ff"
+      : "#b0b3c6";
+
+  const mood = partnerMood?.mood || null;
+  const batteryLevel = partnerStatus?.batteryLevel || null;
+  const distanceFromHome = partnerStatus?.distance || null;
+
+  const lastSeen = partnerStatus?.updatedAt ?? null;
+  const currentWeather = partnerStatus?.currentWeather ?? null;
+  const weatherType = partnerStatus?.weatherType || null;
+  const weatherDescription = partnerStatus?.weatherDescription || null;
+  const userLocation = partnerStatus?.userLocation ?? null;
+  const userTimezone = partnerStatus?.userTimezone || null;
+  const isDaytime = partnerStatus?.isDaytime ?? null;
 
   if (partnerLoading) {
     return (
@@ -789,23 +564,21 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       )}
 
       {interactionLoading && (
-        <View style={styles.absoluteFillObject}>
-          <ActivityIndicator size="large" color="#e03487" />
+        <View style={styles.centered}>
+          <ProcessingAnimation
+            visible={interactionLoading}
+            onClose={() => {}}
+            size="large"
+          />
         </View>
       )}
-
-      <AlertModal
-        visible={alertVisible}
-        message={alertMessage}
-        onClose={() => setAlertVisible(false)}
-      />
 
       <InteractionAnimationModal
         visible={animationModalVisible}
         message={animationMessage}
         action={currentAction}
         onClose={() => {
-          setAlertVisible(false);
+          setAnimationModalVisible(false);
           setCurrentAction(null);
         }}
       />

@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, use } from "react";
 import {
   ScrollView,
   View,
@@ -12,48 +12,31 @@ import {
   TouchableWithoutFeedback,
   RefreshControl,
 } from "react-native";
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
-import { encode } from "base64-arraybuffer";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
-import { fetchUserStatus } from "../../../../services/api/profiles/userStatusService";
-import { getMood } from "../../../../services/api/profiles/moodService";
 import UpdateFavoritesModal from "../../../../components/modals/input/UpdateFavoritesModal";
-import {
-  getUserFavorites,
-  updateUserFavorites,
-} from "../../../../services/api/profiles/favoritesService";
-import { BASE_URL } from "../../../../configuration/config";
-import {
-  getLoveLanguage,
-  updateLoveLanguage,
-} from "../../../../services/api/profiles/loveLanguageService";
-import {
-  getAboutUser,
-  updateAboutUser,
-} from "../../../../services/api/profiles/aboutUserService";
-import {
-  getPartner,
-  getReceivedPartnerRequests,
-} from "../../../../services/api/profiles/partnerService";
-import { buildCachedImageUrl } from "../../../../utils/imageCacheUtils";
+import { updateUserFavorites } from "../../../../services/api/profiles/favoritesService";
+import { updateLoveLanguage } from "../../../../services/api/profiles/loveLanguageService";
+import { updateAboutUser } from "../../../../services/api/profiles/aboutUserService";
+import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { FavoritesType } from "../../../../types/Favorites";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import {
   storeMessage,
-  getStoredMessages,
   updateMessage,
   deleteMessage,
 } from "../../../../services/api/profiles/messageStorageService";
+import { useAuth } from "../../../../contexts/AuthContext";
+import { updateProfilePicture } from "../../../../services/api/profiles/profileService";
+import { updateProfileField } from "../../../../services/api/profiles/profileService";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
@@ -74,6 +57,19 @@ import ViewMessageModal from "../../../../components/modals/output/ViewMessageMo
 import modalStyles from "../styles/ModalStyles.styles";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 
+// hooks
+import useToken from "../../../../hooks/useToken";
+import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { useProfile } from "../../../../hooks/useProfile";
+import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
+import { useUserStatus } from "../../../../hooks/useStatus";
+import { useRequests } from "../../../../hooks/useRequests";
+import { useFavorites } from "../../../../hooks/useFavorites";
+import { usePartner } from "../../../../hooks/usePartner";
+import { useMood } from "../../../../hooks/useMood";
+import { useAbout } from "../../../../hooks/useAbout";
+import { useStoredMessages } from "../../../../hooks/useStoredMessages";
+
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
 
@@ -82,17 +78,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const token = useToken();
 
   // use states
-  const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [showError, setShowError] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [profilePicUpdatedAt, setProfilePicUpdatedAt] = useState<Date | null>(
-    null
-  );
 
   // use states (processing)
   const [loadingName, setLoadingName] = useState(false);
@@ -100,6 +94,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loadingBio, setLoadingBio] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   // use states (modals)
   const [showPictureModal, setShowPictureModal] = useState(false);
@@ -135,371 +130,39 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editTitle, setEditTitle] = useState("");
   const [editMessageText, setEditMessageText] = useState("");
 
-  // fetch functions
+  // data
   const {
     data: profileData,
-    isLoading: profileDataLoading,
     refetch: refetchProfileData,
-  } = useQuery({
-    queryKey: ["profileData"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
-      const res = await axios.get(`${BASE_URL}/profile/get-profile`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      return res.data.user;
-    },
-    staleTime: 1000 * 60 * 60 * 24 * 2,
-  });
-
+    isLoading: profileDataLoading,
+  } = useProfile(user?.id, token);
+  const { data: loveLanguage, refetch: refetchLoveLanguage } = useLoveLanguage(
+    user?.id,
+    token
+  );
+  const { data: status, refetch: refetchStatus } = useUserStatus(
+    user?.id,
+    token
+  );
+  const { data: pendingRequestsData, refetch: refetchPendingRequestsData } =
+    useRequests(user?.id, token);
+  const { data: favorites = {}, refetch: refetchFavorites } = useFavorites(
+    user?.id,
+    token
+  );
+  const { data: partnerData, refetch: refetchPartnerData } = usePartner(
+    user?.id,
+    token
+  );
+  const { data: moodData, refetch: refetchMoodData } = useMood(user?.id, token);
+  const { data: about, refetch: refetchAbout } = useAbout(user?.id, token);
+  const { data: storedMessages = [], refetch: refetchStoredMessages } =
+    useStoredMessages(user?.id, token);
   const {
-    data: loveLanguage,
-    isLoading: loveLanguageLoading,
-    refetch: refetchLoveLanguage,
-  } = useQuery({
-    queryKey: ["loveLanguage", profileData?.id],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
-      return await getLoveLanguage(token, profileData?.id);
-    },
-    enabled: !!profileData?.id,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: status,
-    isLoading: statusLoading,
-    refetch: refetchStatus,
-  } = useQuery({
-    queryKey: ["status", profileData?.id],
-    queryFn: async () => {
-      if (!profileData?.id) {
-        return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
-      return await fetchUserStatus(token, profileData?.id);
-    },
-    enabled: !!profileData?.id,
-    staleTime: 1000 * 60 * 4,
-  });
-
-  const homeStatus = status?.unreachable
-    ? "unreachable"
-    : status?.isAtHome
-    ? "home"
-    : status?.isAtHome === false
-    ? "away"
-    : "unavailable";
-
-  const statusDescription = status?.unreachable
-    ? "Can't find your current location"
-    : status?.isAtHome
-    ? "You are currently at home"
-    : status?.isAtHome === false
-    ? "You are currently not home"
-    : "You must add your home location to use this feature";
-
-  const {
-    data: pendingRequestsData,
-    isLoading: pendingRequestsDataLoading,
-    refetch: refetchPendingRequestsData,
-  } = useQuery({
-    queryKey: ["pendingRequestCount", profileData?.id],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
-      return await getReceivedPartnerRequests(token);
-    },
-    enabled: !!profileData?.id,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const pendingRequestsCount = pendingRequestsData?.filter(
-    (req: any) => req.status === "pending"
-  ).length;
-
-  const {
-    data: favorites = {},
-    isLoading: favoritesLoading,
-    refetch: refetchFavorites,
-  } = useQuery({
-    queryKey: ["favorites", profileData?.id],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      const userId = profileData?.id;
-
-      if (!token || !userId) {
-        return {};
-      }
-
-      return await getUserFavorites(token, userId);
-    },
-    enabled: !!profileData?.id,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: partnerData,
-    isLoading: partnerDataLoading,
-    refetch: refetchPartnerData,
-  } = useQuery({
-    queryKey: ["partnerData"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
-      return await getPartner(token);
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const {
-    data: moodData,
-    isLoading: moodDataLoading,
-    refetch: refetchMoodData,
-  } = useQuery({
-    queryKey: ["moodData", profileData?.id],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
-      return await getMood(token);
-    },
-    enabled: !!profileData?.id,
-    staleTime: 1000 * 60 * 5,
-  });
-
-  const {
-    data: about,
-    isLoading: aboutLoading,
-    refetch: refetchAbout,
-  } = useQuery({
-    queryKey: ["about", profileData?.id],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("No token found");
-        return;
-      }
-
-      return await getAboutUser(token, profileData?.id);
-    },
-    enabled: !!profileData?.id,
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const fetchProfilePicture = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token || !profileData?.id) {
-        return;
-      }
-
-      const pictureResponse = await axios.get(
-        `${BASE_URL}/profile/get-profile-picture/${profileData?.id}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-          responseType: "arraybuffer",
-        }
-      );
-
-      const mime = pictureResponse.headers["content-type"] || "image/jpeg";
-      const base64 = `data:${mime};base64,${encode(pictureResponse.data)}`;
-
-      setAvatarUri(base64);
-
-      const lastModified = pictureResponse.headers["last-modified"];
-      setProfilePicUpdatedAt(
-        lastModified ? new Date(lastModified) : new Date()
-      );
-    } catch (picErr: any) {
-      if (picErr.response?.status !== 404) {
-        setError(picErr.response?.data?.error || picErr.message);
-      }
-    }
-  };
-
-  const {
-    data: storedMessages = [],
-    isLoading: storedMessagesLoading,
-    refetch: refetchStoredMessages,
-  } = useQuery({
-    queryKey: ["storedMessages"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const response = await getStoredMessages(token);
-      return Array.isArray(response) ? response : [];
-    },
-    staleTime: 1000 * 60 * 60 * 24,
-  });
-
-  const storeMessageMutation = useMutation({
-    mutationFn: async ({
-      title,
-      message,
-    }: {
-      title: string;
-      message: string;
-    }) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await storeMessage(token, title, message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
-
-      setStoreMessageModalVisible(false);
-      setAlertTitle("Message Stored");
-      setAlertMessage("You have stored a message");
-      setShowSuccessAlert(true);
-    },
-    onError: (error: any) => {
-      setAlertTitle("Failed");
-      setAlertMessage(error.response?.data?.error || "Failed to store message");
-      setShowErrorAlert(true);
-    },
-  });
-
-  const updateMessageMutation = useMutation({
-    mutationFn: async ({
-      messageId,
-      title,
-      message,
-    }: {
-      messageId: string;
-      title: string;
-      message: string;
-    }) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await updateMessage(token, messageId, title, message);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
-
-      setEditMessageModalVisible(false);
-      setEditingMessage(null);
-      setEditTitle("");
-      setEditMessageText("");
-      setAlertTitle("Message Updated");
-      setAlertMessage("You have updated the message");
-      setShowSuccessAlert(true);
-    },
-    onError: (error: any) => {
-      setAlertTitle("Failed");
-      setAlertMessage(
-        error.response?.data?.error || "Failed to update message"
-      );
-      setShowErrorAlert(true);
-    },
-  });
-
-  const deleteMessageMutation = useMutation({
-    mutationFn: async (messageId: string) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await deleteMessage(token, messageId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages"] });
-
-      setConfirmationVisible(false);
-      setAlertTitle("Message Deleted");
-      setAlertMessage("You have deleted the message");
-      setShowSuccessAlert(true);
-    },
-    onError: (error: any) => {
-      setAlertTitle("Failed");
-      setAlertMessage(
-        error.response?.data?.error || "Failed to delete message"
-      );
-      setShowErrorAlert(true);
-    },
-  });
-
-  // helpers
-  const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt) {
-      const cachedImageUrl = buildCachedImageUrl(
-        profileData?.id,
-        profilePicUpdatedAt
-      );
-
-      return (
-        <Image
-          source={cachedImageUrl}
-          style={styles.avatar}
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? { uri: avatarUri }
-            : require("../../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        contentFit="cover"
-      />
-    );
-  };
+    avatarUri,
+    profilePicUpdatedAt,
+    fetchPicture: fetchProfilePicture,
+  } = useProfilePicture(user?.id, token);
 
   // use effects
   useEffect(() => {
@@ -526,10 +189,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }, [error]);
 
   useEffect(() => {
-    if (profileData?.id) {
+    if (user?.id && token) {
       fetchProfilePicture();
     }
-  }, [profileData?.id]);
+  }, [user?.id, token]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -556,7 +219,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       ]);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates"],
+        queryKey: ["specialDates", user?.id],
       });
     } catch (e) {
     } finally {
@@ -575,28 +238,136 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     refetchStoredMessages,
   ]);
 
-  // handlers
-  const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
-    const token = await AsyncStorage.getItem("token");
+  const homeStatus = status?.unreachable
+    ? "unreachable"
+    : status?.isAtHome
+    ? "home"
+    : status?.isAtHome === false
+    ? "away"
+    : "unavailable";
 
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
+  const statusDescription = status?.unreachable
+    ? "Can't find your current location"
+    : status?.isAtHome
+    ? "You are currently at home"
+    : status?.isAtHome === false
+    ? "You are currently not home"
+    : "You must add your home location to use this feature";
+
+  const pendingRequestsCount = pendingRequestsData?.filter(
+    (req: any) => req.status === "pending"
+  ).length;
+
+  const updateMessageMutation = useMutation({
+    mutationFn: async ({
+      messageId,
+      title,
+      message,
+    }: {
+      messageId: string;
+      title: string;
+      message: string;
+    }) => {
+      return await updateMessage(token, messageId, title, message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
+
+      setEditMessageModalVisible(false);
+      setEditingMessage(null);
+      setEditTitle("");
+      setEditMessageText("");
+      setAlertTitle("Message Updated");
+      setAlertMessage("You have updated the message");
+      setShowSuccessAlert(true);
+    },
+    onError: (error: any) => {
+      setAlertTitle("Failed");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to update message"
+      );
+      setShowErrorAlert(true);
+    },
+  });
+
+  const deleteMessageMutation = useMutation({
+    mutationFn: async (messageId: string) => {
+      return await deleteMessage(token, messageId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
+
+      setConfirmationVisible(false);
+      setAlertTitle("Message Deleted");
+      setAlertMessage("You have deleted the message");
+      setShowSuccessAlert(true);
+    },
+    onError: (error: any) => {
+      setAlertTitle("Failed");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to delete message"
+      );
+      setShowErrorAlert(true);
+    },
+  });
+
+  // helpers
+  const renderProfileImage = () => {
+    if (avatarUri && profilePicUpdatedAt && user?.id) {
+      const timestamp = Math.floor(
+        new Date(profilePicUpdatedAt).getTime() / 1000
+      );
+      const cachedImageUrl = buildCachedImageUrl(
+        user?.id.toString(),
+        timestamp
+      );
+
+      return (
+        <Image
+          source={
+            failed
+              ? require("../../../../assets/default-avatar-two.png")
+              : { uri: cachedImageUrl }
+          }
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+          onError={() => setFailed(true)}
+        />
+      );
     }
 
+    return (
+      <Image
+        source={
+          avatarUri
+            ? { uri: avatarUri }
+            : require("../../../../assets/default-avatar-two.png")
+        }
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+      />
+    );
+  };
+
+  // handlers
+  const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
     try {
       await updateLoveLanguage(token, newLoveLanguage);
 
       await queryClient.invalidateQueries({
-        queryKey: ["loveLanguage", profileData?.id],
+        queryKey: ["loveLanguage", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to save love language");
@@ -604,26 +375,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleSaveAbout = async (newAbout: string) => {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
-
     try {
       await updateAboutUser(token, newAbout);
 
       await queryClient.invalidateQueries({
-        queryKey: ["about", profileData?.id],
+        queryKey: ["about", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities"],
+        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to save about");
@@ -635,22 +399,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleSaveFavorites = async (newFavorites: FavoritesType) => {
-    const token = await AsyncStorage.getItem("token");
-
-    if (!token) {
-      setError("Session expired, please log in again");
-      return;
-    }
-
     try {
       await updateUserFavorites(token, newFavorites);
 
       await queryClient.invalidateQueries({
-        queryKey: ["favorites", profileData?.id],
+        queryKey: ["favorites", user?.id],
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to save favorites");
@@ -683,18 +440,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         setUploading(true);
 
-        const token = await AsyncStorage.getItem("token");
-
         const mimeType = result.assets[0].mimeType || "image/jpeg";
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
 
-        await axios.put(
-          `${BASE_URL}/profile/update-profile-picture`,
-          { image: base64String },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        await updateProfilePicture(token, base64String);
 
         setSuccess("Profile picture uploaded");
         await fetchProfilePicture();
@@ -728,33 +477,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setLoadingBio(true);
       }
 
-      const token = await AsyncStorage.getItem("token");
-      let url = "";
-      let body = {};
-
-      if (field === "name") {
-        url = `${BASE_URL}/profile/update-name`;
-        body = { name: value };
-      } else if (field === "username") {
-        url = `${BASE_URL}/profile/update-username`;
-        body = { username: value };
-      } else if (field === "bio") {
-        url = `${BASE_URL}/profile/update-bio`;
-        body = { bio: value };
-      }
-
-      await axios.put(url, body, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await updateProfileField(field, value, token);
 
       await queryClient.invalidateQueries({
-        queryKey: ["profileData"],
+        queryKey: ["profileData", user?.id],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", profileData?.id],
+        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(`Failed to update ${field}`);
@@ -780,14 +509,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleStoreMessage = async (title: string, message: string) => {
     setStoringMessage(true);
     try {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        setError("Session expired, please log in again");
-        return;
-      }
-
       await storeMessage(token, title, message);
+
       setAlertTitle("Message Stored");
       setAlertMessage("You have stored a message");
       setStoreMessageModalVisible(false);
@@ -815,7 +538,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleEditMessage = () => {
-    if (!selectedMessage) return;
+    if (!selectedMessage) {
+      return;
+    }
 
     setEditingMessage(selectedMessage);
     setEditTitle(selectedMessage.title);
@@ -825,7 +550,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleDeleteMessage = () => {
-    if (!selectedMessage) return;
+    if (!selectedMessage) {
+      return;
+    }
 
     setConfirmationMessage("Are you sure you want to delete this message?");
     setConfirmationAction(
@@ -1284,8 +1011,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <ProfilePictureViewer
             visible={showPictureViewer}
             imageUri={
-              profileData && profilePicUpdatedAt
-                ? buildCachedImageUrl(profileData?.id, profilePicUpdatedAt)
+              user && profilePicUpdatedAt
+                ? buildCachedImageUrl(
+                    user?.id.toString(),
+                    Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+                  )
                 : null
             }
             onClose={() => setShowPictureViewer(false)}
@@ -1342,7 +1072,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             title={alertTitle}
             message={alertMessage}
             buttonText="Great"
-            onClose={() => setShowSuccess(false)}
+            onClose={() => setShowSuccessAlert(false)}
           />
 
           <AlertModal
@@ -1351,7 +1081,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             title={alertTitle}
             message={alertMessage}
             buttonText="Close"
-            onClose={() => setShowError(false)}
+            onClose={() => setShowErrorAlert(false)}
           />
         </View>
       </ScrollView>

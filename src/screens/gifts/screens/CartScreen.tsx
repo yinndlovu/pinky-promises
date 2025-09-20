@@ -13,18 +13,18 @@ import {
   Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // internal
 import {
   addItem,
-  getItems,
-  getCartTotal,
   clearCart,
   deleteItem,
 } from "../../../services/api/gifts/cartService";
 import { CartItem } from "../../../types/Cart";
+import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
+import { useCartItems, useCartTotal } from "../../../hooks/useCart";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -34,6 +34,8 @@ import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 const CartScreen = () => {
   // variables
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const token = useToken();
 
   // use states
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
@@ -56,59 +58,26 @@ const CartScreen = () => {
     (() => void) | null
   >(null);
 
-  // fetch functions
+  // data
   const {
-    data: cartItems = [],
-    isLoading: cartItemsLoading,
+    data: cartItems,
     refetch: refetchCartItems,
-  } = useQuery({
-    queryKey: ["cartItems"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        throw new Error("Session expired, please log in again");
-      }
-
-      const response = await getItems(token);
-      return Array.isArray(response) ? response : [];
-    },
-    staleTime: 1000 * 60 * 60 * 24 * 3,
-  });
-
+    isLoading: cartItemsLoading,
+  } = useCartItems(user?.id, token);
   const {
-    data: cartTotal = 0,
-    isLoading: cartTotalLoading,
+    data: cartTotal,
     refetch: refetchCartTotal,
-  } = useQuery({
-    queryKey: ["cartTotal"],
-    queryFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      const totalData = await getCartTotal(token);
-      return totalData.total || 0;
-    },
-    staleTime: 1000 * 60 * 60 * 24 * 3,
-  });
+    isLoading: cartTotalLoading,
+  } = useCartTotal(user?.id, token);
 
   // mutations
   const addItemMutation = useMutation({
     mutationFn: async ({ item, value }: { item: string; value: string }) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await addItem(token, item, value);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+      queryClient.invalidateQueries({ queryKey: ["cartItems", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal", user?.id] });
 
       setNewItemName("");
       setNewItemValue("");
@@ -128,17 +97,11 @@ const CartScreen = () => {
 
   const deleteItemMutation = useMutation({
     mutationFn: async (itemId: string) => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return await deleteItem(token, itemId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+      queryClient.invalidateQueries({ queryKey: ["cartItems", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal", user?.id] });
 
       setConfirmationVisible(false);
       setToastMessage("Item deleted from cart");
@@ -152,17 +115,11 @@ const CartScreen = () => {
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
       return clearCart(token);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["cartItems"] });
-      queryClient.invalidateQueries({ queryKey: ["cartTotal"] });
+      queryClient.invalidateQueries({ queryKey: ["cartItems", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["cartTotal", user?.id] });
 
       setConfirmationVisible(false);
       setAlertTitle("Cart Cleared");

@@ -9,10 +9,11 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // internal
 import { getPortalActivityCount } from "../../../services/api/gifts/countService";
+import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
 
 // types
 type PortalPreviewProps = {
@@ -30,21 +31,19 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const shadowAnim = useRef(new Animated.Value(0.1)).current;
 
+  // variables
+  const { user } = useAuth();
+  const token = useToken();
+
   // fetch functions
-  const { data: portalActivityCount, isLoading: portalActivityCountLoading } =
+  const { data: portalActivityCount } =
     useQuery({
-      queryKey: ["portalActivityCount"],
+      queryKey: ["portalActivityCount", user?.id],
       queryFn: async () => {
-        const token = await AsyncStorage.getItem("token");
-
-        if (!token) {
-          return null;
-        }
-
         return getPortalActivityCount(token);
       },
       staleTime: 1000 * 60,
-      enabled: !!partner,
+      enabled: !!partner && !!token,
     });
 
   const totalUnseen = portalActivityCount?.total || 0;

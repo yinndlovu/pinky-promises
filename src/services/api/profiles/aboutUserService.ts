@@ -14,7 +14,11 @@ export async function getAboutUser(token: string, userId: string) {
   return res.data.about;
 }
 
-export async function updateAboutUser(token: string, about: string) {
+export async function updateAboutUser(token: string | null, about: string) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.put(
     `${BASE_URL}/more-about-you/update-about-user`,
     { about },

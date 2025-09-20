@@ -1,8 +1,6 @@
 // external
 import React, { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery } from "@tanstack/react-query";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,100 +12,18 @@ import Animated, {
 } from "react-native-reanimated";
 
 // internal
-import { fetchUserStatus } from "../../../../services/api/profiles/userStatusService";
-import { getUserMood } from "../../../../services/api/profiles/moodService";
 import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
-  partnerId,
-  partnerName,
-  refreshKey,
+  mood,
+  moodDescription,
+  status = "unavailable",
+  statusDescription,
+  statusDistance,
 }) => {
   // use effects
   useEffect(() => {
-    refetchPartnerMood();
-    refetchPartnerStatus();
-  }, [partnerId, partnerName, refreshKey]);
-  // animation variables
-  const pulseAnimation = useSharedValue(1);
-  const floatAnimation = useSharedValue(0);
-  const statusColorAnimation = useSharedValue(0);
-  const moodBounceAnimation = useSharedValue(0);
-  const fadeInAnimation = useSharedValue(0);
-
-  // fetch functions
-  const {
-    data: partnerMood,
-    isLoading: partnerMoodLoading,
-    refetch: refetchPartnerMood,
-  } = useQuery({
-    queryKey: ["partnerMood"],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await getUserMood(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const mood = partnerMood?.mood || "No mood";
-  const moodDescription =
-    partnerMood?.description || `${partnerName} hasn't set a mood yet`;
-
-  const {
-    data: partnerStatus,
-    isLoading: partnerStatusLoading,
-    refetch: refetchPartnerStatus,
-  } = useQuery({
-    queryKey: ["partnerStatus"],
-    queryFn: async () => {
-      if (!partnerId) {
-        return null;
-      }
-
-      const token = await AsyncStorage.getItem("token");
-
-      if (!token) {
-        return;
-      }
-
-      return await fetchUserStatus(token, partnerId);
-    },
-    enabled: !!partnerId,
-    staleTime: 1000 * 60 * 2,
-  });
-
-  const status = partnerStatus?.unreachable
-    ? "unreachable"
-    : partnerStatus?.isAtHome
-    ? "home"
-    : partnerStatus?.isAtHome === false
-    ? "away"
-    : "unavailable";
-
-  const statusDescription = partnerStatus?.unreachable
-    ? `Can't find ${partnerName}'s current location`
-    : partnerStatus?.isAtHome
-    ? `${partnerName} is currently at home`
-    : partnerStatus?.isAtHome === false
-    ? `${partnerName} is currently not home`
-    : `${partnerName} hasn't set a home location`;
-
-  // use effects
-  useEffect(() => {
-    refetchPartnerMood();
-    refetchPartnerStatus();
-
     floatAnimation.value = withRepeat(
       withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
       -1,
@@ -118,7 +34,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
       duration: 800,
       easing: Easing.out(Easing.cubic),
     });
-  }, [partnerId, partnerName, refreshKey]);
+  }, []);
 
   useEffect(() => {
     const statusValues = { home: 0, away: 1, unreachable: 2, unavailable: 3 };
@@ -144,6 +60,13 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
       });
     }
   }, [mood]);
+
+  // animation variables
+  const pulseAnimation = useSharedValue(1);
+  const floatAnimation = useSharedValue(0);
+  const statusColorAnimation = useSharedValue(0);
+  const moodBounceAnimation = useSharedValue(0);
+  const fadeInAnimation = useSharedValue(0);
 
   // animated styles
   const pulseStyle = useAnimatedStyle(() => ({
@@ -188,6 +111,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     ],
   }));
 
+  // helpers
   const getStatusEmoji = (status: string) => {
     switch (status) {
       case "home":
@@ -201,7 +125,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     }
   };
 
-  const getMoodEmoji = (mood: string) => {
+  const getMoodEmoji = (mood: string | undefined) => {
     if (!mood || mood === "No mood") {
       return "😐";
     }
@@ -260,9 +184,9 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
 
       <Text style={styles.statusDescription}>{statusDescription}</Text>
 
-      {partnerStatus?.isAtHome === false && partnerStatus?.distance && (
+      {status === "away" && statusDistance && (
         <Text style={styles.statusDistance}>
-          {`${formatDistance(partnerStatus.distance)} away from home`}
+          {`${formatDistance(statusDistance)} away from home`}
         </Text>
       )}
 
