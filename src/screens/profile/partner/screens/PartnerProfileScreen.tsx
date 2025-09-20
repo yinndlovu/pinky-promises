@@ -168,10 +168,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   ]);
 
   // format data
-  const name = partner?.name || "User";
-  const username = partner?.username || "user";
-  const bio = partner?.bio || "";
-
   const mood = partnerMood?.mood || "No mood";
   const moodDescription =
     partnerMood?.description || `${partner?.name} hasn't set a mood yet`;
@@ -189,8 +185,8 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     : partnerStatus?.isAtHome
     ? `${partner?.name} is currently at home`
     : partnerStatus?.isAtHome === false
-    ? `${partner?.id} is currently not home`
-    : `${partner?.id} hasn't set a home location`;
+    ? `${partner?.name} is currently not home`
+    : `${partner?.name} hasn't set a home location`;
 
   // handlers
   const handleRemovePartner = async () => {
@@ -315,9 +311,15 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           </View>
           <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{name}</Text>
-            {username ? <Text style={styles.username}>@{username}</Text> : null}
-            {bio ? <Text style={styles.bio}>{bio}</Text> : null}
+            <Text style={styles.name}>{partner?.name || "User"}</Text>
+            {partner?.username ? (
+              <Text style={styles.username}>
+                @{partner?.username || "user"}
+              </Text>
+            ) : null}
+            {partner?.bio ? (
+              <Text style={styles.bio}>{partner?.bio}</Text>
+            ) : null}
           </View>
           <TouchableOpacity
             style={styles.removeButton}
@@ -372,7 +374,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         <PartnerMoreAboutYou about={partnerAbout} />
 
         <PartnerMessageStorage
-          name={name}
+          name={partner?.name}
           messages={partnerStoredMessages}
           onPress={handleViewMessage}
         />

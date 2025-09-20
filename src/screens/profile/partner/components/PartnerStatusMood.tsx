@@ -14,9 +14,6 @@ import Animated, {
 // internal
 import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
-import useToken from "../../../../hooks/useToken";
-import { useUserStatus } from "../../../../hooks/useStatus";
-import { useUserMood } from "../../../../hooks/useMood";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   mood,
