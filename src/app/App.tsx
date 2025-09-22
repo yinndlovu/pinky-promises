@@ -17,51 +17,51 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import "react-native-get-random-values";
 
 // internal
-import { registerForPushNotificationsAsync } from "./src/utils/notifications/notifications";
-import { NotificationProvider } from "./src/contexts/NotificationContext";
-import { AuthProvider, useAuth } from "./src/contexts/AuthContext";
-import { sqlitePersistor } from "./src/database/reactQueryPersistor";
-import { SSEProvider } from "./src/contexts/SSEContext";
-import { navigationRef } from "./src/utils/navigation/navigation";
-import { InviteProvider } from "./src/games/context/InviteContext";
-import { checkBatteryStatus } from "./src/helpers/checkBatteryStatus";
-import { RootStackParamList } from "./src/types/RootStackParamList";
+import { registerForPushNotificationsAsync } from "../utils/notifications/notifications";
+import { NotificationProvider } from "../contexts/NotificationContext";
+import { AuthProvider, useAuth } from "../contexts/AuthContext";
+import { sqlitePersistor } from "../database/reactQueryPersistor";
+import { SSEProvider } from "../contexts/SSEContext";
+import { navigationRef } from "../utils/navigation/navigation";
+import { InviteProvider } from "../games/context/InviteContext";
+import { checkBatteryStatus } from "../helpers/checkBatteryStatus";
+import { RootStackParamList } from "../types/RootStackParamList";
 
 // content
-import PartnerProfileScreen from "./src/screens/profile/partner/screens/PartnerProfileScreen";
-import ChatScreen from "./src/screens/chat/ChatScreen";
-import PortalScreen from "./src/screens/portal/screens/PortalScreen";
-import SearchScreen from "./src/screens/search/SearchScreen";
-import UserProfileScreen from "./src/screens/profile/other/screens/UserProfileScreen";
-import PendingRequestsScreen from "./src/screens/requests/screens/PendingRequestsScreen";
-import NotesScreen from "./src/screens/ours/screens/NotesScreen";
-import WelcomeScreen from "./src/screens/welcome/WelcomeScreen";
-import NameScreen from "./src/screens/auth/register/NameScreen";
-import UsernameScreen from "./src/screens/auth/register/UsernameScreen";
-import PasswordScreen from "./src/screens/auth/register/PasswordScreen";
-import HomeScreen from "./src/screens/home/screens/HomeScreen";
-import LoginScreen from "./src/screens/auth/login/LoginScreen";
-import NavigationBar from "./src/layouts/NavigationBar";
-import SettingsScreen from "./src/screens/settings/screens/SettingsScreen";
-import ProfileScreen from "./src/screens/profile/user/screens/ProfileScreen";
-import OursScreen from "./src/screens/ours/screens/OursScreen";
-import GiftsScreen from "./src/screens/gifts/screens/GiftsScreen";
-import ChangeEmailScreen from "./src/screens/settings/screens/ChangeEmailScreen";
-import VerifyEmailOtpScreen from "./src/screens/settings/screens/VerifyEmailOtpScreen";
-import ChangePasswordScreen from "./src/screens/settings/password/ChangePasswordScreen";
-import NotificationsScreen from "./src/screens/settings/notifications/NotificationsScreen";
-import TimelineScreen from "./src/screens/ours/screens/TimelineScreen";
-import AboutScreen from "./src/screens/settings/about/AboutScreen";
-import AllFavoriteMemoriesScreen from "./src/screens/ours/screens/AllFavoriteMemoriesScreen";
-import SentMessagesScreen from "./src/screens/portal/screens/SentMessagesScreen";
-import ReceivedMessagesScreen from "./src/screens/portal/screens/ReceivedMessagesScreen";
-import CartScreen from "./src/screens/gifts/screens/CartScreen";
-import AccountScreen from "./src/screens/settings/account/AccountScreen";
-import GameListScreen from "./src/games/game-list/screens/GameListScreen";
-import GameWaitingScreen from "./src/games/room/GameWaitingScreen";
-import GameSetupScreen from "./src/games/trivia/screens/GameSetupScreen";
-import GameSessionScreen from "./src/games/trivia/screens/GameSessionScreen";
-import LoadingAnimation from "./src/components/loading/LoadingAnimation";
+import PartnerProfileScreen from "../screens/profile/partner/screens/PartnerProfileScreen";
+import ChatScreen from "../screens/chat/ChatScreen";
+import PortalScreen from "../screens/portal/screens/PortalScreen";
+import SearchScreen from "../screens/search/SearchScreen";
+import UserProfileScreen from "../screens/profile/other/screens/UserProfileScreen";
+import PendingRequestsScreen from "../screens/requests/screens/PendingRequestsScreen";
+import NotesScreen from "../screens/ours/screens/NotesScreen";
+import WelcomeScreen from "../screens/welcome/WelcomeScreen";
+import NameScreen from "../screens/auth/register/NameScreen";
+import UsernameScreen from "../screens/auth/register/UsernameScreen";
+import PasswordScreen from "../screens/auth/register/PasswordScreen";
+import HomeScreen from "../screens/home/screens/HomeScreen";
+import LoginScreen from "../screens/auth/login/LoginScreen";
+import NavigationBar from "../layouts/NavigationBar";
+import SettingsScreen from "../screens/settings/screens/SettingsScreen";
+import ProfileScreen from "../screens/profile/user/screens/ProfileScreen";
+import OursScreen from "../screens/ours/screens/OursScreen";
+import GiftsScreen from "../screens/gifts/screens/GiftsScreen";
+import ChangeEmailScreen from "../screens/settings/screens/ChangeEmailScreen";
+import VerifyEmailOtpScreen from "../screens/settings/screens/VerifyEmailOtpScreen";
+import ChangePasswordScreen from "../screens/settings/password/ChangePasswordScreen";
+import NotificationsScreen from "../screens/settings/notifications/NotificationsScreen";
+import TimelineScreen from "../screens/ours/screens/TimelineScreen";
+import AboutScreen from "../screens/settings/about/AboutScreen";
+import AllFavoriteMemoriesScreen from "../screens/ours/screens/AllFavoriteMemoriesScreen";
+import SentMessagesScreen from "../screens/portal/screens/SentMessagesScreen";
+import ReceivedMessagesScreen from "../screens/portal/screens/ReceivedMessagesScreen";
+import CartScreen from "../screens/gifts/screens/CartScreen";
+import AccountScreen from "../screens/settings/account/AccountScreen";
+import GameListScreen from "../games/game-list/screens/GameListScreen";
+import GameWaitingScreen from "../games/room/GameWaitingScreen";
+import GameSetupScreen from "../games/trivia/screens/GameSetupScreen";
+import GameSessionScreen from "../games/trivia/screens/GameSessionScreen";
+import LoadingAnimation from "../components/loading/LoadingAnimation";
 
 // variables
 const Stack = createStackNavigator<RootStackParamList>();
@@ -95,7 +95,7 @@ function AIHeader() {
   return (
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Image
-        source={require("./src/assets/ai_icon.png")}
+        source={require("../assets/ai_icon.png")}
         style={{ width: 28, height: 28, borderRadius: 14, marginRight: 8 }}
       />
       <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 18 }}>
