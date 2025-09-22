@@ -43,4 +43,5 @@ google-services.json
 /ios
 /android
 .easignore
+.vscode
 src/utils/weather/weatherIcons.ts
