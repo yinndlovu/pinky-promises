@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import EventSource from "react-native-sse";
+import { AppState } from "react-native";
 
 // internal
 import { BASE_URL } from "../configuration/config";
@@ -50,6 +51,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
       es.addEventListener("open", () => {
         setIsConnected(true);
+        setReconnectAttempts(0);
       });
 
       es.addEventListener("message", (event) => {
@@ -266,7 +268,15 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
     connectSSE();
 
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active") {
+        setReconnectAttempts(0);
+        reconnect();
+      }
+    });
+
     return () => {
+      subscription.remove();
       disconnectSSE();
     };
   }, [token]);
