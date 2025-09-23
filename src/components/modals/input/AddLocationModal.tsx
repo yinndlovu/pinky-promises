@@ -16,9 +16,7 @@ import * as Location from "expo-location";
 import AlertModal from "../output/AlertModal";
 
 // internal
-import {
-  requestLocationPermissions,
-} from "../../../services/location/locationPermissionService";
+import { requestLocationPermissions } from "../../../services/location/locationPermissionService";
 
 type AddLocationModalProps = {
   visible: boolean;
@@ -39,16 +37,12 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     if (visible) {
       (async () => {
         setLoading(true);
         setError(null);
-        setAlertVisible(false);
-        setAlertMessage("");
         try {
           await requestLocationPermissions();
 
@@ -114,6 +108,7 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
                 <TouchableOpacity
                   style={[styles.confirmButton, saving && { opacity: 0.5 }]}
                   disabled={saving}
+                  onPress={() => location && onConfirm(location)}
                 >
                   <Text style={styles.confirmButtonText}>
                     {saving ? "Saving..." : "Confirm"}
@@ -143,16 +138,6 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
               <ActivityIndicator size="large" color="#e03487" />
             </View>
           )}
-          <AlertModal
-            visible={alertVisible}
-            message={alertMessage}
-            onClose={() => {
-              setAlertVisible(false);
-              if (alertMessage === "Home location added") {
-                onClose();
-              }
-            }}
-          />
         </View>
       </View>
     </Modal>

@@ -9,12 +9,7 @@ import { BASE_URL } from "../configuration/config";
 import { useAuth } from "./AuthContext";
 import useToken from "../hooks/useToken";
 import usePartnerId from "../hooks/usePartnerId";
-
-// interfaces
-interface SSEContextType {
-  isConnected: boolean;
-  reconnect: () => void;
-}
+import { SSEContextType } from "../interfaces/SSEContextType";
 
 const SSEContext = createContext<SSEContextType | null>(null);
 

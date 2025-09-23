@@ -5,16 +5,7 @@ import axios from "axios";
 
 // internal
 import { BASE_URL } from "../configuration/config";
-
-// interfaces
-interface AuthContextType {
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  user: any | null;
-  login: (token: string, userData?: any) => Promise<void>;
-  logout: () => Promise<void>;
-  validateToken: () => Promise<boolean>;
-}
+import { AuthContextType } from "../interfaces/AuthContextType";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

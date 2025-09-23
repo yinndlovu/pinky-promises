@@ -959,7 +959,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         placeholder="Type the message here..."
                         placeholderTextColor="#b0b3c6"
                         multiline
-                        maxLength={1000}
+                        maxLength={5000}
                         textAlignVertical="top"
                         style={[modalStyles.input, modalStyles.textArea]}
                       />

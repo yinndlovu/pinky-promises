@@ -115,7 +115,7 @@ const StoreMessageModal: React.FC<Props> = ({
                 value={message}
                 onChangeText={setMessage}
                 multiline
-                maxLength={1000}
+                maxLength={5000}
                 editable={!loading}
                 textAlignVertical="top"
               />
