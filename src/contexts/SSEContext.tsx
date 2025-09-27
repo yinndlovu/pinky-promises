@@ -1,5 +1,11 @@
 // external
-import React, { createContext, useContext, useEffect, useState, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useRef,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import EventSource from "react-native-sse";
 import { AppState, AppStateStatus } from "react-native";
@@ -153,10 +159,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
               break;
 
             case "updateFavorites":
-              queryClient.setQueryData(
-                ["favorites", partnerId],
-                data.data
-              );
+              queryClient.setQueryData(["favorites", partnerId], data.data);
               queryClient.invalidateQueries({
                 queryKey: ["recentActivities", user?.id],
               });
@@ -296,33 +299,39 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   };
 
   const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-      console.log('App has come to the foreground');
-      
-      const backgroundDuration = backgroundTime.current ? Date.now() - backgroundTime.current : 0;
-      
-      if (backgroundDuration > 15000) {
-        console.log(`App was backgrounded for ${backgroundDuration}ms, refetching data`);
-        setWasBackgrounded(true);
-        
+    if (
+      appState.current.match(/inactive|background/) &&
+      nextAppState === "active"
+    ) {
+      console.log("App has come to the foreground");
+
+      const backgroundDuration = backgroundTime.current
+        ? Date.now() - backgroundTime.current
+        : 0;
+
+      if (!isConnected) {
         setReconnectAttempts(0);
         reconnect();
-        
+      }
+
+      if (backgroundDuration > 15000) {
+        console.log(
+          `App was backgrounded for ${backgroundDuration}ms, refetching data`
+        );
+        setWasBackgrounded(true);
+
         setTimeout(() => {
           refetchCriticalData();
           setWasBackgrounded(false);
         }, 2000);
-      } else {
-        setReconnectAttempts(0);
-        reconnect();
       }
-      
+
       backgroundTime.current = null;
     } else if (nextAppState.match(/inactive|background/)) {
-      console.log('App is going to background');
+      console.log("App is going to background");
       backgroundTime.current = Date.now();
     }
-    
+
     appState.current = nextAppState;
   };
 
@@ -333,7 +342,10 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
     connectSSE();
 
-    const subscription = AppState.addEventListener("change", handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      "change",
+      handleAppStateChange
+    );
 
     return () => {
       subscription.remove();
@@ -342,12 +354,14 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   }, [token]);
 
   return (
-    <SSEContext.Provider value={{ 
-      isConnected, 
-      reconnect, 
-      wasBackgrounded,
-      refetchCriticalData 
-    }}>
+    <SSEContext.Provider
+      value={{
+        isConnected,
+        reconnect,
+        wasBackgrounded,
+        refetchCriticalData,
+      }}
+    >
       {children}
     </SSEContext.Provider>
   );
