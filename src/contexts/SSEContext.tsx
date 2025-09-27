@@ -1,8 +1,8 @@
 // external
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import EventSource from "react-native-sse";
-import { AppState } from "react-native";
+import { AppState, AppStateStatus } from "react-native";
 
 // internal
 import { BASE_URL } from "../configuration/config";
@@ -28,16 +28,83 @@ interface SSEProviderProps {
 }
 
 export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
-  // use states
   const [isConnected, setIsConnected] = useState(false);
   const [eventSource, setEventSource] = useState<EventSource | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
+  const [wasBackgrounded, setWasBackgrounded] = useState(false);
 
-  // variables
+  const appState = useRef(AppState.currentState);
+  const backgroundTime = useRef<number | null>(null);
+
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
   const partnerId = usePartnerId();
+
+  const refetchCriticalData = async () => {
+    if (!user?.id || !partnerId) {
+      return;
+    }
+
+    try {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["unseenInteractions", user.id],
+        }),
+        
+        queryClient.invalidateQueries({
+          queryKey: ["status", partnerId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["partnerMood", partnerId],
+        }),
+        
+        queryClient.invalidateQueries({
+          queryKey: ["portalActivityCount", user.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["unseenVentMessage", user.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["unseenSweetMessage", user.id],
+        }),
+        
+        queryClient.invalidateQueries({
+          queryKey: ["unclaimedGift", user.id],
+        }),
+        
+        queryClient.invalidateQueries({
+          queryKey: ["favorites", partnerId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["recentFavoriteMemories", user.id],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["allFavoriteMemories", user.id],
+        }),
+        
+        queryClient.invalidateQueries({
+          queryKey: ["specialDates", user.id],
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: ["about", partnerId],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ["partnerStoredMessages", user.id],
+        }),
+        
+        queryClient.invalidateQueries({
+          queryKey: ["timeline", user.id],
+        }),
+      ]);
+    } catch (error) {
+      console.error("Error refetching critical data:", error);
+    }
+  };
 
   const connectSSE = async () => {
     try {
@@ -256,6 +323,37 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
     }, delay);
   };
 
+  const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+      console.log('App has come to the foreground');
+      
+      const backgroundDuration = backgroundTime.current ? Date.now() - backgroundTime.current : 0;
+      
+      if (backgroundDuration > 30000) {
+        console.log(`App was backgrounded for ${backgroundDuration}ms, refetching data`);
+        setWasBackgrounded(true);
+        
+        setReconnectAttempts(0);
+        reconnect();
+        
+        setTimeout(() => {
+          refetchCriticalData();
+          setWasBackgrounded(false);
+        }, 2000);
+      } else {
+        setReconnectAttempts(0);
+        reconnect();
+      }
+      
+      backgroundTime.current = null;
+    } else if (nextAppState.match(/inactive|background/)) {
+      console.log('App is going to background');
+      backgroundTime.current = Date.now();
+    }
+    
+    appState.current = nextAppState;
+  };
+
   useEffect(() => {
     if (!token) {
       return;
@@ -263,12 +361,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
     connectSSE();
 
-    const subscription = AppState.addEventListener("change", (nextAppState) => {
-      if (nextAppState === "active") {
-        setReconnectAttempts(0);
-        reconnect();
-      }
-    });
+    const subscription = AppState.addEventListener("change", handleAppStateChange);
 
     return () => {
       subscription.remove();
@@ -277,7 +370,12 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   }, [token]);
 
   return (
-    <SSEContext.Provider value={{ isConnected, reconnect }}>
+    <SSEContext.Provider value={{ 
+      isConnected, 
+      reconnect, 
+      wasBackgrounded,
+      refetchCriticalData 
+    }}>
       {children}
     </SSEContext.Provider>
   );
