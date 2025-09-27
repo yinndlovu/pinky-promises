@@ -314,7 +314,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
         reconnect();
       }
 
-      if (backgroundDuration > 15000) {
+      if (backgroundDuration > 30000) {
         console.log(
           `App was backgrounded for ${backgroundDuration}ms, refetching data`
         );
