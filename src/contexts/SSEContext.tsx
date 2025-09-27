@@ -54,14 +54,12 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
         queryClient.invalidateQueries({
           queryKey: ["unseenInteractions", user.id],
         }),
-        
         queryClient.invalidateQueries({
           queryKey: ["status", partnerId],
         }),
         queryClient.invalidateQueries({
           queryKey: ["partnerMood", partnerId],
         }),
-        
         queryClient.invalidateQueries({
           queryKey: ["portalActivityCount", user.id],
         }),
@@ -71,34 +69,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
         queryClient.invalidateQueries({
           queryKey: ["unseenSweetMessage", user.id],
         }),
-        
         queryClient.invalidateQueries({
           queryKey: ["unclaimedGift", user.id],
-        }),
-        
-        queryClient.invalidateQueries({
-          queryKey: ["favorites", partnerId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["recentFavoriteMemories", user.id],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["allFavoriteMemories", user.id],
-        }),
-        
-        queryClient.invalidateQueries({
-          queryKey: ["specialDates", user.id],
-        }),
-
-        queryClient.invalidateQueries({
-          queryKey: ["about", partnerId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ["partnerStoredMessages", user.id],
-        }),
-        
-        queryClient.invalidateQueries({
-          queryKey: ["timeline", user.id],
         }),
       ]);
     } catch (error) {
@@ -329,7 +301,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
       
       const backgroundDuration = backgroundTime.current ? Date.now() - backgroundTime.current : 0;
       
-      if (backgroundDuration > 30000) {
+      if (backgroundDuration > 15000) {
         console.log(`App was backgrounded for ${backgroundDuration}ms, refetching data`);
         setWasBackgrounded(true);
         
