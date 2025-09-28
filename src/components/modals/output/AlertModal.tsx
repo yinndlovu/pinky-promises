@@ -11,17 +11,11 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 
+// external
+import { AlertType, AlertModalProps } from "../../../types/Alert";
+
 // types
 type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
-type AlertType = "info" | "success" | "error";
-type AlertModalProps = {
-  visible: boolean;
-  title?: string;
-  message: string;
-  type?: AlertType;
-  buttonText?: string;
-  onClose: () => void;
-};
 
 const AlertModal: React.FC<AlertModalProps> = ({
   visible,

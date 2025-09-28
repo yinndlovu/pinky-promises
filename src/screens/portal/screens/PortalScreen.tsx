@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -179,7 +179,7 @@ export default function PortalScreen({ navigation }: Props) {
       setConfirmVisible(false);
     } catch (err: any) {
       setToastMessage(
-        err?.response?.data?.message || "Failed to delete message"
+        err?.response?.data?.error || "Failed to delete message"
       );
       setDeleting(false);
       setConfirmVisible(false);
@@ -237,7 +237,7 @@ export default function PortalScreen({ navigation }: Props) {
       setShowSuccess(true);
     } catch (err: any) {
       setToastMessage(
-        err?.response?.data?.message || "Failed to send sweet message"
+        err.response?.data?.error || "Failed to send sweet message"
       );
     } finally {
       setLoading(false);
@@ -261,7 +261,7 @@ export default function PortalScreen({ navigation }: Props) {
       setViewType(type);
       setViewModalVisible(true);
     } catch (err: any) {
-      setToastMessage(err?.response?.data?.message || "Failed to load message");
+      setToastMessage(err.response?.data?.error || "Failed to load message");
     } finally {
       setViewLoading(false);
     }

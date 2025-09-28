@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,7 @@ import {
   setReminderInterval,
 } from "../../../services/api/settings/notificationPreferenceService";
 import useToken from "../../../hooks/useToken";
+import { AlertType } from "../../../types/Alert";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -28,6 +29,8 @@ const ReminderIntervalSetting = () => {
   const [success, setSuccess] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertType, setAlertType] = useState<AlertType | undefined>(undefined);
 
   // variables
   const token = useToken();
@@ -71,11 +74,15 @@ const ReminderIntervalSetting = () => {
       }
 
       await setReminderInterval(token, hours);
-      setAlertMessage("Reminder interval updated");
+      setAlertTitle("Reminder interval updated");
+      setAlertMessage("You have updated your reminder interval.");
+      setAlertType("success");
       setAlertVisible(true);
       await fetchInterval();
     } catch (e: any) {
-      setAlertMessage(e.response?.data?.error || "Failed to save interval");
+      setAlertTitle("Failed");
+      setAlertMessage(e.response?.data?.error || "Failed to save interval.");
+      setAlertType("error");
       setAlertVisible(true);
     }
     setSaving(false);
@@ -115,6 +122,8 @@ const ReminderIntervalSetting = () => {
       )}
       <AlertModal
         visible={alertVisible}
+        title={alertTitle}
+        type={alertType}
         message={alertMessage}
         onClose={() => setAlertVisible(false)}
       />

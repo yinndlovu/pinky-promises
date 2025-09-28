@@ -18,6 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // internal
 import { changePassword } from "../../../services/api/auth/authService";
 import useToken from "../../../hooks/useToken";
+import { AlertType } from "../../../types/Alert";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -47,11 +48,13 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   const [confirmPasswordValid, setConfirmPasswordValid] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<AlertType | undefined>(undefined);
+  const [alertTitle, setAlertTitle] = useState("");
   const [changeSuccess, setChangeSuccess] = useState(false);
 
   // variables
   const token = useToken();
-  
+
   // validators
   const validateNewPassword = (password: string) => {
     return {
@@ -108,16 +111,17 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
         confirmPassword
       );
 
-      setAlertMessage("Password changed. Log in again");
+      setAlertTitle("Password changed");
+      setAlertType("success");
+      setAlertMessage("You have changed your password. Log in again.");
       await AsyncStorage.removeItem("token");
 
       setAlertVisible(true);
       setChangeSuccess(true);
     } catch (error: any) {
       setError(
-        error.response?.data?.message ||
-          error.response?.data?.error ||
-          error.message || "Something went wrong changing your password"
+        error.response?.data?.error ||
+          "Something went wrong changing your password"
       );
     } finally {
       setLoading(false);
@@ -287,6 +291,8 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
         )}
         <AlertModal
           visible={alertVisible}
+          title={alertTitle}
+          type={alertType}
           message={alertMessage}
           onClose={() => {
             setAlertVisible(false);

@@ -1,7 +1,4 @@
 // content
-import React from "react";
-
-// content
 import MessageCard from "./MessageCard";
 
 // internal

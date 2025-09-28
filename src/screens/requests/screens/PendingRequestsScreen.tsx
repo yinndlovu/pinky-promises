@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -85,8 +85,10 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
   // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showInfoAlert, setShowInfoAlert] = useState(false);
 
   // use states (processing)
   const [processingAccept, setProcessingAccept] = useState<string | null>(null);
@@ -114,11 +116,6 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     return null;
   }
 
-  const showAlert = (message: string) => {
-    setAlertMessage(message);
-    setAlertVisible(true);
-  };
-
   // handlers
   const handleAcceptRequest = async (requestId: string, senderId: string) => {
     setProcessingAccept(requestId);
@@ -137,7 +134,9 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
       navigation.replace("PartnerProfile", { userId: senderId });
     } catch (error: any) {
-      showAlert(error.response?.data?.error || "Failed to accept request");
+      setAlertTitle("Failed");
+      setAlertMessage("Failed to accept request.");
+      setShowErrorAlert(true);
     } finally {
       setProcessingAccept(null);
     }
@@ -154,9 +153,13 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
 
-      showAlert("Partner request declined");
+      setAlertTitle("Declined");
+      setAlertMessage("You declined the partner request.");
+      setShowInfoAlert(true);
     } catch (error: any) {
-      showAlert(error.response?.data?.error || "Failed to reject request");
+      setAlertTitle("Failed");
+      setAlertMessage(error.response?.data?.error || "Failed to decline the request.");
+      setShowErrorAlert(true);
     } finally {
       setProcessingReject(null);
     }
@@ -224,9 +227,20 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       />
 
       <AlertModal
-        visible={alertVisible}
+        visible={showErrorAlert}
+        type="error"
+        title={alertTitle}
         message={alertMessage}
-        onClose={() => setAlertVisible(false)}
+        buttonText="Close"
+        onClose={() => setShowErrorAlert(false)}
+      />
+
+      <AlertModal
+        visible={showInfoAlert}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="OK"
+        onClose={() => setShowInfoAlert(false)}
       />
     </View>
   );
