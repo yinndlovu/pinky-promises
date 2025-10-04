@@ -12,7 +12,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
-import { TabRouter, useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect } from "@react-navigation/native";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -416,8 +416,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             lastSeen={lastSeen}
             onPress={() => navigation.navigate("PartnerProfile")}
             renderPartnerImage={renderPartnerImage}
-            currentWeather={currentWeather}
-            weatherType={weatherType}
             weatherDescription={weatherDescription}
             userLocation={userLocation}
             userTimezone={userTimezone}
