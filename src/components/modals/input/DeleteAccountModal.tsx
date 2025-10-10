@@ -38,7 +38,9 @@ const DeleteAccountModal: React.FC<Props> = ({
   // use states
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
   const [passwordModalVisible, setPasswordModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
 
@@ -72,8 +74,9 @@ const DeleteAccountModal: React.FC<Props> = ({
     try {
       await onDelete();
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.error || "Failed to delete account");
-      setAlertVisible(true);
+      setAlertTitle("Failed");
+      setAlertMessage(err.response?.data?.error || "Failed to delete account.");
+      setShowErrorAlert(true);
     }
   };
 
@@ -159,9 +162,21 @@ const DeleteAccountModal: React.FC<Props> = ({
             </View>
 
             <AlertModal
-              visible={alertVisible}
+              visible={showSuccessAlert}
+              type="success"
+              title={alertTitle}
               message={alertMessage || ""}
-              onClose={() => setAlertVisible(false)}
+              buttonText="Great"
+              onClose={() => setShowSuccessAlert(false)}
+            />
+
+            <AlertModal
+              visible={showErrorAlert}
+              type="error"
+              title={alertTitle}
+              message={alertMessage || ""}
+              buttonText="Close"
+              onClose={() => setShowErrorAlert(false)}
             />
           </View>
         </TouchableWithoutFeedback>

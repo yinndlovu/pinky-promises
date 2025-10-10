@@ -33,7 +33,9 @@ const MessageInputModal: React.FC<Props> = ({
   // use states
   const [text, setText] = useState("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
 
   // handlers
   const handleSend = async () => {
@@ -44,8 +46,9 @@ const MessageInputModal: React.FC<Props> = ({
     try {
       onSend(text.trim());
     } catch (err: any) {
-      setAlertMessage(err?.message || "Failed to send message");
-      setAlertVisible(true);
+      setAlertTitle("Failed");
+      setAlertMessage(err?.message || "Failed to send message.");
+      setShowErrorAlert(true);
     }
   };
 
@@ -99,9 +102,21 @@ const MessageInputModal: React.FC<Props> = ({
             </View>
           </View>
           <AlertModal
-            visible={alertVisible}
+            visible={showSuccessAlert}
+            type="success"
+            title={alertTitle}
             message={alertMessage || ""}
-            onClose={() => setAlertVisible(false)}
+            buttonText="Great"
+            onClose={() => setShowSuccessAlert(false)}
+          />
+
+          <AlertModal
+            visible={showErrorAlert}
+            type="error"
+            title={alertTitle}
+            message={alertMessage || ""}
+            buttonText="Close"
+            onClose={() => setShowErrorAlert(false)}
           />
         </View>
       </TouchableWithoutFeedback>

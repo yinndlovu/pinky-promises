@@ -45,7 +45,9 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
     initialDate ? new Date(initialDate) : new Date()
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
 
   // use effects
@@ -59,8 +61,9 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
   // handlers
   const handleSave = async () => {
     if (!memory || !date) {
+      setAlertTitle("Missing info");
       setAlertMessage("Memory and date are required.");
-      setAlertVisible(true);
+      setShowErrorAlert(true);
 
       return;
     }
@@ -70,8 +73,9 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
 
       onClose();
     } catch (err: any) {
+      setAlertTitle("Failed");
       setAlertMessage(err.response?.data?.error || "Failed to save memory.");
-      setAlertVisible(true);
+      setShowErrorAlert(true);
     }
   };
 
@@ -144,10 +148,23 @@ const UpdateFavoriteMemoryModal: React.FC<Props> = ({
               <ActivityIndicator size="large" color="#e03487" />
             </View>
           )}
+
           <AlertModal
-            visible={alertVisible}
+            visible={showSuccessAlert}
+            type="success"
+            title={alertTitle}
             message={alertMessage}
-            onClose={() => setAlertVisible(false)}
+            buttonText="Great"
+            onClose={() => setShowSuccessAlert(false)}
+          />
+
+          <AlertModal
+            visible={showErrorAlert}
+            type="error"
+            title={alertTitle}
+            message={alertMessage}
+            buttonText="Close"
+            onClose={() => setShowErrorAlert(false)}
           />
         </View>
         {showDatePicker && (

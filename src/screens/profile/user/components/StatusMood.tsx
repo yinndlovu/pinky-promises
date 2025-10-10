@@ -137,7 +137,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
     } catch (err: any) {
       setAlertTitle("Failed");
       setAlertMessage(
-        err.response?.data?.error || "Failed to add home location"
+        err.response?.data?.error || "Failed to add home location."
       );
       setShowErrorAlert(true);
     } finally {

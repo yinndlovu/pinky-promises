@@ -36,7 +36,11 @@ const StoreMessageModal: React.FC<Props> = ({
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+
+  // variables
   const insets = useSafeAreaInsets();
 
   // handlers
@@ -51,8 +55,9 @@ const StoreMessageModal: React.FC<Props> = ({
       setTitle("");
       setMessage("");
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.error || "Failed to store message");
-      setAlertVisible(true);
+      setAlertTitle("Failed");
+      setAlertMessage(err.response?.data?.error || "Failed to store message.");
+      setShowErrorAlert(true);
     }
   };
 
@@ -123,9 +128,21 @@ const StoreMessageModal: React.FC<Props> = ({
           </View>
 
           <AlertModal
-            visible={alertVisible}
+            visible={showSuccessAlert}
+            type="success"
+            title={alertTitle}
             message={alertMessage || ""}
-            onClose={() => setAlertVisible(false)}
+            buttonText="Great"
+            onClose={() => setShowSuccessAlert(false)}
+          />
+
+          <AlertModal
+            visible={showErrorAlert}
+            type="error"
+            title={alertTitle}
+            message={alertMessage || ""}
+            buttonText="Close"
+            onClose={() => setShowErrorAlert(false)}
           />
         </View>
       </TouchableWithoutFeedback>

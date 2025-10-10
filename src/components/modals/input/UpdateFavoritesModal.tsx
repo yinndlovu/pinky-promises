@@ -48,8 +48,10 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
   // use states
   const [favorites, setFavorites] = useState<Favorites>(initialFavorites || {});
   const [loading, setLoading] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -67,13 +69,15 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
     setLoading(true);
     try {
       await onSave(favorites);
-      setAlertMessage("Favorites updated");
-      setAlertVisible(true);
+      setAlertTitle("Favorites updated");
+      setAlertMessage("You have updated your favorites.");
+      setShowSuccessAlert(true);
     } catch (err: any) {
+      setAlertTitle("Failed");
       setAlertMessage(
-        err.response?.data?.error || "Failed to update favorites"
+        err.response?.data?.error || "Failed to update favorites."
       );
-      setAlertVisible(true);
+      setShowErrorAlert(true);
     } finally {
       setLoading(false);
     }
@@ -124,13 +128,23 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
               <ActivityIndicator size="large" color="#e03487" />
             </View>
           )}
+
           <AlertModal
-            visible={alertVisible}
+            visible={showSuccessAlert}
+            type="success"
+            title={alertTitle}
             message={alertMessage}
-            onClose={() => {
-              setAlertVisible(false);
-              if (alertMessage === "Favorites updated") onClose();
-            }}
+            buttonText="Great"
+            onClose={() => setShowSuccessAlert(false)}
+          />
+
+          <AlertModal
+            visible={showErrorAlert}
+            type="error"
+            title={alertTitle}
+            message={alertMessage}
+            buttonText="Close"
+            onClose={() => setShowErrorAlert(false)}
           />
         </View>
       </View>

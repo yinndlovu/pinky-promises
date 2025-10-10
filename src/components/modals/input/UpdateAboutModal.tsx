@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import AlertModal from "../output/AlertModal";
 
@@ -28,7 +28,9 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
 }) => {
   const [about, setAbout] = useState(initialAbout || "");
   const [loading, setLoading] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
@@ -42,11 +44,13 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
     try {
       await onSave(about);
 
-      setAlertMessage("More about you updated");
-      setAlertVisible(true);
+      setAlertTitle("More about you updated");
+      setAlertMessage("You have updated your more about you details.");
+      setShowSuccessAlert(true);
     } catch (err: any) {
-      setAlertMessage(err.response?.data?.error || "Failed to update info");
-      setAlertVisible(true);
+      setAlertTitle("Failed");
+      setAlertMessage(err.response?.data?.error || "Failed to update info.");
+      setShowSuccessAlert(true);
     } finally {
       setLoading(false);
     }
@@ -55,54 +59,63 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Update more about you</Text>
-          <TextInput
-            style={styles.textArea}
-            value={about}
-            onChangeText={setAbout}
-            placeholder="Tell more stuff about you..."
-            placeholderTextColor="#b0b3c6"
-            multiline
-            numberOfLines={6}
-            maxLength={500}
-            editable={!loading}
-          />
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.saveButton, loading && { opacity: 0.5 }]}
-              onPress={handleSave}
-              disabled={loading}
-            >
-              <Text style={styles.saveButtonText}>
-                {loading ? "Saving..." : "Save"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={onClose}
-              disabled={loading}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#e03487" />
+        <View style={styles.overlay}>
+          <View style={styles.content}>
+            <Text style={styles.title}>Update more about you</Text>
+            <TextInput
+              style={styles.textArea}
+              value={about}
+              onChangeText={setAbout}
+              placeholder="Tell more stuff about you..."
+              placeholderTextColor="#b0b3c6"
+              multiline
+              numberOfLines={6}
+              maxLength={500}
+              editable={!loading}
+            />
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.saveButton, loading && { opacity: 0.5 }]}
+                onPress={handleSave}
+                disabled={loading}
+              >
+                <Text style={styles.saveButtonText}>
+                  {loading ? "Saving..." : "Save"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={onClose}
+                disabled={loading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
-          )}
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#e03487" />
+              </View>
+            )}
 
-          <AlertModal
-            visible={alertVisible}
-            message={alertMessage}
-            onClose={() => {
-              setAlertVisible(false);
-              if (alertMessage === "More about you updated") onClose();
-            }}
-          />
+            <AlertModal
+              visible={showSuccessAlert}
+              type="success"
+              title={alertTitle}
+              message={alertMessage}
+              buttonText="Great"
+              onClose={() => setShowSuccessAlert(false)}
+            />
+
+            <AlertModal
+              visible={showErrorAlert}
+              type="error"
+              title={alertTitle}
+              message={alertMessage}
+              buttonText="Close"
+              onClose={() => setShowErrorAlert(false)}
+            />
+          </View>
         </View>
-      </View>
       </TouchableWithoutFeedback>
     </Modal>
   );

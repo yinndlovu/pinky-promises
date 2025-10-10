@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   StatusBar,
   Pressable,
+  ToastAndroid,
+  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
@@ -33,6 +35,9 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const handleLogout = async () => {
     setShowLogoutModal(false);
     await logout();
+    if (Platform.OS === "android") {
+      ToastAndroid.show("Successfully logged out", ToastAndroid.SHORT);
+    }
     navigation.reset({
       index: 0,
       routes: [{ name: "Welcome" }],

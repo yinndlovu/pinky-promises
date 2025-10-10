@@ -47,7 +47,9 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   const [description, setDescription] = useState(initialDescription);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
   // use effects
@@ -66,13 +68,12 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
     setLoading(true);
     try {
       const formattedDate = date.toISOString().split("T")[0];
-      
+
       await onSave(
         formattedDate,
         title.trim(),
         description.trim() || undefined
       );
-
     } catch (error: any) {
       throw error;
     } finally {
@@ -164,7 +165,6 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
           </View>
 
           <View style={styles.actions}>
-            
             <TouchableOpacity
               style={[
                 styles.saveButton,
@@ -205,17 +205,21 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
         )}
 
         <AlertModal
-          visible={alertVisible}
+          visible={showSuccessAlert}
+          type="success"
+          title={alertTitle}
           message={alertMessage}
-          onClose={() => {
-            setAlertVisible(false);
-            if (
-              alertMessage.includes("updated") ||
-              alertMessage.includes("created")
-            ) {
-              handleClose();
-            }
-          }}
+          buttonText="Great"
+          onClose={() => setShowSuccessAlert(false)}
+        />
+
+        <AlertModal
+          visible={showErrorAlert}
+          type="error"
+          title={alertTitle}
+          message={alertMessage}
+          buttonText="Close"
+          onClose={() => setShowErrorAlert(false)}
         />
       </View>
     </Modal>

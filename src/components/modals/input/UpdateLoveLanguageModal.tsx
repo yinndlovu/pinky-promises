@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 
 // content
@@ -31,8 +31,10 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   // use states
   const [loveLanguage, setLoveLanguage] = useState(initialLoveLanguage || "");
   const [loading, setLoading] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertTitle, setAlertTitle] = useState("");
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -47,11 +49,15 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
     try {
       await onSave(loveLanguage);
 
-      setAlertMessage("Love language updated!");
-      setAlertVisible(true);
-    } catch (err) {
-      setAlertMessage("Failed to update love language");
-      setAlertVisible(true);
+      setAlertTitle("Love language updated");
+      setAlertMessage("You have updated your love language.");
+      setShowSuccessAlert(true);
+    } catch (err: any) {
+      setAlertTitle("Failed");
+      setAlertMessage(
+        err.response?.data?.error || "Failed to update love language."
+      );
+      setShowErrorAlert(true);
     } finally {
       setLoading(false);
     }
@@ -60,50 +66,59 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.content}>
-          <Text style={styles.title}>Update love language</Text>
-          <TextInput
-            style={styles.input}
-            value={loveLanguage}
-            onChangeText={setLoveLanguage}
-            placeholder="Enter your love language"
-            placeholderTextColor="#b0b3c6"
-            editable={!loading}
-          />
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.saveButton, loading && { opacity: 0.5 }]}
-              onPress={handleSave}
-              disabled={loading}
-            >
-              <Text style={styles.saveButtonText}>
-                {loading ? "Saving..." : "Save"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={onClose}
-              disabled={loading}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#e03487" />
+        <View style={styles.overlay}>
+          <View style={styles.content}>
+            <Text style={styles.title}>Update love language</Text>
+            <TextInput
+              style={styles.input}
+              value={loveLanguage}
+              onChangeText={setLoveLanguage}
+              placeholder="Enter your love language"
+              placeholderTextColor="#b0b3c6"
+              editable={!loading}
+            />
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.saveButton, loading && { opacity: 0.5 }]}
+                onPress={handleSave}
+                disabled={loading}
+              >
+                <Text style={styles.saveButtonText}>
+                  {loading ? "Saving..." : "Save"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={onClose}
+                disabled={loading}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
-          )}
-          <AlertModal
-            visible={alertVisible}
-            message={alertMessage}
-            onClose={() => {
-              setAlertVisible(false);
-              if (alertMessage === "Love language updated!") onClose();
-            }}
-          />
+            {loading && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#e03487" />
+              </View>
+            )}
+            <AlertModal
+              visible={showSuccessAlert}
+              type="success"
+              title={alertTitle}
+              message={alertMessage}
+              buttonText="Great"
+              onClose={() => setShowSuccessAlert(false)}
+            />
+
+            <AlertModal
+              visible={showErrorAlert}
+              type="error"
+              title={alertTitle}
+              message={alertMessage}
+              buttonText="Close"
+              onClose={() => setShowErrorAlert(false)}
+            />
+          </View>
         </View>
-      </View>
       </TouchableWithoutFeedback>
     </Modal>
   );
