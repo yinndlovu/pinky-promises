@@ -62,5 +62,8 @@
     "@types/react": "~19.1.10",
     "typescript": "~5.9.2"
   },
+  "overrides": {
+    "expo-dev-menu": "7.0.14"
+  },
   "private": true
 }

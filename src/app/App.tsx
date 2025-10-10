@@ -28,6 +28,7 @@ import { InviteProvider } from "../games/context/InviteContext";
 import { checkBatteryStatus } from "../helpers/checkBatteryStatus";
 import { RootStackParamList } from "../types/RootStackParamList";
 import { useVersionCheck } from "../hooks/useVersionCheck";
+import useToken from "../hooks/useToken";
 
 // content
 import PartnerProfileScreen from "../screens/profile/partner/screens/PartnerProfileScreen";
@@ -111,14 +112,15 @@ function AIHeader() {
 // screens
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  const token = useToken();
   const { versionInfo, showBanner, dismissBanner } = useVersionCheck();
 
   useEffect(() => {
     if (isAuthenticated) {
       registerForPushNotificationsAsync();
-      checkBatteryStatus();
+      checkBatteryStatus(token);
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, token]);
 
   if (isLoading) {
     return (
