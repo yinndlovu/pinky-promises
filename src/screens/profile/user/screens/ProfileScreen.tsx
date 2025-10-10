@@ -409,6 +409,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await queryClient.invalidateQueries({
         queryKey: ["aiContext", user?.id],
       });
+
+      await queryClient.invalidateQueries({
+        queryKey: ["recentActivities", user?.id]
+      })
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to save favorites");
     }
