@@ -7,7 +7,7 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View, Text, TouchableOpacity } from "react-native";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { QueryClient, onlineManager } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -26,6 +26,7 @@ import { navigationRef } from "../utils/navigation/navigation";
 import { InviteProvider } from "../games/context/InviteContext";
 import { checkBatteryStatus } from "../helpers/checkBatteryStatus";
 import { RootStackParamList } from "../types/RootStackParamList";
+import { useVersionCheck } from "../hooks/useVersionCheck";
 
 // content
 import PartnerProfileScreen from "../screens/profile/partner/screens/PartnerProfileScreen";
@@ -62,6 +63,7 @@ import GameWaitingScreen from "../games/room/GameWaitingScreen";
 import GameSetupScreen from "../games/trivia/screens/GameSetupScreen";
 import GameSessionScreen from "../games/trivia/screens/GameSessionScreen";
 import LoadingAnimation from "../components/loading/LoadingAnimation";
+import VersionUpdateBanner from "../components/banners/VersionUpdateBanner";
 
 // variables
 const Stack = createStackNavigator<RootStackParamList>();
@@ -108,6 +110,7 @@ function AIHeader() {
 // screens
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  const { versionInfo, showBanner, dismissBanner } = useVersionCheck();
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -126,6 +129,12 @@ function AppContent() {
 
   return (
     <>
+      {showBanner && versionInfo && (
+        <VersionUpdateBanner
+          versionInfo={versionInfo}
+          onDismiss={dismissBanner}
+        />
+      )}
       <Stack.Navigator
         initialRouteName={isAuthenticated ? "Main" : "Welcome"}
         screenOptions={{
