@@ -1,4 +1,4 @@
-import React from "react";
+// external
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   Alert,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// internal
 import { AppVersionInfo } from "../../services/api/app-version/appVersionService";
 
 interface VersionUpdateBannerProps {
@@ -19,6 +22,9 @@ export default function VersionUpdateBanner({
   versionInfo,
   onDismiss,
 }: VersionUpdateBannerProps) {
+  // variables
+  const insets = useSafeAreaInsets();
+
   const handleUpdate = () => {
     Alert.alert(
       "Update Available",
@@ -41,7 +47,9 @@ export default function VersionUpdateBanner({
 
   if (versionInfo.mandatory) {
     return (
-      <View style={[styles.banner, styles.mandatoryBanner]}>
+      <View
+        style={[styles.banner, styles.mandatoryBanner, { top: insets.top }]}
+      >
         <View style={styles.content}>
           <Feather
             name="alert-circle"
@@ -64,7 +72,7 @@ export default function VersionUpdateBanner({
   }
 
   return (
-    <View style={[styles.banner, styles.optionalBanner]}>
+    <View style={[styles.banner, styles.optionalBanner, { top: insets.top }]}>
       <View style={styles.content}>
         <Feather name="download" size={18} color="#fff" style={styles.icon} />
         <TouchableOpacity style={styles.textContainer} onPress={handleUpdate}>
@@ -81,9 +89,13 @@ export default function VersionUpdateBanner({
 
 const styles = StyleSheet.create({
   banner: {
+    position: "absolute",
+    left: 0,
+    right: 0,
     paddingHorizontal: 16,
     paddingVertical: 12,
     zIndex: 1000,
+    elevation: 6,
   },
   mandatoryBanner: {
     backgroundColor: "#e03487",

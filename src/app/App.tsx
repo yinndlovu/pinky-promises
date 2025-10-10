@@ -15,6 +15,7 @@ import { Image } from "expo-image";
 import Feather from "@expo/vector-icons/build/Feather";
 import { FontAwesome6 } from "@expo/vector-icons";
 import "react-native-get-random-values";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // internal
 import { registerForPushNotificationsAsync } from "../utils/notifications/notifications";
@@ -521,57 +522,59 @@ export default function App() {
   }, []);
 
   return (
-    <AuthProvider>
-      <NotificationProvider>
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={{
-            persister: sqlitePersistor,
-            maxAge: 1000 * 60 * 60 * 24 * 5,
-          }}
-          onSuccess={() => {}}
-        >
-          <SSEProvider>
-            <NavigationContainer
-              ref={navigationRef}
-              theme={{
-                dark: true,
-                colors: {
-                  primary: "#e03487",
-                  background: "#23243a",
-                  card: "#23243a",
-                  text: "#fff",
-                  border: "transparent",
-                  notification: "#e03487",
-                },
-                fonts: {
-                  regular: {
-                    fontFamily: "System",
-                    fontWeight: "400",
+    <SafeAreaProvider>
+      <AuthProvider>
+        <NotificationProvider>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{
+              persister: sqlitePersistor,
+              maxAge: 1000 * 60 * 60 * 24 * 5,
+            }}
+            onSuccess={() => {}}
+          >
+            <SSEProvider>
+              <NavigationContainer
+                ref={navigationRef}
+                theme={{
+                  dark: true,
+                  colors: {
+                    primary: "#e03487",
+                    background: "#23243a",
+                    card: "#23243a",
+                    text: "#fff",
+                    border: "transparent",
+                    notification: "#e03487",
                   },
-                  medium: {
-                    fontFamily: "System",
-                    fontWeight: "500",
+                  fonts: {
+                    regular: {
+                      fontFamily: "System",
+                      fontWeight: "400",
+                    },
+                    medium: {
+                      fontFamily: "System",
+                      fontWeight: "500",
+                    },
+                    bold: {
+                      fontFamily: "System",
+                      fontWeight: "700",
+                    },
+                    heavy: {
+                      fontFamily: "System",
+                      fontWeight: "900",
+                    },
                   },
-                  bold: {
-                    fontFamily: "System",
-                    fontWeight: "700",
-                  },
-                  heavy: {
-                    fontFamily: "System",
-                    fontWeight: "900",
-                  },
-                },
-              }}
-            >
-              <InviteProvider>
-                <AppContent />
-              </InviteProvider>
-            </NavigationContainer>
-          </SSEProvider>
-        </PersistQueryClientProvider>
-      </NotificationProvider>
-    </AuthProvider>
+                }}
+              >
+                <InviteProvider>
+                  <AppContent />
+                </InviteProvider>
+              </NavigationContainer>
+            </SSEProvider>
+          </PersistQueryClientProvider>
+        </NotificationProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
   );
 }
 
