@@ -69,26 +69,26 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
       setCurrentTime("Unknown");
       return;
     }
-  
+
     const updateTime = () => {
       const nowUtc = new Date();
       const localTime = new Date(nowUtc.getTime() + userTimezone * 1000);
-  
+
       const formatted = localTime.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "numeric",
         hour12: true,
       });
-  
+
       setCurrentTime(formatted);
     };
-  
+
     updateTime();
     const interval = setInterval(updateTime, 30 * 1000);
-  
+
     return () => clearInterval(interval);
   }, [userTimezone]);
-  
+
   useEffect(() => {
     if (isActive) {
       const breatheAnimation = Animated.loop(
@@ -307,22 +307,30 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
           </View>
 
           <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View style={{ flexDirection: "column" }}>
-                <Text
-                  style={{ fontSize: 14, color: "#b0b3c6", fontWeight: "500" }}
-                >
-                  {userLocation || "Unknown"}
-                </Text>
-                <Text style={{ fontSize: 12, color: "#b0b3c6" }}>
-                  {currentTime}
-                </Text>
-              </View>
-            </View>
-
-            <View
-              style={{ width: "100%", marginTop: 4, marginLeft: 12 }}
-            ></View>
+            <Text
+              style={{
+                fontSize: 11,
+                color: "#8a8db0",
+                fontWeight: "600",
+                letterSpacing: 1,
+              }}
+            >
+              CURRENTLY IN
+            </Text>
+            <Text
+              style={{
+                fontSize: 26,
+                color: "#fff",
+                fontWeight: "800",
+                marginTop: 2,
+              }}
+              numberOfLines={1}
+            >
+              {userLocation || "Unknown"}
+            </Text>
+            <Text style={{ fontSize: 12, color: "#b0b3c6", marginTop: 2 }}>
+              {currentTime}
+            </Text>
           </View>
         </View>
 
