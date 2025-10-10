@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 
@@ -35,6 +35,7 @@ type UpdateMoodModalProps = {
   onClose: () => void;
   onSave: (mood: string) => void;
   initialMood?: string;
+  saving: boolean;
 };
 
 const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
@@ -42,12 +43,10 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   onClose,
   onSave,
   initialMood = "happy",
+  saving,
 }) => {
   // use states
   const [selectedMood, setSelectedMood] = useState(initialMood);
-  const [loading, setLoading] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
 
   // use effects
   useEffect(() => {
@@ -62,77 +61,53 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
     label: mood.charAt(0).toUpperCase() + mood.slice(1),
   }));
 
-  // handlers
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await onSave(selectedMood);
-      
-      setAlertMessage("Mood updated!");
-      setAlertVisible(true);
-    } catch (err) {
-      setAlertMessage("Failed to update mood");
-      setAlertVisible(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Update your mood</Text>
-          <ModalSelector
-            data={data}
-            initValue={
-              selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)
-            }
-            onChange={(option) => setSelectedMood(option.key)}
-            style={styles.selector}
-            selectStyle={styles.selectStyle}
-            selectTextStyle={styles.selectTextStyle}
-            optionTextStyle={styles.optionTextStyle}
-            optionContainerStyle={styles.optionContainerStyle}
-            cancelStyle={styles.cancelStyle}
-            cancelTextStyle={styles.cancelTextStyle}
-            backdropPressToClose={true}
-            animationType="fade"
-          />
-          <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.saveButton, loading && { opacity: 0.5}]}
-              onPress={handleSave}
-              disabled={loading}
-            >
-              <Text style={styles.saveButtonText}>
-                {loading ? "Saving..." : "Save"}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={onClose}
-              disabled={loading}
-            >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#e03487" />
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Update your mood</Text>
+            <ModalSelector
+              data={data}
+              initValue={
+                selectedMood.charAt(0).toUpperCase() + selectedMood.slice(1)
+              }
+              onChange={(option) => setSelectedMood(option.key)}
+              style={styles.selector}
+              selectStyle={styles.selectStyle}
+              selectTextStyle={styles.selectTextStyle}
+              optionTextStyle={styles.optionTextStyle}
+              optionContainerStyle={styles.optionContainerStyle}
+              cancelStyle={styles.cancelStyle}
+              cancelTextStyle={styles.cancelTextStyle}
+              backdropPressToClose={true}
+              animationType="fade"
+            />
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.saveButton, saving && { opacity: 0.5 }]}
+                onPress={() => onSave(selectedMood)}
+                disabled={saving}
+              >
+                <Text style={styles.saveButtonText}>
+                  {saving ? "Saving..." : "Save"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={onClose}
+                disabled={saving}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
             </View>
-          )}
-          <AlertModal
-            visible={alertVisible}
-            message={alertMessage}
-            onClose={() => {
-              setAlertVisible(false);
-              if (alertMessage === "Mood updated!") onClose();
-            }}
-          />
+            {saving && (
+              <View style={styles.loadingOverlay}>
+                <ActivityIndicator size="large" color="#e03487" />
+              </View>
+            )}
+          </View>
         </View>
-      </View>
       </TouchableWithoutFeedback>
     </Modal>
   );

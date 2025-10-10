@@ -351,7 +351,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             statusDescription={statusDescription}
             mood={mood || "No mood"}
             moodDescription={moodDescription}
-            statusDistance={partnerStatus.distance}
+            statusDistance={partnerStatus?.distance}
           />
         )}
 

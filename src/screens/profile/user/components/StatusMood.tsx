@@ -66,7 +66,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const [alertMessage, setAlertMessage] = useState("");
   const [updatingMood, setUpdatingMood] = useState(false);
   const [saving, setSaving] = useState(false);
-  
+
   // use effects
   useEffect(() => {
     floatAnimation.value = withRepeat(
@@ -119,7 +119,9 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       await startBackgroundLocationTracking();
 
       setAlertTitle("Home location added");
-      setAlertMessage("You have added your home location. Your partner can now see when you are home.");
+      setAlertMessage(
+        "You have added your home location. Your partner can now see when you are home."
+      );
 
       await queryClient.invalidateQueries({
         queryKey: ["status", user?.id],
@@ -146,22 +148,33 @@ const StatusMood: React.FC<StatusMoodProps> = ({
 
   const handleSaveMood = async (newMood: string) => {
     try {
+      setUpdatingMood(true);
       await updateMood(token, newMood);
 
-      await queryClient.invalidateQueries({
-        queryKey: ["moodData", user?.id],
-      });
+      await queryClient.invalidateQueries({ queryKey: ["moodData", user?.id] });
       await queryClient.invalidateQueries({
         queryKey: ["recentActivities", user?.id],
       });
 
+      setAlertTitle("Mood updated");
+      setAlertMessage(`Your mood is now ${newMood}.`);
+      setShowSuccessAlert(true);
+      setMoodModalVisible(false);
+
       if (onEdit) {
         onEdit();
       }
+
       if (onAddHome) {
         onAddHome();
       }
-    } catch (err: any) {}
+    } catch (err: any) {
+      setAlertTitle("Failed");
+      setAlertMessage(err?.response?.data?.error || "Failed to update mood");
+      setShowErrorAlert(true);
+    } finally {
+      setUpdatingMood(false);
+    }
   };
 
   // animated styles
@@ -326,7 +339,10 @@ const StatusMood: React.FC<StatusMoodProps> = ({
           visible={moodModalVisible}
           onClose={() => setMoodModalVisible(false)}
           onSave={handleSaveMood}
-          initialMood={displayMood}
+          initialMood={
+            displayMood && displayMood !== "No mood" ? displayMood : "Happy"
+          }
+          saving={updatingMood}
         />
 
         <AlertModal

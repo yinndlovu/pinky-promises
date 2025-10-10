@@ -292,16 +292,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       : "#b0b3c6";
 
   const mood = partnerMood?.mood || null;
-  const batteryLevel = partnerStatus?.batteryLevel || null;
-  const distanceFromHome = partnerStatus?.distance || null;
+  const batteryLevel = partnerStatus?.batteryLevel ?? null;
+  const distanceFromHome = partnerStatus?.distance ?? null;
 
   const lastSeen = partnerStatus?.updatedAt ?? null;
-  const currentWeather = partnerStatus?.currentWeather ?? null;
-  const weatherType = partnerStatus?.weatherType || null;
-  const weatherDescription = partnerStatus?.weatherDescription || null;
   const userLocation = partnerStatus?.userLocation ?? null;
-  const userTimezone = partnerStatus?.userTimezone || null;
-  const isDaytime = partnerStatus?.isDaytime ?? null;
+  const userTimezone = partnerStatus?.timezoneOffset ?? null;
 
   if (partnerLoading) {
     return (
@@ -416,10 +412,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             lastSeen={lastSeen}
             onPress={() => navigation.navigate("PartnerProfile")}
             renderPartnerImage={renderPartnerImage}
-            weatherDescription={weatherDescription}
             userLocation={userLocation}
             userTimezone={userTimezone}
-            isDaytime={isDaytime}
           />
         )}
         <View style={styles.buttonRow}>

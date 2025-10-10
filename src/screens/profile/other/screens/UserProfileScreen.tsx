@@ -46,7 +46,6 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [failed, setFailed] = useState(false);
-  const [loadingPfp, setLoadingPfp] = useState(true);
 
   // hook
   const {
@@ -128,43 +127,36 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     });
     return () => unsubscribe();
   }, []);
-  
-  useEffect(() => {
-    setFailed(false);
-    setLoadingPfp(true);
-  }, [avatarUri]);
 
   // helpers
   const renderProfileImage = () => {
-    if (loadingPfp && !failed) {
-      return null;
-    }
-
-    if (avatarUri && profilePicUpdatedAt) {
+    if (avatarUri && profilePicUpdatedAt && userId) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
       );
-      const cachedImageUrl = buildCachedImageUrl(userId.toString(), timestamp);
+      const cachedImageUrl = buildCachedImageUrl(userId, timestamp);
 
       return (
         <Image
-          source={
-            failed || !avatarUri ? fallbackAvatar : { uri: cachedImageUrl }
-          }
+          source={failed ? fallbackAvatar : { uri: cachedImageUrl }}
           style={styles.avatar}
           cachePolicy="disk"
           contentFit="cover"
           transition={200}
-          onLoadEnd={() => setLoadingPfp(false)}
-          onError={() => {
-            setFailed(true);
-            setLoadingPfp(false);
-          }}
+          onError={() => setFailed(true)}
         />
       );
     }
 
-    return null;
+    return (
+      <Image
+        source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
+        style={styles.avatar}
+        cachePolicy="disk"
+        contentFit="cover"
+        transition={200}
+      />
+    );
   };
 
   const showAlert = (message: string) => {

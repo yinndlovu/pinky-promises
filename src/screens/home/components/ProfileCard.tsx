@@ -14,7 +14,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/icons/getBatteryIcon";
-import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
 import { useClockTick } from "../../../hooks/clockTick";
 
 // types
@@ -30,12 +29,8 @@ type ProfileCardProps = {
   distanceFromHome: number;
   onPress: () => void;
   renderPartnerImage: () => React.ReactNode;
-  currentWeather?: number | null;
-  weatherType?: string | null;
-  weatherDescription?: string | null;
   userLocation?: string | null;
-  userTimezone?: string | null;
-  isDaytime?: boolean;
+  userTimezone?: number | null;
 };
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -49,12 +44,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   distanceFromHome,
   onPress,
   renderPartnerImage,
-  currentWeather,
-  weatherType,
-  weatherDescription,
   userLocation,
   userTimezone,
-  isDaytime = true,
 }) => {
   // animation variables
   const breatheAnim = useRef(new Animated.Value(1)).current;
@@ -69,32 +60,35 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   // use states
   const [currentTime, setCurrentTime] = useState<string>("Unknown");
 
-  // dynamic variables
-  const iconSource = getWeatherIcon(weatherType, isDaytime);
-
   // hook
   useClockTick(30 * 1000);
 
   // use effects
   useEffect(() => {
-    if (!userTimezone) {
+    if (userTimezone == null) {
+      setCurrentTime("Unknown");
       return;
     }
-
-    const date = new Date();
-    try {
-      const formatter = new Intl.DateTimeFormat("en-US", {
-        timeZone: userTimezone,
+  
+    const updateTime = () => {
+      const nowUtc = new Date();
+      const localTime = new Date(nowUtc.getTime() + userTimezone * 1000);
+  
+      const formatted = localTime.toLocaleTimeString("en-US", {
         hour: "numeric",
         minute: "numeric",
         hour12: true,
       });
-      setCurrentTime(formatter.format(date));
-    } catch {
-      setCurrentTime("Unknown");
-    }
-  }, [userTimezone, Date.now()]);
-
+  
+      setCurrentTime(formatted);
+    };
+  
+    updateTime();
+    const interval = setInterval(updateTime, 30 * 1000);
+  
+    return () => clearInterval(interval);
+  }, [userTimezone]);
+  
   useEffect(() => {
     if (isActive) {
       const breatheAnimation = Animated.loop(
@@ -314,22 +308,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
           <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Image
-                source={iconSource}
-                style={{ width: 70, height: 70, marginRight: 12 }}
-              />
-
               <View style={{ flexDirection: "column" }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: "#fff",
-                    fontWeight: "500",
-                    marginBottom: 2,
-                  }}
-                >
-                  {currentWeather !== null ? `${currentWeather}°C` : "Unknown"}
-                </Text>
                 <Text
                   style={{ fontSize: 14, color: "#b0b3c6", fontWeight: "500" }}
                 >
@@ -341,11 +320,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
               </View>
             </View>
 
-            <View style={{ width: "100%", marginTop: 4, marginLeft: 12 }}>
-              <Text style={{ fontSize: 15, color: "#fff", fontWeight: "300" }}>
-                {weatherDescription || "Unknown"}
-              </Text>
-            </View>
+            <View
+              style={{ width: "100%", marginTop: 4, marginLeft: 12 }}
+            ></View>
           </View>
         </View>
 

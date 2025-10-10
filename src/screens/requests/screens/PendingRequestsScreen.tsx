@@ -31,7 +31,6 @@ const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
 const ProfileImage = ({ userId, token }: { userId: string; token: string }) => {
   const [failed, setFailed] = useState(false);
-  const [loadingPfp, setLoadingPfp] = useState(true);
 
   const { avatarUri, profilePicUpdatedAt, fetchPicture } = useProfilePicture(
     userId,
@@ -43,38 +42,33 @@ const ProfileImage = ({ userId, token }: { userId: string; token: string }) => {
     fetchPicture();
   }, [fetchPicture]);
 
-  useEffect(() => {
-    setFailed(false);
-    setLoadingPfp(true);
-  }, [avatarUri]);
-
   if (avatarUri && profilePicUpdatedAt) {
-    if (loadingPfp && !failed) {
-      return null;
-    }
-
-    const cachedImageUrl = buildCachedImageUrl(
-      userId,
-      Math.floor(new Date(profilePicUpdatedAt).getTime() / 1000)
+    const timestamp = Math.floor(
+      new Date(profilePicUpdatedAt).getTime() / 1000
     );
+    const cachedImageUrl = buildCachedImageUrl(userId, timestamp);
 
     return (
       <Image
-        source={failed || !avatarUri ? fallbackAvatar : { uri: cachedImageUrl }}
+        source={failed ? fallbackAvatar : { uri: cachedImageUrl }}
         style={styles.avatar}
         cachePolicy="disk"
         contentFit="cover"
         transition={200}
-        onLoadEnd={() => setLoadingPfp(false)}
-        onError={() => {
-          setFailed(true);
-          setLoadingPfp(false);
-        }}
+        onError={() => setFailed(true)}
       />
     );
   }
 
-  return null;
+  return (
+    <Image
+      source={avatarUri ? { uri: avatarUri } : fallbackAvatar}
+      style={styles.avatar}
+      cachePolicy="disk"
+      contentFit="cover"
+      transition={200}
+    />
+  );
 };
 
 const PendingRequestsScreen = ({ navigation }: any) => {
@@ -103,14 +97,13 @@ const PendingRequestsScreen = ({ navigation }: any) => {
     (async () => {
       try {
         const requestsData = await getReceivedPartnerRequests(token);
-        setRequests(
-          requestsData.filter((r: PendingRequest) => r.status === "pending")
-        );
+        const list = Array.isArray(requestsData) ? requestsData : [];
+        setRequests(list.filter((r: PendingRequest) => r.status === "pending"));
       } catch (err) {
         console.error("failed to fetch requests", err);
       }
     })();
-  }, []);
+  }, [token]);
 
   if (!token) {
     return null;
@@ -158,7 +151,9 @@ const PendingRequestsScreen = ({ navigation }: any) => {
       setShowInfoAlert(true);
     } catch (error: any) {
       setAlertTitle("Failed");
-      setAlertMessage(error.response?.data?.error || "Failed to decline the request.");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to decline the request."
+      );
       setShowErrorAlert(true);
     } finally {
       setProcessingReject(null);
