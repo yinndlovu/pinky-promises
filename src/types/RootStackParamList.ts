@@ -4,6 +4,10 @@ export type RootStackParamList = {
   Name: undefined;
   Username: undefined;
   Password: undefined;
+  ExistingUsername: undefined;
+  PinVerification: { username: string };
+  NewPassword: { username: string };
+  ResetSuccess: undefined;
   Login: undefined;
   Main: undefined;
   ChangeEmail: undefined;

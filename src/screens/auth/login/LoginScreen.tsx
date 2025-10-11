@@ -128,6 +128,16 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
             />
           )}
         </TouchableOpacity>
+        <View style={{ flexDirection: "row", marginTop: 16 }}>
+          <Text style={{ color: "#fff", fontSize: 16 }}>Forgot password? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate("ExistingUsername")}>
+            <Text
+              style={{ color: "#e03487", fontSize: 16, fontWeight: "bold" }}
+            >
+              Make a new one.
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ImageBackground>
   );

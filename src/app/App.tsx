@@ -66,6 +66,10 @@ import GameSetupScreen from "../games/trivia/screens/GameSetupScreen";
 import GameSessionScreen from "../games/trivia/screens/GameSessionScreen";
 import LoadingAnimation from "../components/loading/LoadingAnimation";
 import VersionUpdateBanner from "../components/banners/VersionUpdateBanner";
+import ExistingUsernameScreen from "../screens/auth/reset-password/ExistingUsernameScreen";
+import PinVerificationScreen from "../screens/auth/reset-password/PinVerificationScreen";
+import NewPasswordScreen from "../screens/auth/reset-password/NewPasswordScreen";
+import ResetSuccessScreen from "../screens/auth/reset-password/ResetSuccessScreen";
 
 // variables
 const Stack = createStackNavigator<RootStackParamList>();
@@ -200,6 +204,54 @@ function AppContent() {
         <Stack.Screen
           name="Password"
           component={PasswordScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTransparent: true,
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="ExistingUsername"
+          component={ExistingUsernameScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTransparent: true,
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="PinVerification"
+          component={PinVerificationScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTransparent: true,
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="NewPassword"
+          component={NewPasswordScreen}
+          options={{
+            headerShown: true,
+            title: "",
+            headerTransparent: true,
+            headerTintColor: "#fff",
+            headerStyle: { backgroundColor: "transparent" },
+            headerShadowVisible: false,
+          }}
+        />
+        <Stack.Screen
+          name="ResetSuccess"
+          component={ResetSuccessScreen}
           options={{
             headerShown: true,
             title: "",
