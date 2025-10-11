@@ -41,34 +41,29 @@ const ExistingUsernameScreen: React.FC<Props> = ({ navigation }) => {
     const startTime = Date.now();
 
     try {
-      console.log("making call");
       const res = await initiatePasswordReset(username.trim().toLowerCase());
-      console.log("setting token");
       await AsyncStorage.setItem("resetToken", res.token);
 
-      console.log("in try");
       const elapsed = Date.now() - startTime;
+      
       if (elapsed < MIN_BIRD_TIME) {
         await new Promise((resolve) =>
           setTimeout(resolve, MIN_BIRD_TIME - elapsed)
         );
       }
 
-      console.log("stopping loading");
-      console.log("navigating to pin verification");
       navigation.navigate("PinVerification", {
         username: username.trim().toLowerCase(),
       });
     } catch (err: any) {
-      console.log("in catch");
       const elapsed = Date.now() - startTime;
+
       if (elapsed < MIN_BIRD_TIME) {
         await new Promise((resolve) =>
           setTimeout(resolve, MIN_BIRD_TIME - elapsed)
         );
       }
-      console.log(err);
-      console.log(err.response?.data?.error);
+
       setError(
         err.response?.data?.error || "An error occurred. Please try again."
       );

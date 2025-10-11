@@ -24,6 +24,7 @@ import AnimatedDialog from "../../../animations/AnimatedDialog";
 type Props = NativeStackScreenProps<any>;
 
 const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
+  // params
   const { username } = route.params || {};
 
   // use states
@@ -43,16 +44,16 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
     `Nice password! Let me send it to our back-end engineer for approval. One second...`
   );
 
+  // use effects
   useEffect(() => {
     setNewPasswordValid(validatePassword(password));
   }, [password]);
 
+  // handlers
   const handleReset = async () => {
     setError("");
 
-    const MIN_BIRD_TIME = 3500;
-    const startTime = Date.now();
-
+    // validations
     const { length, letter, number, special } = newPasswordValid;
     if (!special) {
       setError(
@@ -80,6 +81,9 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
       setError("Invalid password. Your passwords do not match. Try again.");
       return;
     }
+
+    const MIN_BIRD_TIME = 3500;
+    const startTime = Date.now();
 
     setLoading(true);
 

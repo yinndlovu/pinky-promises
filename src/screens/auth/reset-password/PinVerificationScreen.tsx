@@ -38,6 +38,7 @@ const PinVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
 
   // handlers
   const handleVerify = async () => {
+    // validations
     if (pin.trim().length === 0) {
       setError("Where is you going without entering the PIN?");
       return;

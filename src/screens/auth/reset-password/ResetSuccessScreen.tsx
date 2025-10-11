@@ -29,6 +29,7 @@ const ResetSuccessScreen: React.FC<Props> = ({ navigation }) => {
     return () => clearTimeout(timer);
   }, []);
 
+  // handlers
   const handleGoToLogin = () => {
     navigation.navigate("Login");
   };
