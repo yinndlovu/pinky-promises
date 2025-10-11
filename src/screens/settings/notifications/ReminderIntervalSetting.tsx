@@ -35,11 +35,6 @@ const ReminderIntervalSetting = () => {
   // variables
   const token = useToken();
 
-  if (!token) {
-    setError("Session expired, please log in again");
-    return;
-  }
-
   // use effects
   useEffect(() => {
     fetchInterval();

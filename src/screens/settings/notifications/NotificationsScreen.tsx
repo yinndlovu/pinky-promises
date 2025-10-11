@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -48,24 +48,6 @@ const NotificationsScreen = () => {
   const { data: preferences = {}, isLoading: preferencesLoading } =
     useNotificationPrefs(user?.id, token);
 
-  // handlers
-  const handleToggle = async (type: string, value: boolean) => {
-    setUpdating((prev) => ({ ...prev, [type]: true }));
-    try {
-      await setNotificationPreference(token, type, value);
-
-      setLocalPreferences((prev) => ({ ...prev, [type]: value }));
-
-      queryClient.invalidateQueries({
-        queryKey: ["notificationPreferences", user?.id],
-      });
-    } catch (e: any) {
-      setError(e.response?.data?.error || "Failed to update notification");
-    }
-
-    setUpdating((prev) => ({ ...prev, [type]: false }));
-  };
-
   // use effects
   useEffect(() => {
     if (error) {
@@ -91,6 +73,24 @@ const NotificationsScreen = () => {
       return prev;
     });
   }, [preferences]);
+
+  // handlers
+  const handleToggle = async (type: string, value: boolean) => {
+    setUpdating((prev) => ({ ...prev, [type]: true }));
+    try {
+      await setNotificationPreference(token, type, value);
+
+      setLocalPreferences((prev) => ({ ...prev, [type]: value }));
+
+      queryClient.invalidateQueries({
+        queryKey: ["notificationPreferences", user?.id],
+      });
+    } catch (e: any) {
+      setError(e.response?.data?.error || "Failed to update notification");
+    }
+
+    setUpdating((prev) => ({ ...prev, [type]: false }));
+  };
 
   if (preferencesLoading) {
     return (

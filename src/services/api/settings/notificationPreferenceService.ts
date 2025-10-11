@@ -82,7 +82,11 @@ export async function setNotificationPreference(
   return res.data.value;
 }
 
-export async function getReminderInterval(token: string) {
+export async function getReminderInterval(token: string | null) {
+  if (!token) {
+    return;
+  }
+
   const res = await axios.get(`${BASE_URL}/notifications/interval/get`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -92,7 +96,11 @@ export async function getReminderInterval(token: string) {
   return res.data.hours;
 }
 
-export async function setReminderInterval(token: string, hours: number) {
+export async function setReminderInterval(token: string | null, hours: number) {
+  if (!token) {
+    return;
+  }
+  
   const res = await axios.post(
     `${BASE_URL}/notifications/interval/set`,
     { hours },
