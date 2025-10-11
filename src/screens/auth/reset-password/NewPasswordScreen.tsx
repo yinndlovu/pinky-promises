@@ -107,7 +107,7 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
         );
       }
 
-      navigation.navigate("ResetSuccess", {
+      navigation.replace("ResetSuccess", {
         username,
       });
     } catch (err: any) {

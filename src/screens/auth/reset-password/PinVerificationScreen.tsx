@@ -76,7 +76,7 @@ const PinVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
         );
       }
 
-      navigation.navigate("NewPassword", {
+      navigation.replace("NewPassword", {
         username,
       });
     } catch (err: any) {

@@ -31,7 +31,7 @@ const ResetSuccessScreen: React.FC<Props> = ({ navigation }) => {
 
   // handlers
   const handleGoToLogin = () => {
-    navigation.navigate("Login");
+    navigation.replace("Login");
   };
 
   if (storing) {
