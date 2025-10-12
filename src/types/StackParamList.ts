@@ -16,7 +16,7 @@ export type RootStackParamList = {
 };
 
 export type HomeStackParamList = {
-  Home: undefined;
+  HomeScreen: undefined;
   Search: undefined;
   PartnerProfile: { userId?: string } | undefined;
   UserProfile: { userId?: string } | undefined;
@@ -26,7 +26,7 @@ export type HomeStackParamList = {
 };
 
 export type ProfileStackParamList = {
-  Profile: undefined;
+  ProfileScreen: undefined;
   Settings: undefined;
   ChangeEmail: undefined;
   VerifyEmailOTP: undefined;
@@ -38,13 +38,13 @@ export type ProfileStackParamList = {
 };
 
 export type PresentsStackParamList = {
-  Presents: undefined;
+  PresentsScreen: undefined;
   GameListScreen: undefined;
   CartScreen: undefined;
 };
 
 export type OursStackParamList = {
-  Ours: undefined;
+  OursScreen: undefined;
   NotesScreen: undefined;
   TimelineScreen: undefined;
   AllFavoriteMemoriesScreen: undefined;

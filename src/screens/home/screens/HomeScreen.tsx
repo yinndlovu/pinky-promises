@@ -376,7 +376,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
-          onPress={() => navigation.navigate("Settings")}
+          onPress={() => navigation.navigate("Profile", { screen: "Settings" })}
         >
           <Feather name="settings" size={22} color="#fff" />
         </TouchableOpacity>

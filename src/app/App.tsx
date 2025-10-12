@@ -97,7 +97,7 @@ function HomeStackScreen() {
         cardStyle: { backgroundColor: "#23243a" },
       }}
     >
-      <HomeStack.Screen name="Home" component={HomeScreen} />
+      <HomeStack.Screen name="HomeScreen" component={HomeScreen} />
       <HomeStack.Screen
         name="Search"
         component={SearchScreen}
@@ -182,7 +182,7 @@ function ProfileStackScreen() {
         cardStyle: { backgroundColor: "#23243a" },
       }}
     >
-      <ProfileStack.Screen name="Profile" component={ProfileScreen} />
+      <ProfileStack.Screen name="ProfileScreen" component={ProfileScreen} />
       <ProfileStack.Screen
         name="Settings"
         component={SettingsScreen}
@@ -294,7 +294,7 @@ function PresentsStackScreen() {
         cardStyle: { backgroundColor: "#23243a" },
       }}
     >
-      <PresentsStack.Screen name="Presents" component={GiftsScreen} />
+      <PresentsStack.Screen name="PresentsScreen" component={GiftsScreen} />
       <PresentsStack.Screen
         name="GameListScreen"
         component={GameListScreen}
@@ -340,7 +340,7 @@ function OursStackScreen() {
         cardStyle: { backgroundColor: "#23243a" },
       }}
     >
-      <OursStack.Screen name="Ours" component={OursScreen} />
+      <OursStack.Screen name="OursScreen" component={OursScreen} />
       <OursStack.Screen
         name="NotesScreen"
         component={NotesScreen}

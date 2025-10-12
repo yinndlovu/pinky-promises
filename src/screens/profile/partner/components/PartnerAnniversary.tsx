@@ -1,13 +1,11 @@
 // external
-import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useQuery } from "@tanstack/react-query";
 
 // internal
-import { getSpecialDates } from "../../../../services/api/ours/specialDateService";
-import { SpecialDate } from "../../../../types/SpecialDate";
+import { useSpecialDates } from "../../../../hooks/useSpecialDate";
 import { useAuth } from "../../../../contexts/AuthContext";
 import useToken from "../../../../hooks/useToken";
+import { SpecialDate } from "../../../../types/SpecialDate";
 
 const PartnerAnniversary = () => {
   // variables
@@ -15,15 +13,7 @@ const PartnerAnniversary = () => {
   const token = useToken();
 
   // fetch functions
-  const {
-    data: specialDates = [],
-  } = useQuery<SpecialDate[]>({
-    queryKey: ["specialDates", user?.id],
-    queryFn: async () => {
-      return await getSpecialDates(token);
-    },
-    staleTime: 1000 * 60 * 60,
-  });
+  const { data: specialDates = [] } = useSpecialDates(user?.id, token);
 
   // helpers
   const formatDisplayDate = (
@@ -51,7 +41,7 @@ const PartnerAnniversary = () => {
   };
 
   const getAnniversaryDisplay = () => {
-    const anniversary = specialDates.find((date) =>
+    const anniversary = specialDates.find((date: SpecialDate) =>
       date.title.toLowerCase().includes("anniversary")
     );
 
@@ -64,7 +54,7 @@ const PartnerAnniversary = () => {
   };
 
   const getDayMetDisplay = () => {
-    const dayMet = specialDates.find((date) =>
+    const dayMet = specialDates.find((date: SpecialDate) =>
       date.title.toLowerCase().includes("met")
     );
 

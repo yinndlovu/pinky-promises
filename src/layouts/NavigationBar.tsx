@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
