@@ -47,10 +47,10 @@ export const saveMessage = async (
 };
 
 export const deleteOldMessages = async (): Promise<void> => {
-  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const sixtyDaysAgo = Date.now() - 60 * 24 * 60 * 60 * 1000;
   try {
     await db.runAsync(`DELETE FROM messages WHERE timestamp < ?`, [
-      thirtyDaysAgo,
+      sixtyDaysAgo,
     ]);
   } catch (error) {
     throw error;
