@@ -16,9 +16,7 @@ import { Feather } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // internal
-import {
-  createTimelineRecord,
-} from "../../../services/api/ours/timelineService";
+import { createTimelineRecord } from "../../../services/api/ours/timelineService";
 import { formatDateYearly } from "../../../utils/formatters/formatDate";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
@@ -278,7 +276,7 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: "absolute",
-    bottom: 60,
+    bottom: 10,
     left: 20,
     right: 20,
     backgroundColor: "#e03487",
