@@ -82,7 +82,7 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
       return;
     }
 
-    const MIN_BIRD_TIME = 3500;
+    const MIN_BIRD_TIME = 4000;
     const startTime = Date.now();
 
     setLoading(true);

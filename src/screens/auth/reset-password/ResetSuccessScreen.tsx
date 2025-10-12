@@ -24,7 +24,7 @@ const ResetSuccessScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setStoring(false);
-    }, 7500);
+    }, 8500);
 
     return () => clearTimeout(timer);
   }, []);

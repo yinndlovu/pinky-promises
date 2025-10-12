@@ -52,7 +52,7 @@ const PinVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
     setError("");
     setLoading(true);
 
-    const MIN_BIRD_TIME = 3500;
+    const MIN_BIRD_TIME = 4000;
     const startTime = Date.now();
 
     try {
@@ -99,7 +99,7 @@ const PinVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
     setMessage("Okay, let me resend the PIN. One second...");
     setLoading(true);
 
-    const MIN_BIRD_TIME = 3500;
+    const MIN_BIRD_TIME = 4000;
     const startTime = Date.now();
 
     try {

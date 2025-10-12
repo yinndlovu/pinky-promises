@@ -37,7 +37,7 @@ const ExistingUsernameScreen: React.FC<Props> = ({ navigation }) => {
     setError("");
     setLoading(true);
 
-    const MIN_BIRD_TIME = 3500;
+    const MIN_BIRD_TIME = 4000;
     const startTime = Date.now();
 
     try {
@@ -52,7 +52,7 @@ const ExistingUsernameScreen: React.FC<Props> = ({ navigation }) => {
         );
       }
 
-      navigation.navigate("PinVerification", {
+      navigation.replace("PinVerification", {
         username: username.trim().toLowerCase(),
       });
     } catch (err: any) {
