@@ -26,7 +26,13 @@ import { SSEProvider } from "../contexts/SSEContext";
 import { navigationRef } from "../utils/navigation/navigation";
 import { InviteProvider } from "../games/context/InviteContext";
 import { checkBatteryStatus } from "../helpers/checkBatteryStatus";
-import { RootStackParamList } from "../types/RootStackParamList";
+import {
+  RootStackParamList,
+  ProfileStackParamList,
+  HomeStackParamList,
+  OursStackParamList,
+  PresentsStackParamList,
+} from "../types/StackParamList";
 import { useVersionCheck } from "../hooks/useVersionCheck";
 import useToken from "../hooks/useToken";
 
@@ -72,9 +78,307 @@ import NewPasswordScreen from "../screens/auth/reset-password/NewPasswordScreen"
 import ResetSuccessScreen from "../screens/auth/reset-password/ResetSuccessScreen";
 
 // variables
-const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 const queryClient = new QueryClient();
+
+// stack navigators
+const HomeStack = createStackNavigator<HomeStackParamList>();
+const ProfileStack = createStackNavigator<ProfileStackParamList>();
+const PresentsStack = createStackNavigator<PresentsStackParamList>();
+const RootStack = createStackNavigator<RootStackParamList>();
+const OursStack = createStackNavigator<OursStackParamList>();
+
+function HomeStackScreen() {
+  return (
+    <HomeStack.Navigator
+      screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
+        headerShown: false,
+        cardStyle: { backgroundColor: "#23243a" },
+      }}
+    >
+      <HomeStack.Screen name="Home" component={HomeScreen} />
+      <HomeStack.Screen
+        name="Search"
+        component={SearchScreen}
+        options={{
+          headerShown: true,
+          title: "Search",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <HomeStack.Screen
+        name="PartnerProfile"
+        component={PartnerProfileScreen}
+        options={{
+          headerShown: true,
+          title: "Partner",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <HomeStack.Screen
+        name="UserProfile"
+        component={UserProfileScreen}
+        options={{
+          headerShown: true,
+          title: "",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+        }}
+      />
+      <HomeStack.Screen
+        name="PortalScreen"
+        component={PortalScreen}
+        options={{
+          headerShown: true,
+          title: "Portal",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <HomeStack.Screen
+        name="SentMessagesScreen"
+        component={SentMessagesScreen}
+        options={{
+          headerShown: true,
+          title: "Sent sweet messages",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <HomeStack.Screen
+        name="ReceivedMessagesScreen"
+        component={ReceivedMessagesScreen}
+        options={{
+          headerShown: true,
+          title: "Received sweet messages",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+    </HomeStack.Navigator>
+  );
+}
+
+function ProfileStackScreen() {
+  return (
+    <ProfileStack.Navigator
+      screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
+        headerShown: false,
+        cardStyle: { backgroundColor: "#23243a" },
+      }}
+    >
+      <ProfileStack.Screen name="Profile" component={ProfileScreen} />
+      <ProfileStack.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          headerShown: true,
+          title: "Settings",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <ProfileStack.Screen
+        name="ChangeEmail"
+        component={ChangeEmailScreen}
+        options={{
+          headerShown: true,
+          title: "Change email address",
+          headerTransparent: true,
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <ProfileStack.Screen
+        name="VerifyEmailOTP"
+        component={VerifyEmailOtpScreen}
+        options={{
+          headerShown: true,
+          title: "",
+          headerTransparent: true,
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+        }}
+      />
+      <ProfileStack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{
+          headerShown: true,
+          title: "Change password",
+          headerTransparent: true,
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <ProfileStack.Screen
+        name="NotificationsScreen"
+        component={NotificationsScreen}
+        options={{
+          headerShown: true,
+          title: "Notifications",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <ProfileStack.Screen
+        name="PendingRequests"
+        component={PendingRequestsScreen}
+        options={{
+          headerShown: true,
+          title: "Partner requests",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <RootStack.Screen
+        name="AccountScreen"
+        component={AccountScreen}
+        options={{
+          headerShown: true,
+          title: "Account",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <ProfileStack.Screen
+        name="AboutScreen"
+        component={AboutScreen}
+        options={{
+          headerShown: true,
+          title: "About",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+    </ProfileStack.Navigator>
+  );
+}
+
+function PresentsStackScreen() {
+  return (
+    <PresentsStack.Navigator
+      screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
+        headerShown: false,
+        cardStyle: { backgroundColor: "#23243a" },
+      }}
+    >
+      <PresentsStack.Screen name="Presents" component={GiftsScreen} />
+      <PresentsStack.Screen
+        name="GameListScreen"
+        component={GameListScreen}
+        options={({ navigation }) => ({
+          headerShown: true,
+          title: "Games",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.setParams({ showOptions: true } as any)}
+              style={{ marginRight: 16 }}
+            >
+              <FontAwesome6 name="chart-simple" size={22} color="#fff" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <PresentsStack.Screen
+        name="CartScreen"
+        component={CartScreen}
+        options={{
+          headerShown: true,
+          title: "Cart",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+    </PresentsStack.Navigator>
+  );
+}
+
+function OursStackScreen() {
+  return (
+    <OursStack.Navigator
+      screenOptions={{
+        ...TransitionPresets.SlideFromRightIOS,
+        headerShown: false,
+        cardStyle: { backgroundColor: "#23243a" },
+      }}
+    >
+      <OursStack.Screen name="Ours" component={OursScreen} />
+      <OursStack.Screen
+        name="NotesScreen"
+        component={NotesScreen}
+        options={{
+          headerShown: true,
+          title: "",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+        }}
+      />
+      <OursStack.Screen
+        name="TimelineScreen"
+        component={TimelineScreen}
+        options={{
+          headerShown: true,
+          title: "Timeline",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <OursStack.Screen
+        name="AllFavoriteMemoriesScreen"
+        component={AllFavoriteMemoriesScreen}
+        options={{
+          headerShown: true,
+          title: "All favorite memories",
+          headerTintColor: "#fff",
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+    </OursStack.Navigator>
+  );
+}
 
 // navigation bar
 function MainTabs() {
@@ -91,10 +395,10 @@ function MainTabs() {
         headerShown: false,
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Presents" component={GiftsScreen} />
-      <Tab.Screen name="Ours" component={OursScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Home" component={HomeStackScreen} />
+      <Tab.Screen name="Presents" component={PresentsStackScreen} />
+      <Tab.Screen name="Ours" component={OursStackScreen} />
+      <Tab.Screen name="Profile" component={ProfileStackScreen} />
     </Tab.Navigator>
   );
 }
@@ -142,7 +446,7 @@ function AppContent() {
           onDismiss={dismissBanner}
         />
       )}
-      <Stack.Navigator
+      <RootStack.Navigator
         initialRouteName={isAuthenticated ? "Main" : "Welcome"}
         screenOptions={{
           ...TransitionPresets.SlideFromRightIOS,
@@ -160,24 +464,12 @@ function AppContent() {
           },
         }}
       >
-        <Stack.Screen
-          name="Settings"
-          component={SettingsScreen}
-          options={{
-            headerShown: true,
-            title: "Settings",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
+        <RootStack.Screen
           name="Welcome"
           component={WelcomeScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="Name"
           component={NameScreen}
           options={{
@@ -189,7 +481,7 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="Username"
           component={UsernameScreen}
           options={{
@@ -201,7 +493,7 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="Password"
           component={PasswordScreen}
           options={{
@@ -213,7 +505,7 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="ExistingUsername"
           component={ExistingUsernameScreen}
           options={{
@@ -225,7 +517,7 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="PinVerification"
           component={PinVerificationScreen}
           options={{
@@ -237,7 +529,7 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="NewPassword"
           component={NewPasswordScreen}
           options={{
@@ -249,7 +541,7 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="ResetSuccess"
           component={ResetSuccessScreen}
           options={{
@@ -261,7 +553,7 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="Login"
           component={LoginScreen}
           options={{
@@ -273,108 +565,12 @@ function AppContent() {
             headerShadowVisible: false,
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="Main"
           component={MainTabs}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name="ChangeEmail"
-          component={ChangeEmailScreen}
-          options={{
-            headerShown: true,
-            title: "Change email address",
-            headerTransparent: true,
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="VerifyEmailOTP"
-          component={VerifyEmailOtpScreen}
-          options={{
-            headerShown: true,
-            title: "",
-            headerTransparent: true,
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-          }}
-        />
-        <Stack.Screen
-          name="ChangePassword"
-          component={ChangePasswordScreen}
-          options={{
-            headerShown: true,
-            title: "Change password",
-            headerTransparent: true,
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="PartnerProfile"
-          component={PartnerProfileScreen}
-          options={{
-            headerShown: true,
-            title: "Partner",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="Search"
-          component={SearchScreen}
-          options={{
-            headerShown: true,
-            title: "Search",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="UserProfile"
-          component={UserProfileScreen}
-          options={{
-            headerShown: true,
-            title: "",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-          }}
-        />
-        <Stack.Screen
-          name="PendingRequests"
-          component={PendingRequestsScreen}
-          options={{
-            headerShown: true,
-            title: "Partner requests",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="NotesScreen"
-          component={NotesScreen}
-          options={{
-            headerShown: true,
-            title: "",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-          }}
-        />
-        <Stack.Screen
+        <RootStack.Screen
           name="ChatScreen"
           component={ChatScreen}
           options={({ navigation }) => ({
@@ -396,137 +592,7 @@ function AppContent() {
             ),
           })}
         />
-        <Stack.Screen
-          name="PortalScreen"
-          component={PortalScreen}
-          options={{
-            headerShown: true,
-            title: "Portal",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="NotificationsScreen"
-          component={NotificationsScreen}
-          options={{
-            headerShown: true,
-            title: "Notifications",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="TimelineScreen"
-          component={TimelineScreen}
-          options={{
-            headerShown: true,
-            title: "Timeline",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="AboutScreen"
-          component={AboutScreen}
-          options={{
-            headerShown: true,
-            title: "About",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="AllFavoriteMemoriesScreen"
-          component={AllFavoriteMemoriesScreen}
-          options={{
-            headerShown: true,
-            title: "All favorite memories",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="SentMessagesScreen"
-          component={SentMessagesScreen}
-          options={{
-            headerShown: true,
-            title: "Sent sweet messages",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="ReceivedMessagesScreen"
-          component={ReceivedMessagesScreen}
-          options={{
-            headerShown: true,
-            title: "Received sweet messages",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="CartScreen"
-          component={CartScreen}
-          options={{
-            headerShown: true,
-            title: "Cart",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="AccountScreen"
-          component={AccountScreen}
-          options={{
-            headerShown: true,
-            title: "Account",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-          }}
-        />
-        <Stack.Screen
-          name="GameListScreen"
-          component={GameListScreen}
-          options={({ navigation }) => ({
-            headerShown: true,
-            title: "Games",
-            headerTintColor: "#fff",
-            headerStyle: { backgroundColor: "transparent" },
-            headerShadowVisible: false,
-            headerTitleAlign: "center",
-            headerRight: () => (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.setParams({ showOptions: true } as any)
-                }
-                style={{ marginRight: 16 }}
-              >
-                <FontAwesome6 name="chart-simple" size={22} color="#fff" />
-              </TouchableOpacity>
-            ),
-          })}
-        />
-        <Stack.Screen
+        <RootStack.Screen
           name="GameWaitingScreen"
           component={GameWaitingScreen as any}
           options={{
@@ -538,7 +604,7 @@ function AppContent() {
             headerTitleAlign: "center",
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="GameSetupScreen"
           component={GameSetupScreen}
           options={{
@@ -550,7 +616,7 @@ function AppContent() {
             headerTitleAlign: "center",
           }}
         />
-        <Stack.Screen
+        <RootStack.Screen
           name="GameSessionScreen"
           component={GameSessionScreen as any}
           options={{
@@ -562,7 +628,7 @@ function AppContent() {
             headerTitleAlign: "center",
           }}
         />
-      </Stack.Navigator>
+      </RootStack.Navigator>
       <StatusBar style="light" />
     </>
   );
