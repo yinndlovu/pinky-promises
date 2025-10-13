@@ -7,7 +7,6 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   TouchableOpacity,
   Modal,
 } from "react-native";
@@ -15,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
 import { useAuth } from "../../contexts/AuthContext";

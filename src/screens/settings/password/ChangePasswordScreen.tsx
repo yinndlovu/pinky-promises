@@ -9,16 +9,17 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type { StackScreenProps } from "@react-navigation/stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
 import { changePassword } from "../../../services/api/auth/authService";
 import useToken from "../../../hooks/useToken";
 import { AlertType } from "../../../types/Alert";
+import { validatePassword } from "../../../validators/validatePassword";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -55,23 +56,13 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   // variables
   const token = useToken();
 
-  // validators
-  const validateNewPassword = (password: string) => {
-    return {
-      length: password.length >= 8,
-      letter: /[a-zA-Z]/.test(password),
-      number: /\d/.test(password),
-      special: /[@$!%*?&]/.test(password),
-    };
-  };
-
   const validateConfirmPassword = (confirm: string) => {
     return confirm === newPassword && confirm.length > 0;
   };
 
   // use effects
   useEffect(() => {
-    setNewPasswordValid(validateNewPassword(newPassword));
+    setNewPasswordValid(validatePassword(newPassword));
   }, [newPassword]);
 
   useEffect(() => {
