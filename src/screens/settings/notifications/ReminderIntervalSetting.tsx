@@ -38,7 +38,7 @@ const ReminderIntervalSetting = () => {
   // use effects
   useEffect(() => {
     fetchInterval();
-  }, []);
+  }, [token]);
 
   // fetch functions
   const fetchInterval = async () => {
