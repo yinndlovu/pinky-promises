@@ -63,17 +63,23 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
     }
 
     if (!number) {
-      setError("Invalid password. Your password must contain at least one number.");
+      setError(
+        "Invalid password. Your password must contain at least one number."
+      );
       return;
     }
 
     if (!letter) {
-      setError("Invalid password. Your password must contain at least one letter.");
+      setError(
+        "Invalid password. Your password must contain at least one letter."
+      );
       return;
     }
 
     if (!length) {
-      setError("Invalid password. Your password must be at least 8 characters long.");
+      setError(
+        "Invalid password. Your password must be at least 8 characters long."
+      );
       return;
     }
 
@@ -99,6 +105,8 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
       }
 
       await resetPassword(token, password);
+      await AsyncStorage.removeItem("resetToken");
+
       const elapsed = Date.now() - startTime;
 
       if (elapsed < MIN_BIRD_TIME) {

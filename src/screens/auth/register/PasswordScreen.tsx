@@ -16,13 +16,7 @@ import { Feather } from "@expo/vector-icons";
 // internal
 import { BASE_URL } from "../../../configuration/config";
 import { useAuth } from "../../../contexts/AuthContext";
-
-const validateNewPassword = (password: string) => ({
-  length: password.length >= 8,
-  letter: /[a-zA-Z]/.test(password),
-  number: /\d/.test(password),
-  special: /[@$!%*?&]/.test(password),
-});
+import { validatePassword } from "../../../validators/validatePassword";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -47,7 +41,7 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
 
   // use effects
   useEffect(() => {
-    setNewPasswordValid(validateNewPassword(password));
+    setNewPasswordValid(validatePassword(password));
   }, [password, confirmPassword]);
 
   // handlers
