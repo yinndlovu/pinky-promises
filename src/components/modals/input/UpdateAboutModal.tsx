@@ -10,11 +10,11 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
-import AlertModal from "../output/AlertModal";
 
 // types
 type UpdateAboutModalProps = {
   visible: boolean;
+  loading: boolean;
   initialAbout: string;
   onClose: () => void;
   onSave: (about: string) => Promise<void>;
@@ -22,39 +22,18 @@ type UpdateAboutModalProps = {
 
 const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
   visible,
+  loading,
   initialAbout,
   onClose,
   onSave,
 }) => {
   const [about, setAbout] = useState(initialAbout || "");
-  const [loading, setLoading] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState("");
-  const [alertMessage, setAlertMessage] = useState("");
 
   useEffect(() => {
     if (visible) {
       setAbout(initialAbout || "");
     }
   }, [visible, initialAbout]);
-
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await onSave(about);
-
-      setAlertTitle("More about you updated");
-      setAlertMessage("You have updated your more about you details.");
-      setShowSuccessAlert(true);
-    } catch (err: any) {
-      setAlertTitle("Failed");
-      setAlertMessage(err.response?.data?.error || "Failed to update info.");
-      setShowSuccessAlert(true);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
@@ -76,7 +55,7 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.saveButton, loading && { opacity: 0.5 }]}
-                onPress={handleSave}
+                onPress={() => onSave(about)}
                 disabled={loading}
               >
                 <Text style={styles.saveButtonText}>
@@ -96,24 +75,6 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
                 <ActivityIndicator size="large" color="#e03487" />
               </View>
             )}
-
-            <AlertModal
-              visible={showSuccessAlert}
-              type="success"
-              title={alertTitle}
-              message={alertMessage}
-              buttonText="Great"
-              onClose={() => setShowSuccessAlert(false)}
-            />
-
-            <AlertModal
-              visible={showErrorAlert}
-              type="error"
-              title={alertTitle}
-              message={alertMessage}
-              buttonText="Close"
-              onClose={() => setShowErrorAlert(false)}
-            />
           </View>
         </View>
       </TouchableWithoutFeedback>

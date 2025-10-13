@@ -95,6 +95,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   // use states (modals)
   const [showPictureModal, setShowPictureModal] = useState(false);
@@ -355,6 +356,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
+    setSaving(true);
     try {
       await updateLoveLanguage(token, newLoveLanguage);
 
@@ -369,12 +371,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await queryClient.invalidateQueries({
         queryKey: ["recentActivities", user?.id],
       });
+
+      setLoveLanguageModalVisible(false);
+      setSuccess("You have updated your love language");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to save love language");
+      setError(err.response?.data?.error || "Failed to save love language");
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleSaveAbout = async (newAbout: string) => {
+    setSaving(true);
     try {
       await updateAboutUser(token, newAbout);
 
@@ -389,8 +397,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await queryClient.invalidateQueries({
         queryKey: ["recentActivities", user?.id],
       });
+
+      setAboutModalVisible(false);
+      setSuccess("You have updated more details about you");
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to save about");
+      setError(err.response?.data?.error || "Failed to save about");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -399,6 +412,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleSaveFavorites = async (newFavorites: FavoritesType) => {
+    setSaving(true);
     try {
       await updateUserFavorites(token, newFavorites);
 
@@ -411,10 +425,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id]
-      })
+        queryKey: ["recentActivities", user?.id],
+      });
+
+      setFavoritesModalVisible(false);
+      setSuccess("You have updated your favorites");
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to save favorites");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -805,6 +824,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <View style={{ zIndex: 1000 }}>
           <UpdateFavoritesModal
             visible={favoritesModalVisible}
+            loading={saving}
             initialFavorites={favorites}
             onClose={() => setFavoritesModalVisible(false)}
             onSave={handleSaveFavorites}
@@ -812,6 +832,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
           <UpdateLoveLanguageModal
             visible={loveLanguageModalVisible}
+            loading={saving}
             initialLoveLanguage={loveLanguage}
             onClose={() => setLoveLanguageModalVisible(false)}
             onSave={handleSaveLoveLanguage}
@@ -819,6 +840,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
           <UpdateAboutModal
             visible={aboutModalVisible}
+            loading={saving}
             initialAbout={about}
             onClose={() => setAboutModalVisible(false)}
             onSave={handleSaveAbout}

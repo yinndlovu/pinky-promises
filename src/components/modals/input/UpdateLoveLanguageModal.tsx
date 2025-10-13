@@ -11,12 +11,10 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 
-// content
-import AlertModal from "../output/AlertModal";
-
 // types
 type UpdateLoveLanguageModalProps = {
   visible: boolean;
+  loading: boolean;
   initialLoveLanguage: string;
   onClose: () => void;
   onSave: (loveLanguage: string) => Promise<void>;
@@ -24,17 +22,13 @@ type UpdateLoveLanguageModalProps = {
 
 const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   visible,
+  loading,
   initialLoveLanguage,
   onClose,
   onSave,
 }) => {
   // use states
   const [loveLanguage, setLoveLanguage] = useState(initialLoveLanguage || "");
-  const [loading, setLoading] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertTitle, setAlertTitle] = useState("");
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -42,26 +36,6 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
       setLoveLanguage(initialLoveLanguage || "");
     }
   }, [visible, initialLoveLanguage]);
-
-  // handlers
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await onSave(loveLanguage);
-
-      setAlertTitle("Love language updated");
-      setAlertMessage("You have updated your love language.");
-      setShowSuccessAlert(true);
-    } catch (err: any) {
-      setAlertTitle("Failed");
-      setAlertMessage(
-        err.response?.data?.error || "Failed to update love language."
-      );
-      setShowErrorAlert(true);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
@@ -80,7 +54,7 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.saveButton, loading && { opacity: 0.5 }]}
-                onPress={handleSave}
+                onPress={() => onSave(loveLanguage)}
                 disabled={loading}
               >
                 <Text style={styles.saveButtonText}>
@@ -100,23 +74,6 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
                 <ActivityIndicator size="large" color="#e03487" />
               </View>
             )}
-            <AlertModal
-              visible={showSuccessAlert}
-              type="success"
-              title={alertTitle}
-              message={alertMessage}
-              buttonText="Great"
-              onClose={() => setShowSuccessAlert(false)}
-            />
-
-            <AlertModal
-              visible={showErrorAlert}
-              type="error"
-              title={alertTitle}
-              message={alertMessage}
-              buttonText="Close"
-              onClose={() => setShowErrorAlert(false)}
-            />
           </View>
         </View>
       </TouchableWithoutFeedback>

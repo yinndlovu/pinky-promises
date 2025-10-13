@@ -11,9 +11,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-// content
-import AlertModal from "../output/AlertModal";
-
 // helpers
 const FAVORITE_FIELDS = [
   { key: "favoriteColor", label: "Favorite Color" },
@@ -34,6 +31,7 @@ type Favorites = { [key: string]: string };
 
 type UpdateFavoritesModalProps = {
   visible: boolean;
+  loading: boolean;
   initialFavorites: Favorites;
   onClose: () => void;
   onSave: (favorites: Favorites) => Promise<void>;
@@ -41,17 +39,13 @@ type UpdateFavoritesModalProps = {
 
 const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
   visible,
+  loading,
   initialFavorites,
   onClose,
   onSave,
 }) => {
   // use states
   const [favorites, setFavorites] = useState<Favorites>(initialFavorites || {});
-  const [loading, setLoading] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertTitle, setAlertTitle] = useState("");
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
 
   // use effects
   useEffect(() => {
@@ -63,24 +57,6 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
   // handlers
   const handleChange = (key: string, value: string) => {
     setFavorites((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await onSave(favorites);
-      setAlertTitle("Favorites updated");
-      setAlertMessage("You have updated your favorites.");
-      setShowSuccessAlert(true);
-    } catch (err: any) {
-      setAlertTitle("Failed");
-      setAlertMessage(
-        err.response?.data?.error || "Failed to update favorites."
-      );
-      setShowErrorAlert(true);
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (
@@ -108,7 +84,7 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={[styles.saveButton, loading && { opacity: 0.5 }]}
-              onPress={handleSave}
+              onPress={() => onSave(favorites)}
               disabled={loading}
             >
               <Text style={styles.saveButtonText}>
@@ -128,24 +104,6 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
               <ActivityIndicator size="large" color="#e03487" />
             </View>
           )}
-
-          <AlertModal
-            visible={showSuccessAlert}
-            type="success"
-            title={alertTitle}
-            message={alertMessage}
-            buttonText="Great"
-            onClose={() => setShowSuccessAlert(false)}
-          />
-
-          <AlertModal
-            visible={showErrorAlert}
-            type="error"
-            title={alertTitle}
-            message={alertMessage}
-            buttonText="Close"
-            onClose={() => setShowErrorAlert(false)}
-          />
         </View>
       </View>
     </Modal>
