@@ -4,8 +4,6 @@ import { Platform } from "react-native";
 
 // internal
 import { saveToken } from "../../services/api/expo/tokenService";
-import useToken from "../../hooks/useToken";
-
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: false,
@@ -16,7 +14,9 @@ Notifications.setNotificationHandler({
   }),
 });
 
-export async function registerForPushNotificationsAsync() {
+export async function registerForPushNotificationsAsync(
+  authToken: string | null
+) {
   let token;
 
   if (Device.isDevice) {
@@ -40,12 +40,12 @@ export async function registerForPushNotificationsAsync() {
       const tokenObj = await Notifications.getExpoPushTokenAsync();
       const token = tokenObj.data;
 
-      const authToken = useToken();
-
       if (authToken) {
         try {
           await saveToken(authToken, token);
-        } catch (error) {}
+        } catch (error) {
+          console.log("Error saving push token:", error);
+        }
       } else {
         return;
       }

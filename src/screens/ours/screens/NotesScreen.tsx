@@ -46,7 +46,7 @@ const NotesScreen: React.FC = () => {
       }
     };
     fetchNotes();
-  }, []);
+  }, [token]);
 
   // auto saving notes
   useEffect(() => {

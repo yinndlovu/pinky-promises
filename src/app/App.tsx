@@ -27,7 +27,6 @@ import VersionUpdateBanner from "../components/banners/VersionUpdateBanner";
 import RootNavigator from "../navigation/RootNavigator";
 
 // variables
-
 const queryClient = new QueryClient();
 
 // screens
@@ -38,7 +37,7 @@ function AppContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      registerForPushNotificationsAsync();
+      registerForPushNotificationsAsync(token);
       checkBatteryStatus(token);
     }
   }, [isAuthenticated, token]);
