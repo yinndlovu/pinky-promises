@@ -4,6 +4,7 @@ import { Platform } from "react-native";
 
 // internal
 import { saveToken } from "../../services/api/expo/tokenService";
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: false,
