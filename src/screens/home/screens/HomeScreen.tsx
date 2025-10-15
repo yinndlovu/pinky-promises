@@ -35,6 +35,8 @@ import {
   getInteractionMessage,
   getInteractionFeedback,
 } from "../../../helpers/interactions";
+import { markNotificationSeen } from "../../../services/api/notifications/notificationService";
+import { Notification } from "../../../interfaces/Notification";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
@@ -45,6 +47,7 @@ import ProfileCard from "../components/ProfileCard";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
 import ProcessingAnimation from "../../../components/loading/ProcessingAnimation";
+import NotificationsDropdown from "../../../components/dropdowns/NotificationsDropdown";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -58,6 +61,7 @@ import { useUserMood } from "../../../hooks/useMood";
 import { useUpcomingSpecialDate } from "../../../hooks/useSpecialDate";
 import { useUnseenInteractions } from "../../../hooks/useInteraction";
 import { useRecentActivities } from "../../../hooks/useRecentActivity";
+import { useNotifications } from "../../../hooks/useNotifications";
 import useToken from "../../../hooks/useToken";
 
 // types
@@ -80,6 +84,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [notificationsVisible, setNotificationsVisible] = useState(false);
 
   // use states (modals)
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
@@ -111,8 +116,20 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     profilePicUpdatedAt,
     fetchPicture: fetchPartnerPicture,
   } = useProfilePicture(partner?.id, token);
+  const { data: notificationsData = [], refetch: refetchNotifications } =
+    useNotifications(user?.id, token);
+
+  const [optimisticNotifications, setOptimisticNotifications] = useState<
+    Notification[]
+  >([]);
 
   // use effects
+  useEffect(() => {
+    if (token && notificationsData) {
+      setOptimisticNotifications(notificationsData);
+    }
+  }, [token, notificationsData]);
+
   useEffect(() => {
     if (inviteAccepted && invite) {
       (async () => {
@@ -190,6 +207,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         refetchPartnerStatus(),
         refetchUnseen(),
         fetchPartnerPicture(),
+        refetchNotifications(),
       ]);
     } catch (e) {
     } finally {
@@ -203,7 +221,33 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     refetchPartnerStatus,
     refetchUnseen,
     fetchPartnerPicture,
+    refetchNotifications,
   ]);
+
+  // handle toggle
+  const toggleNotifications = async () => {
+    const newVisible = !notificationsVisible;
+    setNotificationsVisible(newVisible);
+
+    if (newVisible && token) {
+      const unseen = optimisticNotifications.filter((n) => !n.seen);
+
+      setOptimisticNotifications((prev) =>
+        prev.map((n) => ({ ...n, seen: true }))
+      );
+
+      if (unseen.length > 0) {
+        await Promise.all(unseen.map((n) => markNotificationSeen(token, n.id)));
+      }
+
+      const res = await refetchNotifications();
+      if (Array.isArray(res.data)) {
+        setOptimisticNotifications(res.data);
+      }
+    }
+  };
+
+  const unseenCount = optimisticNotifications.filter((n) => !n.seen).length;
 
   // handlers
   const handleInteraction = async (action: string) => {
@@ -227,6 +271,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     } finally {
       setInteractionLoading(false);
     }
+  };
+
+  const handleCloseNotifications = () => {
+    setNotificationsVisible(false);
   };
 
   // helpers
@@ -346,6 +394,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         >
           Overview
         </Text>
+
         <TouchableOpacity
           style={{
             position: "absolute",
@@ -363,6 +412,48 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         >
           <Feather name="search" size={22} color="#fff" />
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{
+            position: "absolute",
+            top: insets.top + (HEADER_HEIGHT - 36) / 2,
+            right: 64,
+            zIndex: 20,
+            backgroundColor: "#23243a",
+            borderRadius: 20,
+            padding: 8,
+            shadowColor: "#000",
+            shadowOpacity: 0.05,
+            shadowRadius: 4,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onPress={toggleNotifications}
+        >
+          <Feather name="bell" size={20} color="#fff" />
+
+          {unseenCount > 0 && (
+            <View
+              style={{
+                position: "absolute",
+                top: -6,
+                right: -6,
+                backgroundColor: "#e03487",
+                paddingHorizontal: 6,
+                paddingVertical: 2,
+                borderRadius: 10,
+                minWidth: 20,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }}>
+                {unseenCount}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         <TouchableOpacity
           style={{
             position: "absolute",
@@ -381,6 +472,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <Feather name="settings" size={22} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      <NotificationsDropdown
+        visible={notificationsVisible}
+        notifications={
+          optimisticNotifications.length > 0
+            ? optimisticNotifications
+            : notificationsData
+        }
+        onClose={handleCloseNotifications}
+      />
+
       <ScrollView
         refreshControl={
           <RefreshControl

@@ -1,3 +1,4 @@
+// external
 import * as Location from "expo-location";
 import { LOCATION_TASK_NAME } from "../../background/LocationTask";
 

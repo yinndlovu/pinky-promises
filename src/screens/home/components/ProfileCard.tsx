@@ -324,7 +324,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 fontWeight: "800",
                 marginTop: 2,
               }}
-              numberOfLines={1}
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.6}
             >
               {userLocation || "Unknown"}
             </Text>
