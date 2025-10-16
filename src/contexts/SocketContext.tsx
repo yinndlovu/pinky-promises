@@ -16,6 +16,7 @@ import { useAuth } from "./AuthContext";
 import useToken from "../hooks/useToken";
 import usePartnerId from "../hooks/usePartnerId";
 
+// types
 type SocketCtx = {
   socket: Socket | null;
   isConnected: boolean;
@@ -37,12 +38,15 @@ export const useSocket = () => {
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  // use states
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
+  // use refs
   const isConnecting = useRef(false);
   const appState = useRef(AppState.currentState);
 
+  // variables
   const { user } = useAuth();
   const token = useToken();
   const partnerId = usePartnerId();
