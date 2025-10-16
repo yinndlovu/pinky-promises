@@ -41,6 +41,8 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
   const appState = useRef(AppState.currentState);
   const backgroundTime = useRef<number | null>(null);
+  const isConnecting = useRef(false);
+  const isConnectedRef = useRef(false);
 
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -49,6 +51,13 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
   const refetchCriticalData = async () => {
     if (!user?.id || !partnerId) {
+      console.log(
+        "Either user ID or partner ID was not found.",
+        "USER ID:",
+        user.id,
+        "PARTNER ID:",
+        partnerId
+      );
       return;
     }
 
@@ -85,13 +94,22 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   };
 
   const connectSSE = async () => {
+    if (isConnecting.current) {
+      console.log("connecting");
+      return;
+    }
+
+    isConnecting.current = true;
+
     try {
       const url = `${BASE_URL}/events?token=${token}`;
       const es = new EventSource(url);
 
       es.addEventListener("open", () => {
+        isConnectedRef.current = true;
         setIsConnected(true);
         setReconnectAttempts(0);
+        isConnecting.current = false;
       });
 
       es.addEventListener("message", (event) => {
@@ -266,10 +284,12 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
       });
 
       es.addEventListener("error", (error) => {
+        console.log("SSE error:", error)
+        isConnecting.current = false;
         setIsConnected(false);
 
         setTimeout(() => {
-          if (!isConnected) {
+          if (!isConnectedRef.current) {
             reconnect();
           }
         }, 5000);
@@ -277,6 +297,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
       setEventSource(es);
     } catch (error) {
+      isConnecting.current = false;
       setIsConnected(false);
     }
   };
@@ -291,7 +312,9 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
   const reconnect = () => {
     disconnectSSE();
+
     const delay = Math.min(1000 * Math.pow(4, reconnectAttempts), 30000);
+
     setTimeout(() => {
       connectSSE();
       setReconnectAttempts((prev) => prev + 1);
@@ -299,8 +322,10 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   };
 
   const handleAppStateChange = (nextAppState: AppStateStatus) => {
+    console.log("AppState change:", appState.current, "->", nextAppState);
+
     if (
-      appState.current.match(/inactive|background/) &&
+      (appState.current === "inactive" || appState.current === "background") &&
       nextAppState === "active"
     ) {
       console.log("App has come to the foreground");
@@ -309,12 +334,18 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
         ? Date.now() - backgroundTime.current
         : 0;
 
-      if (!isConnected) {
+      if (!isConnectedRef.current) {
         setReconnectAttempts(0);
         reconnect();
       }
 
-      if (backgroundDuration > 30000) {
+      console.log(
+        "check how long the app was backgrounded for:",
+        backgroundDuration,
+        "ms"
+      );
+
+      if (backgroundDuration > 10000) {
         console.log(
           `App was backgrounded for ${backgroundDuration}ms, refetching data`
         );
@@ -327,7 +358,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
       }
 
       backgroundTime.current = null;
-    } else if (nextAppState.match(/inactive|background/)) {
+    } else if (nextAppState === "background") {
       console.log("App is going to background");
       backgroundTime.current = Date.now();
     }
@@ -336,12 +367,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    if (!token) {
-      return;
-    }
-
-    connectSSE();
-
+    console.log("Listening for the change");
     const subscription = AppState.addEventListener(
       "change",
       handleAppStateChange
@@ -349,6 +375,22 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children }) => {
 
     return () => {
       subscription.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!token) {
+      console.log("No token found.");
+      return;
+    }
+
+    console.log("token found:", token);
+
+    if (!eventSource) {
+      connectSSE();
+    }
+
+    return () => {
       disconnectSSE();
     };
   }, [token]);

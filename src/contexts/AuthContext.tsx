@@ -16,6 +16,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<any | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   // use effects
   useEffect(() => {
@@ -29,6 +30,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!token) {
         return false;
       }
+
+      setToken(token);
 
       const response = await axios.get(`${BASE_URL}/auth/validate-token`, {
         headers: {
@@ -81,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     await AsyncStorage.removeItem("token");
 
     setUser(null);
+    setToken(null);
     setIsAuthenticated(false);
   };
 
@@ -90,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         isAuthenticated,
         isLoading,
         user,
+        token,
         login,
         logout,
         validateToken,
