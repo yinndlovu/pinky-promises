@@ -14,9 +14,8 @@ import { registerForPushNotificationsAsync } from "../utils/notifications/notifi
 import { NotificationProvider } from "../contexts/NotificationContext";
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
 import { sqlitePersistor } from "../database/reactQueryPersistor";
-import { SSEProvider } from "../contexts/SSEContext";
+import { SocketProvider } from "../contexts/SocketContext";
 import { navigationRef } from "../utils/navigation/navigation";
-import { InviteProvider } from "../games/context/InviteContext";
 import { checkBatteryStatus } from "../helpers/checkBatteryStatus";
 import { useVersionCheck } from "../hooks/useVersionCheck";
 import useToken from "../hooks/useToken";
@@ -85,7 +84,7 @@ export default function App() {
             }}
             onSuccess={() => {}}
           >
-            <SSEProvider>
+            <SocketProvider>
               <NavigationContainer
                 ref={navigationRef}
                 theme={{
@@ -118,11 +117,9 @@ export default function App() {
                   },
                 }}
               >
-                <InviteProvider>
-                  <AppContent />
-                </InviteProvider>
+                <AppContent />
               </NavigationContainer>
-            </SSEProvider>
+            </SocketProvider>
           </PersistQueryClientProvider>
         </NotificationProvider>
       </AuthProvider>

@@ -22,9 +22,6 @@ import ResetSuccessScreen from "../screens/auth/reset-password/ResetSuccessScree
 import LoginScreen from "../screens/auth/login/LoginScreen";
 import MainTabs from "./MainTabs";
 import ChatScreen from "../screens/chat/ChatScreen";
-import GameWaitingScreen from "../games/room/GameWaitingScreen";
-import GameSetupScreen from "../games/trivia/screens/GameSetupScreen";
-import GameSessionScreen from "../games/trivia/screens/GameSessionScreen";
 
 // components
 import AIHeader from "./components/AIHeader";
@@ -179,42 +176,6 @@ export default function RootNavigator() {
             </TouchableOpacity>
           ),
         })}
-      />
-      <RootStack.Screen
-        name="GameWaitingScreen"
-        component={GameWaitingScreen as any}
-        options={{
-          headerShown: true,
-          title: "Game Room",
-          headerTintColor: "#fff",
-          headerStyle: { backgroundColor: "transparent" },
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-        }}
-      />
-      <RootStack.Screen
-        name="GameSetupScreen"
-        component={GameSetupScreen}
-        options={{
-          headerShown: true,
-          title: "Setup",
-          headerTintColor: "#fff",
-          headerStyle: { backgroundColor: "transparent" },
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-        }}
-      />
-      <RootStack.Screen
-        name="GameSessionScreen"
-        component={GameSessionScreen as any}
-        options={{
-          headerShown: true,
-          title: "Playing Trivia",
-          headerTintColor: "#fff",
-          headerStyle: { backgroundColor: "transparent" },
-          headerShadowVisible: false,
-          headerTitleAlign: "center",
-        }}
       />
     </RootStack.Navigator>
   );

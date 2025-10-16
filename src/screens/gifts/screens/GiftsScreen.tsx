@@ -207,7 +207,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
-          onPress={() => navigation.navigate("GameListScreen")}
+          // onPress={() => navigation.navigate("GameListScreen")}
         >
           <Ionicons name="game-controller-outline" size={22} color="#fff" />
         </TouchableOpacity>

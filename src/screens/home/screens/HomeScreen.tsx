@@ -26,7 +26,6 @@ import {
   formatTime,
   formatTimeLeft,
 } from "../../../utils/formatters/formatDate";
-import { useInvite } from "../../../games/context/InviteContext";
 import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
 import { useAuth } from "../../../contexts/AuthContext";
@@ -72,7 +71,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
-  const { invite, setInvite, inviteAccepted, setInviteAccepted } = useInvite();
   const { user } = useAuth();
   const token = useToken();
 
@@ -129,37 +127,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       setOptimisticNotifications(notificationsData);
     }
   }, [token, notificationsData]);
-
-  useEffect(() => {
-    if (inviteAccepted && invite) {
-      (async () => {
-        try {
-          const yourInfo = await fetchCurrentUserProfileAndAvatar();
-          const partnerInfo = await fetchPartnerProfileAndAvatar();
-
-          if (!yourInfo || !partnerInfo) {
-            alert("Failed to fetch profile information. Please try again.");
-            setInviteAccepted(false);
-            return;
-          }
-
-          navigation.navigate("GameWaitingScreen", {
-            gameName: invite.gameName,
-            yourInfo,
-            partnerInfo,
-            roomId: invite.roomId,
-            isInviter: false,
-          });
-          setInviteAccepted(false);
-          setInvite(null);
-        } catch (error) {
-          console.error("Error navigating to waiting screen:", error);
-          alert("An error occurred. Please try again.");
-          setInviteAccepted(false);
-        }
-      })();
-    }
-  }, [inviteAccepted, invite, navigation]);
 
   useFocusEffect(
     useCallback(() => {
