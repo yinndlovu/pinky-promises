@@ -312,14 +312,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const userLocation = partnerStatus?.userLocation ?? null;
   const userTimezone = partnerStatus?.timezoneOffset ?? null;
 
-  if (partnerLoading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
       {!isOnline && (
@@ -462,27 +454,23 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.partnerLabel}>PARTNER</Text>
-        {partnerLoading ? (
-          <View style={styles.centered}>
-            <ActivityIndicator color="#e03487" size="large" />
-          </View>
-        ) : (
-          <ProfileCard
-            partner={partner}
-            avatarUri={avatarUri}
-            status={status}
-            statusColor={statusColor}
-            mood={mood}
-            isActive={isActive}
-            batteryLevel={batteryLevel}
-            distanceFromHome={distanceFromHome}
-            lastSeen={lastSeen}
-            onPress={() => navigation.navigate("PartnerProfile")}
-            renderPartnerImage={renderPartnerImage}
-            userLocation={userLocation}
-            userTimezone={userTimezone}
-          />
-        )}
+
+        <ProfileCard
+          partner={partner}
+          avatarUri={avatarUri}
+          status={status}
+          statusColor={statusColor}
+          mood={mood}
+          isActive={isActive}
+          batteryLevel={batteryLevel}
+          distanceFromHome={distanceFromHome}
+          lastSeen={lastSeen}
+          onPress={() => navigation.navigate("PartnerProfile")}
+          renderPartnerImage={renderPartnerImage}
+          userLocation={userLocation}
+          userTimezone={userTimezone}
+        />
+
         <View style={styles.buttonRow}>
           <BlurView intensity={50} tint="dark" style={styles.blurButton}>
             <TouchableOpacity

@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,9 +12,11 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 // internal
 import { getNotes, updateNotes } from "../../../services/api/ours/notesService";
 import useToken from "../../../hooks/useToken";
+import { useSocket } from "../../../contexts/SocketContext";
 
 // variables
 const AUTO_SAVE_DELAY = 1000;
+const TYPING_THROTTLE_MS = 3000;
 
 const NotesScreen: React.FC = () => {
   // use states
@@ -24,12 +26,16 @@ const NotesScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [partnerTyping, setPartnerTyping] = useState(false);
 
   // use refs
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
+  const lastTypingEmit = useRef<number>(0);
 
   // variables
   const token = useToken();
+  const { socket } = useSocket();
 
   // use effects
   useEffect(() => {
@@ -48,6 +54,40 @@ const NotesScreen: React.FC = () => {
     fetchNotes();
   }, [token]);
 
+  // incoming socket events
+  useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
+    const onPartnerTyping = () => {
+      setPartnerTyping(true);
+      if (typingTimeout.current) {
+        clearTimeout(typingTimeout.current);
+      }
+      typingTimeout.current = setTimeout(() => {
+        setPartnerTyping(false);
+      }, 2000);
+    };
+
+    const onContentUpdated = async () => {
+      try {
+        const notes = await getNotes(token);
+        if (!saving) {
+          setContent(notes.content || "");
+        }
+      } catch {}
+    };
+
+    socket.on("notes:partnerTyping", onPartnerTyping);
+    socket.on("notes:contentUpdated", onContentUpdated);
+
+    return () => {
+      socket.off("notes:partnerTyping", onPartnerTyping);
+      socket.off("notes:contentUpdated", onContentUpdated);
+    };
+  }, [socket, token, saving]);
+
   // auto saving notes
   useEffect(() => {
     if (loading) {
@@ -62,6 +102,10 @@ const NotesScreen: React.FC = () => {
     saveTimeout.current = setTimeout(async () => {
       try {
         await updateNotes(token, content);
+
+        if (socket?.connected) {
+          socket.emit("notes:updated");
+        }
       } catch {}
       setSaving(false);
     }, AUTO_SAVE_DELAY);
@@ -72,6 +116,21 @@ const NotesScreen: React.FC = () => {
     };
   }, [content]);
 
+  const handleChangeText = useCallback(
+    (text: string) => {
+      setContent(text);
+      const now = Date.now();
+      if (
+        socket?.connected &&
+        now - lastTypingEmit.current > TYPING_THROTTLE_MS
+      ) {
+        socket.emit("notes:typing");
+        lastTypingEmit.current = now;
+      }
+    },
+    [socket]
+  );
+
   return (
     <KeyboardAwareScrollView
       contentContainerStyle={{ flexGrow: 1 }}
@@ -81,6 +140,19 @@ const NotesScreen: React.FC = () => {
     >
       <View style={styles.container}>
         <Text style={styles.header}>Our shared notes</Text>
+        {partnerTyping ? (
+          <View style={[styles.statusBar]}>
+            <Text style={styles.savingText}>
+              Partner is writing something on the notes…
+            </Text>
+          </View>
+        ) : null}
+        {saving && !partnerTyping ? (
+          <View style={styles.statusBar}>
+            <Text style={styles.savingText}>Saving...</Text>
+          </View>
+        ) : null}
+
         {loading ? (
           <ActivityIndicator color="#e03487" style={{ marginTop: 32 }} />
         ) : (
@@ -93,7 +165,7 @@ const NotesScreen: React.FC = () => {
               style={styles.input}
               multiline
               value={content}
-              onChangeText={setContent}
+              onChangeText={handleChangeText}
               placeholder="Start writing your shared notes here..."
               placeholderTextColor="#b0b3c6"
               textAlignVertical="top"
