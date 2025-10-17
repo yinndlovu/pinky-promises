@@ -52,6 +52,7 @@ const SentMessagesScreen = () => {
       const res = await getSentSweetMessages(token);
       return res.sweets || res;
     },
+    enabled: !!user?.id && !!token,
     staleTime: 1000 * 60 * 10,
   });
 

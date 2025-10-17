@@ -36,15 +36,14 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   const token = useToken();
 
   // fetch functions
-  const { data: portalActivityCount } =
-    useQuery({
-      queryKey: ["portalActivityCount", user?.id],
-      queryFn: async () => {
-        return getPortalActivityCount(token);
-      },
-      staleTime: 1000 * 60,
-      enabled: !!partner && !!token,
-    });
+  const { data: portalActivityCount } = useQuery({
+    queryKey: ["portalActivityCount", user?.id],
+    queryFn: async () => {
+      return getPortalActivityCount(token);
+    },
+    staleTime: 1000 * 60,
+    enabled: !!partner && !!token,
+  });
 
   const totalUnseen = portalActivityCount?.total || 0;
   const sweetTotal = portalActivityCount?.sweetTotal || 0;

@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,9 @@ import { formatDateYearly } from "../../../utils/formatters/formatDate";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useTimeline } from "../../../hooks/useTimeline";
+
+// content
+import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 const TimelineScreen = () => {
   // variables
@@ -118,9 +121,15 @@ const TimelineScreen = () => {
       </View>
 
       {isTimelineLoading ? (
-        <Text style={{ color: "#aaa", textAlign: "center", marginTop: 40 }}>
-          Loading...
-        </Text>
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <LoadingSpinner showMessage={false} size="medium" />
+        </View>
       ) : (
         <FlatList
           data={Array.isArray(timeline) ? timeline : []}
@@ -208,12 +217,14 @@ const TimelineScreen = () => {
                 </Text>
               </TouchableOpacity>
             </View>
+
             {error && (
               <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>
             )}
           </View>
         </KeyboardAvoidingView>
       </Modal>
+
       {showToast && (
         <View style={styles.toast}>
           <Text style={styles.toastText}>{toastMessage}</Text>

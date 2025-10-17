@@ -26,8 +26,6 @@ import {
   formatTime,
   formatTimeLeft,
 } from "../../../utils/formatters/formatDate";
-import { fetchCurrentUserProfileAndAvatar } from "../../../games/helpers/userDetailsHelper";
-import { fetchPartnerProfileAndAvatar } from "../../../games/helpers/partnerDetailsHelper";
 import { useAuth } from "../../../contexts/AuthContext";
 import { checkAndUpdateHomeStatus } from "../../../helpers/checkHomeStatus";
 import {
@@ -141,7 +139,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       checkAndUpdateHomeStatus(token);
       const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
       return () => clearInterval(interval);
-    }, [])
+    }, [token])
   );
 
   useEffect(() => {

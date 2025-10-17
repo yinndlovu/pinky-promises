@@ -78,41 +78,38 @@ export default function PortalScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
 
   // fetch functions
-  const {
-    data: unseenSweetMessage,
-    refetch: refetchUnseenSweetMessage,
-  } = useQuery({
-    queryKey: ["unseenSweetMessage", user?.id],
-    queryFn: async () => {
-      const unseenSweet = await getLastUnseenSweetMessage(token);
-      return unseenSweet.sweet || null;
-    },
-    staleTime: 0,
-  });
+  const { data: unseenSweetMessage, refetch: refetchUnseenSweetMessage } =
+    useQuery({
+      queryKey: ["unseenSweetMessage", user?.id],
+      queryFn: async () => {
+        const unseenSweet = await getLastUnseenSweetMessage(token);
+        return unseenSweet.sweet || null;
+      },
+      enabled: !!user?.id && !!token,
+      staleTime: 0,
+    });
 
-  const {
-    data: unseenVentMessage,
-    refetch: refetchUnseenVentMessage,
-  } = useQuery({
-    queryKey: ["unseenVentMessage", user?.id],
-    queryFn: async () => {
-      const unseenVent = await getLastUnseenVentMessage(token);
-      return unseenVent.vent || null;
-    },
-    staleTime: 0,
-  });
+  const { data: unseenVentMessage, refetch: refetchUnseenVentMessage } =
+    useQuery({
+      queryKey: ["unseenVentMessage", user?.id],
+      queryFn: async () => {
+        const unseenVent = await getLastUnseenVentMessage(token);
+        return unseenVent.vent || null;
+      },
+      enabled: !!user?.id && !!token,
+      staleTime: 0,
+    });
 
-  const {
-    data: sweetMessagesSent = [],
-    refetch: refetchSweetMessagesSent,
-  } = useQuery<Message[]>({
-    queryKey: ["sweetMessagesSent", user?.id],
-    queryFn: async () => {
-      const sentSweet = await getSentSweetMessages(token);
-      return sentSweet.sweets || sentSweet;
-    },
-    staleTime: 1000 * 60 * 60,
-  });
+  const { data: sweetMessagesSent = [], refetch: refetchSweetMessagesSent } =
+    useQuery<Message[]>({
+      queryKey: ["sweetMessagesSent", user?.id],
+      queryFn: async () => {
+        const sentSweet = await getSentSweetMessages(token);
+        return sentSweet.sweets || sentSweet;
+      },
+      enabled: !!user?.id && !!token,
+      staleTime: 1000 * 60 * 60,
+    });
 
   const {
     data: sweetMessagesReceived = [],
@@ -123,20 +120,20 @@ export default function PortalScreen({ navigation }: Props) {
       const receivedSweet = await getReceivedSweetMessages(token);
       return receivedSweet.sweets || receivedSweet;
     },
+    enabled: !!user?.id && !!token,
     staleTime: 1000 * 60 * 60,
   });
 
-  const {
-    data: ventMessagesSent = [],
-    refetch: refetchVentMessagesSent,
-  } = useQuery<Message[]>({
-    queryKey: ["ventMessagesSent", user?.id],
-    queryFn: async () => {
-      const sentVent = await getSentVentMessages(token);
-      return sentVent.vents || sentVent;
-    },
-    staleTime: 1000 * 60 * 60,
-  });
+  const { data: ventMessagesSent = [], refetch: refetchVentMessagesSent } =
+    useQuery<Message[]>({
+      queryKey: ["ventMessagesSent", user?.id],
+      queryFn: async () => {
+        const sentVent = await getSentVentMessages(token);
+        return sentVent.vents || sentVent;
+      },
+      enabled: !!user?.id && !!token,
+      staleTime: 1000 * 60 * 60,
+    });
 
   const {
     data: ventMessagesReceived = [],
@@ -147,6 +144,7 @@ export default function PortalScreen({ navigation }: Props) {
       const receivedVent = await getReceivedVentMessages(token);
       return receivedVent.vents || receivedVent;
     },
+    enabled: !!user?.id && !!token,
     staleTime: 1000 * 60 * 60,
   });
 
@@ -178,9 +176,7 @@ export default function PortalScreen({ navigation }: Props) {
       setDeleting(false);
       setConfirmVisible(false);
     } catch (err: any) {
-      setToastMessage(
-        err?.response?.data?.error || "Failed to delete message"
-      );
+      setToastMessage(err?.response?.data?.error || "Failed to delete message");
       setDeleting(false);
       setConfirmVisible(false);
     } finally {
@@ -286,13 +282,15 @@ export default function PortalScreen({ navigation }: Props) {
     if (!viewModalVisible && viewType) {
       queryClient.invalidateQueries({
         queryKey: [
-          viewType === "sweet" ? "unseenSweetMessage" : "unseenVentMessage", user?.id
+          viewType === "sweet" ? "unseenSweetMessage" : "unseenVentMessage",
+          user?.id,
         ],
       });
 
       queryClient.invalidateQueries({
         queryKey: [
-          viewType === "sweet" ? "sweetMessagesSent" : "ventMessagesSent", user?.id
+          viewType === "sweet" ? "sweetMessagesSent" : "ventMessagesSent",
+          user?.id,
         ],
       });
 
@@ -301,7 +299,7 @@ export default function PortalScreen({ navigation }: Props) {
           viewType === "sweet"
             ? "sweetMessagesReceived"
             : "ventMessagesReceived",
-            user?.id
+          user?.id,
         ],
       });
       setViewType(null);
@@ -429,6 +427,7 @@ export default function PortalScreen({ navigation }: Props) {
           onClose={() => setShowSuccess(false)}
         />
       </ScrollView>
+
       {viewLoading && (
         <View
           style={{

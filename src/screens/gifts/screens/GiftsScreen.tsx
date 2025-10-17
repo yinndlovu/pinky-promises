@@ -71,7 +71,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   );
   const {
     data: setMonthlyGift,
-    isLoading: setMonthlyGiftLoading,
     refetch: refetchSetMonthlyGift,
   } = useSetMonthlyGift(user?.id, token);
 
@@ -156,13 +155,13 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  if (setMonthlyGiftLoading) {
+  /*if (setMonthlyGiftLoading) {
     return (
       <View style={styles.centered}>
         <LoadingSpinner showMessage={false} size="medium" />
       </View>
     );
-  }
+  }*/
 
   return (
     <View style={{ flex: 1, backgroundColor: "#23243a" }}>
