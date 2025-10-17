@@ -86,7 +86,7 @@ const NotesScreen: React.FC = () => {
       socket.off("notes:partnerTyping", onPartnerTyping);
       socket.off("notes:contentUpdated", onContentUpdated);
     };
-  }, [socket, token, saving]);
+  }, [socket, token]); // previously had a saving dependency here
 
   // auto saving notes
   useEffect(() => {
