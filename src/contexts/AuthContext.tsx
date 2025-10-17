@@ -44,6 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         return true;
       }
+      
       return false;
     } catch (error: any) {
       if (

@@ -160,6 +160,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         queryClient.setQueryData(["unseenVentMessage", user.id], data);
 
         queryClient.invalidateQueries({
+          queryKey: ["unseenVentMessage", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+        queryClient.invalidateQueries({
           queryKey: ["portalActivityCount", user.id],
         });
       }
@@ -181,6 +187,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         queryClient.setQueryData(["unseenSweetMessage", user.id], data);
 
         queryClient.invalidateQueries({
+          queryKey: ["unseenSweetMessage", user.id],
+        });
+        queryClient.invalidateQueries({
           queryKey: ["portalActivityCount", user.id],
         });
         queryClient.invalidateQueries({
@@ -195,6 +204,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       queryClient.setQueryData(["timeline", user.id], data);
+      queryClient.invalidateQueries({
+        queryKey: ["timeline", user.id],
+      });
       queryClient.invalidateQueries({
         queryKey: ["recentActivities", user.id],
       });
@@ -281,7 +293,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       queryClient.invalidateQueries({
         queryKey: ["timeline", user.id],
       }),
-      queryClient.invalidateQueries({ queryKey: ["notifications", user.id] })
+      queryClient.invalidateQueries({
+        queryKey: ["notifications", user.id],
+      })
     );
     Promise.allSettled(tasks);
   };
