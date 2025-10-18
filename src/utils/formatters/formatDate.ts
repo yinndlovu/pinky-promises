@@ -107,13 +107,30 @@ export const formatTime = (dateString: string): string => {
 };
 
 // format time left until coming date in the home screen
-export const formatTimeLeft = (daysUntil: number): string => {
+export const formatTimeLeft = (
+  daysUntil: number,
+  hoursUntil?: number,
+  minutesUntil?: number
+): string => {
   if (daysUntil === 0) {
+    if (hoursUntil != null) {
+      if (hoursUntil > 0) {
+        return minutesUntil != null && minutesUntil > 0
+          ? `${hoursUntil} hour${
+              hoursUntil !== 1 ? "s" : ""
+            } ${minutesUntil} minute${minutesUntil !== 1 ? "s" : ""} left`
+          : `${hoursUntil} hour${hoursUntil !== 1 ? "s" : ""} left`;
+      } else if (minutesUntil != null && minutesUntil > 0) {
+        return `${minutesUntil} minute${minutesUntil !== 1 ? "s" : ""} left`;
+      }
+    }
     return "Today";
   }
 
   if (daysUntil === 1) {
-    return "1 day left";
+    return hoursUntil != null
+      ? `${daysUntil} day ${hoursUntil} hour${hoursUntil !== 1 ? "s" : ""} left`
+      : "1 day left";
   }
 
   if (daysUntil < 30) {

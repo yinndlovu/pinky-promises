@@ -90,7 +90,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // data
   const {
     data: partner,
-    isLoading: partnerLoading,
     refetch: refetchPartner,
   } = usePartner(user?.id, token);
   const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
