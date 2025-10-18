@@ -143,10 +143,11 @@ const NotesScreen: React.FC = () => {
         {partnerTyping ? (
           <View style={[styles.statusBar]}>
             <Text style={styles.savingText}>
-              Partner is writing something on the notes…
+              Your baby is writing something on the notes…
             </Text>
           </View>
         ) : null}
+
         {saving && !partnerTyping ? (
           <View style={styles.statusBar}>
             <Text style={styles.savingText}>Saving...</Text>
