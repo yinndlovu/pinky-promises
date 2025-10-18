@@ -32,7 +32,11 @@ export async function verifyPassword(token: string | null, password: string) {
   const res = await axios.post(
     `${BASE_URL}/auth/verify-password`,
     { password },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
 
   return res.data.message;

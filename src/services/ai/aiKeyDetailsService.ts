@@ -10,14 +10,20 @@ export async function saveKeyDetail(record: {
   token: string;
 }) {
   const { token, ...data } = record;
+
   return axios.post(`${BASE_URL}/ai/record-detail`, data, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 }
 
 export async function fetchKeyDetails(token: string) {
   const res = await axios.get(`${BASE_URL}/ai/records`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
   return res.data.records;
 }

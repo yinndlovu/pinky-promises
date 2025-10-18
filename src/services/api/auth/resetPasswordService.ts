@@ -20,7 +20,9 @@ export async function verifyPin(token: string | null, pin: string) {
       pin,
     },
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -38,7 +40,9 @@ export async function resetPassword(token: string | null, newPassword: string) {
       newPassword,
     },
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -54,7 +58,9 @@ export async function resendPin(token: string | null) {
     `${BASE_URL}/auth/reset-password/resend-pin`,
     {},
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -67,7 +73,9 @@ export async function checkVerificationStatus(token: string | null) {
   }
 
   const res = await axios.get(`${BASE_URL}/auth/reset-password/status`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   return res.data;
