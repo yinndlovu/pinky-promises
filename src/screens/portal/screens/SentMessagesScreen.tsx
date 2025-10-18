@@ -47,7 +47,7 @@ const SentMessagesScreen = () => {
     error,
     refetch: refetchMessages,
   } = useQuery<Message[]>({
-    queryKey: ["lastSixSentMessages", user?.id],
+    queryKey: ["sentSweetMessages", user?.id],
     queryFn: async () => {
       const res = await getSentSweetMessages(token);
       return res.sweets || res;

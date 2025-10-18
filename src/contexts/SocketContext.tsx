@@ -157,8 +157,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData(["unseenVentMessage", user.id], data);
-
         queryClient.invalidateQueries({
           queryKey: ["unseenVentMessage", user.id],
         });
@@ -180,33 +178,55 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         userId: string;
         userName: string;
       }) => {
-        if (!user?.id) {
+        if (!user?.id || String(data.userId) !== String(partnerId)) {
           return;
         }
 
-        queryClient.setQueryData(["unseenSweetMessage", user.id], data);
-
         queryClient.invalidateQueries({
-          queryKey: ["unseenSweetMessage", user.id],
+          queryKey: ["unseenVentMessage", user.id],
         });
         queryClient.invalidateQueries({
           queryKey: ["portalActivityCount", user.id],
         });
+
+        queryClient.setQueryData<any[]>(
+          ["sentSweetMessages", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [data];
+            }
+
+            if (old.some((x) => x.id === data.id)) {
+              return old;
+            }
+
+            return [data, ...old];
+          }
+        );
+
         queryClient.invalidateQueries({
           queryKey: ["recentActivities", user.id],
         });
       }
     );
 
-    s.on("addTimelineRecord", (data: { record: any }) => {
+    s.on("addTimelineRecord", (data: { newRecord: any }) => {
       if (!user?.id) {
         return;
       }
 
-      queryClient.setQueryData(["timeline", user.id], data);
-      queryClient.invalidateQueries({
-        queryKey: ["timeline", user.id],
+      queryClient.setQueryData<any[]>(["timeline", user.id], (old) => {
+        if (!old || !Array.isArray(old)) {
+          return [data.newRecord];
+        }
+
+        if (old.some((x) => x.id === data.newRecord.id)) {
+          return old;
+        }
+
+        return [data.newRecord, ...old];
       });
+
       queryClient.invalidateQueries({
         queryKey: ["recentActivities", user.id],
       });
@@ -242,6 +262,393 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
       }
     );
+
+    s.on("favoritesUpdate", (data: { updated: any }) => {
+      if (partnerId && String(partnerId) == data.updated.userId) {
+        queryClient.invalidateQueries({ queryKey: ["favorites", partnerId] });
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    });
+
+    s.on(
+      "createSpecialDate",
+      (data: {
+        id: string;
+        date: string;
+        title: string;
+        description: string;
+        userId: string;
+        partnerId: string;
+      }) => {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(["specialDates", user.id], (old) => {
+          if (!old || !Array.isArray(old)) {
+            return [data];
+          }
+
+          if (old.some((x) => x.id === data.id)) {
+            return old;
+          }
+
+          return [data, ...old];
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on(
+      "updateSpecialDate",
+      (data: {
+        id: string;
+        date: string;
+        title: string;
+        description: string;
+        userId: string;
+        partnerId: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(["specialDates", user.id], (old) => {
+          if (!old || !Array.isArray(old)) {
+            return [data];
+          }
+
+          const existingIndex = old.findIndex((x) => x.id === data.id);
+
+          if (existingIndex !== -1) {
+            const updated = [...old];
+            updated[existingIndex] = data;
+            return updated;
+          }
+
+          return [data, ...old];
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on(
+      "deleteSpecialDate",
+      (data: {
+        id: string;
+        date: string;
+        title: string;
+        description: string;
+        userId: string;
+        partnerId: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(["specialDates", user.id], (old) => {
+          if (!old || !Array.isArray(old)) {
+            return [];
+          }
+
+          return old.filter((x) => x.id !== data.id);
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on(
+      "storeMessage",
+      (data: {
+        id: string;
+        title: string;
+        message: string;
+        createdAt: string;
+        updatedAt: string;
+        userId: string;
+        partnerId: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(
+          ["partnerStoredMessages", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [data];
+            }
+
+            if (old.some((x) => x.id === data.id)) {
+              return old;
+            }
+
+            return [data, ...old];
+          }
+        );
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on(
+      "updateStoredMessage",
+      (data: {
+        id: string;
+        title: string;
+        message: string;
+        createdAt: string;
+        updatedAt: string;
+        userId: string;
+        partnerId: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(
+          ["partnerStoredMessages", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [data];
+            }
+
+            const existingIndex = old.findIndex((x) => x.id === data.id);
+
+            if (existingIndex !== -1) {
+              const updated = [...old];
+              updated[existingIndex] = data;
+              return updated;
+            }
+
+            return [data, ...old];
+          }
+        );
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on(
+      "deleteStoredMessage",
+      (data: {
+        id: string;
+        title: string;
+        message: string;
+        createdAt: string;
+        updatedAt: string;
+        userId: string;
+        partnerId: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(
+          ["partnerStoredMessages", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [];
+            }
+
+            return old.filter((x) => x.id !== data.id);
+          }
+        );
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on("updateLoveLanguage", (data: { record: any }) => {
+      if (partnerId && String(partnerId) === String(data.record.userId)) {
+        queryClient.setQueryData(["loveLanguage", partnerId], data.record);
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    });
+
+    s.on(
+      "createFavoriteMemory",
+      (data: {
+        id: string;
+        memory: string;
+        date: string;
+        author: string;
+        partnerId: string;
+        userId: string;
+        createdAt: string;
+        updatedAt: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(
+          ["allFavoriteMemories", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [data];
+            }
+
+            if (old.some((x) => x.id === data.id)) {
+              return old;
+            }
+
+            return [data, ...old];
+          }
+        );
+
+        queryClient.setQueryData<any[]>(
+          ["recentFavoriteMemories", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [data];
+            }
+
+            if (old.some((x) => x.id === data.id)) {
+              return old;
+            }
+
+            return [data, ...old];
+          }
+        );
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on(
+      "deleteFavoriteMemory",
+      (data: {
+        id: string;
+        memory: string;
+        date: string;
+        author: string;
+        partnerId: string;
+        userId: string;
+        createdAt: string;
+        updatedAt: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(
+          ["allFavoriteMemories", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [];
+            }
+
+            return old.filter((x) => x.id !== data.id);
+          }
+        );
+
+        queryClient.setQueryData<any[]>(
+          ["recentFavoriteMemories", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [];
+            }
+
+            return old.filter((x) => x.id !== data.id);
+          }
+        );
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on(
+      "updateFavoriteMemory",
+      (data: {
+        id: string;
+        memory: string;
+        date: string;
+        author: string;
+        partnerId: string;
+        userId: string;
+        createdAt: string;
+        updatedAt: string;
+      }) => {
+        if (!user.id || String(data.partnerId) !== String(user.id)) {
+          return;
+        }
+
+        queryClient.setQueryData<any[]>(
+          ["recentFavoriteMemories", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [data];
+            }
+
+            const existingIndex = old.findIndex((x) => x.id === data.id);
+
+            if (existingIndex !== -1) {
+              const updated = [...old];
+              updated[existingIndex] = data;
+              return updated;
+            }
+
+            return [data, ...old];
+          }
+        );
+
+        queryClient.setQueryData<any[]>(
+          ["allFavoriteMemories", user.id],
+          (old) => {
+            if (!old || !Array.isArray(old)) {
+              return [data];
+            }
+
+            const existingIndex = old.findIndex((x) => x.id === data.id);
+
+            if (existingIndex !== -1) {
+              const updated = [...old];
+              updated[existingIndex] = data;
+              return updated;
+            }
+
+            return [data, ...old];
+          }
+        );
+
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    );
+
+    s.on("updateAbout", (data: { aboutUser: any }) => {
+      if (partnerId && String(partnerId) === String(data.aboutUser.userId)) {
+        queryClient.setQueryData(["about", partnerId], data.aboutUser);
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user.id],
+        });
+      }
+    });
 
     setSocket(s);
   };
