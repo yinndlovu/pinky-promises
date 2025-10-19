@@ -286,18 +286,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData<any[]>(["specialDates", user.id], (old) => {
-          if (!old || !Array.isArray(old)) {
-            return [data];
-          }
-
-          if (old.some((x) => x.id === data.id)) {
-            return old;
-          }
-
-          return [data, ...old];
+        queryClient.invalidateQueries({
+          queryKey: ["specialDates", user.id],
         });
-
+        queryClient.invalidateQueries({
+          queryKey: ["upcomingSpecialDate", user.id],
+        });
         queryClient.invalidateQueries({
           queryKey: ["recentActivities", user.id],
         });
@@ -318,22 +312,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData<any[]>(["specialDates", user.id], (old) => {
-          if (!old || !Array.isArray(old)) {
-            return [data];
-          }
-
-          const existingIndex = old.findIndex((x) => x.id === data.id);
-
-          if (existingIndex !== -1) {
-            const updated = [...old];
-            updated[existingIndex] = data;
-            return updated;
-          }
-
-          return [data, ...old];
+        queryClient.invalidateQueries({
+          queryKey: ["specialDates", user.id],
         });
-
+        queryClient.invalidateQueries({
+          queryKey: ["upcomingSpecialDate", user.id],
+        });
         queryClient.invalidateQueries({
           queryKey: ["recentActivities", user.id],
         });
@@ -354,14 +338,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData<any[]>(["specialDates", user.id], (old) => {
-          if (!old || !Array.isArray(old)) {
-            return [];
-          }
-
-          return old.filter((x) => x.id !== data.id);
+        queryClient.invalidateQueries({
+          queryKey: ["specialDates", user.id],
         });
-
+        queryClient.invalidateQueries({
+          queryKey: ["upcomingSpecialDate", user.id],
+        });
         queryClient.invalidateQueries({
           queryKey: ["recentActivities", user.id],
         });
@@ -476,14 +458,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     );
 
-    s.on("updateLoveLanguage", (data: { record: any }) => {
-      if (partnerId && String(partnerId) === String(data.record.userId)) {
-        queryClient.setQueryData(["loveLanguage", partnerId], data.record);
-        queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
-        });
+    s.on(
+      "updateLoveLanguage",
+      (data: { userId: string; loveLanguage: string }) => {
+        if (partnerId && String(partnerId) === String(data.userId)) {
+          queryClient.setQueryData(["loveLanguage", partnerId], data.loveLanguage);
+          queryClient.invalidateQueries({
+            queryKey: ["recentActivities", user.id],
+          });
+        }
       }
-    });
+    );
 
     s.on(
       "createFavoriteMemory",
@@ -643,7 +628,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     s.on("updateAbout", (data: { aboutUser: any }) => {
       if (partnerId && String(partnerId) === String(data.aboutUser.userId)) {
-        queryClient.setQueryData(["about", partnerId], data.aboutUser);
+        queryClient.setQueryData(["about", partnerId], data.aboutUser.about);
         queryClient.invalidateQueries({
           queryKey: ["recentActivities", user.id],
         });

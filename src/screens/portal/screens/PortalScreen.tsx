@@ -302,6 +302,10 @@ export default function PortalScreen({ navigation }: Props) {
           user?.id,
         ],
       });
+
+      queryClient.invalidateQueries({
+        queryKey: ["portalActivityCount", user.id],
+      });
       setViewType(null);
     }
   }, [viewModalVisible]);

@@ -88,10 +88,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [animationMessage, setAnimationMessage] = useState("");
 
   // data
-  const {
-    data: partner,
-    refetch: refetchPartner,
-  } = usePartner(user?.id, token);
+  const { data: partner, refetch: refetchPartner } = usePartner(
+    user?.id,
+    token
+  );
   const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
     partner?.id,
     token
@@ -586,7 +586,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 <Text style={styles.eventName}>{upcomingDate.title}</Text>
                 <Text style={styles.eventTimeLeft}>
                   {" "}
-                  {formatTimeLeft(upcomingDate.daysUntil)}
+                  {formatTimeLeft(
+                    upcomingDate.timeLeft.days,
+                    upcomingDate.timeLeft.hours,
+                    upcomingDate.timeLeft.minutes
+                  )}
                 </Text>
               </View>
               <Text style={styles.eventDescription}>
