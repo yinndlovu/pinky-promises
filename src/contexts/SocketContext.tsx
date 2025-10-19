@@ -14,7 +14,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BASE_URL } from "../configuration/config";
 import { useAuth } from "./AuthContext";
 import useToken from "../hooks/useToken";
-import usePartnerId from "../hooks/usePartnerId";
 
 // types
 type SocketCtx = {
@@ -49,7 +48,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   // variables
   const { user } = useAuth();
   const token = useToken();
-  const partnerId = usePartnerId();
+  const partnerId = user?.partnerId;
   const queryClient = useQueryClient();
 
   const connect = () => {
@@ -462,7 +461,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       "updateLoveLanguage",
       (data: { userId: string; loveLanguage: string }) => {
         if (partnerId && String(partnerId) === String(data.userId)) {
-          queryClient.setQueryData(["loveLanguage", partnerId], data.loveLanguage);
+          queryClient.setQueryData(
+            ["loveLanguage", partnerId],
+            data.loveLanguage
+          );
           queryClient.invalidateQueries({
             queryKey: ["recentActivities", user.id],
           });
