@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -87,21 +87,14 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     partner?.id,
     token
   );
-  const { data: partnerFavorites = {}, refetch: refetchPartnerFavorites } =
-    useFavorites(partner?.id, token);
-  const { data: loveLanguage, refetch: refetchLoveLanguage } = useLoveLanguage(
-    partner?.id,
-    token
-  );
-  const { data: partnerAbout, refetch: refetchPartnerAbout } = useAbout(
-    partner?.id,
-    token
-  );
+  const { data: partnerFavorites = {} } = useFavorites(partner?.id, token);
+  const { data: loveLanguage } = useLoveLanguage(partner?.id, token);
+  const { data: partnerAbout } = useAbout(partner?.id, token);
   const { data: partnerDistance } = usePartnerDistance(user?.id, token);
-  const {
-    data: partnerStoredMessages = [],
-    refetch: refetchPartnerStoredMessages,
-  } = useReceivedMessages(user?.id, token);
+  const { data: partnerStoredMessages = [] } = useReceivedMessages(
+    user?.id,
+    token
+  );
   const {
     avatarUri,
     profilePicUpdatedAt,
@@ -145,11 +138,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
       if (partner?.id) {
         await Promise.all([
-          refetchPartnerFavorites(),
-          refetchLoveLanguage(),
-          refetchPartnerAbout(),
+          refetchPartnerMood(),
+          refetchPartnerStatus(),
           fetchPartnerPicture(),
-          refetchPartnerStoredMessages(),
         ]);
       }
     } catch (e) {
@@ -157,13 +148,11 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       setRefreshing(false);
     }
   }, [
-    refetchLoveLanguage,
     refetchPartnerData,
-    refetchPartnerFavorites,
     refetchCurrentUser,
-    refetchPartnerAbout,
+    refetchPartnerMood,
+    refetchPartnerStatus,
     fetchPartnerPicture,
-    refetchPartnerStoredMessages,
     partner?.id,
   ]);
 

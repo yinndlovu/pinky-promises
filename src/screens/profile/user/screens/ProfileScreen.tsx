@@ -137,28 +137,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     refetch: refetchProfileData,
     isLoading: profileDataLoading,
   } = useProfile(user?.id, token);
-  const { data: loveLanguage, refetch: refetchLoveLanguage } = useLoveLanguage(
-    user?.id,
-    token
-  );
+  const { data: loveLanguage } = useLoveLanguage(user?.id, token);
   const { data: status, refetch: refetchStatus } = useUserStatus(
     user?.id,
     token
   );
   const { data: pendingRequestsData, refetch: refetchPendingRequestsData } =
     useRequests(user?.id, token);
-  const { data: favorites = {}, refetch: refetchFavorites } = useFavorites(
-    user?.id,
-    token
-  );
+  const { data: favorites = {} } = useFavorites(user?.id, token);
   const { data: partnerData, refetch: refetchPartnerData } = usePartner(
     user?.id,
     token
   );
   const { data: moodData, refetch: refetchMoodData } = useMood(user?.id, token);
-  const { data: about, refetch: refetchAbout } = useAbout(user?.id, token);
-  const { data: storedMessages = [], refetch: refetchStoredMessages } =
-    useStoredMessages(user?.id, token);
+  const { data: about } = useAbout(user?.id, token);
+  const { data: storedMessages = [] } = useStoredMessages(user?.id, token);
   const {
     avatarUri,
     profilePicUpdatedAt,
@@ -207,16 +200,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     setRefreshing(true);
     try {
       await Promise.all([
-        refetchLoveLanguage(),
         refetchProfileData(),
         refetchStatus(),
         refetchPendingRequestsData(),
-        refetchFavorites(),
         refetchPartnerData(),
         refetchMoodData(),
-        refetchAbout(),
         fetchProfilePicture(),
-        refetchStoredMessages(),
       ]);
 
       await queryClient.invalidateQueries({
@@ -227,16 +216,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setRefreshing(false);
     }
   }, [
-    refetchLoveLanguage,
     refetchPartnerData,
-    refetchAbout,
     refetchMoodData,
-    refetchFavorites,
     refetchStatus,
     refetchProfileData,
     refetchPendingRequestsData,
     fetchProfilePicture,
-    refetchStoredMessages,
   ]);
 
   const homeStatus = status?.unreachable

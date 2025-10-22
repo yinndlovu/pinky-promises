@@ -18,6 +18,12 @@ import { useSocket } from "../../../contexts/SocketContext";
 const AUTO_SAVE_DELAY = 1000;
 const TYPING_THROTTLE_MS = 3000;
 
+// interfaces
+interface ContentUpdatedPayload {
+  by: number;
+  content: string;
+}
+
 const NotesScreen: React.FC = () => {
   // use states
   const [content, setContent] = useState("");
@@ -32,6 +38,7 @@ const NotesScreen: React.FC = () => {
   const saveTimeout = useRef<NodeJS.Timeout | null>(null);
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);
   const lastTypingEmit = useRef<number>(0);
+  const lastSavedContent = useRef("");
 
   // variables
   const token = useToken();
@@ -70,13 +77,11 @@ const NotesScreen: React.FC = () => {
       }, 2000);
     };
 
-    const onContentUpdated = async () => {
-      try {
-        const notes = await getNotes(token);
-        if (!saving) {
-          setContent(notes.content || "");
-        }
-      } catch {}
+    const onContentUpdated = (payload: ContentUpdatedPayload) => {
+      const { content: newContent } = payload;
+      if (!saving && newContent !== content) {
+        setContent(newContent);
+      }
     };
 
     socket.on("notes:partnerTyping", onPartnerTyping);
@@ -86,11 +91,19 @@ const NotesScreen: React.FC = () => {
       socket.off("notes:partnerTyping", onPartnerTyping);
       socket.off("notes:contentUpdated", onContentUpdated);
     };
-  }, [socket, token, saving]); // previously removed a saving dependency here
+  }, [socket, token, saving, content]);
+
+  // automatically clear error state
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   // auto saving notes
   useEffect(() => {
-    if (loading) {
+    if (loading || lastSavedContent.current === content) {
       return;
     }
 
@@ -103,8 +116,10 @@ const NotesScreen: React.FC = () => {
       try {
         await updateNotes(token, content);
 
+        lastSavedContent.current = content;
+
         if (socket?.connected) {
-          socket.emit("notes:updated");
+          socket.emit("notes:updated", { content });
         }
       } catch {}
       setSaving(false);
@@ -140,6 +155,12 @@ const NotesScreen: React.FC = () => {
     >
       <View style={styles.container}>
         <Text style={styles.header}>Our shared notes</Text>
+        {error && (
+          <View style={styles.statusBar}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
+
         {partnerTyping ? (
           <View style={[styles.statusBar]}>
             <Text style={styles.savingText}>

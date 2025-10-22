@@ -5,7 +5,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -41,7 +40,6 @@ import ActionsModal from "../../../components/modals/selection/ActionsModal";
 import styles from "../styles/HomeScreen.styles";
 import PortalPreview from "../components/PortalPreview";
 import ProfileCard from "../components/ProfileCard";
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
 import ProcessingAnimation from "../../../components/loading/ProcessingAnimation";
 import NotificationsDropdown from "../../../components/dropdowns/NotificationsDropdown";
@@ -135,10 +133,20 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      checkAndUpdateHomeStatus(token);
-      const interval = setInterval(checkAndUpdateHomeStatus, 5 * 60 * 1000);
+      const run = async () => {
+        await checkAndUpdateHomeStatus(token);
+
+        queryClient.invalidateQueries({ queryKey: ["status", user?.id] });
+        queryClient.invalidateQueries({
+          queryKey: ["recentActivities", user?.id],
+        });
+      };
+
+      run();
+
+      const interval = setInterval(run, 5 * 60 * 1000);
       return () => clearInterval(interval);
-    }, [token])
+    }, [token, user?.id])
   );
 
   useEffect(() => {
