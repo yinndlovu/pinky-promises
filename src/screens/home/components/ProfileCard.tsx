@@ -64,29 +64,31 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   // use effects
   useEffect(() => {
-    if (userTimezone == null) {
-      setCurrentTime("Unknown");
-      return;
-    }
+  if (userTimezone == null) {
+    setCurrentTime("Unknown");
+    return;
+  }
 
-    const updateTime = () => {
-      const nowUtc = new Date();
-      const localTime = new Date(nowUtc.getTime() + userTimezone * 1000);
+  const updateTime = () => {
+    const now = new Date();
+    const utcTimestamp = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
 
-      const formatted = localTime.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      });
+    const userLocalTime = new Date(utcTimestamp + userTimezone * 1000);
 
-      setCurrentTime(formatted);
-    };
+    const formatted = userLocalTime.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
 
-    updateTime();
-    const interval = setInterval(updateTime, 30 * 1000);
+    setCurrentTime(formatted);
+  };
 
-    return () => clearInterval(interval);
-  }, [userTimezone]);
+  updateTime();
+  const interval = setInterval(updateTime, 30 * 1000);
+
+  return () => clearInterval(interval);
+}, [userTimezone]);
 
   useEffect(() => {
     if (isActive) {
