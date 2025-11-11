@@ -33,7 +33,9 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   );
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
-  const [showSuccessAlert, setShowSuccess] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // data
   const { data: specialDates = [] } = useSpecialDates(user?.id, token);
@@ -104,30 +106,69 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
     title: string,
     description?: string
   ) => {
-    setModalVisible(false);
+    setLoading(true);
 
     if (editingDate) {
-      await updateSpecialDate(token, editingDate.id, date, title, description);
-      setAlertTitle("Updated");
-      setAlertMessage(
-        modalType === "anniversary"
-          ? "Your anniversary date has been updated."
-          : "The day you met has been updated."
-      );
-      setShowSuccess(true);
+      try {
+        await updateSpecialDate(
+          token,
+          editingDate.id,
+          date,
+          title,
+          description
+        );
+        setAlertTitle("Updated");
+        setAlertMessage(
+          modalType === "anniversary"
+            ? "Your anniversary date has been updated."
+            : "The day you met has been updated."
+        );
+        setLoading(false);
+        setModalVisible(false);
+        setShowSuccessAlert(true);
+      } catch (error: any) {
+        setAlertTitle("Failed");
+        setAlertMessage(
+          error.response.data?.error || "Failed to update special date"
+        );
+        setLoading(false);
+        setModalVisible(false);
+        setShowErrorAlert(true);
+      }
     } else {
-      await createSpecialDate(token, date, title, description);
-      setAlertTitle("Created");
-      setAlertMessage(
-        modalType === "anniversary"
-          ? "Your anniversary date has been set."
-          : "The day you met has been set."
-      );
-      setShowSuccess(true);
+      try {
+        await createSpecialDate(token, date, title, description);
+        setAlertTitle("Created");
+        setAlertMessage(
+          modalType === "anniversary"
+            ? "Your anniversary date has been set."
+            : "The day you met has been set."
+        );
+        setLoading(false);
+        setModalVisible(false);
+        setShowSuccessAlert(true);
+      } catch (error: any) {
+        setAlertTitle("Failed");
+        setAlertMessage(
+          error.response.data?.error || "Failed to create special date"
+        );
+        setLoading(false);
+        setModalVisible(false);
+        setShowErrorAlert(true);
+      }
     }
 
     await queryClient.invalidateQueries({
       queryKey: ["specialDates", user?.id],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: ["recentActivities", user?.id],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: ["upcomingSpecialDate", user?.id],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: ["aiContext", user?.id],
     });
   };
 
@@ -175,6 +216,7 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
       <View style={{ zIndex: 1000 }}>
         <UpdateSpecialDateModal
           visible={modalVisible}
+          loading={loading}
           onClose={() => setModalVisible(false)}
           onSave={handleSave}
           initialDate={editingDate?.date}
@@ -192,7 +234,16 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
           title={alertTitle}
           message={alertMessage}
           buttonText="Great"
-          onClose={() => setShowSuccess(false)}
+          onClose={() => setShowSuccessAlert(false)}
+        />
+
+        <AlertModal
+          visible={showErrorAlert}
+          type="error"
+          title={alertTitle}
+          message={alertMessage}
+          buttonText="Close"
+          onClose={() => setShowErrorAlert(false)}
         />
       </View>
     </View>

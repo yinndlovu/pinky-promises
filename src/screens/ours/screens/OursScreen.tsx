@@ -77,6 +77,8 @@ const OursScreen = ({ navigation }: Props) => {
   const [editingMemory, setEditingMemory] = useState<any | null>(null);
   const [memoryModalLoading, setMemoryModalLoading] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [addingSpecialDate, setAddingSpecialDate] = useState(false);
+  const [updatingSpecialDate, setUpdatingSpecialDate] = useState(false);
 
   // use states errors
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +100,8 @@ const OursScreen = ({ navigation }: Props) => {
     title: string,
     description?: string
   ) => {
+    setAddingSpecialDate(true);
+
     try {
       await createSpecialDate(token, date, title, description);
 
@@ -127,6 +131,7 @@ const OursScreen = ({ navigation }: Props) => {
       setAddModalVisible(false);
     } finally {
       setAddModalVisible(false);
+      setAddingSpecialDate(false);
     }
   };
 
@@ -149,6 +154,8 @@ const OursScreen = ({ navigation }: Props) => {
     title: string,
     description?: string
   ) => {
+    setUpdatingSpecialDate(true);
+
     if (!selectedDate) {
       return;
     }
@@ -182,6 +189,7 @@ const OursScreen = ({ navigation }: Props) => {
       setEditModalVisible(false);
     } finally {
       setEditModalVisible(false);
+      setUpdatingSpecialDate(false);
     }
   };
 
@@ -481,6 +489,7 @@ const OursScreen = ({ navigation }: Props) => {
         onClose={() => setAddModalVisible(false)}
         onSave={handleAddSpecialDate}
         isEditing={false}
+        loading={addingSpecialDate}
       />
 
       <ConfirmationModal
@@ -512,6 +521,7 @@ const OursScreen = ({ navigation }: Props) => {
         initialTitle={selectedDate?.title}
         initialDescription={selectedDate?.description}
         isEditing={true}
+        loading={updatingSpecialDate}
       />
 
       <AlertModal

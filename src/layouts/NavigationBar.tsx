@@ -1,5 +1,5 @@
 // external
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
@@ -117,7 +117,26 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
           return (
             <Pressable
               key={item.name}
-              onPress={() => navigation.navigate(item.name)}
+              onPress={() => {
+                const isActive = currentRoute === item.name;
+
+                if (!isActive) {
+                  navigation.navigate(item.name);
+                  return;
+                }
+
+                const startScreens: Record<string, string> = {
+                  Home: "HomeScreen",
+                  Presents: "PresentsScreen",
+                  Ours: "OursScreen",
+                  Profile: "ProfileScreen",
+                };
+
+                const start = startScreens[item.name];
+                if (start) {
+                  navigation.navigate(item.name, { screen: start });
+                }
+              }}
               android_ripple={{
                 color: "rgba(167, 72, 130, 0.3)",
                 borderless: true,

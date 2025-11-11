@@ -13,15 +13,13 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 
-// content
-import AlertModal from "../output/AlertModal";
-
 // internal
 import { formatDate } from "../../../helpers/favoriteMemoryModalHelper";
 
 // types
 type UpdateSpecialDateModalProps = {
   visible: boolean;
+  loading: boolean;
   onClose: () => void;
   onSave: (date: string, title: string, description?: string) => Promise<void>;
   initialDate?: string;
@@ -32,6 +30,7 @@ type UpdateSpecialDateModalProps = {
 
 const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   visible,
+  loading,
   onClose,
   onSave,
   initialDate,
@@ -46,11 +45,6 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [alertTitle, setAlertTitle] = useState("");
-  const [showErrorAlert, setShowErrorAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
 
   // use effects
   useEffect(() => {
@@ -65,7 +59,6 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
       return;
     }
 
-    setLoading(true);
     try {
       const formattedDate = date.toISOString().split("T")[0];
 
@@ -76,8 +69,6 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
       );
     } catch (error: any) {
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -86,7 +77,6 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
     setTitle("");
     setDescription("");
     setShowDatePicker(false);
-    setLoading(false);
     onClose();
   };
 
@@ -203,24 +193,6 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
             style={Platform.OS === "ios" ? styles.iosDatePicker : undefined}
           />
         )}
-
-        <AlertModal
-          visible={showSuccessAlert}
-          type="success"
-          title={alertTitle}
-          message={alertMessage}
-          buttonText="Great"
-          onClose={() => setShowSuccessAlert(false)}
-        />
-
-        <AlertModal
-          visible={showErrorAlert}
-          type="error"
-          title={alertTitle}
-          message={alertMessage}
-          buttonText="Close"
-          onClose={() => setShowErrorAlert(false)}
-        />
       </View>
     </Modal>
   );
