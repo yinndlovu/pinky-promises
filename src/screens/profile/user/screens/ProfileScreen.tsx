@@ -56,6 +56,7 @@ import ConfirmationModal from "../../../../components/modals/selection/Confirmat
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import modalStyles from "../styles/ModalStyles.styles";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
+import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
 
 // hooks
 import useToken from "../../../../hooks/useToken";
@@ -87,6 +88,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [showError, setShowError] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [avatarFetched, setAvatarFetched] = useState(false);
 
   // use states (processing)
   const [loadingName, setLoadingName] = useState(false);
@@ -184,7 +186,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   useEffect(() => {
     if (user?.id && token) {
-      fetchProfilePicture();
+      Promise.resolve(fetchProfilePicture()).finally(() =>
+        setAvatarFetched(true)
+      );
     }
   }, [user?.id, token]);
 
@@ -324,17 +328,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       );
     }
 
+    if (!avatarFetched) {
+      return <AvatarSkeleton style={styles.avatar} />;
+    }
+
+    if (!avatarUri) {
+      return (
+        <Image
+          source={require("../../../../assets/default-avatar-two.png")}
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
     return (
       <Image
-        source={
-          avatarUri
-            ? { uri: avatarUri }
-            : require("../../../../assets/default-avatar-two.png")
-        }
+        source={{ uri: avatarUri }}
         style={styles.avatar}
         cachePolicy="disk"
         contentFit="cover"
         transition={200}
+        onError={() => setFailed(true)}
       />
     );
   };

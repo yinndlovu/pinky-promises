@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -42,7 +42,9 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
-  const [alertVisible, setAlertVisible] = useState(false);
+  const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [showErrorAlert, setShowErrorAlert] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -78,7 +80,9 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
       switch (requestStatus) {
         case "pending":
           await cancelRequest(token, userId);
-          showAlert("Partner request cancelled");
+          setAlertTitle("Partner request cancelled");
+          setAlertMessage("You have cancelled the partner request.");
+          setShowSuccessAlert(true);
           break;
 
         case "incoming":
@@ -94,13 +98,19 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
         case "none":
           await sendRequest(token, userId);
-          showAlert("Partner request sent");
+          setAlertTitle("Partner request sent");
+          setAlertMessage(
+            "You have sent a partner request. Wait for the user to accept it."
+          );
+          setShowSuccessAlert(true);
           break;
       }
     } catch (error: any) {
-      showAlert(
+      setAlertTitle("Failed");
+      setAlertMessage(
         error.response?.data?.error || "Failed to process partner request"
       );
+      setShowErrorAlert(true);
     } finally {
       setSendingRequest(false);
     }
@@ -157,11 +167,6 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
         transition={200}
       />
     );
-  };
-
-  const showAlert = (message: string) => {
-    setAlertMessage(message);
-    setAlertVisible(true);
   };
 
   const getButtonText = () => {
@@ -267,9 +272,21 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
       </ScrollView>
 
       <AlertModal
-        visible={alertVisible}
+        visible={showSuccessAlert}
+        type="success"
+        title={alertTitle}
         message={alertMessage}
-        onClose={() => setAlertVisible(false)}
+        buttonText="Great"
+        onClose={() => setShowSuccessAlert(false)}
+      />
+
+      <AlertModal
+        visible={showErrorAlert}
+        type="error"
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="Close"
+        onClose={() => setShowErrorAlert(false)}
       />
     </View>
   );
