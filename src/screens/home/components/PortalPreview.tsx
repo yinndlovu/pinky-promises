@@ -1,5 +1,5 @@
 // external
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPortalActivityCount } from "../../../services/api/gifts/countService";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // types
 type PortalPreviewProps = {
@@ -34,6 +35,8 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   // variables
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // fetch functions
   const { data: portalActivityCount } = useQuery({
@@ -209,7 +212,9 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
                 <Feather
                   name={getActivityIcon()}
                   size={24}
-                  color={totalUnseen > 0 ? "#e03487" : "#b0b3c6"}
+                  color={
+                    totalUnseen > 0 ? theme.colors.primary : theme.colors.muted
+                  }
                 />
               </Animated.View>
 
@@ -242,7 +247,11 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
             </View>
 
             <View style={styles.arrowContainer}>
-              <Feather name="chevron-right" size={20} color="#b0b3c6" />
+              <Feather
+                name="chevron-right"
+                size={20}
+                color={theme.colors.muted}
+              />
             </View>
           </Animated.View>
 
@@ -313,127 +322,128 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    width: "100%",
-    marginTop: 24,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 14,
-    color: "#b0b3c6",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    marginLeft: 16,
-    marginBottom: 10,
-    alignSelf: "flex-start",
-  },
-  portalCard: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: "#e03487",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      width: "100%",
+      marginTop: 24,
+      marginBottom: 24,
     },
-    shadowRadius: 8,
-    elevation: 4,
-    position: "relative",
-    overflow: "hidden",
-  },
-  contentWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  glowBackground: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "#e03487",
-    borderRadius: 16,
-  },
-  iconContainer: {
-    position: "relative",
-    marginRight: 16,
-  },
-  iconWrapper: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: "#23243a",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    sectionTitle: {
+      fontSize: 14,
+      color: theme.colors.muted,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      marginLeft: 16,
+      marginBottom: 10,
+      alignSelf: "flex-start",
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  notificationBadge: {
-    position: "absolute",
-    top: -4,
-    right: -4,
-    backgroundColor: "#e03487",
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#e03487",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    portalCard: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 16,
+      padding: 20,
+      shadowColor: theme.colors.primary,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowRadius: 8,
+      elevation: 4,
+      position: "relative",
+      overflow: "hidden",
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  badgeText: {
-    color: "#fff",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  contentContainer: {
-    flex: 1,
-  },
-  activityText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  portalText: {
-    color: "#b0b3c6",
-    fontSize: 14,
-  },
-  arrowContainer: {
-    marginLeft: 12,
-  },
-  particle: {
-    position: "absolute",
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#e03487",
-  },
-  particle1: {
-    top: 20,
-    right: 60,
-  },
-  particle2: {
-    top: 35,
-    right: 45,
-  },
-  particle3: {
-    top: 15,
-    right: 75,
-  },
-});
+    contentWrapper: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    glowBackground: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 16,
+    },
+    iconContainer: {
+      position: "relative",
+      marginRight: 16,
+    },
+    iconWrapper: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: theme.colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: theme.colors.shadow,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    notificationBadge: {
+      position: "absolute",
+      top: -4,
+      right: -4,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 10,
+      minWidth: 20,
+      height: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: theme.colors.primary,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    badgeText: {
+      color: theme.colors.text,
+      fontSize: 10,
+      fontWeight: "bold",
+    },
+    contentContainer: {
+      flex: 1,
+    },
+    activityText: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 4,
+    },
+    portalText: {
+      color: theme.colors.muted,
+      fontSize: 14,
+    },
+    arrowContainer: {
+      marginLeft: 12,
+    },
+    particle: {
+      position: "absolute",
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+      backgroundColor: theme.colors.primary,
+    },
+    particle1: {
+      top: 20,
+      right: 60,
+    },
+    particle2: {
+      top: 35,
+      right: 45,
+    },
+    particle3: {
+      top: 15,
+      right: 75,
+    },
+  });
 
 export default PortalPreview;

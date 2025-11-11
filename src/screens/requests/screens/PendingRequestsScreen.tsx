@@ -1,5 +1,5 @@
 // external
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -21,15 +21,21 @@ import { PendingRequest } from "../../../types/Request";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useProfilePicture } from "../../../hooks/useProfilePicture";
+import { useTheme } from "../../../theme/ThemeContext";
+import { createPendingRequestsStyles } from "../styles/PendingRequestsScreen.styles";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
-import styles from "../styles/PendingRequestsScreen.styles";
 
 // variables
 const fallbackAvatar = require("../../../assets/default-avatar-two.png");
 
 const ProfileImage = ({ userId, token }: { userId: string; token: string }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createPendingRequestsStyles(theme), [theme]);
+
+  // use states
   const [failed, setFailed] = useState(false);
 
   const { avatarUri, profilePicUpdatedAt, fetchPicture } = useProfilePicture(
@@ -76,6 +82,8 @@ const PendingRequestsScreen = ({ navigation }: any) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createPendingRequestsStyles(theme), [theme]);
 
   // use states
   const [requests, setRequests] = useState<PendingRequest[]>([]);
@@ -189,7 +197,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
             disabled={isProcessing}
           >
             {isAccepting ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={theme.colors.text} size="small" />
             ) : (
               <Text style={styles.actionButtonText}>Accept</Text>
             )}
@@ -200,7 +208,7 @@ const PendingRequestsScreen = ({ navigation }: any) => {
             disabled={isProcessing}
           >
             {isRejecting ? (
-              <ActivityIndicator color="#fff" size="small" />
+              <ActivityIndicator color={theme.colors.text} size="small" />
             ) : (
               <Text style={styles.actionButtonText}>Decline</Text>
             )}

@@ -6,6 +6,7 @@ import {
 
 // internal
 import { PresentsStackParamList } from "../../types/StackParamList";
+import { useTheme } from "../../theme/ThemeContext";
 
 // screens
 import GiftsScreen from "../../screens/gifts/screens/GiftsScreen";
@@ -14,12 +15,14 @@ import CartScreen from "../../screens/gifts/screens/CartScreen";
 const PresentsStack = createStackNavigator<PresentsStackParamList>();
 
 export default function PresentsStackScreen() {
+  const { theme } = useTheme();
+
   return (
     <PresentsStack.Navigator
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
         headerShown: false,
-        cardStyle: { backgroundColor: "#23243a" },
+        cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <PresentsStack.Screen name="PresentsScreen" component={GiftsScreen} />
@@ -29,7 +32,7 @@ export default function PresentsStackScreen() {
         options={{
           headerShown: true,
           title: "Cart",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",

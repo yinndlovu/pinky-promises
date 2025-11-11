@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { changePassword } from "../../../services/api/auth/authService";
 import useToken from "../../../hooks/useToken";
 import { AlertType } from "../../../types/Alert";
 import { validatePassword } from "../../../validators/validatePassword";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // screen content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -55,6 +56,8 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
 
   // variables
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   const validateConfirmPassword = (confirm: string) => {
     return confirm === newPassword && confirm.length > 0;
@@ -144,7 +147,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -161,7 +164,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
                 <TextInput
                   style={styles.input}
                   placeholder="Enter current password"
-                  placeholderTextColor="#b0b3c6"
+                  placeholderTextColor={theme.colors.muted}
                   value={currentPassword}
                   onChangeText={setCurrentPassword}
                   secureTextEntry={!showCurrentPassword}
@@ -174,7 +177,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
                   <Feather
                     name={showCurrentPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#b0b3c6"
+                    color={theme.colors.muted}
                   />
                 </TouchableOpacity>
               </View>
@@ -186,7 +189,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
                 <TextInput
                   style={styles.input}
                   placeholder="Enter new password"
-                  placeholderTextColor="#b0b3c6"
+                  placeholderTextColor={theme.colors.muted}
                   value={newPassword}
                   onChangeText={setNewPassword}
                   secureTextEntry={!showNewPassword}
@@ -199,7 +202,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
                   <Feather
                     name={showNewPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#b0b3c6"
+                    color={theme.colors.muted}
                   />
                 </TouchableOpacity>
               </View>
@@ -230,7 +233,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
                 <TextInput
                   style={styles.input}
                   placeholder="Confirm new password"
-                  placeholderTextColor="#b0b3c6"
+                  placeholderTextColor={theme.colors.muted}
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
                   secureTextEntry={!showConfirmPassword}
@@ -243,7 +246,7 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
                   <Feather
                     name={showConfirmPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#b0b3c6"
+                    color={theme.colors.muted}
                   />
                 </TouchableOpacity>
               </View>
@@ -299,110 +302,111 @@ const ChangePasswordScreen: React.FC<ChangePasswordScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 150,
-    paddingBottom: 32,
-    alignItems: "stretch",
-    backgroundColor: "#23243a",
-    minHeight: "100%",
-  },
-  contentWrapper: {
-    flex: 1,
-    alignItems: "center",
-    paddingHorizontal: 20,
-  },
-  inputSection: {
-    width: "100%",
-    marginBottom: 24,
-    alignItems: "center",
-  },
-  sectionLabel: {
-    fontSize: 16,
-    color: "#b0b3c6",
-    fontWeight: "500",
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  inputWrapper: {
-    width: "100%",
-    borderWidth: 1,
-    borderColor: "#b0b3c6",
-    borderRadius: 12,
-    padding: 6,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: "#fff",
-    borderWidth: 0,
-    borderRadius: 12,
-    padding: 12,
-    outlineWidth: 0,
-  },
-  eyeButton: {
-    paddingHorizontal: 10,
-  },
-  validationContainer: {
-    width: "100%",
-    marginTop: 12,
-    paddingHorizontal: 8,
-  },
-  validationItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 6,
-  },
-  validationText: {
-    fontSize: 13,
-    marginLeft: 8,
-    fontWeight: "500",
-  },
-  saveButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
-    marginTop: 20,
-  },
-  saveButtonDisabled: {
-    backgroundColor: "rgba(224, 52, 135, 0.5)",
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  toast: {
-    position: "absolute",
-    top: 50,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingTop: 150,
+      paddingBottom: 32,
+      alignItems: "stretch",
+      backgroundColor: theme.colors.background,
+      minHeight: "100%",
+    },
+    contentWrapper: {
+      flex: 1,
+      alignItems: "center",
+      paddingHorizontal: 20,
+    },
+    inputSection: {
+      width: "100%",
+      marginBottom: 24,
+      alignItems: "center",
+    },
+    sectionLabel: {
+      fontSize: 16,
+      color: theme.colors.muted,
+      fontWeight: "500",
+      marginBottom: 12,
+      textAlign: "center",
+    },
+    inputWrapper: {
+      width: "100%",
+      borderWidth: 1,
+      borderColor: theme.colors.muted,
+      borderRadius: 12,
+      padding: 6,
+      backgroundColor: theme.colors.modalOverlay,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    input: {
+      flex: 1,
+      fontSize: 16,
+      color: theme.colors.text,
+      borderWidth: 0,
+      borderRadius: 12,
+      padding: 12,
+      outlineWidth: 0,
+    },
+    eyeButton: {
+      paddingHorizontal: 10,
+    },
+    validationContainer: {
+      width: "100%",
+      marginTop: 12,
+      paddingHorizontal: 8,
+    },
+    validationItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 6,
+    },
+    validationText: {
+      fontSize: 13,
+      marginLeft: 8,
+      fontWeight: "500",
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 12,
+      paddingVertical: 14,
+      paddingHorizontal: 20,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 2,
+      marginTop: 20,
+    },
+    saveButtonDisabled: {
+      backgroundColor: theme.colors.primaryMuted,
+    },
+    saveButtonText: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    toast: {
+      position: "absolute",
+      top: 50,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default ChangePasswordScreen;

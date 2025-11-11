@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   ScrollView,
   View,
@@ -33,11 +33,12 @@ import {
 } from "../../../helpers/interactions";
 import { markNotificationSeen } from "../../../services/api/notifications/notificationService";
 import { Notification } from "../../../interfaces/Notification";
+import { useTheme } from "../../../theme/ThemeContext";
+import { createHomeStyles } from "../styles/HomeScreen.styles";
 
 // screen content
 import RecentActivity from "../components/RecentActivity";
 import ActionsModal from "../../../components/modals/selection/ActionsModal";
-import styles from "../styles/HomeScreen.styles";
 import PortalPreview from "../components/PortalPreview";
 import ProfileCard from "../components/ProfileCard";
 import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
@@ -70,6 +71,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createHomeStyles(theme), [theme]);
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -329,8 +332,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       : status === "Away"
       ? "#e03487"
       : status === "Unreachable"
-      ? "#db8a47ff"
-      : "#b0b3c6";
+      ? "#db8a47"
+      : theme.colors.muted;
 
   const mood = partnerMood?.mood || null;
   const batteryLevel = partnerStatus?.batteryLevel ?? null;
@@ -341,7 +344,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const userTimezone = partnerStatus?.timezoneOffset ?? null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
         <View
           style={{
@@ -354,14 +357,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             paddingVertical: 2,
           }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>
+          <Text style={{ color: theme.colors.text, textAlign: "center" }}>
             You are offline
           </Text>
         </View>
       )}
       <View
         style={{
-          backgroundColor: "#23243a",
+          backgroundColor: theme.colors.background,
           paddingTop: insets.top,
           height: HEADER_HEIGHT + insets.top,
           justifyContent: "center",
@@ -373,7 +376,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <Text
           style={{
             fontSize: 20,
-            color: "#fff",
+            color: theme.colors.text,
             letterSpacing: 0,
           }}
         >
@@ -386,16 +389,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             left: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           onPress={() => navigation.navigate("Search")}
         >
-          <Feather name="search" size={22} color="#fff" />
+          <Feather name="search" size={22} color={theme.colors.text} />
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -404,10 +407,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             right: 64,
             zIndex: 20,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.05,
             shadowRadius: 4,
             alignItems: "center",
@@ -415,7 +418,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           }}
           onPress={toggleNotifications}
         >
-          <Feather name="bell" size={20} color="#fff" />
+          <Feather name="bell" size={20} color={theme.colors.text} />
 
           {unseenCount > 0 && (
             <View
@@ -423,7 +426,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 position: "absolute",
                 top: -6,
                 right: -6,
-                backgroundColor: "#e03487",
+                backgroundColor: theme.colors.primary,
                 paddingHorizontal: 6,
                 paddingVertical: 2,
                 borderRadius: 10,
@@ -432,7 +435,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }}>
+              <Text
+                style={{
+                  color: theme.colors.text,
+                  fontSize: 11,
+                  fontWeight: "700",
+                }}
+              >
                 {unseenCount}
               </Text>
             </View>
@@ -445,16 +454,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             right: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           onPress={() => navigation.navigate("Profile", { screen: "Settings" })}
         >
-          <Feather name="settings" size={22} color="#fff" />
+          <Feather name="settings" size={22} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -473,9 +482,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e03487"
-            colors={["#e03487"]}
-            progressBackgroundColor="#23243a"
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.background}
           />
         }
         contentContainerStyle={styles.container}
@@ -539,7 +548,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               <Feather
                 name="bell"
                 size={22}
-                color="#e03487"
+                color={theme.colors.primary}
                 style={{
                   position: "absolute",
                   top: 14,
@@ -574,7 +583,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 >
                   <Text
                     style={{
-                      color: "#fff",
+                      color: theme.colors.text,
                       fontSize: 16,
                       fontWeight: "bold",
                       marginTop: 12,
@@ -586,7 +595,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   </Text>
                   <Text
                     style={{
-                      color: "#b0b3c6",
+                      color: theme.colors.muted,
                       fontSize: 12,
                       marginTop: 6,
                       textAlign: "center",

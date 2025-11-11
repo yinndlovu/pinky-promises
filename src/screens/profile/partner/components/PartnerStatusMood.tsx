@@ -1,5 +1,5 @@
 // external
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Animated, {
   useSharedValue,
@@ -14,6 +14,7 @@ import Animated, {
 // internal
 import { PartnerStatusMoodProps } from "../../../../types/StatusMood";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
+import { useTheme } from "../../../../theme/ThemeContext";
 
 const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   mood,
@@ -22,6 +23,10 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   statusDescription,
   statusDistance,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // use effects
   useEffect(() => {
     floatAnimation.value = withRepeat(
@@ -82,7 +87,12 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   }));
 
   const statusColorStyle = useAnimatedStyle(() => {
-    const colors = ["#4caf50", "#e03487", "#db8a47", "#b0b3c6"];
+    const colors = [
+      "#4caf50",
+      theme.colors.accent,
+      "#db8a47",
+      theme.colors.muted,
+    ];
     const currentColor =
       colors[Math.round(statusColorAnimation.value)] || colors[3];
 
@@ -165,10 +175,10 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
               status === "home"
                 ? { color: "#4caf50" }
                 : status === "away"
-                ? { color: "#e03487" }
+                ? { color: theme.colors.accent }
                 : status === "unreachable"
                 ? { color: "#db8a47ff" }
-                : { color: "#b0b3c6" },
+                : { color: theme.colors.muted },
             ]}
           >
             {status === "home"
@@ -203,108 +213,109 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  wrapper: {
-    width: "100%",
-    marginBottom: 14,
-  },
-  loadingContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 20,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 0,
-  },
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 0,
-  },
-  statusIndicator: {
-    marginRight: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  statusContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statusEmoji: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  statusValue: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginRight: 8,
-    marginTop: 5,
-  },
-  statusDescription: {
-    color: "#b0b3c6",
-    fontSize: 14,
-    marginBottom: 8,
-    marginLeft: 2,
-    marginTop: 6,
-  },
-  statusLabel: {
-    fontSize: 18,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  statusDistance: {
-    color: "#e03487",
-    fontSize: 12,
-    marginBottom: 12,
-    marginLeft: 2,
-    opacity: 0.8,
-  },
-  moodRow: {
-    marginTop: 10,
-    marginBottom: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  moodLabel: {
-    fontSize: 18,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  moodContentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  moodEmoji: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  moodValue: {
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  moodDescription: {
-    fontSize: 14,
-    color: "#b0b3c6",
-    marginLeft: 4,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    wrapper: {
+      width: "100%",
+      marginBottom: 14,
+    },
+    loadingContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 20,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 0,
+    },
+    statusRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 0,
+    },
+    statusIndicator: {
+      marginRight: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    statusDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    statusContent: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    statusEmoji: {
+      fontSize: 20,
+      marginRight: 8,
+    },
+    statusValue: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+      marginRight: 8,
+      marginTop: 5,
+    },
+    statusDescription: {
+      color: theme.colors.muted,
+      fontSize: 14,
+      marginBottom: 8,
+      marginLeft: 2,
+      marginTop: 6,
+    },
+    statusLabel: {
+      fontSize: 18,
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      marginBottom: 2,
+    },
+    statusDistance: {
+      color: theme.colors.primary,
+      fontSize: 12,
+      marginBottom: 12,
+      marginLeft: 2,
+      opacity: 0.8,
+    },
+    moodRow: {
+      marginTop: 10,
+      marginBottom: 4,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    moodLabel: {
+      fontSize: 18,
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      marginBottom: 2,
+    },
+    moodContentRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    moodEmoji: {
+      fontSize: 20,
+      marginRight: 8,
+    },
+    moodValue: {
+      fontSize: 16,
+      color: theme.colors.text,
+      fontWeight: "bold",
+    },
+    moodDescription: {
+      fontSize: 14,
+      color: theme.colors.muted,
+      marginLeft: 4,
+    },
+  });
 
 export default PartnerStatusMood;

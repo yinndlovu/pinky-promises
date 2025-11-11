@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -21,7 +21,6 @@ import PastGiftsList from "../components/PastGiftsList";
 import ClaimedGiftModal from "../../../components/modals/output/ClaimedGiftModal";
 import UpdateMonthlyGiftModal from "../../../components/modals/input/UpdateMonthlyGiftModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
 
 // internal
 import { claimMonthlyGift } from "../../../services/api/gifts/monthlyGiftService";
@@ -37,6 +36,7 @@ import {
   usePastGifts,
   useSetMonthlyGift,
 } from "../../../hooks/useGift";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -48,6 +48,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -69,10 +71,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
     user?.id,
     token
   );
-  const {
-    data: setMonthlyGift,
-    refetch: refetchSetMonthlyGift,
-  } = useSetMonthlyGift(user?.id, token);
+  const { data: setMonthlyGift, refetch: refetchSetMonthlyGift } =
+    useSetMonthlyGift(user?.id, token);
 
   // use effects
   useEffect(() => {
@@ -164,7 +164,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   }*/
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
         <View
           style={{
@@ -184,7 +184,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       )}
       <View
         style={{
-          backgroundColor: "#23243a",
+          backgroundColor: theme.colors.background,
           paddingTop: insets.top,
           height: HEADER_HEIGHT + insets.top,
           justifyContent: "center",
@@ -199,21 +199,21 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             left: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           // onPress={() => navigation.navigate("GameListScreen")}
         >
-          <Ionicons name="game-controller-outline" size={22} color="#fff" />
+          <Ionicons name="game-controller-outline" size={22} color={theme.colors.text} />
         </TouchableOpacity>
         <Text
           style={{
             fontSize: 20,
-            color: "#fff",
+            color: theme.colors.text,
             letterSpacing: 0,
           }}
         >
@@ -226,16 +226,16 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             right: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           onPress={() => navigation.navigate("CartScreen")}
         >
-          <Feather name="shopping-cart" size={22} color="#fff" />
+          <Feather name="shopping-cart" size={22} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -245,9 +245,9 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#e03487"]}
-            tintColor="#e03487"
-            progressBackgroundColor="#23243a"
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
+            progressBackgroundColor={theme.colors.background}
           />
         }
       >
@@ -268,7 +268,7 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
         ) : (
           <Text
             style={{
-              color: "#b0b3c6",
+              color: theme.colors.muted,
               textAlign: "center",
               marginTop: 8,
               marginBottom: 12,
@@ -314,41 +314,42 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 32,
-    alignItems: "stretch",
-    backgroundColor: "#23243a",
-    minHeight: "100%",
-  },
-  toast: {
-    position: "absolute",
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: "#23243a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingTop: 20,
+      paddingBottom: 32,
+      alignItems: "stretch",
+      backgroundColor: theme.colors.background,
+      minHeight: "100%",
+    },
+    toast: {
+      position: "absolute",
+      bottom: 10,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    centered: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
 
 export default GiftsScreen;

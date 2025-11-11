@@ -1,5 +1,5 @@
 // external
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import {
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useNotificationPrefs } from "../../../hooks/useNotificationPrefs";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // screen content
 import ReminderIntervalSetting from "./ReminderIntervalSetting";
@@ -32,6 +33,8 @@ const NotificationsScreen = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [updating, setUpdating] = useState<{ [key: string]: boolean }>({});
@@ -106,7 +109,7 @@ const NotificationsScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 100}
     >
-      <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <ScrollView
           contentContainerStyle={styles.container}
           showsVerticalScrollIndicator={false}
@@ -130,8 +133,13 @@ const NotificationsScreen = () => {
                 value={!!localPreferences[key]}
                 onValueChange={(val) => handleToggle(key, val)}
                 disabled={updating[key]}
-                trackColor={{ false: "#767577", true: "#e03487" }}
-                thumbColor={localPreferences[key] ? "#fff" : "#b0b3c6"}
+                trackColor={{
+                  false: theme.colors.surface,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={
+                  localPreferences[key] ? "#f1f3f7ff" : theme.colors.muted
+                }
               />
             </View>
           ))}
@@ -144,7 +152,7 @@ const NotificationsScreen = () => {
           onRequestClose={() => {}}
         >
           <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color="#e03487" />
+            <ActivityIndicator size="large" color={theme.colors.accent} />
           </View>
         </Modal>
         {showError && (
@@ -157,68 +165,69 @@ const NotificationsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#23243a",
-    padding: 20,
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 20,
-    color: "#fff",
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 16,
-    borderBottomWidth: 0.7,
-    borderColor: "#333",
-  },
-  label: {
-    fontSize: 16,
-    color: "#e8e8eb",
-    fontWeight: "bold",
-  },
-  description: {
-    color: "#b0b3c6",
-    fontSize: 13,
-    marginTop: 2,
-    marginBottom: 0,
-    fontWeight: "400",
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  toast: {
-    position: "absolute",
-    top: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 50,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  loadingOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.background,
+      padding: 20,
+    },
+    header: {
+      fontSize: 22,
+      fontWeight: "bold",
+      marginBottom: 20,
+      color: theme.colors.text,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 16,
+      borderBottomWidth: 0.7,
+      borderColor: theme.colors.surface,
+    },
+    label: {
+      fontSize: 16,
+      color: theme.colors.text,
+      fontWeight: "bold",
+    },
+    description: {
+      color: theme.colors.muted,
+      fontSize: 13,
+      marginTop: 2,
+      marginBottom: 0,
+      fontWeight: "400",
+    },
+    centered: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    toast: {
+      position: "absolute",
+      top: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 50,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    loadingOverlay: {
+      flex: 1,
+      backgroundColor: theme.colors.absoluteFillObject,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });
 
 export default NotificationsScreen;

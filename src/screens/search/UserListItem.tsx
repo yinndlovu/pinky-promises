@@ -1,10 +1,11 @@
 // external
-import React from "react";
+import { useMemo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Image } from 'expo-image';
+import { Image } from "expo-image";
 
 // internal
-import { buildCachedImageUrl } from '../../utils/cache/imageCacheUtils';
+import { buildCachedImageUrl } from "../../utils/cache/imageCacheUtils";
+import { useTheme } from "../../theme/ThemeContext";
 
 // types
 type User = {
@@ -30,26 +31,35 @@ export default function UserListItem({
   profilePicture,
   onPress,
 }: UserListItemProps) {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // render user profile picture
   const renderProfileImage = () => {
-    if (profilePicture) {
-      const cachedImageUrl = buildCachedImageUrl(user.id, profilePicture.updatedAt);
+    if (profilePicture && user) {
+      const timestamp = Math.floor(
+        new Date(profilePicture.updatedAt).getTime() / 1000
+      );
+
+      const cachedImageUrl = buildCachedImageUrl(user.id, timestamp);
       return (
         <Image
           source={cachedImageUrl}
           style={styles.avatar}
           contentFit="cover"
+          cachePolicy="disk"
           transition={200}
         />
       );
     }
-    
+
     return (
       <Image
         source={require("../../assets/default-avatar-two.png")}
         style={styles.avatar}
         contentFit="cover"
+        cachePolicy="disk"
       />
     );
   };
@@ -65,31 +75,32 @@ export default function UserListItem({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#333",
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 16,
-  },
-  info: {
-    flex: 1,
-  },
-  name: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  username: {
-    color: "#b0b3c6",
-    fontSize: 14,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.surface,
+    },
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      marginRight: 16,
+    },
+    info: {
+      flex: 1,
+    },
+    name: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    username: {
+      color: theme.colors.muted,
+      fontSize: 14,
+    },
+  });

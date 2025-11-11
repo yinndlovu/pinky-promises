@@ -1,5 +1,5 @@
 // external
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -19,10 +19,11 @@ import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
 import { getUserProfile } from "../../../../services/api/profiles/profileService";
 import { usePartnerRequestStatus } from "../../../../hooks/usePartnerRequestStatus";
+import { useTheme } from "../../../../theme/ThemeContext";
 
 // screen content
 import AlertModal from "../../../../components/modals/output/AlertModal";
-import styles from "../styles/UserProfileScreen.styles";
+import { createUserProfileStyles } from "../styles/UserProfileScreen.styles";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 
 // variables
@@ -37,6 +38,8 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createUserProfileStyles(theme), [theme]);
 
   // use states
   const [user, setUser] = useState<any>(null);
@@ -211,7 +214,9 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   if (!user) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
+        <Text
+          style={{ color: theme.colors.text, fontSize: 22, fontWeight: "bold" }}
+        >
           User not found
         </Text>
       </View>
@@ -219,7 +224,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
         <View
           style={{
@@ -232,7 +237,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
             paddingVertical: 2,
           }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>
+          <Text style={{ color: theme.colors.text, textAlign: "center" }}>
             You are offline
           </Text>
         </View>
@@ -264,7 +269,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
           disabled={sendingRequest}
         >
           {sendingRequest ? (
-            <ActivityIndicator color="#fff" size="small" />
+            <ActivityIndicator color={theme.colors.text} size="small" />
           ) : (
             <Text style={styles.partnerButtonText}>{getButtonText()}</Text>
           )}

@@ -6,6 +6,7 @@ import {
 
 // internal
 import { OursStackParamList } from "../../types/StackParamList";
+import { useTheme } from "../../theme/ThemeContext";
 
 // screens
 import OursScreen from "../../screens/ours/screens/OursScreen";
@@ -16,12 +17,14 @@ import AllFavoriteMemoriesScreen from "../../screens/ours/screens/AllFavoriteMem
 const OursStack = createStackNavigator<OursStackParamList>();
 
 export default function OursStackScreen() {
+  const { theme } = useTheme();
+
   return (
     <OursStack.Navigator
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
         headerShown: false,
-        cardStyle: { backgroundColor: "#23243a" },
+        cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <OursStack.Screen name="OursScreen" component={OursScreen} />
@@ -31,7 +34,7 @@ export default function OursStackScreen() {
         options={{
           headerShown: true,
           title: "",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -42,7 +45,7 @@ export default function OursStackScreen() {
         options={{
           headerShown: true,
           title: "Timeline",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -54,7 +57,7 @@ export default function OursStackScreen() {
         options={{
           headerShown: true,
           title: "All favorite memories",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",

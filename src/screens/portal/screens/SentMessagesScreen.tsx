@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { Message } from "../../../types/Message";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
@@ -29,6 +30,8 @@ const SentMessagesScreen = () => {
   // variables
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [viewModalVisible, setViewModalVisible] = useState(false);
@@ -91,10 +94,10 @@ const SentMessagesScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Text
         style={{
-          color: "#fff",
+          color: theme.colors.text,
           fontSize: 15,
           fontWeight: "600",
           margin: 16,
@@ -104,7 +107,10 @@ const SentMessagesScreen = () => {
         These are all the sweet messages you sent
       </Text>
       {messagesLoading ? (
-        <ActivityIndicator color="#e03487" style={{ marginTop: 40 }} />
+        <ActivityIndicator
+          color={theme.colors.primary}
+          style={{ marginTop: 40 }}
+        />
       ) : error ? (
         <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
           {error.message || "Failed to load messages"}
@@ -133,14 +139,18 @@ const SentMessagesScreen = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#e03487"
-              colors={["#e03487"]}
-              progressBackgroundColor="#23243a"
+              tintColor={theme.colors.primary}
+              colors={[theme.colors.primary]}
+              progressBackgroundColor={theme.colors.background}
             />
           }
           ListEmptyComponent={
             <Text
-              style={{ color: "#b0b3c6", textAlign: "center", marginTop: 40 }}
+              style={{
+                color: theme.colors.muted,
+                textAlign: "center",
+                marginTop: 40,
+              }}
             >
               No sent messages yet
             </Text>
@@ -170,61 +180,62 @@ const SentMessagesScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  centered: {
-    flex: 1,
-    backgroundColor: "#23243a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  memoryItem: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
-  },
-  memoryText: {
-    color: "#fff",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "left",
-    marginBottom: 6,
-  },
-  metaRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginBottom: 4,
-  },
-  metaText: {
-    color: "#b0b3c6",
-    fontSize: 12,
-  },
-  toast: {
-    position: "absolute",
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#393a4a",
-    opacity: 0.5,
-    marginVertical: 8,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    centered: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    memoryItem: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 10,
+    },
+    memoryText: {
+      color: theme.colors.text,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: "left",
+      marginBottom: 6,
+    },
+    metaRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      marginBottom: 4,
+    },
+    metaText: {
+      color: theme.colors.muted,
+      fontSize: 12,
+    },
+    toast: {
+      position: "absolute",
+      bottom: 10,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.mutedAlt,
+      opacity: 0.5,
+      marginVertical: 8,
+    },
+  });
 
 export default SentMessagesScreen;

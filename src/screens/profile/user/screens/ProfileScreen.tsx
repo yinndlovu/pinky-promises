@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect, useCallback, use } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   ScrollView,
   View,
@@ -37,6 +37,9 @@ import {
 import { useAuth } from "../../../../contexts/AuthContext";
 import { updateProfilePicture } from "../../../../services/api/profiles/profileService";
 import { updateProfileField } from "../../../../services/api/profiles/profileService";
+import { useTheme } from "../../../../theme/ThemeContext";
+import { createModalStyles } from "../styles/ModalStyles.styles";
+import { createProfileStyles } from "../styles/ProfileScrees.styles";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
@@ -48,13 +51,11 @@ import Anniversary from "../components/Anniversary";
 import Favorites from "../components/Favorites";
 import LoveLanguage from "../components/LoveLanguage";
 import MoreAboutYou from "../components/MoreAboutYou";
-import styles from "../styles/ProfileScrees.styles";
 import MessageStorage from "../components/MessageStorage";
 import StoreMessageModal from "../../../../components/modals/input/StoreMessageModal";
 import AlertModal from "../../../../components/modals/output/AlertModal";
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
-import modalStyles from "../styles/ModalStyles.styles";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
 
@@ -81,6 +82,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createProfileStyles(theme), [theme]);
+  const modalStyles = useMemo(() => createModalStyles(theme), [theme]);
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -627,15 +631,21 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#e03487"
-              colors={["#e03487"]}
-              progressBackgroundColor="#23243a"
+              tintColor={theme.colors.accent}
+              colors={[theme.colors.accent]}
+              progressBackgroundColor={theme.colors.background}
             />
           }
           contentContainerStyle={styles.centered}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={{ color: "#fff", fontSize: 18, fontWeight: "bold" }}>
+          <Text
+            style={{
+              color: theme.colors.text,
+              fontSize: 18,
+              fontWeight: "bold",
+            }}
+          >
             Something went wrong viewing your profile
           </Text>
         </ScrollView>
@@ -644,7 +654,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
         <View
           style={{
@@ -657,14 +667,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             paddingVertical: 2,
           }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>
+          <Text style={{ color: theme.colors.text, textAlign: "center" }}>
             You are offline
           </Text>
         </View>
       )}
       <View
         style={{
-          backgroundColor: "#23243a",
+          backgroundColor: theme.colors.background,
           paddingTop: insets.top,
           height: HEADER_HEIGHT + insets.top,
           justifyContent: "center",
@@ -676,7 +686,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <Text
           style={{
             fontSize: 20,
-            color: "#fff",
+            color: theme.colors.text,
             letterSpacing: 0,
           }}
         >
@@ -688,23 +698,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             left: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           onPress={() => navigation.navigate("PendingRequests")}
         >
-          <Feather name="users" size={22} color="#fff" />
+          <Feather name="users" size={22} color={theme.colors.text} />
           {pendingRequestsCount > 0 && (
             <View
               style={{
                 position: "absolute",
                 top: -4,
                 right: -4,
-                backgroundColor: "#e03487",
+                backgroundColor: theme.colors.primary,
                 borderRadius: 10,
                 paddingHorizontal: 5,
                 paddingVertical: 1,
@@ -713,7 +723,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: "#fff", fontSize: 10, fontWeight: "bold" }}>
+              <Text
+                style={{
+                  color: theme.colors.text,
+                  fontSize: 10,
+                  fontWeight: "bold",
+                }}
+              >
                 {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
               </Text>
             </View>
@@ -725,16 +741,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             right: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           onPress={() => navigation.navigate("Settings")}
         >
-          <Feather name="settings" size={22} color="#fff" />
+          <Feather name="settings" size={22} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -742,9 +758,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e03487"
-            colors={["#e03487"]}
-            progressBackgroundColor="#23243a"
+            tintColor={theme.colors.accent}
+            colors={[theme.colors.accent]}
+            progressBackgroundColor={theme.colors.background}
           />
         }
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
@@ -771,7 +787,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
               setEditModalVisible(true);
             }}
           >
-            <Feather name="edit-2" size={22} color="#e03487" />
+            <Feather name="edit-2" size={22} color={theme.colors.primary} />
           </TouchableOpacity>
         </View>
 
@@ -871,7 +887,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         placeholder="Name"
                         value={editName}
                         onChangeText={setEditName}
-                        placeholderTextColor="#b0b3c6"
+                        placeholderTextColor={theme.colors.muted}
                       />
                       {editName !== originalName && (
                         <TouchableOpacity
@@ -896,7 +912,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         onChangeText={(text) =>
                           setEditUsername(text.replace(/^@+/, ""))
                         }
-                        placeholderTextColor="#b0b3c6"
+                        placeholderTextColor={theme.colors.muted}
                         autoCapitalize="none"
                       />
                       {editUsername !== originalUsername && (
@@ -924,7 +940,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         placeholder="Bio"
                         value={editBio}
                         onChangeText={setEditBio}
-                        placeholderTextColor="#b0b3c6"
+                        placeholderTextColor={theme.colors.muted}
                       />
                       {editBio !== originalBio && (
                         <TouchableOpacity
@@ -969,7 +985,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         onPress={() => setEditMessageModalVisible(false)}
                         style={modalStyles.closeButton}
                       >
-                        <Feather name="x" size={24} color="#fff" />
+                        <Feather name="x" size={24} color={theme.colors.text} />
                       </TouchableOpacity>
                     </View>
 
@@ -980,7 +996,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         value={editTitle}
                         onChangeText={setEditTitle}
                         placeholder="Message title..."
-                        placeholderTextColor="#b0b3c6"
+                        placeholderTextColor={theme.colors.muted}
                         maxLength={50}
                       />
 
@@ -989,7 +1005,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         value={editMessageText}
                         onChangeText={setEditMessageText}
                         placeholder="Type the message here..."
-                        placeholderTextColor="#b0b3c6"
+                        placeholderTextColor={theme.colors.muted}
                         multiline
                         maxLength={5000}
                         textAlignVertical="top"
@@ -1014,7 +1030,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                         }
                       >
                         {updateMessageMutation.isPending ? (
-                          <ActivityIndicator color="#fff" size="small" />
+                          <ActivityIndicator
+                            color={theme.colors.text}
+                            size="small"
+                          />
                         ) : (
                           <Text style={modalStyles.saveButtonText}>Save</Text>
                         )}

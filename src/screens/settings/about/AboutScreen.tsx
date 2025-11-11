@@ -1,17 +1,21 @@
 // external
-import React from "react";
+import { useMemo } from "react";
 import { Text, StyleSheet, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import aboutText from "../../../configuration/aboutText";
+import { useTheme } from "../../../theme/ThemeContext";
 
 const AboutScreen = () => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: "#23243a" }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       contentContainerStyle={{
         padding: 24,
         paddingTop: insets.top + 24,
@@ -25,20 +29,21 @@ const AboutScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#e03487",
-    marginBottom: 18,
-    textAlign: "center",
-  },
-  body: {
-    fontSize: 16,
-    color: "#fff",
-    lineHeight: 24,
-    textAlign: "left",
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    header: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: theme.colors.accent,
+      marginBottom: 18,
+      textAlign: "center",
+    },
+    body: {
+      fontSize: 16,
+      color: theme.colors.text,
+      lineHeight: 24,
+      textAlign: "left",
+    },
+  });
 
 export default AboutScreen;

@@ -1,12 +1,14 @@
 // external
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useMemo } from "react";
 
 // content
 import MessageList from "../components/MessageList";
 
 // internal
 import { SweetMessageProps } from "../../../interfaces/PortalMessage";
+import { useTheme } from "../../../theme/ThemeContext";
 
 export default function SweetMessagesSection({
   sent,
@@ -20,13 +22,15 @@ export default function SweetMessagesSection({
 }: SweetMessageProps) {
   // variables
   const unviewed = lastUnseen;
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   return (
     <View>
       <View style={styles.titleRow}>
         <Text style={styles.sectionTitle}>Sweet Messages</Text>
         <TouchableOpacity style={styles.plusButton} onPress={onAdd}>
-          <Ionicons name="add" size={20} color="#fff" />
+          <Ionicons name="add" size={20} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
       {unviewed && (
@@ -85,84 +89,85 @@ export default function SweetMessagesSection({
   );
 }
 
-const styles = StyleSheet.create({
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 0,
-    color: "#dce0f7",
-    marginBottom: 10,
-  },
-  subTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 12,
-    color: "#b0b3c6",
-  },
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  plusButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 16,
-    width: 32,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 12,
-    marginBottom: 4,
-  },
-  banner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#1b1c2e",
-    padding: 20,
-    borderRadius: 10,
-    marginVertical: 10,
-    justifyContent: "space-between",
-  },
-  bannerText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  viewButton: {
-    marginLeft: 12,
-    backgroundColor: "#e03487",
-    paddingVertical: 7,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-  },
-  viewButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-  viewAllButton: {
-    backgroundColor: "transparent",
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-  },
-  viewAllButtonText: {
-    color: "#e03487",
-    fontWeight: "bold",
-    fontSize: 13,
-    letterSpacing: 0.5,
-  },
-  emptyText: {
-    color: "#b0b3c6",
-    fontStyle: "italic",
-    marginVertical: 8,
-    marginLeft: 8,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    sectionTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginTop: 0,
+      color: theme.colors.muted,
+      marginBottom: 10,
+    },
+    subTitle: {
+      fontSize: 16,
+      fontWeight: "600",
+      marginTop: 12,
+      color: theme.colors.mutedAlt,
+    },
+    titleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 4,
+    },
+    plusButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 16,
+      width: 32,
+      height: 32,
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: 8,
+    },
+    row: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginTop: 12,
+      marginBottom: 4,
+    },
+    banner: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.surfaceAlt,
+      padding: 20,
+      borderRadius: 10,
+      marginVertical: 10,
+      justifyContent: "space-between",
+    },
+    bannerText: {
+      color: theme.colors.text,
+      fontWeight: "600",
+      fontSize: 16,
+    },
+    viewButton: {
+      marginLeft: 12,
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 7,
+      paddingHorizontal: 18,
+      borderRadius: 8,
+    },
+    viewButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+    viewAllButton: {
+      backgroundColor: "transparent",
+      paddingVertical: 4,
+      paddingHorizontal: 12,
+      borderRadius: 8,
+    },
+    viewAllButtonText: {
+      color: theme.colors.primary,
+      fontWeight: "bold",
+      fontSize: 13,
+      letterSpacing: 0.5,
+    },
+    emptyText: {
+      color: theme.colors.muted,
+      fontStyle: "italic",
+      marginVertical: 8,
+      marginLeft: 8,
+    },
+  });

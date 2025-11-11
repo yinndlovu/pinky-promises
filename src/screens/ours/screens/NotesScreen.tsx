@@ -1,5 +1,11 @@
 // external
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   View,
   Text,
@@ -13,6 +19,7 @@ import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view
 import { getNotes, updateNotes } from "../../../services/api/ours/notesService";
 import useToken from "../../../hooks/useToken";
 import { useSocket } from "../../../contexts/SocketContext";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // variables
 const AUTO_SAVE_DELAY = 1000;
@@ -43,6 +50,8 @@ const NotesScreen: React.FC = () => {
   // variables
   const token = useToken();
   const { socket } = useSocket();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use effects
   useEffect(() => {
@@ -176,7 +185,10 @@ const NotesScreen: React.FC = () => {
         ) : null}
 
         {loading ? (
-          <ActivityIndicator color="#e03487" style={{ marginTop: 32 }} />
+          <ActivityIndicator
+            color={theme.colors.primary}
+            style={{ marginTop: 32 }}
+          />
         ) : (
           <KeyboardAwareScrollView
             style={styles.scroll}
@@ -189,7 +201,7 @@ const NotesScreen: React.FC = () => {
               value={content}
               onChangeText={handleChangeText}
               placeholder="Start writing your shared notes here..."
-              placeholderTextColor="#b0b3c6"
+              placeholderTextColor={theme.colors.muted}
               textAlignVertical="top"
               editable={!loading}
             />
@@ -200,48 +212,49 @@ const NotesScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#23243a",
-    padding: 0,
-  },
-  header: {
-    fontSize: 18,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    letterSpacing: 0,
-    paddingBottom: 10,
-    textAlign: "center",
-  },
-  scroll: {
-    flexGrow: 1,
-    padding: 15,
-  },
-  input: {
-    minHeight: 300,
-    color: "#fff",
-    fontSize: 16,
-    backgroundColor: "#1b1c2e",
-    borderRadius: 16,
-    padding: 18,
-    textAlignVertical: "top",
-    fontFamily: "sans-serif",
-  },
-  statusBar: {
-    minHeight: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
-  },
-  savingText: {
-    color: "#e03487",
-    fontSize: 13,
-  },
-  errorText: {
-    color: "red",
-    fontSize: 13,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      padding: 0,
+    },
+    header: {
+      fontSize: 18,
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      letterSpacing: 0,
+      paddingBottom: 10,
+      textAlign: "center",
+    },
+    scroll: {
+      flexGrow: 1,
+      padding: 15,
+    },
+    input: {
+      minHeight: 300,
+      color: theme.colors.text,
+      fontSize: 16,
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 16,
+      padding: 18,
+      textAlignVertical: "top",
+      fontFamily: "sans-serif",
+    },
+    statusBar: {
+      minHeight: 28,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 10,
+    },
+    savingText: {
+      color: theme.colors.primary,
+      fontSize: 13,
+    },
+    errorText: {
+      color: "red",
+      fontSize: 13,
+    },
+  });
 
 export default NotesScreen;

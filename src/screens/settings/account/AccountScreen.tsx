@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import type { StackScreenProps } from "@react-navigation/stack";
 import { deleteAccount } from "../../../services/api/account/accountService";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import DeleteAccountModal from "../../../components/modals/input/DeleteAccountModal";
@@ -33,6 +34,8 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   // variables
   const { logout } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // handlers
   const handleDeleteAccountPress = () => {
@@ -87,7 +90,7 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   }, [toastMessage]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
@@ -97,18 +100,26 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
           <Pressable
             style={styles.actionRow}
             onPress={handleDeleteAccountPress}
-            android_ripple={{ color: "#23243a" }}
+            android_ripple={{ color: theme.colors.background }}
           >
             <Text style={styles.actionText}>Delete your account</Text>
-            <Ionicons name="chevron-forward" size={22} color="#ccc" />
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={theme.colors.text}
+            />
           </Pressable>
           <Pressable
             style={styles.actionRow}
             onPress={() => navigation.navigate("ChangePassword")}
-            android_ripple={{ color: "#23243a" }}
+            android_ripple={{ color: theme.colors.background }}
           >
             <Text style={styles.actionText}>Change password</Text>
-            <Ionicons name="chevron-forward" size={22} color="#ccc" />
+            <Ionicons
+              name="chevron-forward"
+              size={22}
+              color={theme.colors.text}
+            />
           </Pressable>
         </View>
       </ScrollView>
@@ -129,58 +140,59 @@ const AccountScreen: React.FC<AccountScreenProps> = ({ navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingTop: 18,
-    paddingBottom: 32,
-    backgroundColor: "#23243a",
-    minHeight: "100%",
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    marginBottom: 10,
-    marginLeft: 6,
-  },
-  actionRow: {
-    backgroundColor: "#2e2f4a",
-    marginBottom: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  actionText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  toast: {
-    position: "absolute",
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingTop: 18,
+      paddingBottom: 32,
+      backgroundColor: theme.colors.background,
+      minHeight: "100%",
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      marginBottom: 10,
+      marginLeft: 6,
+    },
+    actionRow: {
+      backgroundColor: theme.colors.surfaceAlt,
+      marginBottom: 12,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 10,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    actionText: {
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    toast: {
+      position: "absolute",
+      bottom: 10,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default AccountScreen;

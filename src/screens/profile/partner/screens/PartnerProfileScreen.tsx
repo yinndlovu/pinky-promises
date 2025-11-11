@@ -1,5 +1,5 @@
 // external
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,8 @@ import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
 import { favoritesObjectToArray } from "../../../../helpers/profileHelpers";
 import { formatDistance } from "../../../../utils/formatters/formatDistance";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { createPartnerProfileStyles } from "../styles/PartnerProfileScreen.styles";
+import { useTheme } from "../../../../theme/ThemeContext";
 
 // screen content
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
@@ -30,7 +32,6 @@ import PartnerFavorites from "../components/PartnerFavorites";
 import PartnerLoveLanguage from "../components/PartnerLoveLanguage";
 import PartnerStatusMood from "../components/PartnerStatusMood";
 import PartnerAnniversary from "../components/PartnerAnniversary";
-import styles from "../styles/PartnerProfileScreen.styles";
 import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
@@ -54,6 +55,8 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createPartnerProfileStyles(theme), [theme]);
 
   // use states
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -275,7 +278,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   if (!partner) {
     return (
       <View style={styles.centered}>
-        <Text style={{ color: "#fff", fontSize: 22, fontWeight: "bold" }}>
+        <Text
+          style={{ color: theme.colors.text, fontSize: 22, fontWeight: "bold" }}
+        >
           You have no partner
         </Text>
       </View>
@@ -283,7 +288,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
         <View
           style={{
@@ -296,7 +301,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
             paddingVertical: 2,
           }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>
+          <Text style={{ color: theme.colors.text, textAlign: "center" }}>
             You are offline
           </Text>
         </View>
@@ -306,9 +311,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e03487"
-            colors={["#e03487"]}
-            progressBackgroundColor="#23243a"
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.background}
           />
         }
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
@@ -373,7 +378,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
         {partnerLoading && (
           <View style={styles.centered}>
-            <ActivityIndicator color="#5ad1e6" size="large" />
+            <ActivityIndicator color={theme.colors.primary} size="large" />
           </View>
         )}
 

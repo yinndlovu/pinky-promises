@@ -9,6 +9,7 @@ import Feather from "@expo/vector-icons/build/Feather";
 // internal
 import { RootStackParamList } from "../types/StackParamList";
 import { useAuth } from "../contexts/AuthContext";
+import { useTheme } from "../theme/ThemeContext";
 
 // screens
 import WelcomeScreen from "../screens/welcome/WelcomeScreen";
@@ -31,14 +32,15 @@ const RootStack = createStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   // variables
   const { isAuthenticated } = useAuth();
-  
+  const { theme } = useTheme();
+
   return (
     <RootStack.Navigator
       initialRouteName={isAuthenticated ? "Main" : "Welcome"}
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
         headerShown: false,
-        cardStyle: { backgroundColor: "#23243a" },
+        cardStyle: { backgroundColor: theme.colors.background },
         transitionSpec: {
           open: {
             animation: "timing",
@@ -63,7 +65,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -75,7 +77,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -87,7 +89,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -99,7 +101,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -111,7 +113,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -123,7 +125,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -135,7 +137,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -147,7 +149,7 @@ export default function RootNavigator() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -163,7 +165,7 @@ export default function RootNavigator() {
         options={({ navigation }) => ({
           headerShown: true,
           headerTitle: () => <AIHeader />,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -172,7 +174,11 @@ export default function RootNavigator() {
               onPress={() => navigation.setParams({ showOptions: true } as any)}
               style={{ marginRight: 16 }}
             >
-              <Feather name="more-vertical" size={22} color="#fff" />
+              <Feather
+                name="more-vertical"
+                size={22}
+                color={theme.colors.text}
+              />
             </TouchableOpacity>
           ),
         })}

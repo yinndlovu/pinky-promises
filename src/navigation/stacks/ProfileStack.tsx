@@ -6,6 +6,7 @@ import {
 
 // internal
 import { ProfileStackParamList } from "../../types/StackParamList";
+import { useTheme } from "../../theme/ThemeContext";
 
 // screens
 import ProfileScreen from "../../screens/profile/user/screens/ProfileScreen";
@@ -21,12 +22,14 @@ import PendingRequestsScreen from "../../screens/requests/screens/PendingRequest
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 
 export default function ProfileStackScreen() {
+  const { theme } = useTheme();
+
   return (
     <ProfileStack.Navigator
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
         headerShown: false,
-        cardStyle: { backgroundColor: "#23243a" },
+        cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <ProfileStack.Screen name="ProfileScreen" component={ProfileScreen} />
@@ -36,7 +39,7 @@ export default function ProfileStackScreen() {
         options={{
           headerShown: true,
           title: "Settings",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -49,7 +52,7 @@ export default function ProfileStackScreen() {
           headerShown: true,
           title: "Change email address",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -62,7 +65,7 @@ export default function ProfileStackScreen() {
           headerShown: true,
           title: "",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -74,7 +77,7 @@ export default function ProfileStackScreen() {
           headerShown: true,
           title: "Change password",
           headerTransparent: true,
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -86,7 +89,7 @@ export default function ProfileStackScreen() {
         options={{
           headerShown: true,
           title: "Notifications",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -98,7 +101,7 @@ export default function ProfileStackScreen() {
         options={{
           headerShown: true,
           title: "Partner requests",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -110,7 +113,7 @@ export default function ProfileStackScreen() {
         options={{
           headerShown: true,
           title: "Account",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -122,7 +125,7 @@ export default function ProfileStackScreen() {
         options={{
           headerShown: true,
           title: "About",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",

@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -28,6 +28,7 @@ import {
   deleteFavoriteMemory,
 } from "../../../services/api/ours/favoriteMemoriesService";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // screen content
 import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
@@ -54,6 +55,8 @@ const OursScreen = ({ navigation }: Props) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [selectedDate, setSelectedDate] = useState<any | null>(null);
@@ -359,13 +362,13 @@ const OursScreen = ({ navigation }: Props) => {
   {
     deleting && (
       <View style={styles.loadingOverlay}>
-        <ActivityIndicator size="large" color="#e03487" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
         <View
           style={{
@@ -378,14 +381,14 @@ const OursScreen = ({ navigation }: Props) => {
             paddingVertical: 2,
           }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>
+          <Text style={{ color: theme.colors.text, textAlign: "center" }}>
             You are offline
           </Text>
         </View>
       )}
       <View
         style={{
-          backgroundColor: "#23243a",
+          backgroundColor: theme.colors.background,
           paddingTop: insets.top,
           height: HEADER_HEIGHT + insets.top,
           justifyContent: "center",
@@ -400,21 +403,21 @@ const OursScreen = ({ navigation }: Props) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             left: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           onPress={() => navigation.navigate("TimelineScreen")}
         >
-          <FontAwesome5 name="stream" size={22} color="#fff" />
+          <FontAwesome5 name="stream" size={22} color={theme.colors.text} />
         </TouchableOpacity>
         <Text
           style={{
             fontSize: 20,
-            color: "#fff",
+            color: theme.colors.text,
             letterSpacing: 0,
           }}
         >
@@ -426,16 +429,16 @@ const OursScreen = ({ navigation }: Props) => {
             top: insets.top + (HEADER_HEIGHT - 36) / 2,
             right: 18,
             zIndex: 10,
-            backgroundColor: "#23243a",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 8,
-            shadowColor: "#000",
+            shadowColor: theme.colors.shadow,
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
           onPress={() => navigation.navigate("ChatScreen")}
         >
-          <Feather name="message-circle" size={22} color="#fff" />
+          <Feather name="message-circle" size={22} color={theme.colors.text} />
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -445,9 +448,9 @@ const OursScreen = ({ navigation }: Props) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e03487"
-            colors={["#e03487"]}
-            progressBackgroundColor="#23243a"
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.background}
           />
         }
       >
@@ -548,49 +551,52 @@ const OursScreen = ({ navigation }: Props) => {
 
       {memoryModalLoading && !memoryModalVisible && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#e03487" />
-          <Text style={{ color: "#fff", marginTop: 12 }}>Deleting...</Text>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={{ color: theme.colors.text, marginTop: 12 }}>
+            Deleting...
+          </Text>
         </View>
       )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingBottom: 32,
-    alignItems: "stretch",
-    backgroundColor: "#23243a",
-    minHeight: "100%",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 16,
-  },
-  toast: {
-    position: "absolute",
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingBottom: 32,
+      alignItems: "stretch",
+      backgroundColor: theme.colors.background,
+      minHeight: "100%",
+    },
+    loadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.absoluteFillObject,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 16,
+    },
+    toast: {
+      position: "absolute",
+      bottom: 10,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default OursScreen;

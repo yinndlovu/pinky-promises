@@ -6,6 +6,7 @@ import {
 
 // internal
 import { HomeStackParamList } from "../../types/StackParamList";
+import { useTheme } from "../../theme/ThemeContext";
 
 // screens
 import HomeScreen from "../../screens/home/screens/HomeScreen";
@@ -19,12 +20,14 @@ import ReceivedMessagesScreen from "../../screens/portal/screens/ReceivedMessage
 const HomeStack = createStackNavigator<HomeStackParamList>();
 
 export default function HomeStackScreen() {
+  const { theme } = useTheme();
+
   return (
     <HomeStack.Navigator
       screenOptions={{
         ...TransitionPresets.SlideFromRightIOS,
         headerShown: false,
-        cardStyle: { backgroundColor: "#23243a" },
+        cardStyle: { backgroundColor: theme.colors.background },
       }}
     >
       <HomeStack.Screen name="HomeScreen" component={HomeScreen} />
@@ -34,7 +37,7 @@ export default function HomeStackScreen() {
         options={{
           headerShown: true,
           title: "Search",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -46,7 +49,7 @@ export default function HomeStackScreen() {
         options={{
           headerShown: true,
           title: "Partner",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -58,7 +61,7 @@ export default function HomeStackScreen() {
         options={{
           headerShown: true,
           title: "",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
         }}
@@ -69,7 +72,7 @@ export default function HomeStackScreen() {
         options={{
           headerShown: true,
           title: "Portal",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -81,7 +84,7 @@ export default function HomeStackScreen() {
         options={{
           headerShown: true,
           title: "Sent sweet messages",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
@@ -93,7 +96,7 @@ export default function HomeStackScreen() {
         options={{
           headerShown: true,
           title: "Received sweet messages",
-          headerTintColor: "#fff",
+          headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",

@@ -1,5 +1,5 @@
 // external
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
@@ -18,6 +18,7 @@ import useToken from "../hooks/useToken";
 import { useProfilePicture } from "../hooks/useProfilePicture";
 import { useGift } from "../hooks/useGift";
 import AvatarSkeleton from "../components/skeletons/AvatarSkeleton";
+import { useTheme } from "../theme/ThemeContext";
 
 // types
 type Props = {
@@ -25,13 +26,16 @@ type Props = {
   currentRoute: NavItem;
 };
 
-const ACTIVE_COLOR = "#e03487";
-const INACTIVE_COLOR = "#b0b3c6";
-
 export default function NavigationBar({ navigation, currentRoute }: Props) {
   // variables
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // colors
+  const ACTIVE_COLOR = theme.colors.primary;
+  const INACTIVE_COLOR = theme.colors.muted;
 
   // data
   const { data: gift } = useGift(user?.id, token);
@@ -163,7 +167,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
                 }
               }}
               android_ripple={{
-                color: "rgba(167, 72, 130, 0.3)",
+                color: theme.colors.ripple,
                 borderless: true,
                 radius: 30,
               }}
@@ -215,40 +219,41 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    backgroundColor: "#23243a",
-    paddingVertical: 10,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.05)",
-  },
-  tab: {
-    flex: 1,
-    alignItems: "center",
-    backgroundColor: "#23243a",
-    borderRadius: 30,
-    overflow: "hidden",
-    padding: 10,
-    justifyContent: "center",
-  },
-  label: {
-    fontSize: 12,
-    marginTop: 2,
-    fontWeight: "bold",
-  },
-  avatarContainer: {
-    width: 26,
-    height: 26,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  avatar: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 2,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+      backgroundColor: theme.colors.background,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: theme.colors.surfaceAlt,
+    },
+    tab: {
+      flex: 1,
+      alignItems: "center",
+      backgroundColor: theme.colors.background,
+      borderRadius: 30,
+      overflow: "hidden",
+      padding: 10,
+      justifyContent: "center",
+    },
+    label: {
+      fontSize: 12,
+      marginTop: 2,
+      fontWeight: "bold",
+    },
+    avatarContainer: {
+      width: 26,
+      height: 26,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    avatar: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      borderWidth: 2,
+    },
+  });

@@ -1,5 +1,5 @@
 // external
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -18,6 +18,7 @@ import { User } from "../../types/User";
 import { ProfilePictureInfo } from "../../types/ProfilePicture";
 import useToken from "../../hooks/useToken";
 import { fetchProfilePicture } from "../../services/api/profiles/profileService";
+import { useTheme } from "../../theme/ThemeContext";
 
 // screen content
 import AlertModal from "../../components/modals/output/AlertModal";
@@ -30,6 +31,8 @@ export default function SearchScreen({ navigation }: Props) {
   // variables
   const insets = useSafeAreaInsets();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [query, setQuery] = useState("");
@@ -113,7 +116,7 @@ export default function SearchScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a", paddingTop: 0 }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background, paddingTop: 0 }}>
       {!isOnline && (
         <View
           style={{
@@ -133,8 +136,8 @@ export default function SearchScreen({ navigation }: Props) {
       )}
       <TextInput
         style={{
-          backgroundColor: "#1b1c2e",
-          color: "#fff",
+          backgroundColor: theme.colors.surface,
+          color: theme.colors.text,
           borderRadius: 20,
           paddingHorizontal: 20,
           paddingVertical: 12,
@@ -143,12 +146,15 @@ export default function SearchScreen({ navigation }: Props) {
           marginTop: 12,
         }}
         placeholder="Search users..."
-        placeholderTextColor="#b0b3c6"
+        placeholderTextColor={theme.colors.muted}
         value={query}
         onChangeText={handleSearch}
       />
       {loading && (
-        <ActivityIndicator color="#e03487" style={{ marginTop: 20 }} />
+        <ActivityIndicator
+          color={theme.colors.accent}
+          style={{ marginTop: 20 }}
+        />
       )}
       <FlatList
         data={users}
@@ -163,7 +169,11 @@ export default function SearchScreen({ navigation }: Props) {
         ListEmptyComponent={
           !loading && query.length > 1 ? (
             <Text
-              style={{ color: "#b0b3c6", alignSelf: "center", marginTop: 40 }}
+              style={{
+                color: theme.colors.muted,
+                alignSelf: "center",
+                marginTop: 40,
+              }}
             >
               No users found.
             </Text>
@@ -186,25 +196,26 @@ export default function SearchScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  toast: {
-    position: "absolute",
-    bottom: 60,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    toast: {
+      position: "absolute",
+      bottom: 60,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });

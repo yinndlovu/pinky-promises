@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,7 @@ import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
 import useToken from "../../../hooks/useToken";
 import { useMemories } from "../../../hooks/useMemory";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // confirmation modal
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
@@ -35,6 +36,8 @@ const AllFavoriteMemoriesScreen = () => {
   const { user } = useAuth();
   const currentUserId = user?.id;
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [refreshing, setRefreshing] = useState(false);
@@ -50,7 +53,7 @@ const AllFavoriteMemoriesScreen = () => {
   const [showError, setShowError] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
-  
+
   // data
   const {
     data: memories = [],
@@ -161,10 +164,10 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Text
         style={{
-          color: "#fff",
+          color: theme.colors.text,
           textAlign: "center",
           marginTop: 10,
           fontSize: 16,
@@ -175,7 +178,10 @@ const AllFavoriteMemoriesScreen = () => {
         These are all your favorite memories
       </Text>
       {memoriesLoading ? (
-        <ActivityIndicator color="#e03487" style={{ marginTop: 40 }} />
+        <ActivityIndicator
+          color={theme.colors.primary}
+          style={{ marginTop: 40 }}
+        />
       ) : error ? (
         <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
           {error.message || "Failed to load favorite memories"}
@@ -206,14 +212,18 @@ const AllFavoriteMemoriesScreen = () => {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={onRefresh}
-              tintColor="#e03487"
-              colors={["#e03487"]}
-              progressBackgroundColor="#23243a"
+              tintColor={theme.colors.primary}
+              colors={[theme.colors.primary]}
+              progressBackgroundColor={theme.colors.background}
             />
           }
           ListEmptyComponent={
             <Text
-              style={{ color: "#b0b3c6", textAlign: "center", marginTop: 40 }}
+              style={{
+                color: theme.colors.muted,
+                textAlign: "center",
+                marginTop: 40,
+              }}
             >
               No favorite memories yet
             </Text>
@@ -276,49 +286,52 @@ const AllFavoriteMemoriesScreen = () => {
         <View
           style={{
             ...StyleSheet.absoluteFillObject,
-            backgroundColor: "rgba(35,36,58,0.7)",
+            backgroundColor: theme.colors.absoluteFillObject,
             justifyContent: "center",
             alignItems: "center",
             zIndex: 1000,
           }}
         >
-          <ActivityIndicator size="large" color="#e03487" />
-          <Text style={{ color: "#fff", marginTop: 12 }}>Deleting...</Text>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={{ color: theme.colors.text, marginTop: 12 }}>
+            Deleting...
+          </Text>
         </View>
       )}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  memoryItem: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
-  },
-  memoryText: {
-    color: "#fff",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "left",
-    marginBottom: 6,
-  },
-  metaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  metaText: {
-    color: "#b0b3c6",
-    fontSize: 12,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#393a4a",
-    opacity: 0.5,
-    marginVertical: 8,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    memoryItem: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 10,
+    },
+    memoryText: {
+      color: theme.colors.text,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: "left",
+      marginBottom: 6,
+    },
+    metaRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 4,
+    },
+    metaText: {
+      color: theme.colors.muted,
+      fontSize: 12,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.muted,
+      opacity: 0.5,
+      marginVertical: 8,
+    },
+  });
 
 export default AllFavoriteMemoriesScreen;

@@ -1,5 +1,5 @@
 // external
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -25,6 +25,7 @@ import { CartItem } from "../../../types/Cart";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useCartItems, useCartTotal } from "../../../hooks/useCart";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -36,6 +37,8 @@ const CartScreen = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [addItemModalVisible, setAddItemModalVisible] = useState(false);
@@ -211,14 +214,14 @@ const CartScreen = () => {
         onPress={() => handleRemoveItem(item.id)}
         disabled={deleteItemMutation.isPending}
       >
-        <Feather name="trash-2" size={18} color="#e03487" />
+        <Feather name="trash-2" size={18} color={theme.colors.primary} />
       </TouchableOpacity>
     </View>
   );
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Feather name="shopping-cart" size={64} color="#b0b3c6" />
+      <Feather name="shopping-cart" size={64} color={theme.colors.muted} />
       <Text style={styles.emptyStateTitle}>Your cart is empty</Text>
       <Text style={styles.emptyStateSubtitle}>
         Add some items to get started
@@ -227,7 +230,7 @@ const CartScreen = () => {
         style={styles.emptyStateAddButton}
         onPress={() => setAddItemModalVisible(true)}
       >
-        <Feather name="plus" size={20} color="#fff" />
+        <Feather name="plus" size={20} color={theme.colors.text} />
         <Text style={styles.emptyStateAddButtonText}>Add your first item</Text>
       </TouchableOpacity>
     </View>
@@ -244,7 +247,7 @@ const CartScreen = () => {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -253,9 +256,9 @@ const CartScreen = () => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#e03487"]}
-            tintColor="#e03487"
-            progressBackgroundColor="#23243a"
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
+            progressBackgroundColor={theme.colors.background}
           />
         }
       >
@@ -270,11 +273,11 @@ const CartScreen = () => {
                   style={styles.addButton}
                   onPress={() => setAddItemModalVisible(true)}
                 >
-                  <Feather name="plus" size={24} color="#fff" />
+                  <Feather name="plus" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
               </View>
               <Pressable
-                android_ripple={{ color: "#212236ff" }}
+                android_ripple={{ color: theme.colors.ripple }}
                 style={styles.cartItemsContainer}
               >
                 {safeCartItems.map(renderCartItem)}
@@ -282,7 +285,7 @@ const CartScreen = () => {
             </View>
 
             <Pressable
-              android_ripple={{ color: "#212236ff" }}
+              android_ripple={{ color: theme.colors.ripple }}
               style={styles.totalSection}
             >
               <View style={styles.totalRow}>
@@ -299,7 +302,11 @@ const CartScreen = () => {
                 onPress={handleClearCart}
                 disabled={clearCartMutation.isPending}
               >
-                <Feather name="trash-2" size={18} color="#e03487" />
+                <Feather
+                  name="trash-2"
+                  size={18}
+                  color={theme.colors.primary}
+                />
                 <Text style={styles.clearButtonText}>Clear cart</Text>
               </TouchableOpacity>
             </View>
@@ -317,7 +324,7 @@ const CartScreen = () => {
                     onPress={() => setAddItemModalVisible(false)}
                     style={styles.closeButton}
                   >
-                    <Feather name="x" size={24} color="#fff" />
+                    <Feather name="x" size={24} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
 
@@ -328,7 +335,7 @@ const CartScreen = () => {
                     value={newItemName}
                     onChangeText={setNewItemName}
                     placeholder="e.g., Cute brown plushie"
-                    placeholderTextColor="#b0b3c6"
+                    placeholderTextColor={theme.colors.muted}
                     maxLength={50}
                   />
 
@@ -338,7 +345,7 @@ const CartScreen = () => {
                     value={newItemValue}
                     onChangeText={setNewItemValue}
                     placeholder="0.00"
-                    placeholderTextColor="#b0b3c6"
+                    placeholderTextColor={theme.colors.muted}
                     keyboardType="numeric"
                     maxLength={10}
                   />
@@ -416,286 +423,287 @@ const CartScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 100,
-  },
-  loadingContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: "#23243a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  loadingText: {
-    color: "#fff",
-    fontSize: 16,
-    marginTop: 12,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionHeaderRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 10,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    color: "#b0b3c6",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    opacity: 0.7,
-    fontWeight: "bold",
-  },
-  addButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#e03487",
-    borderRadius: 16,
-    width: 26,
-    height: 26,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  cartItemsContainer: {
-    marginTop: 16,
-    backgroundColor: "#1b1c2e",
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  cartItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#23243a",
-  },
-  itemInfo: {
-    flex: 1,
-  },
-  itemName: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 4,
-  },
-  itemValue: {
-    color: "#e03487",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  removeButton: {
-    padding: 8,
-    marginLeft: 12,
-  },
-  totalSection: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 24,
-  },
-  totalRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  totalLabel: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  totalValue: {
-    color: "#e03487",
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  actionsSection: {
-    marginBottom: 24,
-  },
-  clearButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#e03487",
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  clearButtonText: {
-    color: "#e03487",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  emptyState: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-  },
-  emptyStateTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyStateSubtitle: {
-    color: "#b0b3c6",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  emptyStateAddButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#e03487",
-    borderRadius: 12,
-    paddingVertical: 12,
-    marginTop: 50,
-    paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  emptyStateAddButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginLeft: 8,
-  },
-  modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  modalContent: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 28,
-    alignItems: "center",
-    width: "80%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 18,
-    justifyContent: "space-between",
-  },
-  modalTitle: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "left",
-    flex: 1,
-  },
-  closeButton: {
-    marginLeft: 12,
-    padding: 4,
-  },
-  form: {
-    width: "100%",
-    marginBottom: 18,
-  },
-  label: {
-    color: "#b0b3c6",
-    fontSize: 14,
-    marginBottom: 6,
-    fontWeight: "bold",
-  },
-  input: {
-    backgroundColor: "#18192b",
-    color: "#fff",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 16,
-    marginBottom: 16,
-  },
-  modalActions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 8,
-  },
-  cancelButton: {
-    backgroundColor: "#393a4a",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    borderColor: "#b0b3c6",
-    marginRight: 8,
-    flex: 1,
-  },
-  cancelButtonText: {
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-  saveButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    flex: 1,
-  },
-  saveButtonDisabled: {
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-  toast: {
-    position: "absolute",
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    contentContainer: {
+      paddingHorizontal: 16,
+      paddingTop: 20,
+      paddingBottom: 100,
+    },
+    loadingContainer: {
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    centered: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    loadingText: {
+      color: theme.colors.text,
+      fontSize: 16,
+      marginTop: 12,
+    },
+    section: {
+      marginBottom: 24,
+    },
+    sectionHeaderRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 10,
+    },
+    sectionTitle: {
+      fontSize: 13,
+      color: theme.colors.muted,
+      letterSpacing: 1,
+      textTransform: "uppercase",
+      opacity: 0.7,
+      fontWeight: "bold",
+    },
+    addButton: {
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.primary,
+      borderRadius: 16,
+      width: 26,
+      height: 26,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    addButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+      marginLeft: 8,
+    },
+    cartItemsContainer: {
+      marginTop: 16,
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 16,
+      overflow: "hidden",
+    },
+    cartItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.background,
+    },
+    itemInfo: {
+      flex: 1,
+    },
+    itemName: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "600",
+      marginBottom: 4,
+    },
+    itemValue: {
+      color: theme.colors.primary,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    removeButton: {
+      padding: 8,
+      marginLeft: 12,
+    },
+    totalSection: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 16,
+      padding: 20,
+      marginBottom: 24,
+    },
+    totalRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    totalLabel: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    totalValue: {
+      color: theme.colors.primary,
+      fontSize: 24,
+      fontWeight: "bold",
+    },
+    actionsSection: {
+      marginBottom: 24,
+    },
+    clearButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "transparent",
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 24,
+    },
+    clearButtonText: {
+      color: theme.colors.primary,
+      fontWeight: "bold",
+      fontSize: 16,
+      marginLeft: 8,
+    },
+    emptyState: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 80,
+    },
+    emptyStateTitle: {
+      color: theme.colors.text,
+      fontSize: 20,
+      fontWeight: "bold",
+      marginTop: 16,
+      marginBottom: 8,
+    },
+    emptyStateSubtitle: {
+      color: theme.colors.muted,
+      fontSize: 16,
+      textAlign: "center",
+    },
+    emptyStateAddButton: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.primary,
+      borderRadius: 12,
+      paddingVertical: 12,
+      marginTop: 50,
+      paddingHorizontal: 20,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 4,
+    },
+    emptyStateAddButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+      marginLeft: 8,
+    },
+    modalOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.absoluteFillObject,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    modalContent: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 28,
+      alignItems: "center",
+      width: "80%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    modalHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      width: "100%",
+      marginBottom: 18,
+      justifyContent: "space-between",
+    },
+    modalTitle: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+      textAlign: "left",
+      flex: 1,
+    },
+    closeButton: {
+      marginLeft: 12,
+      padding: 4,
+    },
+    form: {
+      width: "100%",
+      marginBottom: 18,
+    },
+    label: {
+      color: theme.colors.muted,
+      fontSize: 14,
+      marginBottom: 6,
+      fontWeight: "bold",
+    },
+    input: {
+      backgroundColor: theme.colors.surfaceAlt,
+      color: theme.colors.text,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      fontSize: 16,
+      marginBottom: 16,
+    },
+    modalActions: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+      marginTop: 8,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 24,
+      alignItems: "center",
+      borderColor: theme.colors.muted,
+      marginRight: 8,
+      flex: 1,
+    },
+    cancelButtonText: {
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 24,
+      alignItems: "center",
+      flex: 1,
+    },
+    saveButtonDisabled: {
+      opacity: 0.6,
+    },
+    saveButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+    toast: {
+      position: "absolute",
+      bottom: 10,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default CartScreen;

@@ -1,5 +1,5 @@
 // external
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -16,6 +16,7 @@ import {
 } from "../../../services/api/settings/notificationPreferenceService";
 import useToken from "../../../hooks/useToken";
 import { AlertType } from "../../../types/Alert";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -34,6 +35,8 @@ const ReminderIntervalSetting = () => {
 
   // variables
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use effects
   useEffect(() => {
@@ -90,7 +93,7 @@ const ReminderIntervalSetting = () => {
         Set how often you want to receive reminder notifications (in hours)
       </Text>
       {loading ? (
-        <ActivityIndicator color="#e03487" style={{ marginVertical: 16 }} />
+        <ActivityIndicator color={theme.colors.accent} style={{ marginVertical: 16 }} />
       ) : (
         <View style={styles.inputRow}>
           <TextInput
@@ -99,7 +102,7 @@ const ReminderIntervalSetting = () => {
             onChangeText={setInterval}
             keyboardType="numeric"
             placeholder="e.g. 6"
-            placeholderTextColor="#b0b3c6"
+            placeholderTextColor={theme.colors.muted}
             editable={!saving}
           />
           <Text style={styles.unit}>hours</Text>
@@ -128,73 +131,74 @@ const ReminderIntervalSetting = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 32,
-    marginBottom: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginBottom: 6,
-  },
-  description: {
-    color: "#b0b3c6",
-    fontSize: 13,
-    marginBottom: 14,
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: "rgba(255,255,255,0.05)",
-    color: "#fff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#b0b3c6",
-    padding: 10,
-    fontSize: 16,
-    marginRight: 8,
-  },
-  unit: {
-    color: "#b0b3c6",
-    fontSize: 15,
-    marginRight: 12,
-  },
-  saveButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-  error: {
-    color: "#f44336",
-    marginTop: 8,
-    fontSize: 13,
-  },
-  success: {
-    color: "#4caf50",
-    marginTop: 8,
-    fontSize: 13,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    wrapper: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 16,
+      padding: 20,
+      marginTop: 32,
+      marginBottom: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+      marginBottom: 6,
+    },
+    description: {
+      color: theme.colors.muted,
+      fontSize: 13,
+      marginBottom: 14,
+    },
+    inputRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 4,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.text,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: theme.colors.muted,
+      padding: 10,
+      fontSize: 16,
+      marginRight: 8,
+    },
+    unit: {
+      color: theme.colors.muted,
+      fontSize: 15,
+      marginRight: 12,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 18,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    saveButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+    error: {
+      color: "#f44336",
+      marginTop: 8,
+      fontSize: 13,
+    },
+    success: {
+      color: "#4caf50",
+      marginTop: 8,
+      fontSize: 13,
+    },
+  });
 
 export default ReminderIntervalSetting;

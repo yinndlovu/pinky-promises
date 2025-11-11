@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 // internal
 import { Memory, FavoriteMemoryProps } from "../../../types/Memory";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // screen content
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
@@ -26,6 +27,8 @@ const FavoriteMemories: React.FC<FavoriteMemoryProps> = ({
 }) => {
   // variables
   const displayMemories = memories.slice(0, 5);
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [selectedMemory, setSelectedMemory] = useState<Memory | null>(null);
@@ -89,7 +92,9 @@ const FavoriteMemories: React.FC<FavoriteMemoryProps> = ({
                   <Text style={styles.metaText}>
                     {item.author ? `By ${item.author}` : "By Unknown"}
                   </Text>
-                  <Text style={styles.metaText}>{formatDateDMY(item.date)}</Text>
+                  <Text style={styles.metaText}>
+                    {formatDateDMY(item.date)}
+                  </Text>
                 </View>
               </TouchableOpacity>
             )}
@@ -120,110 +125,111 @@ const FavoriteMemories: React.FC<FavoriteMemoryProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  wrapper: {
-    width: "100%",
-    marginBottom: 32,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 10,
-    marginTop: 8,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    letterSpacing: 0,
-    marginLeft: 12,
-  },
-  viewButton: {
-    backgroundColor: "transparent",
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-  },
-  viewButtonText: {
-    color: "#e03487",
-    fontWeight: "bold",
-    fontSize: 15,
-    letterSpacing: 0.5,
-  },
-  memoriesCard: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  memoryItem: {
-    paddingVertical: 12,
-  },
-  memoryText: {
-    color: "#fff",
-    fontSize: 15,
-    lineHeight: 22,
-    textAlign: "left",
-    marginBottom: 6,
-  },
-  noMemoriesText: {
-    color: "#b0b3c6",
-    fontSize: 15,
-    textAlign: "center",
-    paddingVertical: 24,
-  },
-  metaRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
-  },
-  metaText: {
-    color: "#b0b3c6",
-    fontSize: 12,
-  },
-  actionRow: {
-    flexDirection: "row",
-    marginTop: 4,
-  },
-  actionButton: {
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-    borderRadius: 6,
-    backgroundColor: "#393a4a",
-  },
-  actionText: {
-    color: "#e03487",
-    fontWeight: "bold",
-    fontSize: 13,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#393a4a",
-    opacity: 0.5,
-    marginVertical: 8,
-  },
-  addButton: {
-    marginTop: 18,
-    alignSelf: "center",
-    backgroundColor: "#e03487",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  addButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    wrapper: {
+      width: "100%",
+      marginBottom: 32,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 10,
+      marginTop: 8,
+    },
+    sectionTitle: {
+      fontSize: 18,
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      letterSpacing: 0,
+      marginLeft: 12,
+    },
+    viewButton: {
+      backgroundColor: "transparent",
+      borderRadius: 8,
+      paddingVertical: 4,
+      paddingHorizontal: 12,
+    },
+    viewButtonText: {
+      color: theme.colors.primary,
+      fontWeight: "bold",
+      fontSize: 15,
+      letterSpacing: 0.5,
+    },
+    memoriesCard: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 16,
+      paddingVertical: 16,
+      paddingHorizontal: 20,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    memoryItem: {
+      paddingVertical: 12,
+    },
+    memoryText: {
+      color: theme.colors.text,
+      fontSize: 15,
+      lineHeight: 22,
+      textAlign: "left",
+      marginBottom: 6,
+    },
+    noMemoriesText: {
+      color: theme.colors.muted,
+      fontSize: 15,
+      textAlign: "center",
+      paddingVertical: 24,
+    },
+    metaRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 4,
+    },
+    metaText: {
+      color: theme.colors.muted,
+      fontSize: 12,
+    },
+    actionRow: {
+      flexDirection: "row",
+      marginTop: 4,
+    },
+    actionButton: {
+      paddingVertical: 2,
+      paddingHorizontal: 8,
+      borderRadius: 6,
+      backgroundColor: theme.colors.surfaceAlt,
+    },
+    actionText: {
+      color: "#e03487",
+      fontWeight: "bold",
+      fontSize: 13,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.mutedAlt,
+      opacity: 0.5,
+      marginVertical: 8,
+    },
+    addButton: {
+      marginTop: 18,
+      alignSelf: "center",
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 2,
+    },
+    addButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default FavoriteMemories;

@@ -1,5 +1,5 @@
 // external
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/icons/getBatteryIcon";
 import { useClockTick } from "../../../hooks/clockTick";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // types
 type ProfileCardProps = {
@@ -59,36 +60,40 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   // use states
   const [currentTime, setCurrentTime] = useState<string>("Unknown");
 
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // hook
   useClockTick(30 * 1000);
 
   // use effects
   useEffect(() => {
-  if (userTimezone == null) {
-    setCurrentTime("Unknown");
-    return;
-  }
+    if (userTimezone == null) {
+      setCurrentTime("Unknown");
+      return;
+    }
 
-  const updateTime = () => {
-    const now = new Date();
-    const utcTimestamp = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
+    const updateTime = () => {
+      const now = new Date();
+      const utcTimestamp = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
 
-    const userLocalTime = new Date(utcTimestamp + userTimezone * 1000);
+      const userLocalTime = new Date(utcTimestamp + userTimezone * 1000);
 
-    const formatted = userLocalTime.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "numeric",
-      hour12: true,
-    });
+      const formatted = userLocalTime.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      });
 
-    setCurrentTime(formatted);
-  };
+      setCurrentTime(formatted);
+    };
 
-  updateTime();
-  const interval = setInterval(updateTime, 30 * 1000);
+    updateTime();
+    const interval = setInterval(updateTime, 30 * 1000);
 
-  return () => clearInterval(interval);
-}, [userTimezone]);
+    return () => clearInterval(interval);
+  }, [userTimezone]);
 
   useEffect(() => {
     if (isActive) {
@@ -273,7 +278,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                   inputRange: [0, 1],
                   outputRange: [0.1, 0.3],
                 }),
-                shadowColor: "#e03487",
+                shadowColor: theme.colors.primary,
                 shadowRadius: borderGlowAnim.interpolate({
                   inputRange: [0, 1],
                   outputRange: [8, 12],
@@ -311,7 +316,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Text
               style={{
                 fontSize: 11,
-                color: "#8a8db0",
+                color: theme.colors.mutedAlt,
                 fontWeight: "600",
                 letterSpacing: 1,
               }}
@@ -321,7 +326,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <Text
               style={{
                 fontSize: 26,
-                color: "#fff",
+                color: theme.colors.text,
                 fontWeight: "800",
                 marginTop: 2,
               }}
@@ -331,7 +336,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             >
               {userLocation || "Unknown"}
             </Text>
-            <Text style={{ fontSize: 12, color: "#b0b3c6", marginTop: 2 }}>
+            <Text
+              style={{ fontSize: 12, color: theme.colors.muted, marginTop: 2 }}
+            >
               {currentTime}
             </Text>
           </View>
@@ -368,7 +375,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 <MaterialCommunityIcons
                   name={getBatteryIcon(batteryLevel)}
                   size={18}
-                  color="#b0b3c6"
+                  color={theme.colors.muted}
                 />
                 <Text style={styles.batteryText}>{batteryLevel}%</Text>
               </View>
@@ -448,130 +455,131 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  profileCard: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 24,
-    paddingVertical: 20,
-    paddingHorizontal: 32,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
-    width: "100%",
-    position: "relative",
-    overflow: "hidden",
-  },
-  profileCardInactive: {
-    opacity: 0.6,
-  },
-  glowBorder: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: "#e03487",
-  },
-  profileContainer: {
-    alignItems: "center",
-    width: "100%",
-  },
-  avatarWrapper: {
-    marginBottom: 8,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 14,
-    textAlign: "center",
-  },
-  statusContainer: {
-    marginTop: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    width: "100%",
-  },
-  statusGroup: {
-    flexDirection: "column",
-    alignItems: "flex-start",
-  },
-  moodGroup: {
-    flexDirection: "column",
-    alignItems: "flex-end",
-  },
-  statusText: {
-    fontSize: 14,
-    color: "#b0b3c6",
-  },
-  lastSeenText: {
-    fontSize: 12,
-    color: "#8a8db0",
-    marginTop: 2,
-  },
-  distanceText: {
-    fontSize: 12,
-    color: "#8a8db0",
-    marginTop: 2,
-  },
-  moodText: {
-    fontSize: 14,
-    color: "#b0b3c6",
-  },
-  batteryContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 4,
-  },
-  batteryText: {
-    fontSize: 12,
-    color: "#b0b3c6",
-    marginLeft: 4,
-  },
-  particle: {
-    position: "absolute",
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#e03487",
-  },
-  particle1: {
-    top: 30,
-    right: 40,
-  },
-  particle2: {
-    top: 50,
-    right: 60,
-  },
-  particle3: {
-    top: 20,
-    right: 80,
-  },
-  noPartnerContainer: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 24,
-    paddingVertical: 40,
-    paddingHorizontal: 32,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 4,
-    width: "100%",
-    minHeight: 120,
-  },
-  noPartnerText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#b0b3c6",
-    textAlign: "center",
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    profileCard: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 24,
+      paddingVertical: 20,
+      paddingHorizontal: 32,
+      alignItems: "center",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.15,
+      shadowRadius: 10,
+      elevation: 4,
+      width: "100%",
+      position: "relative",
+      overflow: "hidden",
+    },
+    profileCardInactive: {
+      opacity: 0.6,
+    },
+    glowBorder: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      borderRadius: 24,
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+    },
+    profileContainer: {
+      alignItems: "center",
+      width: "100%",
+    },
+    avatarWrapper: {
+      marginBottom: 8,
+    },
+    name: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: theme.colors.text,
+      marginBottom: 14,
+      textAlign: "center",
+    },
+    statusContainer: {
+      marginTop: 8,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "flex-start",
+      width: "100%",
+    },
+    statusGroup: {
+      flexDirection: "column",
+      alignItems: "flex-start",
+    },
+    moodGroup: {
+      flexDirection: "column",
+      alignItems: "flex-end",
+    },
+    statusText: {
+      fontSize: 14,
+      color: theme.colors.muted,
+    },
+    lastSeenText: {
+      fontSize: 12,
+      color: theme.colors.mutedAlt,
+      marginTop: 2,
+    },
+    distanceText: {
+      fontSize: 12,
+      color: theme.colors.mutedAlt,
+      marginTop: 2,
+    },
+    moodText: {
+      fontSize: 14,
+      color: theme.colors.muted,
+    },
+    batteryContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 4,
+    },
+    batteryText: {
+      fontSize: 12,
+      color: theme.colors.muted,
+      marginLeft: 4,
+    },
+    particle: {
+      position: "absolute",
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: theme.colors.primary,
+    },
+    particle1: {
+      top: 30,
+      right: 40,
+    },
+    particle2: {
+      top: 50,
+      right: 60,
+    },
+    particle3: {
+      top: 20,
+      right: 80,
+    },
+    noPartnerContainer: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 24,
+      paddingVertical: 40,
+      paddingHorizontal: 32,
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.15,
+      shadowRadius: 10,
+      elevation: 4,
+      width: "100%",
+      minHeight: 120,
+    },
+    noPartnerText: {
+      fontSize: 18,
+      fontWeight: "600",
+      color: theme.colors.muted,
+      textAlign: "center",
+    },
+  });
 
 export default ProfileCard;

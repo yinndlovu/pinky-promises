@@ -1,5 +1,5 @@
 // external
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   View,
   StyleSheet,
@@ -33,6 +33,7 @@ import {
 import { Message } from "../../../types/Message";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // screen content
 import SweetMessagesSection from "../components/SweetMessagesSection";
@@ -51,6 +52,8 @@ export default function PortalScreen({ navigation }: Props) {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [selectedMessage, setSelectedMessage] = useState<Message | undefined>(
@@ -331,13 +334,13 @@ export default function PortalScreen({ navigation }: Props) {
   {
     deleting && (
       <View style={styles.loadingOverlay}>
-        <ActivityIndicator size="large" color="#e03487" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
         <View
           style={{
@@ -350,7 +353,7 @@ export default function PortalScreen({ navigation }: Props) {
             paddingVertical: 2,
           }}
         >
-          <Text style={{ color: "white", textAlign: "center" }}>
+          <Text style={{ color: theme.colors.text, textAlign: "center" }}>
             You are offline
           </Text>
         </View>
@@ -362,9 +365,9 @@ export default function PortalScreen({ navigation }: Props) {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#e03487"
-            colors={["#e03487"]}
-            progressBackgroundColor="#23243a"
+            tintColor={theme.colors.primary}
+            colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.background}
           />
         }
       >
@@ -436,14 +439,14 @@ export default function PortalScreen({ navigation }: Props) {
         <View
           style={{
             ...StyleSheet.absoluteFillObject,
-            backgroundColor: "rgba(35,36,58,0.7)",
+            backgroundColor: theme.colors.absoluteFillObject,
             justifyContent: "center",
             alignItems: "center",
             zIndex: 1000,
           }}
         >
-          <ActivityIndicator size="large" color="#e03487" />
-          <Text style={{ color: "#fff", marginTop: 16, fontWeight: "bold" }}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={{ color: theme.colors.text, marginTop: 16, fontWeight: "bold" }}>
             Loading message...
           </Text>
         </View>
@@ -458,45 +461,46 @@ export default function PortalScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingBottom: 150,
-    alignItems: "stretch",
-    backgroundColor: "#23243a",
-    minHeight: "100%",
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 16,
-  },
-  toast: {
-    position: "absolute",
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: "#23243a",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 16,
+      paddingBottom: 150,
+      alignItems: "stretch",
+      backgroundColor: theme.colors.background,
+      minHeight: "100%",
+    },
+    loadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.absoluteFillObject,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 16,
+    },
+    toast: {
+      position: "absolute",
+      bottom: 10,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    centered: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });

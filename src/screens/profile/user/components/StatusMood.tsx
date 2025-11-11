@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -27,6 +27,7 @@ import { updateMood } from "../../../../services/api/profiles/moodService";
 import { addHomeLocation } from "../../../../services/api/profiles/homeLocationService";
 import useToken from "../../../../hooks/useToken";
 import { startBackgroundLocationTracking } from "../../../../services/location/locationPermissionService";
+import { useTheme } from "../../../../theme/ThemeContext";
 
 // screen content
 import AddLocationModal from "../../../../components/modals/input/AddLocationModal";
@@ -49,6 +50,8 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const displayMoodDescription =
     moodDescription || "You haven't added a mood yet";
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // animation variables
   const pulseAnimation = useSharedValue(1);
@@ -191,7 +194,12 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   }));
 
   const statusColorStyle = useAnimatedStyle(() => {
-    const colors = ["#4caf50", "#e03487", "#db8a47", "#b0b3c6"];
+    const colors = [
+      "#4caf50",
+      theme.colors.accent,
+      "#db8a47",
+      theme.colors.muted,
+    ];
     const currentColor =
       colors[Math.round(statusColorAnimation.value)] || colors[3];
 
@@ -258,7 +266,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
     <Animated.View style={[styles.wrapper, fadeInStyle]}>
       {updatingMood && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#e03487" />
+          <ActivityIndicator size="large" color={theme.colors.accent} />
         </View>
       )}
 
@@ -279,10 +287,10 @@ const StatusMood: React.FC<StatusMoodProps> = ({
               status === "home"
                 ? { color: "#4caf50" }
                 : status === "away"
-                ? { color: "#e03487" }
+                ? { color: theme.colors.accent }
                 : status === "unreachable"
                 ? { color: "#db8a47ff" }
-                : { color: "#b0b3c6" },
+                : { color: theme.colors.muted },
             ]}
           >
             {status === "home"
@@ -299,7 +307,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
           style={styles.addButton}
           onPress={() => setModalVisible(true)}
         >
-          <Feather name="plus" size={18} color="#fff" />
+          <Feather name="plus" size={18} color={theme.colors.text} />
         </TouchableOpacity>
       </Animated.View>
 
@@ -317,7 +325,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
           style={styles.editButton}
           onPress={() => setMoodModalVisible(true)}
         >
-          <Feather name="edit-2" size={18} color="#e03487" />
+          <Feather name="edit-2" size={18} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
 
@@ -367,146 +375,147 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  wrapper: {
-    width: "100%",
-    marginBottom: 14,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 0,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
-  statusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 0,
-  },
-  statusIndicator: {
-    marginRight: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  statusContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
-  },
-  statusEmoji: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  statusValue: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginRight: 8,
-  },
-  statusDescription: {
-    color: "#b0b3c6",
-    fontSize: 14,
-    marginBottom: 8,
-    marginLeft: 2,
-    marginTop: 6,
-  },
-  statusDistance: {
-    color: "#e03487",
-    fontSize: 12,
-    marginBottom: 12,
-    marginLeft: 2,
-    opacity: 0.8,
-  },
-  addButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 16,
-    padding: 6,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  statusLabel: {
-    fontSize: 18,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  moodRow: {
-    marginTop: 10,
-    marginBottom: 4,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  moodLabel: {
-    fontSize: 18,
-    color: "#b0b3c6",
-    fontWeight: "bold",
-    marginBottom: 2,
-  },
-  moodContentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  moodEmoji: {
-    fontSize: 20,
-    marginRight: 8,
-  },
-  moodValue: {
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  moodDescription: {
-    fontSize: 14,
-    color: "#b0b3c6",
-    marginLeft: 4,
-  },
-  editButton: {
-    backgroundColor: "transparent",
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  toast: {
-    position: "absolute",
-    top: 50,
-    left: 20,
-    right: 20,
-    backgroundColor: "#e03487",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    zIndex: 100,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  toastText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    wrapper: {
+      width: "100%",
+      marginBottom: 14,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 0,
+    },
+    loadingOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.absoluteFillObject,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 100,
+    },
+    statusRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      marginBottom: 0,
+    },
+    statusIndicator: {
+      marginRight: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    statusDot: {
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
+    },
+    statusContent: {
+      flexDirection: "row",
+      alignItems: "center",
+      flex: 1,
+    },
+    statusEmoji: {
+      fontSize: 20,
+      marginRight: 8,
+    },
+    statusValue: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+      marginRight: 8,
+    },
+    statusDescription: {
+      color: theme.colors.muted,
+      fontSize: 14,
+      marginBottom: 8,
+      marginLeft: 2,
+      marginTop: 6,
+    },
+    statusDistance: {
+      color: theme.colors.accent,
+      fontSize: 12,
+      marginBottom: 12,
+      marginLeft: 2,
+      opacity: 0.8,
+    },
+    addButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 16,
+      padding: 6,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    statusLabel: {
+      fontSize: 18,
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      marginBottom: 2,
+    },
+    moodRow: {
+      marginTop: 10,
+      marginBottom: 4,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    moodLabel: {
+      fontSize: 18,
+      color: theme.colors.muted,
+      fontWeight: "bold",
+      marginBottom: 2,
+    },
+    moodContentRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    moodEmoji: {
+      fontSize: 20,
+      marginRight: 8,
+    },
+    moodValue: {
+      fontSize: 16,
+      color: theme.colors.text,
+      fontWeight: "bold",
+    },
+    moodDescription: {
+      fontSize: 14,
+      color: theme.colors.muted,
+      marginLeft: 4,
+    },
+    editButton: {
+      backgroundColor: "transparent",
+      borderRadius: 8,
+      paddingVertical: 4,
+      paddingHorizontal: 12,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    toast: {
+      position: "absolute",
+      top: 50,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default StatusMood;

@@ -1,5 +1,5 @@
 // external
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   TextInput,
@@ -22,9 +22,10 @@ import { DEEPSEEK_KEY } from "../../configuration/config";
 import { saveKeyDetail } from "../../services/ai/aiKeyDetailsService";
 import { favoritesObjectToArray } from "../../helpers/aiHelpers";
 import { ChatMessage } from "../../types/Message";
+import { createChatStyles } from "./styles/ChatScreen.styles";
+import { useTheme } from "../../theme/ThemeContext";
 
 // screen content
-import styles from "./styles/ChatScreen.styles";
 import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
 import LoadingSpinner from "../../components/loading/LoadingSpinner";
 
@@ -51,6 +52,8 @@ export default function ChatScreen() {
   const route = useRoute();
   const queryClient = useQueryClient();
   const token = useToken();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createChatStyles(theme), [theme]);
 
   // use states
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -415,7 +418,7 @@ export default function ChatScreen() {
 
   if (contextLoading || keyDetailsLoading) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#23243a" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -426,7 +429,7 @@ export default function ChatScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#23243a" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -490,7 +493,7 @@ export default function ChatScreen() {
           <TextInput
             style={styles.input}
             placeholder="Type your message..."
-            placeholderTextColor="#b0b3c6"
+            placeholderTextColor={theme.colors.muted}
             value={inputText}
             onChangeText={setInputText}
             editable={!isSending}
@@ -519,7 +522,7 @@ export default function ChatScreen() {
         <TouchableOpacity
           style={{
             flex: 1,
-            backgroundColor: "rgba(0,0,0,0.2)",
+            backgroundColor: theme.colors.modalOverlay,
             justifyContent: "flex-start",
             alignItems: "flex-end",
             paddingTop: 50,
@@ -530,11 +533,11 @@ export default function ChatScreen() {
         >
           <View
             style={{
-              backgroundColor: "#23243a",
+              backgroundColor: theme.colors.background,
               borderRadius: 8,
               padding: 8,
               minWidth: 120,
-              shadowColor: "#000",
+              shadowColor: theme.colors.shadow,
               shadowOpacity: 0.2,
               shadowRadius: 8,
               elevation: 4,
@@ -547,7 +550,7 @@ export default function ChatScreen() {
               }}
               style={{ paddingVertical: 10, paddingHorizontal: 16 }}
             >
-              <Text style={{ color: "#e03487", fontWeight: "bold" }}>
+              <Text style={{ color: theme.colors.primary, fontWeight: "bold" }}>
                 Clear chat
               </Text>
             </TouchableOpacity>
