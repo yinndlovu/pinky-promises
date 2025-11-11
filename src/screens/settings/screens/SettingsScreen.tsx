@@ -92,30 +92,30 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.optionsWrapper}>
-          {settingsOptions.map((option, idx) => (
+        <View style={styles.section}>
+          {settingsOptions.map((option) => (
             <Pressable
               key={option.label}
-              style={styles.optionRow}
+              style={styles.actionRow}
               onPress={option.onPress}
-              android_ripple={{ color: "#282942ff" }}
+              android_ripple={{ color: "#23243a" }}
             >
-              <Feather
-                name={option.icon as any}
-                size={20}
-                color="#e03487"
-                style={styles.optionIcon}
-              />
-              <Text style={styles.optionLabel}>{option.label}</Text>
-              <Feather
-                name="chevron-right"
-                size={20}
-                color="#b0b3c6"
-                style={styles.chevron}
-              />
+              <View
+                style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
+              >
+                <Feather
+                  name={option.icon as any}
+                  size={20}
+                  color="#e03487"
+                  style={styles.optionIcon}
+                />
+                <Text style={styles.actionText}>{option.label}</Text>
+              </View>
+              <Feather name="chevron-right" size={20} color="#ccc" />
             </Pressable>
           ))}
         </View>
+
         <TouchableOpacity
           style={styles.logoutButton}
           onPress={() => setShowLogoutModal(true)}
@@ -154,36 +154,32 @@ const styles = StyleSheet.create({
     backgroundColor: "#23243a",
     minHeight: "100%",
   },
-  optionsWrapper: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 16,
-    paddingVertical: 8,
-    marginBottom: 32,
-    width: "100%",
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 2,
+  section: {
+    marginBottom: 24,
   },
-  optionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 18,
+  sectionTitle: {
+    fontSize: 16,
+    color: "#b0b3c6",
+    fontWeight: "bold",
+    marginBottom: 10,
+    marginLeft: 6,
+  },
+  actionRow: {
+    backgroundColor: "#2e2f4a",
+    marginBottom: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#23243a",
+    borderRadius: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  actionText: {
+    color: "#fff",
+    fontSize: 16,
   },
   optionIcon: {
     marginRight: 16,
-  },
-  optionLabel: {
-    color: "#fff",
-    fontSize: 16,
-    flex: 1,
-    fontWeight: "500",
-  },
-  chevron: {
-    marginLeft: 8,
   },
   logoutButton: {
     flexDirection: "row",

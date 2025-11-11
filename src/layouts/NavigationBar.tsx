@@ -1,5 +1,5 @@
 // external
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import type {
@@ -17,6 +17,7 @@ import { useAuth } from "../contexts/AuthContext";
 import useToken from "../hooks/useToken";
 import { useProfilePicture } from "../hooks/useProfilePicture";
 import { useGift } from "../hooks/useGift";
+import AvatarSkeleton from "../components/skeletons/AvatarSkeleton";
 
 // types
 type Props = {
@@ -42,16 +43,21 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
 
   // use states
   const [failed, setFailed] = useState(false);
+  const [avatarFetched, setAvatarFetched] = useState(false);
 
   // use effects
   useEffect(() => {
     if (token) {
-      fetchUserAvatar();
+      Promise.resolve(fetchUserAvatar()).finally(() => setAvatarFetched(true));
     }
   }, [token]);
 
   // helpers
   const renderProfileIcon = () => {
+    if (!avatarFetched) {
+      return <AvatarSkeleton style={styles.avatar} />;
+    }
+
     if (avatarUri && profilePicUpdatedAt && user?.id) {
       const timestamp = Math.floor(
         new Date(profilePicUpdatedAt).getTime() / 1000
@@ -85,6 +91,24 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
       );
     }
 
+    if (!avatarUri) {
+      return (
+        <Image
+          source={require("../assets/default-avatar-two.png")}
+          style={[
+            styles.avatar,
+            {
+              borderColor:
+                currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
+            },
+          ]}
+          contentFit="cover"
+          cachePolicy="disk"
+          transition={200}
+        />
+      );
+    }
+
     return (
       <Image
         source={
@@ -102,6 +126,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
         contentFit="cover"
         cachePolicy="disk"
         transition={200}
+        onError={() => setFailed(true)}
       />
     );
   };

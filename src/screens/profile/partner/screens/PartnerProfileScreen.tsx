@@ -34,6 +34,7 @@ import styles from "../styles/PartnerProfileScreen.styles";
 import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
+import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
 
 // hooks
 import useToken from "../../../../hooks/useToken";
@@ -58,6 +59,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [showPictureViewer, setShowPictureViewer] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
+  const [avatarFetched, setAvatarFetched] = useState(false);
 
   // use states (processing)
   const [removingPartner, setRemovingPartner] = useState(false);
@@ -118,7 +120,9 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   // use effects
   useEffect(() => {
     if (token && partner?.id) {
-      fetchPartnerPicture();
+      Promise.resolve(fetchPartnerPicture()).finally(() =>
+        setAvatarFetched(true)
+      );
     }
   }, [partner?.id, token]);
 
@@ -228,6 +232,22 @@ const PartnerProfileScreen = ({ navigation }: any) => {
       );
     }
 
+    if (!avatarFetched) {
+      return <AvatarSkeleton style={styles.avatar} />;
+    }
+
+    if (!avatarUri) {
+      return (
+        <Image
+          source={require("../../../../assets/default-avatar-two.png")}
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
     return (
       <Image
         source={
@@ -239,6 +259,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         cachePolicy="disk"
         contentFit="cover"
         transition={200}
+        onError={() => setFailed(true)}
       />
     );
   };

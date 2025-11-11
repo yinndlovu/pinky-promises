@@ -43,6 +43,7 @@ import ProfileCard from "../components/ProfileCard";
 import InteractionAnimationModal from "../../../components/modals/output/InteractionAnimationModal";
 import ProcessingAnimation from "../../../components/loading/ProcessingAnimation";
 import NotificationsDropdown from "../../../components/dropdowns/NotificationsDropdown";
+import AvatarSkeleton from "../../../components/skeletons/AvatarSkeleton";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -79,6 +80,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [currentAction, setCurrentAction] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
   const [notificationsVisible, setNotificationsVisible] = useState(false);
+  const [avatarFetched, setAvatarFetched] = useState(false);
 
   // use states (modals)
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
@@ -126,7 +128,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       if (partner?.id && token) {
-        fetchPartnerPicture();
+        Promise.resolve(fetchPartnerPicture()).finally(() =>
+          setAvatarFetched(true)
+        );
       }
     }, [partner?.id, token])
   );
@@ -276,6 +280,22 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       );
     }
 
+    if (!avatarFetched) {
+      return <AvatarSkeleton style={styles.avatar} />;
+    }
+
+    if (!avatarUri) {
+      return (
+        <Image
+          source={require("../../../assets/default-avatar-two.png")}
+          style={styles.avatar}
+          cachePolicy="disk"
+          contentFit="cover"
+          transition={200}
+        />
+      );
+    }
+
     return (
       <Image
         source={
@@ -287,6 +307,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         cachePolicy="disk"
         contentFit="cover"
         transition={200}
+        onError={() => setFailed(true)}
       />
     );
   };

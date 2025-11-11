@@ -125,7 +125,10 @@ const PendingRequestsScreen = ({ navigation }: any) => {
 
       setRequests((prev) => prev.filter((req) => req.id !== requestId));
 
-      navigation.replace("PartnerProfile", { userId: senderId });
+      navigation.navigate("Home", {
+        screen: "PartnerProfile",
+        params: { userId: String(senderId) },
+      });
     } catch (error: any) {
       setAlertTitle("Failed");
       setAlertMessage("Failed to accept request.");
