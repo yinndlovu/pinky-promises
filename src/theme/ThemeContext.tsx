@@ -7,7 +7,7 @@ import React, {
   useEffect,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useColorScheme } from "react-native";
+import { Appearance } from "react-native";
 import * as Updates from "expo-updates";
 
 // internal
@@ -24,26 +24,37 @@ type Ctx = {
 const ThemeContext = createContext<Ctx | null>(null);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [mode, setMode] = useState<Mode>("system");
-  const systemScheme = useColorScheme();
-  const effectiveScheme = systemScheme ?? "light";
+  const [mode, setModeState] = useState<Mode>("system");
+  const [systemScheme, setSystemScheme] = useState<"light" | "dark">(
+    () => Appearance.getColorScheme() ?? "light"
+  );
 
   useEffect(() => {
     AsyncStorage.getItem("themeMode").then((m) => {
       if (m === "light" || m === "dark" || m === "system") {
-        setMode(m);
+        setModeState(m);
       }
     });
   }, []);
 
-  const active = mode === "system" ? effectiveScheme : mode;
+  useEffect(() => {
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      setSystemScheme(colorScheme ?? "light");
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const active = mode === "system" ? systemScheme : mode;
   const theme = active === "dark" ? darkTheme : lightTheme;
 
   const value = useMemo(
     () => ({
       mode,
       setMode: async (m: Mode) => {
-        setMode(m);
+        setModeState(m);
         try {
           await AsyncStorage.setItem("themeMode", m);
           await Updates.reloadAsync();
