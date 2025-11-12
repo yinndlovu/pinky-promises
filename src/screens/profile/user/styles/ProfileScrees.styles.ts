@@ -96,7 +96,7 @@ export const createProfileStyles = (theme: AppTheme) =>
       alignItems: "center",
     },
     partnerText: {
-      color: theme.colors.mutedAlt,
+      color: theme.colors.muted,
       fontSize: 15,
       fontWeight: "500",
       textAlign: "center",

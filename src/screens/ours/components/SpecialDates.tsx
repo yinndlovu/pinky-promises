@@ -132,7 +132,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     separator: {
       height: 1,
-      backgroundColor: theme.colors.mutedAlt,
+      backgroundColor: theme.colors.separatorAlt,
       opacity: 0.5,
       marginVertical: 2,
     },

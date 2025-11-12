@@ -223,7 +223,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     dateButton: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: theme.colors.border,
+      backgroundColor: theme.colors.surface,
       borderRadius: 8,
       paddingVertical: 10,
       paddingHorizontal: 14,

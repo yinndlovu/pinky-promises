@@ -203,13 +203,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       backgroundColor: theme.colors.surfaceAlt,
     },
     actionText: {
-      color: "#e03487",
+      color: theme.colors.accent,
       fontWeight: "bold",
       fontSize: 13,
     },
     separator: {
       height: 1,
-      backgroundColor: theme.colors.mutedAlt,
+      backgroundColor: theme.colors.separatorAlt,
       opacity: 0.5,
       marginVertical: 8,
     },

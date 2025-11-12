@@ -262,7 +262,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       textAlignVertical: "top",
     },
     dateButton: {
-      backgroundColor: theme.colors.surfaceAlt,
+      backgroundColor: theme.colors.surface,
       borderRadius: 8,
       paddingHorizontal: 16,
       paddingVertical: 12,
@@ -306,7 +306,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       fontSize: 16,
     },
     iosDatePicker: {
-      backgroundColor: theme.colors.absoluteFillObject,
+      backgroundColor: theme.colors.background,
       borderRadius: 8,
       marginTop: 10,
     },

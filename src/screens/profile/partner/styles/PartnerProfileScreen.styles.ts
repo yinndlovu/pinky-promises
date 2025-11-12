@@ -86,7 +86,7 @@ export const createPartnerProfileStyles = (theme: AppTheme) =>
       textAlign: "center",
     },
     partnerName: {
-      color: theme.colors.text,
+      color: theme.colors.muted,
       fontWeight: "bold",
     },
     centered: {
