@@ -63,7 +63,7 @@ export const darkTheme = {
     surfaceAlt: "#1b1c2e",
     accent: "#e03487",
     muted: "#b0b3c6",
-    mutedAlt: "#8a8db0",
+    mutedAlt: "#61637cff",
     separator: "#393a4a",
     cancelButton: "#393a4a",
     actionButton: "rgba(194, 58, 124, 0.3)",
