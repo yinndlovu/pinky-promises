@@ -1,5 +1,5 @@
 // external
-import React from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 // internal
 import { Notification } from "../../interfaces/Notification";
 import { formatDateDMY, formatTime } from "../../utils/formatters/formatDate";
+import { useTheme } from "../../theme/ThemeContext";
 
 interface Props {
   visible: boolean;
@@ -19,7 +20,14 @@ interface Props {
   onClose: () => void;
 }
 
-const NotificationsDropdown: React.FC<Props> = ({ visible, notifications, onClose }) => {
+const NotificationsDropdown: React.FC<Props> = ({
+  visible,
+  notifications,
+  onClose,
+}) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   if (!visible) {
     return null;
   }
@@ -64,72 +72,73 @@ const NotificationsDropdown: React.FC<Props> = ({ visible, notifications, onClos
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
     overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'transparent',
-    zIndex: 25,
-  },
-  dropdown: {
-    position: "absolute",
-    top: 100,
-    right: 12,
-    width: 320,
-    maxHeight: 360,
-    backgroundColor: "#1b1c2e",
-    borderRadius: 12,
-    padding: 8,
-    zIndex: 30,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 10,
-  },
-  notificationItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 6,
-  },
-  notificationItemUnread: {
-    backgroundColor: "rgba(224,52,135,0.06)",
-  },
-  notificationContent: {
-    flex: 1,
-    marginLeft: 8,
-  },
-  notificationTitle: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "700",
-  },
-  notificationMessage: {
-    color: "#b0b3c6",
-    fontSize: 13,
-    marginTop: 4,
-  },
-  notificationDate: {
-    color: "#8d8fa3",
-    fontSize: 11,
-    marginTop: 6,
-  },
-  unseenDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#e03487",
-    marginTop: 6,
-  },
-  noNotificationsText: {
-    color: "#b0b3c6",
-    textAlign: "center",
-    padding: 20,
-  },
-});
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: "transparent",
+      zIndex: 25,
+    },
+    dropdown: {
+      position: "absolute",
+      top: 100,
+      right: 12,
+      width: 320,
+      maxHeight: 360,
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 12,
+      padding: 8,
+      zIndex: 30,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 10,
+    },
+    notificationItem: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      padding: 10,
+      borderRadius: 10,
+      marginBottom: 6,
+    },
+    notificationItemUnread: {
+      backgroundColor: theme.colors.unreadNotificationBackground,
+    },
+    notificationContent: {
+      flex: 1,
+      marginLeft: 8,
+    },
+    notificationTitle: {
+      color: theme.colors.text,
+      fontSize: 14,
+      fontWeight: "700",
+    },
+    notificationMessage: {
+      color: theme.colors.muted,
+      fontSize: 13,
+      marginTop: 4,
+    },
+    notificationDate: {
+      color: theme.colors.mutedAlt,
+      fontSize: 11,
+      marginTop: 6,
+    },
+    unseenDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: theme.colors.primary,
+      marginTop: 6,
+    },
+    noNotificationsText: {
+      color: theme.colors.muted,
+      textAlign: "center",
+      padding: 20,
+    },
+  });
 
 export default NotificationsDropdown;

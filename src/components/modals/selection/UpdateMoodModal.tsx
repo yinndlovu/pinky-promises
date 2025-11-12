@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Modal,
   View,
@@ -11,8 +11,8 @@ import {
 } from "react-native";
 import ModalSelector from "react-native-modal-selector";
 
-// content
-import AlertModal from "../output/AlertModal";
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // options
 const MOOD_OPTIONS = [
@@ -45,6 +45,10 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   initialMood = "happy",
   saving,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // use states
   const [selectedMood, setSelectedMood] = useState(initialMood);
 
@@ -101,11 +105,6 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-            {saving && (
-              <View style={styles.loadingOverlay}>
-                <ActivityIndicator size="large" color="#e03487" />
-              </View>
-            )}
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -113,104 +112,98 @@ const UpdateMoodModal: React.FC<UpdateMoodModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    width: "90%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 16,
-    alignSelf: "center",
-  },
-  selector: {
-    width: "100%",
-    marginBottom: 24,
-  },
-  selectStyle: {
-    backgroundColor: "#393a4a",
-    borderRadius: 10,
-    borderWidth: 0,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-  },
-  selectTextStyle: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  optionTextStyle: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  optionContainerStyle: {
-    backgroundColor: "#23243a",
-    borderRadius: 10,
-  },
-  cancelStyle: {
-    backgroundColor: "#e03487",
-    borderRadius: 10,
-  },
-  cancelTextStyle: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 8,
-  },
-  saveButton: {
-    backgroundColor: "#e03487",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginRight: 8,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  cancelButton: {
-    backgroundColor: "#393a4a",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginLeft: 8,
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    modalOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 24,
+      alignItems: "center",
+      width: "90%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: theme.colors.text,
+      marginBottom: 16,
+      alignSelf: "center",
+    },
+    selector: {
+      width: "100%",
+      marginBottom: 24,
+    },
+    selectStyle: {
+      backgroundColor: theme.colors.separator,
+      borderRadius: 10,
+      borderWidth: 0,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+    },
+    selectTextStyle: {
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    optionTextStyle: {
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    optionContainerStyle: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 10,
+    },
+    cancelStyle: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 10,
+    },
+    cancelTextStyle: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+      marginTop: 8,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginRight: 8,
+    },
+    saveButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.cancelButton,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginLeft: 8,
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default UpdateMoodModal;

@@ -1,5 +1,11 @@
+// external
+import { useMemo } from "react";
 import { Modal, View, Text, Pressable, StyleSheet } from "react-native";
 
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
+
+// types
 type Props = {
   visible: boolean;
   onClose: () => void;
@@ -13,6 +19,10 @@ export default function ThemePickerModal({
   value,
   onChange,
 }: Props) {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const options: Array<{ label: string; value: Props["value"] }> = [
     { label: "System", value: "system" },
     { label: "Light", value: "light" },
@@ -28,7 +38,7 @@ export default function ThemePickerModal({
     >
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          <Text style={styles.title}>Theme</Text>
+          <Text style={styles.title}>CHOOSE A THEME</Text>
           {options.map((opt) => (
             <Pressable
               key={opt.value}
@@ -51,46 +61,47 @@ export default function ThemePickerModal({
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    justifyContent: "center",
-    padding: 24,
-  },
-  sheet: {
-    backgroundColor: "#2e2f4a",
-    borderRadius: 12,
-    padding: 16,
-  },
-  title: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    marginBottom: 12,
-    textAlign: "center",
-  },
-  row: {
-    paddingVertical: 12,
-  },
-  label: {
-    color: "#fff",
-    fontSize: 15,
-    textAlign: "center",
-  },
-  selected: {
-    color: "#e03487",
-    fontWeight: "bold",
-  },
-  close: {
-    marginTop: 8,
-    backgroundColor: "#e03487",
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  closeText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      padding: 24,
+    },
+    sheet: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 12,
+      padding: 16,
+    },
+    title: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 20,
+      marginBottom: 12,
+      textAlign: "center",
+    },
+    row: {
+      paddingVertical: 12,
+    },
+    label: {
+      color: theme.colors.text,
+      fontSize: 15,
+      textAlign: "center",
+    },
+    selected: {
+      color: theme.colors.accent,
+      fontWeight: "bold",
+    },
+    close: {
+      marginTop: 8,
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 10,
+      borderRadius: 8,
+    },
+    closeText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      textAlign: "center",
+    },
+  });

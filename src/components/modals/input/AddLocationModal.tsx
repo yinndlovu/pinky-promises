@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Modal,
   View,
@@ -13,6 +13,7 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
 // internal
+import { useTheme } from "../../../theme/ThemeContext";
 import { requestLocationPermissions } from "../../../services/location/locationPermissionService";
 
 type AddLocationModalProps = {
@@ -28,6 +29,10 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
   onConfirm,
   saving = false,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -76,13 +81,13 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
           <Text style={styles.modalTitle}>Your current location</Text>
           {loading ? (
             <>
-              <ActivityIndicator size="large" color="#e03487" />
-              <Button title="Stop" onPress={onClose} color="#e03487" />
+              <ActivityIndicator size="large" color={theme.colors.accent} />
+              <Button title="Stop" onPress={onClose} color={theme.colors.primary} />
             </>
           ) : error ? (
             <>
               <Text style={styles.errorText}>{error}</Text>
-              <Button title="Close" onPress={onClose} color="#e03487" />
+              <Button title="Close" onPress={onClose} color={theme.colors.primary} />
             </>
           ) : location ? (
             <>
@@ -130,103 +135,92 @@ const AddLocationModal: React.FC<AddLocationModalProps> = ({
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           )}
-          {saving && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#e03487" />
-            </View>
-          )}
         </View>
       </View>
     </Modal>
   );
 };
 
-const styles = StyleSheet.create({
-  modalOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContent: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    width: "90%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 16,
-    alignSelf: "center",
-  },
-  errorText: {
-    color: "#e03487",
-    fontWeight: "bold",
-    marginVertical: 16,
-    textAlign: "center",
-  },
-  map: {
-    width: 300,
-    height: 220,
-    borderRadius: 12,
-    marginVertical: 20,
-    borderWidth: 1,
-    borderColor: "#393a4a",
-    overflow: "hidden",
-  },
-  coordsText: {
-    color: "#b0b3c6",
-    fontSize: 15,
-    marginBottom: 16,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 8,
-  },
-  confirmButton: {
-    backgroundColor: "#e03487",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginRight: 8,
-  },
-  confirmButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  cancelButton: {
-    backgroundColor: "#393a4a",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginLeft: 8,
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    modalOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    modalContent: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 24,
+      alignItems: "center",
+      width: "90%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: theme.colors.text,
+      marginBottom: 16,
+      alignSelf: "center",
+    },
+    errorText: {
+      color: theme.colors.accent,
+      fontWeight: "bold",
+      marginVertical: 16,
+      textAlign: "center",
+    },
+    map: {
+      width: 300,
+      height: 220,
+      borderRadius: 12,
+      marginVertical: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.separator,
+      overflow: "hidden",
+    },
+    coordsText: {
+      color: theme.colors.muted,
+      fontSize: 15,
+      marginBottom: 16,
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+      marginTop: 8,
+    },
+    confirmButton: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginRight: 8,
+    },
+    confirmButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.cancelButton,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginLeft: 8,
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default AddLocationModal;

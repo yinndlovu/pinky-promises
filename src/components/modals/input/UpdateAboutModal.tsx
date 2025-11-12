@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Modal,
   View,
@@ -10,6 +10,9 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // types
 type UpdateAboutModalProps = {
@@ -27,6 +30,11 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
   onClose,
   onSave,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // use states
   const [about, setAbout] = useState(initialAbout || "");
 
   useEffect(() => {
@@ -46,7 +54,7 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
               value={about}
               onChangeText={setAbout}
               placeholder="Tell more stuff about you..."
-              placeholderTextColor="#b0b3c6"
+              placeholderTextColor={theme.colors.muted}
               multiline
               numberOfLines={6}
               maxLength={500}
@@ -70,11 +78,6 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-            {loading && (
-              <View style={styles.loadingOverlay}>
-                <ActivityIndicator size="large" color="#e03487" />
-              </View>
-            )}
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -82,88 +85,82 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  content: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    width: "90%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-    position: "relative",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 16,
-    alignSelf: "center",
-  },
-  textArea: {
-    backgroundColor: "#393a4a",
-    color: "#fff",
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    fontSize: 16,
-    minHeight: 120,
-    width: "100%",
-    textAlignVertical: "top",
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#393a4a",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 12,
-  },
-  saveButton: {
-    backgroundColor: "#e03487",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginRight: 8,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  cancelButton: {
-    backgroundColor: "#393a4a",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginLeft: 8,
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    content: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 24,
+      alignItems: "center",
+      width: "90%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+      position: "relative",
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: theme.colors.text,
+      marginBottom: 16,
+      alignSelf: "center",
+    },
+    textArea: {
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.text,
+      borderRadius: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      fontSize: 16,
+      minHeight: 120,
+      width: "100%",
+      textAlignVertical: "top",
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+      marginTop: 12,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginRight: 8,
+    },
+    saveButtonText: {
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.cancelButton,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginLeft: 8,
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default UpdateAboutModal;

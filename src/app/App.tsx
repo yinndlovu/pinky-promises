@@ -71,7 +71,7 @@ function AppNavigation() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    NavigationBar.setButtonStyleAsync(theme.dark ? "light" : "light");
+    NavigationBar.setButtonStyleAsync(theme.dark ? "light" : "dark");
   }, [theme]);
 
   return (

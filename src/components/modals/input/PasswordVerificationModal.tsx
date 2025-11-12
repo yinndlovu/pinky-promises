@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Modal,
   View,
@@ -13,6 +13,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import AlertModal from "../output/AlertModal";
@@ -43,6 +46,8 @@ const PasswordVerificationModal: React.FC<Props> = ({
 
   // variables
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // handlers
   const handleVerify = async () => {
@@ -120,7 +125,7 @@ const PasswordVerificationModal: React.FC<Props> = ({
                 <TextInput
                   style={styles.passwordInput}
                   placeholder="Enter your password..."
-                  placeholderTextColor="#b0b3c6"
+                  placeholderTextColor={theme.colors.muted}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!showPassword}
@@ -134,7 +139,7 @@ const PasswordVerificationModal: React.FC<Props> = ({
                   <Feather
                     name={showPassword ? "eye-off" : "eye"}
                     size={20}
-                    color="#b0b3c6"
+                    color={theme.colors.muted}
                   />
                 </TouchableOpacity>
               </View>
@@ -164,107 +169,108 @@ const PasswordVerificationModal: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(5,3,12,0.7)",
-    justifyContent: "flex-end",
-  },
-  container: {
-    backgroundColor: "#23243a",
-    width: screenWidth,
-    height: "50%",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#b0b3c6",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 20,
-    opacity: 0.6,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: 20,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 16,
-    backgroundColor: "transparent",
-  },
-  closeButtonText: {
-    color: "#b0b3c6",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    flex: 1,
-    textAlign: "center",
-    marginHorizontal: 16,
-  },
-  verifyButton: {
-    backgroundColor: "#e03487",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    minWidth: 60,
-    alignItems: "center",
-  },
-  verifyButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#2f3149",
-    marginVertical: 8,
-  },
-  content: {
-    flex: 1,
-    paddingTop: 16,
-  },
-  description: {
-    color: "#fff",
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  inputContainer: {
-    position: "relative",
-  },
-  passwordInput: {
-    backgroundColor: "#1b1c2e",
-    color: "#fff",
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#2f3149",
-    paddingRight: 50,
-  },
-  eyeButton: {
-    position: "absolute",
-    right: 12,
-    top: 12,
-    width: 24,
-    height: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "flex-end",
+    },
+    container: {
+      backgroundColor: theme.colors.background,
+      width: screenWidth,
+      height: "50%",
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingHorizontal: 20,
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      backgroundColor: theme.colors.muted,
+      borderRadius: 2,
+      alignSelf: "center",
+      marginBottom: 20,
+      opacity: 0.6,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingBottom: 20,
+    },
+    closeButton: {
+      width: 32,
+      height: 32,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 16,
+      backgroundColor: "transparent",
+    },
+    closeButtonText: {
+      color: theme.colors.muted,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 20,
+      fontWeight: "bold",
+      flex: 1,
+      textAlign: "center",
+      marginHorizontal: 16,
+    },
+    verifyButton: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      minWidth: 60,
+      alignItems: "center",
+    },
+    verifyButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 14,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.separator,
+      marginVertical: 8,
+    },
+    content: {
+      flex: 1,
+      paddingTop: 16,
+    },
+    description: {
+      color: theme.colors.text,
+      fontSize: 16,
+      lineHeight: 24,
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    inputContainer: {
+      position: "relative",
+    },
+    passwordInput: {
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.text,
+      borderRadius: 10,
+      padding: 14,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      paddingRight: 50,
+    },
+    eyeButton: {
+      position: "absolute",
+      right: 12,
+      top: 12,
+      width: 24,
+      height: 24,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });
 
 export default PasswordVerificationModal;

@@ -1,6 +1,9 @@
 // external
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import { View, StyleSheet, Animated } from "react-native";
+
+// internal
+import { useTheme } from "../../theme/ThemeContext";
 
 // interfaces
 interface LoadingSpinnerProps {
@@ -14,6 +17,10 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = "medium",
   showMessage = true,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // animation variables
   const spinAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -177,10 +184,23 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
           ]}
         >
           <View style={styles.heartContainer}>
-            <View style={[styles.heartLeft, { backgroundColor: "#e03487" }]} />
-            <View style={[styles.heartRight, { backgroundColor: "#e03487" }]} />
             <View
-              style={[styles.heartBottom, { backgroundColor: "#e03487" }]}
+              style={[
+                styles.heartLeft,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.heartRight,
+                { backgroundColor: theme.colors.primary },
+              ]}
+            />
+            <View
+              style={[
+                styles.heartBottom,
+                { backgroundColor: theme.colors.primary },
+              ]}
             />
           </View>
         </Animated.View>
@@ -267,94 +287,95 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  spinnerContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  glowBackground: {
-    position: "absolute",
-    backgroundColor: "rgba(224, 52, 135, 0.1)",
-    shadowColor: "#e03487",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 8,
-  },
-  spinner: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#1b1c2e",
-    borderWidth: 3,
-    borderColor: "#e03487",
-    shadowColor: "#e03487",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  heartContainer: {
-    position: "relative",
-    width: 20,
-    height: 18,
-  },
-  heartLeft: {
-    position: "absolute",
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    top: 0,
-    left: 0,
-  },
-  heartRight: {
-    position: "absolute",
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    top: 0,
-    right: 0,
-  },
-  heartBottom: {
-    position: "absolute",
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    bottom: 0,
-    left: 5,
-    transform: [{ rotate: "45deg" }],
-  },
-  particle: {
-    position: "absolute",
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#e03487",
-  },
-  particle1: {
-    top: 20,
-    right: 20,
-  },
-  particle2: {
-    top: 35,
-    right: 35,
-  },
-  particle3: {
-    top: 15,
-    right: 50,
-  },
-  message: {
-    color: "#e03487",
-    textAlign: "center",
-    marginTop: 16,
-    fontWeight: "bold",
-    fontSize: 10,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20,
+    },
+    spinnerContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      position: "relative",
+    },
+    glowBackground: {
+      position: "absolute",
+      backgroundColor: theme.colors.glowBackground,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.3,
+      shadowRadius: 20,
+      elevation: 8,
+    },
+    spinner: {
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.colors.surfaceAlt,
+      borderWidth: 3,
+      borderColor: theme.colors.primary,
+      shadowColor: theme.colors.primary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.5,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    heartContainer: {
+      position: "relative",
+      width: 20,
+      height: 18,
+    },
+    heartLeft: {
+      position: "absolute",
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      top: 0,
+      left: 0,
+    },
+    heartRight: {
+      position: "absolute",
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      top: 0,
+      right: 0,
+    },
+    heartBottom: {
+      position: "absolute",
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      bottom: 0,
+      left: 5,
+      transform: [{ rotate: "45deg" }],
+    },
+    particle: {
+      position: "absolute",
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: theme.colors.primary,
+    },
+    particle1: {
+      top: 20,
+      right: 20,
+    },
+    particle2: {
+      top: 35,
+      right: 35,
+    },
+    particle3: {
+      top: 15,
+      right: 50,
+    },
+    message: {
+      color: theme.colors.accent,
+      textAlign: "center",
+      marginTop: 16,
+      fontWeight: "bold",
+      fontSize: 10,
+    },
+  });
 
 export default LoadingSpinner;

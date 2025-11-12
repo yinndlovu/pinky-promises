@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Modal,
   View,
@@ -14,6 +14,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Feather } from "@expo/vector-icons";
 
 // internal
+import { useTheme } from "../../../theme/ThemeContext";
 import { formatDate } from "../../../helpers/favoriteMemoryModalHelper";
 
 // types
@@ -38,6 +39,10 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   initialDescription = "",
   isEditing = false,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // use states
   const [date, setDate] = useState<Date>(
     initialDate ? new Date(initialDate) : new Date()
@@ -108,7 +113,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
               style={styles.closeButton}
               disabled={loading}
             >
-              <Feather name="x" size={24} color="#fff" />
+              <Feather name="x" size={24} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
@@ -121,7 +126,11 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
                 disabled={loading}
               >
                 <Text style={styles.dateButtonText}>{formatDate(date)}</Text>
-                <Feather name="calendar" size={20} color="#e03487" />
+                <Feather
+                  name="calendar"
+                  size={20}
+                  color={theme.colors.primary}
+                />
               </TouchableOpacity>
             </View>
 
@@ -132,7 +141,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
                 value={title}
                 onChangeText={setTitle}
                 placeholder="e.g., Anniversary, Day we met"
-                placeholderTextColor="#b0b3c6"
+                placeholderTextColor={theme.colors.muted}
                 maxLength={50}
                 editable={!loading}
               />
@@ -145,7 +154,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Add a description..."
-                placeholderTextColor="#b0b3c6"
+                placeholderTextColor={theme.colors.muted}
                 multiline
                 numberOfLines={3}
                 maxLength={200}
@@ -158,7 +167,7 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
             <TouchableOpacity
               style={[
                 styles.saveButton,
-                (!title.trim() || loading) && styles.saveButtonDisabled,
+                { opacity: !title.trim() || loading ? 0.5 : 1 },
               ]}
               onPress={handleSave}
               disabled={!title.trim() || loading}
@@ -175,12 +184,6 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
-
-          {loading && (
-            <View style={styles.loadingOverlay}>
-              <ActivityIndicator size="large" color="#e03487" />
-            </View>
-          )}
         </View>
 
         {showDatePicker && (
@@ -198,124 +201,115 @@ const UpdateSpecialDateModal: React.FC<UpdateSpecialDateModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  content: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 24,
-    width: "90%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-    position: "relative",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  closeButton: {
-    padding: 4,
-  },
-  form: {
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#b0b3c6",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    color: "#fff",
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#393a4a",
-  },
-  textArea: {
-    height: 80,
-    textAlignVertical: "top",
-  },
-  dateButton: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: "#393a4a",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dateButtonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: "#393a4a",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  saveButton: {
-    flex: 1,
-    backgroundColor: "#e03487",
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  saveButtonDisabled: {
-    backgroundColor: "#666",
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
-  iosDatePicker: {
-    backgroundColor: "#23243a",
-    borderRadius: 8,
-    marginTop: 10,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    content: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 24,
+      width: "90%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+      position: "relative",
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 24,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: theme.colors.text,
+    },
+    closeButton: {
+      padding: 4,
+    },
+    form: {
+      marginBottom: 24,
+    },
+    inputGroup: {
+      marginBottom: 20,
+    },
+    label: {
+      fontSize: 16,
+      fontWeight: "bold",
+      color: theme.colors.muted,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      color: theme.colors.text,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    textArea: {
+      height: 80,
+      textAlignVertical: "top",
+    },
+    dateButton: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    dateButtonText: {
+      color: theme.colors.text,
+      fontSize: 16,
+    },
+    actions: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      gap: 12,
+    },
+    cancelButton: {
+      flex: 1,
+      backgroundColor: theme.colors.cancelButton,
+      borderRadius: 8,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    saveButton: {
+      flex: 1,
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    saveButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    iosDatePicker: {
+      backgroundColor: theme.colors.absoluteFillObject,
+      borderRadius: 8,
+      marginTop: 10,
+    },
+  });
 
 export default UpdateSpecialDateModal;

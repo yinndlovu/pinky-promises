@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Modal,
   View,
@@ -11,6 +11,9 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // types
 type Props = {
@@ -28,6 +31,10 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
   onSave,
   loading = false,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // use states
   const [giftName, setGiftName] = useState(initialGiftName);
 
@@ -52,7 +59,7 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
                 style={styles.closeButton}
                 disabled={loading}
               >
-                <Feather name="x" size={24} color="#fff" />
+                <Feather name="x" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
             <View style={styles.form}>
@@ -62,7 +69,7 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
                 value={giftName}
                 onChangeText={setGiftName}
                 placeholder="e.g., Spotify gift card"
-                placeholderTextColor="#b0b3c6"
+                placeholderTextColor={theme.colors.muted}
                 maxLength={50}
                 editable={!loading}
               />
@@ -88,11 +95,6 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-            {loading && (
-              <View style={styles.loadingOverlay}>
-                <ActivityIndicator size="large" color="#e03487" />
-              </View>
-            )}
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -100,104 +102,98 @@ const UpdateMonthlyGiftModal: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  content: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 28,
-    alignItems: "center",
-    width: "80%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 18,
-    justifyContent: "space-between",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "left",
-    flex: 1,
-  },
-  closeButton: {
-    marginLeft: 12,
-    padding: 4,
-  },
-  form: {
-    width: "100%",
-    marginBottom: 18,
-  },
-  label: {
-    color: "#b0b3c6",
-    fontSize: 14,
-    marginBottom: 6,
-    fontWeight: "bold",
-  },
-  input: {
-    backgroundColor: "#18192b",
-    color: "#fff",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  actions: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 8,
-  },
-  cancelButton: {
-    backgroundColor: "#393a4a",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    flex: 1,
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-  saveButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    alignItems: "center",
-    marginRight: 8,
-    flex: 1,
-  },
-  saveButtonDisabled: {
-    opacity: 0.6,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    content: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 28,
+      alignItems: "center",
+      width: "80%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    header: {
+      flexDirection: "row",
+      alignItems: "center",
+      width: "100%",
+      marginBottom: 18,
+      justifyContent: "space-between",
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+      textAlign: "left",
+      flex: 1,
+    },
+    closeButton: {
+      marginLeft: 12,
+      padding: 4,
+    },
+    form: {
+      width: "100%",
+      marginBottom: 18,
+    },
+    label: {
+      color: theme.colors.muted,
+      fontSize: 14,
+      marginBottom: 6,
+      fontWeight: "bold",
+    },
+    input: {
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.text,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      fontSize: 16,
+      marginBottom: 8,
+    },
+    actions: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginTop: 8,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.cancelButton,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 24,
+      alignItems: "center",
+      flex: 1,
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 24,
+      alignItems: "center",
+      marginRight: 8,
+      flex: 1,
+    },
+    saveButtonDisabled: {
+      opacity: 0.6,
+    },
+    saveButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+  });
 
 export default UpdateMonthlyGiftModal;

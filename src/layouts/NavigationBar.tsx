@@ -59,7 +59,13 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   // helpers
   const renderProfileIcon = () => {
     if (!avatarFetched) {
-      return <AvatarSkeleton style={styles.avatar} />;
+      return (
+        <AvatarSkeleton
+          style={styles.avatar}
+          darkColor={theme.colors.skeletonDark}
+          highlightColor={theme.colors.skeletonHighlight}
+        />
+      );
     }
 
     if (avatarUri && profilePicUpdatedAt && user?.id) {
@@ -139,7 +145,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   const hasUnclaimedGift = !!gift;
 
   return (
-    <SafeAreaView edges={["bottom"]} style={{ backgroundColor: "#23243a" }}>
+    <SafeAreaView edges={["bottom"]} style={{ backgroundColor: theme.colors.background }}>
       <View style={styles.container}>
         {NAV_ITEMS.map((item) => {
           const isActive = currentRoute === item.name;

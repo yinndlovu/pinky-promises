@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import { View, Text, ScrollView, Pressable, StyleSheet } from "react-native";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { v4 as uuidv4 } from "uuid";
@@ -8,11 +8,8 @@ import { v4 as uuidv4 } from "uuid";
 import { GAMES, Game } from "../../interfaces/Game";
 import { fetchCurrentUserProfileAndAvatar } from "../../helpers/userDetailsHelper";
 import { fetchPartnerProfileAndAvatar } from "../../helpers/partnerDetailsHelper";
-import {
-  getTriviaSocket,
-  connectTriviaSocket,
-} from "../../../services/games/trivia/triviaSocketService";
 import { useAuth } from "../../../contexts/AuthContext";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import RequestGameModal from "../../components/modals/RequestGameModal";
@@ -20,6 +17,8 @@ import RequestGameModal from "../../components/modals/RequestGameModal";
 const GameListScreen = ({ navigation }: any) => {
   // variables
   const { user } = useAuth();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -33,7 +32,7 @@ const GameListScreen = ({ navigation }: any) => {
   };
 
   const handleRequestGame = async () => {
-    try {
+    /*try {
       setIsRequesting(true);
 
       const userInfo = await fetchCurrentUserProfileAndAvatar();
@@ -62,7 +61,7 @@ const GameListScreen = ({ navigation }: any) => {
       console.error("Error preparing game:", err);
     } finally {
       setIsRequesting(false);
-    }
+    }*/
   };
 
   return (
@@ -84,7 +83,7 @@ const GameListScreen = ({ navigation }: any) => {
             <FontAwesome6
               name={game.icon || "gamepad"}
               size={24}
-              color="#e03487"
+              color={theme.colors.accent}
             />
             <View style={{ marginLeft: 12, flex: 1 }}>
               <Text style={styles.gameName}>{game.name}</Text>
@@ -109,26 +108,27 @@ const GameListScreen = ({ navigation }: any) => {
 
 export default GameListScreen;
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 16,
-  },
-  gameItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#2a2b44",
-    padding: 16,
-    marginBottom: 12,
-    borderRadius: 12,
-  },
-  gameName: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  gameDescription: {
-    color: "#b0b3c6",
-    fontSize: 14,
-    marginTop: 4,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    container: {
+      padding: 16,
+    },
+    gameItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.surface,
+      padding: 16,
+      marginBottom: 12,
+      borderRadius: 12,
+    },
+    gameName: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    gameDescription: {
+      color: theme.colors.muted,
+      fontSize: 14,
+      marginTop: 4,
+    },
+  });

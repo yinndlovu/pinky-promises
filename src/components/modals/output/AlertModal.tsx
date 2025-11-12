@@ -1,5 +1,5 @@
 // external
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useMemo } from "react";
 import {
   Modal,
   View,
@@ -11,7 +11,8 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 
-// external
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 import { AlertType, AlertModalProps } from "../../../types/Alert";
 
 // types
@@ -25,6 +26,11 @@ const AlertModal: React.FC<AlertModalProps> = ({
   buttonText = "OK",
   onClose,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // animations
   const scaleAnim = useRef(new Animated.Value(0.8)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
@@ -102,52 +108,53 @@ const AlertModal: React.FC<AlertModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  content: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 28,
-    alignItems: "center",
-    width: "80%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  title: {
-    color: "#fff",
-    fontSize: 18,
-    marginTop: 12,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  message: {
-    color: "#fff",
-    marginTop: 12,
-    fontSize: 16,
-    marginBottom: 24,
-    textAlign: "center",
-  },
-  okButton: {
-    backgroundColor: "#e03487",
-    borderRadius: 14,
-    paddingVertical: 12,
-    width: "90%",
-    alignSelf: "center",
-    alignItems: "center",
-  },
-  okButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    content: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 28,
+      alignItems: "center",
+      width: "80%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 18,
+      marginTop: 12,
+      textAlign: "center",
+      fontWeight: "bold",
+    },
+    message: {
+      color: theme.colors.text,
+      marginTop: 12,
+      fontSize: 16,
+      marginBottom: 24,
+      textAlign: "center",
+    },
+    okButton: {
+      backgroundColor: theme.colors.primary,
+      borderRadius: 14,
+      paddingVertical: 12,
+      width: "90%",
+      alignSelf: "center",
+      alignItems: "center",
+    },
+    okButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default AlertModal;

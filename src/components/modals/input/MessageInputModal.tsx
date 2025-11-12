@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Modal,
   View,
@@ -10,6 +10,9 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import AlertModal from "../output/AlertModal";
@@ -30,12 +33,23 @@ const MessageInputModal: React.FC<Props> = ({
   type,
   loading = false,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // use states
   const [text, setText] = useState("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [alertTitle, setAlertTitle] = useState("");
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
+
+  // use effects
+  useEffect(() => {
+    if (!visible) {
+      setText("");
+    }
+  }, [visible]);
 
   // handlers
   const handleSend = async () => {
@@ -71,7 +85,7 @@ const MessageInputModal: React.FC<Props> = ({
             <TextInput
               style={styles.input}
               placeholder={placeholder}
-              placeholderTextColor="#b0b3c6"
+              placeholderTextColor={theme.colors.muted}
               value={text}
               onChangeText={setText}
               multiline
@@ -89,7 +103,10 @@ const MessageInputModal: React.FC<Props> = ({
               <TouchableOpacity
                 style={[
                   styles.sendButton,
-                  { backgroundColor: type === "sweet" ? "#e03487" : "#3b82f6" },
+                  {
+                    backgroundColor:
+                      type === "sweet" ? theme.colors.primary : "#3b82f6",
+                  },
                   (!text.trim() || loading) && { opacity: 0.5 },
                 ]}
                 onPress={handleSend}
@@ -124,66 +141,67 @@ const MessageInputModal: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(5,3,12,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 24,
-    width: "90%",
-    maxWidth: 350,
-    alignItems: "stretch",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 17,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  input: {
-    backgroundColor: "#1b1c2e",
-    color: "#fff",
-    borderRadius: 10,
-    padding: 14,
-    minHeight: 80,
-    maxHeight: 160,
-    fontSize: 16,
-    marginBottom: 20,
-    textAlignVertical: "top",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "center",
-  },
-  cancelButton: {
-    marginRight: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    backgroundColor: "#393a4a",
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-  sendButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 22,
-    borderRadius: 8,
-  },
-  sendButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 15,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    container: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 24,
+      width: "90%",
+      maxWidth: 350,
+      alignItems: "stretch",
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 17,
+      fontWeight: "bold",
+      marginBottom: 16,
+      textAlign: "center",
+    },
+    input: {
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.text,
+      borderRadius: 10,
+      padding: 14,
+      minHeight: 80,
+      maxHeight: 160,
+      fontSize: 16,
+      marginBottom: 20,
+      textAlignVertical: "top",
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      alignItems: "center",
+    },
+    cancelButton: {
+      marginRight: 12,
+      paddingVertical: 10,
+      paddingHorizontal: 18,
+      borderRadius: 8,
+      backgroundColor: theme.colors.cancelButton,
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+    sendButton: {
+      paddingVertical: 10,
+      paddingHorizontal: 22,
+      borderRadius: 8,
+    },
+    sendButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 15,
+    },
+  });
 
 export default MessageInputModal;

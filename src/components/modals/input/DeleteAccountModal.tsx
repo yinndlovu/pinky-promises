@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Modal,
   View,
@@ -12,6 +12,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import AlertModal from "../output/AlertModal";
@@ -35,6 +38,10 @@ const DeleteAccountModal: React.FC<Props> = ({
   onVerifyPassword,
   loading = false,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // use states
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
@@ -136,7 +143,7 @@ const DeleteAccountModal: React.FC<Props> = ({
                     ]}
                   >
                     {isConfirmed && (
-                      <Feather name="check" size={16} color="#fff" />
+                      <Feather name="check" size={16} color={theme.colors.text} />
                     )}
                   </View>
                   <Text style={styles.checkboxText}>
@@ -192,125 +199,126 @@ const DeleteAccountModal: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(5,3,12,0.7)",
-    justifyContent: "flex-end",
-  },
-  container: {
-    backgroundColor: "#23243a",
-    width: screenWidth,
-    height: "75%",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#b0b3c6",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 20,
-    opacity: 0.6,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: 0,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 16,
-    backgroundColor: "transparent",
-  },
-  closeButtonText: {
-    color: "#b0b3c6",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  deleteButton: {
-    backgroundColor: "#ff4757",
-    paddingVertical: 8,
-    marginTop: 16,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    width: "100%",
-    alignItems: "center",
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  content: {
-    flex: 1,
-    paddingTop: 0,
-  },
-  dangerSection: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    marginBottom: 26,
-  },
-  dangerTitle: {
-    color: "#ff4757",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginLeft: 12,
-  },
-  description: {
-    color: "#fff",
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  warningSection: {
-    backgroundColor: "#1b1c2e",
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "#ff4757",
-  },
-  warningText: {
-    color: "#ff6b6b",
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 20,
-  },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: "#b0b3c6",
-    marginRight: 12,
-    marginTop: 2,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  checkboxChecked: {
-    backgroundColor: "#ff4757",
-    borderColor: "#ff4757",
-  },
-  checkboxText: {
-    color: "#fff",
-    fontSize: 14,
-    lineHeight: 20,
-    flex: 1,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "flex-end",
+    },
+    container: {
+      backgroundColor: theme.colors.background,
+      width: screenWidth,
+      height: "75%",
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingHorizontal: 20,
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      backgroundColor: theme.colors.muted,
+      borderRadius: 2,
+      alignSelf: "center",
+      marginBottom: 20,
+      opacity: 0.6,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingBottom: 0,
+    },
+    closeButton: {
+      width: 32,
+      height: 32,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 16,
+      backgroundColor: "transparent",
+    },
+    closeButtonText: {
+      color: theme.colors.text,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    deleteButton: {
+      backgroundColor: "#ff4757",
+      paddingVertical: 8,
+      marginTop: 16,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      width: "100%",
+      alignItems: "center",
+    },
+    deleteButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 14,
+    },
+    content: {
+      flex: 1,
+      paddingTop: 0,
+    },
+    dangerSection: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      marginBottom: 26,
+    },
+    dangerTitle: {
+      color: "#ff4757",
+      fontSize: 20,
+      fontWeight: "bold",
+      marginLeft: 12,
+    },
+    description: {
+      color: theme.colors.text,
+      fontSize: 16,
+      lineHeight: 24,
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    warningSection: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 10,
+      padding: 16,
+      marginBottom: 24,
+      borderWidth: 1,
+      borderColor: "#ff4757",
+    },
+    warningText: {
+      color: "#ff6b6b",
+      fontSize: 14,
+      lineHeight: 20,
+      marginBottom: 8,
+    },
+    checkboxContainer: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginBottom: 20,
+    },
+    checkbox: {
+      width: 24,
+      height: 24,
+      borderRadius: 4,
+      borderWidth: 2,
+      borderColor: theme.colors.muted,
+      marginRight: 12,
+      marginTop: 2,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    checkboxChecked: {
+      backgroundColor: "#ff4757",
+      borderColor: "#ff4757",
+    },
+    checkboxText: {
+      color: theme.colors.text,
+      fontSize: 14,
+      lineHeight: 20,
+      flex: 1,
+    },
+  });
 
 export default DeleteAccountModal;

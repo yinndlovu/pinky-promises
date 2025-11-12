@@ -333,7 +333,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     }
 
     if (!avatarFetched) {
-      return <AvatarSkeleton style={styles.avatar} />;
+      return (
+        <AvatarSkeleton
+          style={styles.avatar}
+          darkColor={theme.colors.skeletonDark}
+          highlightColor={theme.colors.skeletonHighlight}
+        />
+      );
     }
 
     if (!avatarUri) {

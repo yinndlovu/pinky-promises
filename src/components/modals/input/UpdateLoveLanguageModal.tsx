@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Modal,
   View,
@@ -10,6 +10,9 @@ import {
   ActivityIndicator,
   TouchableWithoutFeedback,
 } from "react-native";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // types
 type UpdateLoveLanguageModalProps = {
@@ -27,6 +30,10 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   onClose,
   onSave,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   // use states
   const [loveLanguage, setLoveLanguage] = useState(initialLoveLanguage || "");
 
@@ -48,7 +55,7 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
               value={loveLanguage}
               onChangeText={setLoveLanguage}
               placeholder="Enter your love language"
-              placeholderTextColor="#b0b3c6"
+              placeholderTextColor={theme.colors.muted}
               editable={!loading}
             />
             <View style={styles.buttonRow}>
@@ -69,11 +76,6 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
-            {loading && (
-              <View style={styles.loadingOverlay}>
-                <ActivityIndicator size="large" color="#e03487" />
-              </View>
-            )}
           </View>
         </View>
       </TouchableWithoutFeedback>
@@ -81,86 +83,80 @@ const UpdateLoveLanguageModal: React.FC<UpdateLoveLanguageModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  content: {
-    backgroundColor: "#23243a",
-    borderRadius: 16,
-    padding: 24,
-    alignItems: "center",
-    width: "90%",
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
-    position: "relative",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#fff",
-    marginBottom: 16,
-    alignSelf: "center",
-  },
-  input: {
-    backgroundColor: "#393a4a",
-    color: "#fff",
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    fontSize: 16,
-    borderWidth: 1,
-    borderColor: "#393a4a",
-    width: "100%",
-    marginBottom: 24,
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: 8,
-  },
-  saveButton: {
-    backgroundColor: "#e03487",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginRight: 8,
-  },
-  saveButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  cancelButton: {
-    backgroundColor: "#393a4a",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-    alignItems: "center",
-    flex: 1,
-    marginLeft: 8,
-  },
-  cancelButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(35,36,58,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 100,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    content: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 16,
+      padding: 24,
+      alignItems: "center",
+      width: "90%",
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      elevation: 5,
+      position: "relative",
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: theme.colors.text,
+      marginBottom: 16,
+      alignSelf: "center",
+    },
+    input: {
+      backgroundColor: theme.colors.surface,
+      color: theme.colors.text,
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      fontSize: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      width: "100%",
+      marginBottom: 24,
+    },
+    buttonRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+      marginTop: 8,
+    },
+    saveButton: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginRight: 8,
+    },
+    saveButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+    cancelButton: {
+      backgroundColor: theme.colors.cancelButton,
+      paddingVertical: 12,
+      paddingHorizontal: 32,
+      borderRadius: 8,
+      alignItems: "center",
+      flex: 1,
+      marginLeft: 8,
+    },
+    cancelButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 16,
+    },
+  });
 
 export default UpdateLoveLanguageModal;

@@ -1,5 +1,5 @@
 // external
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Modal,
   View,
@@ -12,6 +12,9 @@ import {
   Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // content
 import AlertModal from "../output/AlertModal";
@@ -42,6 +45,8 @@ const StoreMessageModal: React.FC<Props> = ({
 
   // variables
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   // handlers
   const handleStore = async () => {
@@ -106,7 +111,7 @@ const StoreMessageModal: React.FC<Props> = ({
               <TextInput
                 style={styles.titleInput}
                 placeholder="Message title..."
-                placeholderTextColor="#b0b3c6"
+                placeholderTextColor={theme.colors.muted}
                 value={title}
                 onChangeText={setTitle}
                 maxLength={50}
@@ -116,7 +121,7 @@ const StoreMessageModal: React.FC<Props> = ({
               <TextInput
                 style={styles.messageInput}
                 placeholder="Type the message here..."
-                placeholderTextColor="#b0b3c6"
+                placeholderTextColor={theme.colors.muted}
                 value={message}
                 onChangeText={setMessage}
                 multiline
@@ -150,99 +155,100 @@ const StoreMessageModal: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(5,3,12,0.7)",
-    justifyContent: "flex-end",
-  },
-  container: {
-    backgroundColor: "#23243a",
-    width: screenWidth,
-    height: "75%",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingHorizontal: 20,
-  },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#b0b3c6",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginBottom: 20,
-    opacity: 0.6,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: 20,
-  },
-  closeButton: {
-    width: 32,
-    height: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 16,
-    backgroundColor: "transparent",
-  },
-  closeButtonText: {
-    color: "#b0b3c6",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  title: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    flex: 1,
-    textAlign: "center",
-    marginHorizontal: 16,
-  },
-  storeButton: {
-    backgroundColor: "#e03487",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    minWidth: 60,
-    alignItems: "center",
-  },
-  storeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: "#2f3149",
-    marginVertical: 8,
-  },
-  content: {
-    flex: 1,
-    paddingTop: 16,
-  },
-  titleInput: {
-    backgroundColor: "#1b1c2e",
-    color: "#fff",
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#2f3149",
-  },
-  messageInput: {
-    backgroundColor: "#1b1c2e",
-    color: "#fff",
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#2f3149",
-    marginBottom: 16,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      flex: 1,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "flex-end",
+    },
+    container: {
+      backgroundColor: theme.colors.background,
+      width: screenWidth,
+      height: "75%",
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingHorizontal: 20,
+    },
+    handle: {
+      width: 40,
+      height: 4,
+      backgroundColor: theme.colors.muted,
+      borderRadius: 2,
+      alignSelf: "center",
+      marginBottom: 20,
+      opacity: 0.6,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingBottom: 20,
+    },
+    closeButton: {
+      width: 32,
+      height: 32,
+      justifyContent: "center",
+      alignItems: "center",
+      borderRadius: 16,
+      backgroundColor: "transparent",
+    },
+    closeButtonText: {
+      color: theme.colors.muted,
+      fontSize: 18,
+      fontWeight: "bold",
+    },
+    title: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+      flex: 1,
+      textAlign: "center",
+      marginHorizontal: 16,
+    },
+    storeButton: {
+      backgroundColor: theme.colors.primary,
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      minWidth: 60,
+      alignItems: "center",
+    },
+    storeButtonText: {
+      color: theme.colors.text,
+      fontWeight: "bold",
+      fontSize: 14,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: theme.colors.separator,
+      marginVertical: 8,
+    },
+    content: {
+      flex: 1,
+      paddingTop: 16,
+    },
+    titleInput: {
+      backgroundColor: theme.colors.surfaceAlt,
+      color: theme.colors.text,
+      borderRadius: 10,
+      padding: 14,
+      fontSize: 16,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    messageInput: {
+      backgroundColor: theme.colors.surfaceAlt,
+      color: theme.colors.text,
+      borderRadius: 10,
+      padding: 14,
+      fontSize: 16,
+      flex: 1,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 16,
+    },
+  });
 
 export default StoreMessageModal;

@@ -1,5 +1,5 @@
 // external
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Modal,
   TouchableWithoutFeedback,
@@ -10,6 +10,7 @@ import LottieView from "lottie-react-native";
 
 // animation files
 import catFootprints from "../../assets/animations/cat-footprints.json";
+import { useTheme } from "../../theme/ThemeContext";
 
 // types
 type LoadingAnimationModalProps = {
@@ -23,6 +24,10 @@ const LoadingAnimation: React.FC<LoadingAnimationModalProps> = ({
   onClose,
   size = "medium",
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   if (!visible) {
     return null;
   }
@@ -64,27 +69,28 @@ const LoadingAnimation: React.FC<LoadingAnimationModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  content: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  animation: {
-    marginBottom: 16,
-  },
-  message: {
-    color: "#e03487",
-    fontWeight: "bold",
-    textAlign: "center",
-    maxWidth: 225,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    content: {
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 20,
+    },
+    animation: {
+      marginBottom: 16,
+    },
+    message: {
+      color: theme.colors.accent,
+      fontWeight: "bold",
+      textAlign: "center",
+      maxWidth: 225,
+    },
+  });
 
 export default LoadingAnimation;

@@ -1,5 +1,5 @@
 // external
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Modal,
   Text,
@@ -8,6 +8,9 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import LottieView from "lottie-react-native";
+
+// internal
+import { useTheme } from "../../../theme/ThemeContext";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -27,6 +30,10 @@ const InteractionAnimationModal: React.FC<InteractionAnimationModalProps> = ({
   action,
   message,
 }) => {
+  // variables
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   if (!visible || !action) {
     return null;
   }
@@ -53,35 +60,36 @@ const InteractionAnimationModal: React.FC<InteractionAnimationModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(5, 3, 12, 0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  },
-  container: {
-    backgroundColor: "rgba(5, 3, 12, 0.5)",
-    borderRadius: 24,
-    padding: 32,
-    alignItems: "center",
-    width: "80%",
-    maxWidth: 300,
-    overflow: "hidden",
-  },
-  animation: {
-    width: 150,
-    height: 150,
-    marginBottom: 16,
-  },
-  message: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    maxWidth: 225,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
+  StyleSheet.create({
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: theme.colors.modalOverlay,
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000,
+    },
+    container: {
+      backgroundColor: theme.colors.animationBackground,
+      borderRadius: 24,
+      padding: 32,
+      alignItems: "center",
+      width: "80%",
+      maxWidth: 300,
+      overflow: "hidden",
+    },
+    animation: {
+      width: 150,
+      height: 150,
+      marginBottom: 16,
+    },
+    message: {
+      color: theme.colors.text,
+      fontSize: 16,
+      fontWeight: "bold",
+      textAlign: "center",
+      maxWidth: 225,
+    },
+  });
 
 export default InteractionAnimationModal;

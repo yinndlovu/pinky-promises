@@ -1,3 +1,4 @@
+// external
 import { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated, ViewStyle } from "react-native";
 

@@ -335,7 +335,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       borderColor: theme.colors.muted,
       borderRadius: 12,
       padding: 6,
-      backgroundColor: theme.colors.modalOverlay,
+      backgroundColor: theme.colors.surface,
       flexDirection: "row",
       alignItems: "center",
     },
@@ -343,6 +343,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       flex: 1,
       fontSize: 16,
       color: theme.colors.text,
+      backgroundColor: theme.colors.surface,
       borderWidth: 0,
       borderRadius: 12,
       padding: 12,
@@ -381,6 +382,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     saveButtonDisabled: {
       backgroundColor: theme.colors.primaryMuted,
+      color: theme.colors.muted,
     },
     saveButtonText: {
       color: theme.colors.text,

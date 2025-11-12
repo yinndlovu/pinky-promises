@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { Feather, FontAwesome5 } from "@expo/vector-icons";
@@ -359,14 +358,6 @@ const OursScreen = ({ navigation }: Props) => {
     setRefreshing(false);
   };
 
-  {
-    deleting && (
-      <View style={styles.loadingOverlay}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
-
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
@@ -548,15 +539,6 @@ const OursScreen = ({ navigation }: Props) => {
           <Text style={styles.toastText}>{error}</Text>
         </View>
       )}
-
-      {memoryModalLoading && !memoryModalVisible && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={{ color: theme.colors.text, marginTop: 12 }}>
-            Deleting...
-          </Text>
-        </View>
-      )}
     </View>
   );
 };
@@ -569,13 +551,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       alignItems: "stretch",
       backgroundColor: theme.colors.background,
       minHeight: "100%",
-    },
-    loadingOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: theme.colors.absoluteFillObject,
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 16,
     },
     toast: {
       position: "absolute",

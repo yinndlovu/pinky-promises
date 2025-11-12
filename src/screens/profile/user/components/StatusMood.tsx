@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -264,12 +263,6 @@ const StatusMood: React.FC<StatusMoodProps> = ({
 
   return (
     <Animated.View style={[styles.wrapper, fadeInStyle]}>
-      {updatingMood && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color={theme.colors.accent} />
-        </View>
-      )}
-
       <View style={styles.headerRow}>
         <Text style={styles.statusLabel}>Status</Text>
       </View>
@@ -386,13 +379,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       alignItems: "center",
       justifyContent: "space-between",
       marginBottom: 0,
-    },
-    loadingOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: theme.colors.absoluteFillObject,
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 100,
     },
     statusRow: {
       flexDirection: "row",
