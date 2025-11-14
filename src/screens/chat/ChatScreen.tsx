@@ -12,28 +12,20 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { useQueryClient } from "@tanstack/react-query";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
-import { useAuth } from "../../contexts/AuthContext";
-import { DEEPSEEK_KEY } from "../../configuration/config";
-import { saveKeyDetail } from "../../services/ai/aiKeyDetailsService";
-import { favoritesObjectToArray } from "../../helpers/aiHelpers";
+import { getTimeLabel, getDayLabel } from "../../utils/formatters/chatLabels";
+import { useSocket } from "../../contexts/SocketContext";
+import {
+  getChatMessages,
+  deleteAllChatMessages,
+} from "../../services/api/chat/chatService";
 import { ChatMessage } from "../../types/Message";
 import { createChatStyles } from "./styles/ChatScreen.styles";
 import { useTheme } from "../../theme/ThemeContext";
-
-// screen content
-import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
-import LoadingSpinner from "../../components/loading/LoadingSpinner";
-
-// hooks
-import useToken from "../../hooks/useToken";
-import { useAiContext, useKeyDetails } from "../../hooks/useAiContext";
-
-// chats database
+import { sendChatMessage } from "../../services/api/chat/chatService";
 import {
   createTable,
   fetchMessages,
@@ -42,17 +34,22 @@ import {
   deleteAllMessages,
 } from "../../database/chatdb";
 
+// screen content
+import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
+
+// hooks
+import useToken from "../../hooks/useToken";
+
 export default function ChatScreen() {
   // variables
-  const { user } = useAuth();
   const insets = useSafeAreaInsets();
   const EXTRA_KEYBOARD_PADDING = 50;
   const LAST_CLEANUP_KEY = "lastCleanupDate";
   const navigation = useNavigation();
   const route = useRoute();
-  const queryClient = useQueryClient();
   const token = useToken();
   const { theme } = useTheme();
+  const { socket } = useSocket();
   const styles = useMemo(() => createChatStyles(theme), [theme]);
 
   // use states
@@ -61,16 +58,6 @@ export default function ChatScreen() {
   const [isSending, setIsSending] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
-  // data
-  const { data: context, isLoading: contextLoading } = useAiContext(
-    user?.id,
-    token
-  );
-  const { data: keyDetails = [], isLoading: keyDetailsLoading } = useKeyDetails(
-    user?.id,
-    token
-  );
 
   // check if chats have been cleaned that day
   const runCleanupOncePerDay = async () => {
@@ -82,17 +69,43 @@ export default function ChatScreen() {
       if (!lastCleanup || now - Number(lastCleanup) > oneDayMs) {
         await deleteOldMessages();
         await AsyncStorage.setItem(LAST_CLEANUP_KEY, now.toString());
-      } else {
       }
     } catch (error) {}
   };
+
+  // fetch messages from backend
+  const fetchMessagesFromBackend = useCallback(async () => {
+    if (!token) {
+      return;
+    }
+
+    try {
+      const data = await getChatMessages(token);
+      if (data.messages) {
+        const formattedMessages = data.messages.reverse();
+        setMessages(formattedMessages);
+
+        // also save to local db for offline access
+        for (const msg of formattedMessages) {
+          try {
+            await saveMessage(msg.id, msg.text, msg.sender, msg.timestamp);
+          } catch (err) {}
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch messages from backend:", error);
+      // fallback to local messages
+      const localMessages = await fetchMessages();
+      setMessages(localMessages);
+    }
+  }, [token]);
 
   // use effects
   useEffect(() => {
     createTable();
     runCleanupOncePerDay();
-    fetchMessages().then(setMessages);
-  }, []);
+    fetchMessagesFromBackend();
+  }, [fetchMessagesFromBackend]);
 
   useEffect(() => {
     if ((route.params as any)?.showOptions) {
@@ -101,200 +114,74 @@ export default function ChatScreen() {
     }
   }, [route.params]);
 
-  // helpers
-  const getFormattedKeyDetails = useCallback(() => {
-    if (!keyDetails.length) {
-      return "None recorded.";
+  // socket event listeners
+  useEffect(() => {
+    if (!socket) {
+      return;
     }
 
-    return keyDetails
-      .map((d: any) => `${d.type}: ${d.key} = ${d.value}`)
-      .join("; ");
-  }, [keyDetails]);
+    const onChatMessage = (data: { message: ChatMessage; type: string }) => {
+      setMessages((prev) => {
+        // check if message already exists to avoid duplicates
+        const exists = prev.some((m) => m.id === data.message.id);
+        if (exists) return prev;
 
-  const getFormattedSpecialDates = useCallback(() => {
-    if (!context?.specialDateDetails?.length) {
-      return "None set";
-    }
+        return [data.message, ...prev];
+      });
 
-    return context.specialDateDetails
-      .map(
-        (d: any) =>
-          `${d.title}: ${new Date(d.date).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-          })}`
-      )
-      .join(", ");
-  }, [context]);
+      // save to local db
+      saveMessage(
+        data.message.id,
+        data.message.text,
+        data.message.sender,
+        data.message.timestamp
+      ).catch(() => {});
+    };
 
-  const getFormattedAnniversary = useCallback(() => {
-    const anniversary = context.specialDateDetails.find((d: any) =>
-      d.title.toLowerCase().includes("anniversary")
-    );
+    const onChatTyping = (data: { isTyping: boolean }) => {
+      setIsSending(data.isTyping);
+    };
 
-    return anniversary
-      ? new Date(anniversary.date).toLocaleDateString("en-GB", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-      : "Not set";
-  }, [context]);
+    const onChatError = (data: { error: string }) => {
+      console.error("Chat error:", data.error);
+      setIsSending(false);
+    };
 
-  const getFormattedFavoriteMemories = useCallback(() => {
-    if (!context?.favoriteMemories?.length) {
-      return "None set";
-    }
+    const onChatMessages = (data: { messages: ChatMessage[] }) => {
+      if (data.messages) {
+        const formattedMessages = data.messages.reverse();
+        setMessages(formattedMessages);
+      }
+    };
 
-    return context.favoriteMemories.map((m: any) => m.memory).join(", ");
-  }, [context]);
+    socket.on("chat:message", onChatMessage);
+    socket.on("chat:typing", onChatTyping);
+    socket.on("chat:error", onChatError);
+    socket.on("chat:messages", onChatMessages);
 
-  const getFormattedNotes = useCallback(() => {
-    return context?.pairNotes || "None set";
-  }, [context]);
-
-  const getFormattedLoveLanguage = useCallback(() => {
-    return context?.userLoveLanguage || "Not set";
-  }, [context]);
-
-  const getFormattedAboutUser = useCallback(() => {
-    return context?.userAbout || "Not set";
-  }, [context]);
-
-  const getFormattedFavorites = useCallback(() => {
-    const favArr = favoritesObjectToArray(context?.userFavorites);
-
-    if (!favArr.length) {
-      return "None set";
-    }
-
-    return favArr.map((f) => `${f.label}: ${f.value}`).join(", ");
-  }, [context]);
-
-  // helpers (partner)
-  const getFormattedPartnerLoveLanguage = useCallback(() => {
-    return context?.partnerLoveLanguage || "Not set";
-  }, [context]);
-
-  const getFormattedPartnerFavorites = useCallback(() => {
-    const favArr = favoritesObjectToArray(context?.partnerFavorites);
-
-    if (!favArr.length) {
-      return "None set";
-    }
-
-    return favArr.map((f) => `${f.label}: ${f.value}`).join(", ");
-  }, [context]);
-
-  const getFormattedAboutPartner = useCallback(() => {
-    return context?.partnerAbout || "Not set";
-  }, [context]);
+    return () => {
+      socket.off("chat:message", onChatMessage);
+      socket.off("chat:typing", onChatTyping);
+      socket.off("chat:error", onChatError);
+      socket.off("chat:messages", onChatMessages);
+    };
+  }, [socket]);
 
   // handlers
   const handleDelete = async () => {
+    try {
+      if (token) {
+        await deleteAllChatMessages(token);
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+    }
+
     await deleteAllMessages();
     setMessages([]);
     setShowConfirm(false);
   };
 
-  // AI call
-  const getBotResponse = async (message: string) => {
-    const todayString = new Date().toLocaleDateString("en-GB", {
-      weekday: "long",
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-
-    const systemPrompt = `
-    Your name is Lily, and a helpful assistant (more like a mascot) for ${
-      context?.userName || "User"
-    }. Their partner's name is ${
-      context?.partnerName || "Partner"
-    }, they are a couple using the Pinky Promises app.
-    Today is: ${todayString}
-    Currently, you're talking to just ${
-      context?.userName || "User"
-    }, so avoid addressing this 
-    user as if it's the two of them with their partner.
-    So say things like "heyyy ${user?.name || "User"}" not "heyyy 
-    ${context?.userName || "User"} & ${
-      context?.partnerName || "Partner"
-    }" because 
-    it's just ${context?.userName || "User"} chatting with you.
-    Text them back in lowercase letters only.
-    Show excitement by adding extra letters where necessary, like "heyyy"
-    Make your texts as short as possible, and avoid using too much emojis, a little is fine.
-    Sound human, like their best friend rather than an AI.
-    Their anniversary is ${getFormattedAnniversary()}.
-    Special dates: ${getFormattedSpecialDates()}.
-    Favorite memories: ${getFormattedFavoriteMemories()}.
-    Notes: ${getFormattedNotes()}.
-    Love language for : ${getFormattedLoveLanguage()}.
-    Favorites: ${getFormattedFavorites()}.
-    Love language for ${
-      context?.partnerName || "Partner"
-    }: ${getFormattedPartnerLoveLanguage()}.
-    Favorites for ${
-      context?.partnerName || "Partner"
-    }: ${getFormattedPartnerFavorites()}.
-    More about ${context?.userName || "User"}: ${getFormattedAboutUser()}.
-    More about ${
-      context?.partnerName || "Partner"
-    }: ${getFormattedAboutPartner()}
-    Answer questions about their relationship, memories, special dates, favorites, 
-    love langauges, and more. 
-    Be warm, personal, and supportive.
-    Keep your messages short and as human as possible.
-    Key details recorded: ${getFormattedKeyDetails()} - Key details are just
-    things you have learned about them and for you to keep in mind.
-    Don't just bring up things you know about them every time, especially 
-    for no reason. Bring things up when it's relevant to the conversation or have to. 
-    This goes for everything, including dates, favorites, etc.
-    If the user shares a new key detail (like a favorite, special date, or 
-    relationship milestone, essentially something worth remembering), respond as normal, 
-    but also include a JSON object at the end of your response with the format:
-    {"record": {"type": "...", "key": "...", "value": "..."}}
-    If there's nothing to record, do not include this object.
-    `.trim();
-
-    const history = [...messages].reverse().map((m) => ({
-      role: m.sender === "You" ? "user" : "assistant",
-      content: m.text,
-    }));
-
-    const apiMessages = [
-      { role: "system", content: systemPrompt },
-      ...history,
-      { role: "user", content: message },
-    ];
-
-    try {
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${DEEPSEEK_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "deepseek/deepseek-r1:free",
-            messages: apiMessages,
-          }),
-        }
-      );
-
-      const data = await response.json();
-      return data?.choices?.[0]?.message?.content?.trim();
-    } catch (error) {
-      return "sorry, something went wrong. please try again.";
-    }
-  };
-
-  // handlers
   const handleSend = async () => {
     if (inputText.trim() === "") {
       return;
@@ -312,6 +199,7 @@ export default function ChatScreen() {
     setInputText("");
     setIsSending(true);
 
+    // save to local db
     try {
       await saveMessage(
         userMessage.id,
@@ -321,56 +209,28 @@ export default function ChatScreen() {
       );
     } catch (err: any) {}
 
-    const aiText = await getBotResponse(inputText);
+    // send via socket if connected, otherwise fallback to http
+    if (socket?.connected) {
+      socket.emit("chat:send", { message: inputText });
+    } else {
+      try {
+        const data = await sendChatMessage(token, inputText);
 
-    let record = null;
-    let messageText = aiText;
-    try {
-      const match = aiText.match(/\{[\s\S]*"record"[\s\S]*\}/);
+        if (data.userMessage && data.botReply) {
+          setMessages((prev) => [data.botReply, ...prev]);
+          await saveMessage(
+            data.botReply.id,
+            data.botReply.text,
+            data.botReply.sender,
+            data.botReply.timestamp
+          );
+        }
 
-      if (match) {
-        const json = JSON.parse(match[0]);
-        record = json.record;
-        messageText = aiText.replace(match[0], "").trim();
+        setIsSending(false);
+      } catch (error) {
+        console.error("Send message error:", error);
+        setIsSending(false);
       }
-    } catch (e) {}
-
-    const botTimestamp = Date.now();
-    const botReply: ChatMessage = {
-      id: (botTimestamp + 1).toString(),
-      text: messageText || "sorry, i didn’t quite get that. please try again.",
-      sender: "Lily",
-      timestamp: botTimestamp,
-    };
-
-    setMessages((prev) => [botReply, ...prev]);
-    setIsSending(false);
-
-    try {
-      await saveMessage(
-        botReply.id,
-        botReply.text,
-        botReply.sender,
-        botReply.timestamp
-      );
-    } catch (err: any) {}
-    if (record && context?.partnerId && token) {
-      const userId = user?.id;
-
-      if (!userId) {
-        return;
-      }
-
-      await saveKeyDetail({
-        ...record,
-        userId,
-        partnerId: context?.partnerId,
-        token,
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["keyDetails", user?.id],
-      });
     }
   };
 
@@ -378,55 +238,8 @@ export default function ChatScreen() {
     if (index === messages.length - 1) {
       return true;
     }
-
     return messages[index + 1]?.sender !== messages[index].sender;
   };
-
-  // utils
-  const getDayLabel = (timestamp: number) => {
-    const now = new Date();
-    const msgDate = new Date(timestamp);
-    const diffTime = now.setHours(0, 0, 0, 0) - msgDate.setHours(0, 0, 0, 0);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-      return "Today";
-    }
-
-    if (diffDays === 1) {
-      return "Yesterday";
-    }
-
-    if (diffDays > 1 && diffDays < 8) {
-      return `${diffDays} days ago`;
-    }
-
-    return msgDate.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-  };
-
-  const getTimeLabel = (timestamp: number) => {
-    const msgDate = new Date(timestamp);
-    return msgDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  if (contextLoading || keyDetailsLoading) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <LoadingSpinner showMessage={false} size="medium" />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
