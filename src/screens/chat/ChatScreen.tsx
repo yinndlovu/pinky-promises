@@ -1,19 +1,20 @@
 // external
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import {
   View,
   TextInput,
   FlatList,
   Text,
-  KeyboardAvoidingView,
   Platform,
   TouchableOpacity,
   Modal,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { getTimeLabel, getDayLabel } from "../../utils/formatters/chatLabels";
@@ -43,7 +44,6 @@ import useToken from "../../hooks/useToken";
 export default function ChatScreen() {
   // variables
   const insets = useSafeAreaInsets();
-  const EXTRA_KEYBOARD_PADDING = 50;
   const LAST_CLEANUP_KEY = "lastCleanupDate";
   const navigation = useNavigation();
   const route = useRoute();
@@ -51,6 +51,7 @@ export default function ChatScreen() {
   const { theme } = useTheme();
   const { socket } = useSocket();
   const styles = useMemo(() => createChatStyles(theme), [theme]);
+  const flatListRef = useRef<any>(null);
 
   // use states
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -82,7 +83,7 @@ export default function ChatScreen() {
     try {
       const data = await getChatMessages(token);
       if (data.messages) {
-        const formattedMessages = data.messages.reverse();
+        const formattedMessages = data.messages;
         setMessages(formattedMessages);
 
         // also save to local db for offline access
@@ -114,6 +115,12 @@ export default function ChatScreen() {
     }
   }, [route.params]);
 
+  useEffect(() => {
+    if (messages.length > 0) {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
   // socket event listeners
   useEffect(() => {
     if (!socket) {
@@ -124,9 +131,23 @@ export default function ChatScreen() {
       setMessages((prev) => {
         // check if message already exists to avoid duplicates
         const exists = prev.some((m) => m.id === data.message.id);
-        if (exists) return prev;
+        if (exists) {
+          return prev;
+        }
 
-        return [data.message, ...prev];
+        if (data.message.sender === "You") {
+          const recentUserMessage = prev[prev.length - 1];
+          if (
+            recentUserMessage?.sender === "You" &&
+            recentUserMessage?.text === data.message.text &&
+            Math.abs(recentUserMessage.timestamp - data.message.timestamp) <
+              5000
+          ) {
+            return prev;
+          }
+        }
+
+        return [...prev, data.message];
       });
 
       // save to local db
@@ -149,7 +170,7 @@ export default function ChatScreen() {
 
     const onChatMessages = (data: { messages: ChatMessage[] }) => {
       if (data.messages) {
-        const formattedMessages = data.messages.reverse();
+        const formattedMessages = data.messages;
         setMessages(formattedMessages);
       }
     };
@@ -195,7 +216,7 @@ export default function ChatScreen() {
       timestamp,
     };
 
-    setMessages((prev) => [userMessage, ...prev]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsSending(true);
 
@@ -217,7 +238,7 @@ export default function ChatScreen() {
         const data = await sendChatMessage(token, inputText);
 
         if (data.userMessage && data.botReply) {
-          setMessages((prev) => [data.botReply, ...prev]);
+          setMessages((prev) => [...prev, data.botReply]);
           await saveMessage(
             data.botReply.id,
             data.botReply.text,
@@ -235,10 +256,11 @@ export default function ChatScreen() {
   };
 
   const shouldShowSender = (index: number) => {
-    if (index === messages.length - 1) {
+    if (index === 0) {
       return true;
     }
-    return messages[index + 1]?.sender !== messages[index].sender;
+
+    return messages[index - 1]?.sender !== messages[index].sender;
   };
 
   return (
@@ -246,16 +268,16 @@ export default function ChatScreen() {
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={insets.bottom + 8}
       >
-        <FlatList
+        <KeyboardAwareFlatList
+          ref={flatListRef}
           data={messages}
-          inverted
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingTop: 24, paddingBottom: 60 }}
+          contentContainerStyle={{ paddingBottom: 80 }}
           renderItem={({ item, index }) => {
             const currentDay = getDayLabel(item.timestamp);
-            const prevMsg = messages[index + 1];
+            const prevMsg = index > 0 ? messages[index - 1] : null;
             const prevDay = prevMsg ? getDayLabel(prevMsg.timestamp) : null;
             const showDayLabel = currentDay !== prevDay;
 
@@ -291,6 +313,9 @@ export default function ChatScreen() {
               </View>
             );
           }}
+          enableOnAndroid={true}
+          extraScrollHeight={100}
+          keyboardOpeningTime={0}
         />
         {isSending && (
           <View style={styles.typingIndicatorWrapper}>
@@ -300,7 +325,11 @@ export default function ChatScreen() {
         <View
           style={[
             styles.inputBar,
-            { paddingBottom: insets.bottom + 8 + EXTRA_KEYBOARD_PADDING },
+            {
+              bottom: insets.bottom + 8,
+              left: 0,
+              right: 0,
+            },
           ]}
         >
           <TextInput
@@ -325,51 +354,53 @@ export default function ChatScreen() {
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
-      <Modal
-        visible={showOptions}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowOptions(false)}
-      >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            backgroundColor: theme.colors.modalOverlay,
-            justifyContent: "flex-start",
-            alignItems: "flex-end",
-            paddingTop: 50,
-            paddingRight: 20,
-          }}
-          activeOpacity={1}
-          onPressOut={() => setShowOptions(false)}
+        <Modal
+          visible={showOptions}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowOptions(false)}
         >
-          <View
+          <TouchableOpacity
             style={{
-              backgroundColor: theme.colors.background,
-              borderRadius: 8,
-              padding: 8,
-              minWidth: 120,
-              shadowColor: theme.colors.shadow,
-              shadowOpacity: 0.2,
-              shadowRadius: 8,
-              elevation: 4,
+              flex: 1,
+              backgroundColor: theme.colors.modalOverlay,
+              justifyContent: "flex-start",
+              alignItems: "flex-end",
+              paddingTop: 50,
+              paddingRight: 20,
             }}
+            activeOpacity={1}
+            onPressOut={() => setShowOptions(false)}
           >
-            <TouchableOpacity
-              onPress={() => {
-                setShowOptions(false);
-                setShowConfirm(true);
+            <View
+              style={{
+                backgroundColor: theme.colors.background,
+                borderRadius: 8,
+                padding: 8,
+                minWidth: 120,
+                shadowColor: theme.colors.shadow,
+                shadowOpacity: 0.2,
+                shadowRadius: 8,
+                elevation: 4,
               }}
-              style={{ paddingVertical: 10, paddingHorizontal: 16 }}
             >
-              <Text style={{ color: theme.colors.primary, fontWeight: "bold" }}>
-                Clear chat
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </TouchableOpacity>
-      </Modal>
+              <TouchableOpacity
+                onPress={() => {
+                  setShowOptions(false);
+                  setShowConfirm(true);
+                }}
+                style={{ paddingVertical: 10, paddingHorizontal: 16 }}
+              >
+                <Text
+                  style={{ color: theme.colors.primary, fontWeight: "bold" }}
+                >
+                  Clear chat
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+      </KeyboardAvoidingView>
 
       <ConfirmationModal
         visible={showConfirm}

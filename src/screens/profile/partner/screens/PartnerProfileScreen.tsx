@@ -342,11 +342,29 @@ const PartnerProfileScreen = ({ navigation }: any) => {
               <Text style={styles.bio}>{partner?.bio}</Text>
             ) : null}
           </View>
+        </View>
+        <View style={styles.actionButtonsContainer}>
           <TouchableOpacity
             style={styles.removeButton}
             onPress={() => setShowRemoveModal(true)}
           >
             <Text style={styles.removeButtonText}>Remove</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.messageButton}
+            onPress={() =>
+              navigation.navigate("PartnerChatScreen", {
+                partnerId: partner?.id, 
+                partnerName: partner?.name,
+              })
+            }
+          >
+            <Feather
+              name="message-circle"
+              size={20}
+              color={theme.colors.text}
+            />
+            <Text style={styles.messageButtonText}>Message</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.divider} />
