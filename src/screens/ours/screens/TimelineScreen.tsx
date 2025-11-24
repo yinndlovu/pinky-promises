@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   View,
+  ScrollView,
   Text,
   StyleSheet,
   TouchableOpacity,
@@ -14,6 +15,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import { createTimelineRecord } from "../../../services/api/ours/timelineService";
@@ -24,7 +26,7 @@ import { useTimeline } from "../../../hooks/useTimeline";
 import { useTheme } from "../../../theme/ThemeContext";
 
 // content
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 const TimelineScreen = () => {
   // variables
@@ -32,6 +34,7 @@ const TimelineScreen = () => {
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
@@ -126,15 +129,30 @@ const TimelineScreen = () => {
       </View>
 
       {isTimelineLoading ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: insets.top,
+            backgroundColor: theme.colors.background,
+            paddingHorizontal: 16,
           }}
+          showsVerticalScrollIndicator={false}
         >
-          <LoadingSpinner showMessage={false} size="medium" />
-        </View>
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        </ScrollView>
       ) : (
         <FlatList
           data={Array.isArray(timeline) ? timeline : []}

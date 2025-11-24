@@ -5,11 +5,13 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import {
@@ -24,19 +26,22 @@ import useToken from "../../../hooks/useToken";
 import { useMemories } from "../../../hooks/useMemory";
 import { useTheme } from "../../../theme/ThemeContext";
 
-// confirmation modal
+// modals
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
 
+// content
+import Shimmer from "../../../components/skeletons/Shimmer";
+
 const AllFavoriteMemoriesScreen = () => {
-  // variables
+  // hooks
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const currentUserId = user?.id;
   const token = useToken();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
@@ -76,7 +81,7 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleLongPress = (item: Memory) => {
-    if (item.userId === currentUserId) {
+    if (item.userId === user?.id) {
       setSelectedMemory(item);
       setActionModalVisible(true);
     }
@@ -163,6 +168,35 @@ const AllFavoriteMemoriesScreen = () => {
     setRefreshing(false);
   };
 
+  if (memoriesLoading) {
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top,
+          backgroundColor: theme.colors.background,
+          paddingHorizontal: 16,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+      </ScrollView>
+    </View>;
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Text
@@ -177,12 +211,7 @@ const AllFavoriteMemoriesScreen = () => {
       >
         These are all your favorite memories
       </Text>
-      {memoriesLoading ? (
-        <ActivityIndicator
-          color={theme.colors.primary}
-          style={{ marginTop: 40 }}
-        />
-      ) : error ? (
+      {error ? (
         <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
           {error.message || "Failed to load favorite memories"}
         </Text>

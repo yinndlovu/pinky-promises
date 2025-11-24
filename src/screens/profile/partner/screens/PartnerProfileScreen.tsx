@@ -34,14 +34,13 @@ import PartnerStatusMood from "../components/PartnerStatusMood";
 import PartnerAnniversary from "../components/PartnerAnniversary";
 import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
-import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
+import Shimmer from "../../../../components/skeletons/Shimmer";
 
 // hooks
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
 import { usePartner } from "../../../../hooks/usePartner";
-import { useProfile } from "../../../../hooks/useProfile";
 import { useFavorites } from "../../../../hooks/useFavorites";
 import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
 import { useAbout } from "../../../../hooks/useAbout";
@@ -80,26 +79,28 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerLoading,
   } = usePartner(user?.id, token);
   const {
-    data: currentUser,
-    refetch: refetchCurrentUser,
-    isLoading: currentUserLoading,
-  } = useProfile(user?.id, token);
-  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
+    data: partnerStatus,
+    refetch: refetchPartnerStatus,
+    isLoading: partnerStatusLoading,
+  } = useUserStatus(partner?.id, token);
+  const {
+    data: partnerMood,
+    refetch: refetchPartnerMood,
+    isLoading: partnerMoodLoading,
+  } = useUserMood(partner?.id, token);
+  const { data: partnerFavorites = {}, isLoading: partnerFavoritesLoading } =
+    useFavorites(partner?.id, token);
+  const { data: loveLanguage, isLoading: loveLanguageLoading } =
+    useLoveLanguage(partner?.id, token);
+  const { data: partnerAbout, isLoading: partnerAboutLoading } = useAbout(
     partner?.id,
     token
   );
-  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
-    partner?.id,
-    token
-  );
-  const { data: partnerFavorites = {} } = useFavorites(partner?.id, token);
-  const { data: loveLanguage } = useLoveLanguage(partner?.id, token);
-  const { data: partnerAbout } = useAbout(partner?.id, token);
   const { data: partnerDistance } = usePartnerDistance(user?.id, token);
-  const { data: partnerStoredMessages = [] } = useReceivedMessages(
-    user?.id,
-    token
-  );
+  const {
+    data: partnerStoredMessages = [],
+    isLoading: partnerStoredMessagesLoading,
+  } = useReceivedMessages(user?.id, token);
   const {
     avatarUri,
     profilePicUpdatedAt,
@@ -141,7 +142,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     setRefreshing(true);
     try {
       await refetchPartnerData();
-      await refetchCurrentUser();
 
       if (partner?.id) {
         await Promise.all([
@@ -156,7 +156,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     }
   }, [
     refetchPartnerData,
-    refetchCurrentUser,
     refetchPartnerMood,
     refetchPartnerStatus,
     fetchPartnerPicture,
@@ -273,14 +272,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     );
   };
 
-  if (partnerLoading || currentUserLoading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
-      </View>
-    );
-  }
-
   if (!partner) {
     return (
       <View style={styles.centered}>
@@ -325,66 +316,78 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.profileRow}>
-          <View style={styles.avatarWrapper}>
-            <TouchableOpacity onPress={() => setShowPictureViewer(true)}>
-              {renderProfileImage()}
-            </TouchableOpacity>
+        {partnerLoading ? (
+          <View style={styles.profileRow}>
+            <Shimmer radius={8} height={40} style={{ width: "100%" }} />
           </View>
-          <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{partner?.name || "User"}</Text>
-            {partner?.username ? (
-              <Text style={styles.username}>
-                @{partner?.username || "user"}
+        ) : (
+          <>
+            <View style={styles.profileRow}>
+              <View style={styles.avatarWrapper}>
+                <TouchableOpacity onPress={() => setShowPictureViewer(true)}>
+                  {renderProfileImage()}
+                </TouchableOpacity>
+              </View>
+              <View style={styles.infoWrapper}>
+                <Text style={styles.name}>{partner?.name || "User"}</Text>
+                {partner?.username ? (
+                  <Text style={styles.username}>
+                    @{partner?.username || "user"}
+                  </Text>
+                ) : null}
+                {partner?.bio ? (
+                  <Text style={styles.bio}>{partner?.bio}</Text>
+                ) : null}
+              </View>
+            </View>
+            <View style={styles.actionButtonsContainer}>
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => setShowRemoveModal(true)}
+              >
+                <Text style={styles.removeButtonText}>Remove</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.messageButton}
+                onPress={() =>
+                  navigation.navigate("PartnerChatScreen", {
+                    partnerId: partner?.id,
+                    partnerName: partner?.name,
+                  })
+                }
+              >
+                <Feather
+                  name="message-circle"
+                  size={20}
+                  color={theme.colors.text}
+                />
+                <Text style={styles.messageButtonText}>Message</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.divider} />
+
+            <View style={styles.partnerRow}>
+              <Text style={styles.partnerText}>
+                Partner:{" "}
+                <Text style={styles.partnerName}>
+                  {partner?.partnerName || "You"}
+                </Text>
               </Text>
-            ) : null}
-            {partner?.bio ? (
-              <Text style={styles.bio}>{partner?.bio}</Text>
-            ) : null}
-          </View>
-        </View>
-        <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => setShowRemoveModal(true)}
-          >
-            <Text style={styles.removeButtonText}>Remove</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.messageButton}
-            onPress={() =>
-              navigation.navigate("PartnerChatScreen", {
-                partnerId: partner?.id, 
-                partnerName: partner?.name,
-              })
-            }
-          >
-            <Feather
-              name="message-circle"
-              size={20}
-              color={theme.colors.text}
-            />
-            <Text style={styles.messageButtonText}>Message</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.divider} />
+              <Text style={styles.distanceText}>
+                {partnerDistance?.distance !== undefined
+                  ? `${formatDistance(partnerDistance.distance)} `
+                  : ""}
+                <Text style={styles.apartText}>
+                  {partnerDistance?.distance !== undefined ? "apart" : ""}
+                </Text>
+              </Text>
+            </View>
+          </>
+        )}
 
-        <View style={styles.partnerRow}>
-          <Text style={styles.partnerText}>
-            Partner:{" "}
-            <Text style={styles.partnerName}>{currentUser?.name || "You"}</Text>
-          </Text>
-          <Text style={styles.distanceText}>
-            {partnerDistance?.distance !== undefined
-              ? `${formatDistance(partnerDistance.distance)} `
-              : ""}
-            <Text style={styles.apartText}>
-              {partnerDistance?.distance !== undefined ? "apart" : ""}
-            </Text>
-          </Text>
-        </View>
-
-        {partner?.id && (
+        {partnerStatusLoading || partnerMoodLoading ? (
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        ) : (
           <PartnerStatusMood
             status={status}
             statusDescription={statusDescription}
@@ -396,27 +399,37 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
         <PartnerAnniversary />
 
-        <PartnerFavorites
-          favorites={favoritesObjectToArray(partnerFavorites)}
-        />
-
-        {partnerLoading && (
-          <View style={styles.centered}>
-            <ActivityIndicator color={theme.colors.primary} size="large" />
-          </View>
+        {partnerFavoritesLoading ? (
+          <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        ) : (
+          <PartnerFavorites
+            favorites={favoritesObjectToArray(partnerFavorites)}
+          />
         )}
 
         <View style={styles.divider} />
 
-        <PartnerLoveLanguage loveLanguage={loveLanguage} />
+        {loveLanguageLoading ? (
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        ) : (
+          <PartnerLoveLanguage loveLanguage={loveLanguage} />
+        )}
 
-        <PartnerMoreAboutYou about={partnerAbout} />
+        {partnerAboutLoading ? (
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        ) : (
+          <PartnerMoreAboutYou about={partnerAbout} />
+        )}
 
-        <PartnerMessageStorage
-          name={partner?.name}
-          messages={partnerStoredMessages}
-          onPress={handleViewMessage}
-        />
+        {partnerStoredMessagesLoading ? (
+          <Shimmer radius={8} height={30} style={{ width: "100%" }} />
+        ) : (
+          <PartnerMessageStorage
+            name={partner?.name}
+            messages={partnerStoredMessages}
+            onPress={handleViewMessage}
+          />
+        )}
       </ScrollView>
 
       <View style={{ zIndex: 1000 }}>

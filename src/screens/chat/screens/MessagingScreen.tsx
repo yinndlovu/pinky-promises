@@ -258,7 +258,7 @@ export default function PartnerChatScreen() {
           }}
         />
 
-        <View style={[styles.inputBar, { paddingBottom: insets.bottom }]}>
+        <View style={[styles.inputBar, { paddingBottom: insets.bottom - 18 }]}>
           <TextInput
             style={styles.input}
             placeholder="Type your message..."
@@ -465,7 +465,7 @@ const createMessagingStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       lineHeight: 20,
     },
     messageTextUser: {
-      color: "#ffffff",
+      color: theme.colors.text,
     },
     messageTextPartner: {
       color: theme.colors.text,
@@ -520,7 +520,7 @@ const createMessagingStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       opacity: 0.5,
     },
     sendButtonText: {
-      color: "#ffffff",
+      color: theme.colors.text,
       fontWeight: "600",
       fontSize: 15,
     },

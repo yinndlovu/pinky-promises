@@ -56,8 +56,8 @@ import StoreMessageModal from "../../../../components/modals/input/StoreMessageM
 import AlertModal from "../../../../components/modals/output/AlertModal";
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
-import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
 import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
+import Shimmer from "../../../../components/skeletons/Shimmer";
 
 // hooks
 import useToken from "../../../../hooks/useToken";
@@ -67,7 +67,6 @@ import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
 import { useUserStatus } from "../../../../hooks/useStatus";
 import { useRequests } from "../../../../hooks/useRequests";
 import { useFavorites } from "../../../../hooks/useFavorites";
-import { usePartner } from "../../../../hooks/usePartner";
 import { useMood } from "../../../../hooks/useMood";
 import { useAbout } from "../../../../hooks/useAbout";
 import { useStoredMessages } from "../../../../hooks/useStoredMessages";
@@ -143,21 +142,27 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     refetch: refetchProfileData,
     isLoading: profileDataLoading,
   } = useProfile(user?.id, token);
-  const { data: loveLanguage } = useLoveLanguage(user?.id, token);
-  const { data: status, refetch: refetchStatus } = useUserStatus(
-    user?.id,
-    token
-  );
+  const { data: loveLanguage, isLoading: loveLanguageLoading } =
+    useLoveLanguage(user?.id, token);
+  const {
+    data: status,
+    refetch: refetchStatus,
+    isLoading: statusLoading,
+  } = useUserStatus(user?.id, token);
   const { data: pendingRequestsData, refetch: refetchPendingRequestsData } =
     useRequests(user?.id, token);
-  const { data: favorites = {} } = useFavorites(user?.id, token);
-  const { data: partnerData, refetch: refetchPartnerData } = usePartner(
+  const { data: favorites = {}, isLoading: favoritesLoading } = useFavorites(
     user?.id,
     token
   );
-  const { data: moodData, refetch: refetchMoodData } = useMood(user?.id, token);
-  const { data: about } = useAbout(user?.id, token);
-  const { data: storedMessages = [] } = useStoredMessages(user?.id, token);
+  const {
+    data: moodData,
+    refetch: refetchMoodData,
+    isLoading: moodDataLoading,
+  } = useMood(user?.id, token);
+  const { data: about, isLoading: aboutLoading } = useAbout(user?.id, token);
+  const { data: storedMessages = [], isLoading: storedMessagesLoading } =
+    useStoredMessages(user?.id, token);
   const {
     avatarUri,
     profilePicUpdatedAt,
@@ -211,7 +216,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         refetchProfileData(),
         refetchStatus(),
         refetchPendingRequestsData(),
-        refetchPartnerData(),
         refetchMoodData(),
         fetchProfilePicture(),
       ]);
@@ -224,7 +228,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setRefreshing(false);
     }
   }, [
-    refetchPartnerData,
     refetchMoodData,
     refetchStatus,
     refetchProfileData,
@@ -621,14 +624,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const originalUsername = profileData?.username || "";
   const originalBio = profileData?.bio || "";
 
-  if (profileDataLoading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
-      </View>
-    );
-  }
-
   if (!profileData && !profileDataLoading) {
     return (
       <View style={styles.centered}>
@@ -772,82 +767,116 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.profileRow}>
-          <TouchableOpacity
-            style={styles.avatarWrapper}
-            onPress={handleAvatarPress}
-          >
-            {renderProfileImage()}
-          </TouchableOpacity>
-          <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{profileData?.name || ""}</Text>
-            <Text style={styles.username}>@{profileData?.username || ""}</Text>
-            <Text style={styles.bio}>{profileData?.bio || ""}</Text>
+        {profileDataLoading ? (
+          <View style={styles.profileRow}>
+            <Shimmer radius={8} height={50} style={{ width: "100%" }} />
           </View>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => {
-              setEditName(profileData?.name || "");
-              setEditUsername(profileData?.username || "");
-              setEditBio(profileData?.bio || "");
-              setEditModalVisible(true);
+        ) : (
+          <>
+            <View style={styles.profileRow}>
+              <TouchableOpacity
+                style={styles.avatarWrapper}
+                onPress={handleAvatarPress}
+              >
+                {renderProfileImage()}
+              </TouchableOpacity>
+              <View style={styles.infoWrapper}>
+                <Text style={styles.name}>{profileData?.name || ""}</Text>
+                <Text style={styles.username}>
+                  @{profileData?.username || ""}
+                </Text>
+                <Text style={styles.bio}>{profileData?.bio || ""}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => {
+                  setEditName(profileData?.name || "");
+                  setEditUsername(profileData?.username || "");
+                  setEditBio(profileData?.bio || "");
+                  setEditModalVisible(true);
+                }}
+              >
+                <Feather name="edit-2" size={22} color={theme.colors.primary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.partnerRow}>
+              <Text style={styles.partnerText}>
+                Partner:{" "}
+                <Text
+                  style={
+                    profileData?.partnerName &&
+                    profileData?.partnerName !== "No partner"
+                      ? styles.partnerName
+                      : styles.noPartnerName
+                  }
+                >
+                  {profileData?.name || "No partner"}
+                </Text>
+              </Text>
+            </View>
+          </>
+        )}
+
+        {statusLoading || moodDataLoading ? (
+          <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        ) : (
+          <StatusMood
+            status={homeStatus}
+            statusDescription={statusDescription}
+            mood={moodData?.mood || "No mood set"}
+            moodDescription={moodData?.description}
+            onEdit={() => refetchMoodData()}
+            onAddHome={() => {
+              refetchStatus();
             }}
-          >
-            <Feather name="edit-2" size={22} color={theme.colors.primary} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.divider} />
-
-        <View style={styles.partnerRow}>
-          <Text style={styles.partnerText}>
-            Partner:{" "}
-            <Text
-              style={
-                partnerData?.name && partnerData?.name !== "No partner"
-                  ? styles.partnerName
-                  : styles.noPartnerName
-              }
-            >
-              {partnerData?.name || "No partner"}
-            </Text>
-          </Text>
-        </View>
-
-        <StatusMood
-          status={homeStatus}
-          statusDescription={statusDescription}
-          mood={moodData?.mood || "No mood set"}
-          moodDescription={moodData?.description}
-          onEdit={() => refetchMoodData()}
-          onAddHome={() => {
-            refetchStatus();
-          }}
-        />
+          />
+        )}
 
         <Anniversary onEditAnniversary={() => {}} onEditDayMet={() => {}} />
 
-        <Favorites
-          favorites={favoritesObjectToArray(favorites)}
-          onEdit={() => setFavoritesModalVisible(true)}
-        />
+        {favoritesLoading ? (
+          <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        ) : (
+          <Favorites
+            favorites={favoritesObjectToArray(favorites)}
+            onEdit={() => setFavoritesModalVisible(true)}
+          />
+        )}
 
         <View style={styles.divider} />
 
-        <LoveLanguage
-          loveLanguage={loveLanguage}
-          onEdit={() => setLoveLanguageModalVisible(true)}
-        />
+        {loveLanguageLoading ? (
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        ) : (
+          <LoveLanguage
+            loveLanguage={loveLanguage}
+            onEdit={() => setLoveLanguageModalVisible(true)}
+          />
+        )}
 
-        <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
+        {aboutLoading ? (
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        ) : (
+          <MoreAboutYou
+            about={about}
+            onEdit={() => setAboutModalVisible(true)}
+          />
+        )}
 
-        <MessageStorage
-          name={partnerData?.name || "No one"}
-          messages={storedMessages}
-          onAdd={handleAddMessage}
-          onLongPress={handleLongPressMessage}
-          onPress={handleViewMessage}
-        />
+        {storedMessagesLoading ? (
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        ) : (
+          <MessageStorage
+            name={profileData?.partnerName || "No one"}
+            messages={storedMessages}
+            onAdd={handleAddMessage}
+            onLongPress={handleLongPressMessage}
+            onPress={handleViewMessage}
+          />
+        )}
 
         <View style={{ zIndex: 1000 }}>
           <UpdateFavoritesModal

@@ -16,6 +16,9 @@ import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useTheme } from "../../../theme/ThemeContext";
 
+// content
+import Shimmer from "../../../components/skeletons/Shimmer";
+
 // types
 type PortalPreviewProps = {
   partner: any;
@@ -39,7 +42,7 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // fetch functions
-  const { data: portalActivityCount } = useQuery({
+  const { data: portalActivityCount, isLoading: activityLoading } = useQuery({
     queryKey: ["portalActivityCount", user?.id],
     queryFn: async () => {
       return getPortalActivityCount(token);
@@ -155,6 +158,14 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
       return "inbox";
     }
   };
+
+  if (activityLoading) {
+    return (
+      <View style={styles.container}>
+        <Shimmer radius={12} height={20} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

@@ -42,6 +42,7 @@ import ConfirmationModal from "../../../components/modals/selection/Confirmation
 import MessageInputModal from "../../../components/modals/input/MessageInputModal";
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 // types
 type Props = NativeStackScreenProps<any, any>;
@@ -81,42 +82,52 @@ export default function PortalScreen({ navigation }: Props) {
   const [loading, setLoading] = useState(false);
 
   // fetch functions
-  const { data: unseenSweetMessage, refetch: refetchUnseenSweetMessage } =
-    useQuery({
-      queryKey: ["unseenSweetMessage", user?.id],
-      queryFn: async () => {
-        const unseenSweet = await getLastUnseenSweetMessage(token);
-        return unseenSweet.sweet || null;
-      },
-      enabled: !!user?.id && !!token,
-      staleTime: 0,
-    });
+  const {
+    data: unseenSweetMessage,
+    refetch: refetchUnseenSweetMessage,
+    isLoading: unseenSweetMessageLoading,
+  } = useQuery({
+    queryKey: ["unseenSweetMessage", user?.id],
+    queryFn: async () => {
+      const unseenSweet = await getLastUnseenSweetMessage(token);
+      return unseenSweet.sweet || null;
+    },
+    enabled: !!user?.id && !!token,
+    staleTime: 0,
+  });
 
-  const { data: unseenVentMessage, refetch: refetchUnseenVentMessage } =
-    useQuery({
-      queryKey: ["unseenVentMessage", user?.id],
-      queryFn: async () => {
-        const unseenVent = await getLastUnseenVentMessage(token);
-        return unseenVent.vent || null;
-      },
-      enabled: !!user?.id && !!token,
-      staleTime: 0,
-    });
+  const {
+    data: unseenVentMessage,
+    refetch: refetchUnseenVentMessage,
+    isLoading: unseenVentMessageLoading,
+  } = useQuery({
+    queryKey: ["unseenVentMessage", user?.id],
+    queryFn: async () => {
+      const unseenVent = await getLastUnseenVentMessage(token);
+      return unseenVent.vent || null;
+    },
+    enabled: !!user?.id && !!token,
+    staleTime: 0,
+  });
 
-  const { data: sweetMessagesSent = [], refetch: refetchSweetMessagesSent } =
-    useQuery<Message[]>({
-      queryKey: ["sweetMessagesSent", user?.id],
-      queryFn: async () => {
-        const sentSweet = await getSentSweetMessages(token);
-        return sentSweet.sweets || sentSweet;
-      },
-      enabled: !!user?.id && !!token,
-      staleTime: 1000 * 60 * 60,
-    });
+  const {
+    data: sweetMessagesSent = [],
+    refetch: refetchSweetMessagesSent,
+    isLoading: sweetMessagesSentLoading,
+  } = useQuery<Message[]>({
+    queryKey: ["sweetMessagesSent", user?.id],
+    queryFn: async () => {
+      const sentSweet = await getSentSweetMessages(token);
+      return sentSweet.sweets || sentSweet;
+    },
+    enabled: !!user?.id && !!token,
+    staleTime: 1000 * 60 * 60,
+  });
 
   const {
     data: sweetMessagesReceived = [],
     refetch: refetchSweetMessagesReceived,
+    isLoading: sweetMessagesReceivedLoading,
   } = useQuery<Message[]>({
     queryKey: ["sweetMessagesReceived", user?.id],
     queryFn: async () => {
@@ -127,20 +138,24 @@ export default function PortalScreen({ navigation }: Props) {
     staleTime: 1000 * 60 * 60,
   });
 
-  const { data: ventMessagesSent = [], refetch: refetchVentMessagesSent } =
-    useQuery<Message[]>({
-      queryKey: ["ventMessagesSent", user?.id],
-      queryFn: async () => {
-        const sentVent = await getSentVentMessages(token);
-        return sentVent.vents || sentVent;
-      },
-      enabled: !!user?.id && !!token,
-      staleTime: 1000 * 60 * 60,
-    });
+  const {
+    data: ventMessagesSent = [],
+    refetch: refetchVentMessagesSent,
+    isLoading: ventMessagesSentLoading,
+  } = useQuery<Message[]>({
+    queryKey: ["ventMessagesSent", user?.id],
+    queryFn: async () => {
+      const sentVent = await getSentVentMessages(token);
+      return sentVent.vents || sentVent;
+    },
+    enabled: !!user?.id && !!token,
+    staleTime: 1000 * 60 * 60,
+  });
 
   const {
     data: ventMessagesReceived = [],
     refetch: refetchVentMessagesReceived,
+    isLoading: ventMessagesReceivedLoading,
   } = useQuery<Message[]>({
     queryKey: ["ventMessagesReceived", user?.id],
     queryFn: async () => {
@@ -339,6 +354,34 @@ export default function PortalScreen({ navigation }: Props) {
     );
   }
 
+  if (
+    unseenSweetMessageLoading ||
+    unseenVentMessageLoading ||
+    sweetMessagesReceivedLoading ||
+    sweetMessagesSentLoading ||
+    ventMessagesSentLoading ||
+    ventMessagesReceivedLoading
+  ) {
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView
+        contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+      </ScrollView>
+    </View>;
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
@@ -446,7 +489,13 @@ export default function PortalScreen({ navigation }: Props) {
           }}
         >
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={{ color: theme.colors.text, marginTop: 16, fontWeight: "bold" }}>
+          <Text
+            style={{
+              color: theme.colors.text,
+              marginTop: 16,
+              fontWeight: "bold",
+            }}
+          >
             Loading message...
           </Text>
         </View>

@@ -38,6 +38,7 @@ import NotesCanvas from "../components/NotesCanvas";
 import SpecialDates from "../components/SpecialDates";
 import FavoriteMemories from "../components/FavoriteMemories";
 import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 // hooks
 import useToken from "../../../hooks/useToken";
@@ -50,6 +51,8 @@ type Props = NativeStackScreenProps<any>;
 const OursScreen = ({ navigation }: Props) => {
   // variables
   const HEADER_HEIGHT = 60;
+
+  // hooks
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -87,14 +90,21 @@ const OursScreen = ({ navigation }: Props) => {
   const [showError, setShowError] = useState(false);
 
   // data
-  const { data: recentMemories = [], refetch: refetchRecentMemories } =
-    useRecentMemories(user?.id, token);
-  const { data: notesPreview, refetch: refetchNotesPreview } = useNotesPreview(
-    user?.id,
-    token
-  );
-  const { data: specialDates = [], refetch: refetchSpecialDates } =
-    useSpecialDates(user?.id, token);
+  const {
+    data: recentMemories = [],
+    refetch: refetchRecentMemories,
+    isLoading: recentMemoriesLoading,
+  } = useRecentMemories(user?.id, token);
+  const {
+    data: notesPreview,
+    refetch: refetchNotesPreview,
+    isLoading: notesPreviewLoading,
+  } = useNotesPreview(user?.id, token);
+  const {
+    data: specialDates = [],
+    refetch: refetchSpecialDates,
+    isLoading: specialDatesLoading,
+  } = useSpecialDates(user?.id, token);
 
   // handlers
   const handleAddSpecialDate = async (
@@ -445,27 +455,39 @@ const OursScreen = ({ navigation }: Props) => {
           />
         }
       >
-        <NotesCanvas
-          preview={notesPreview?.content}
-          updatedAt={notesPreview?.updatedAt}
-          onView={() => navigation.navigate("NotesScreen")}
-        />
+        {notesPreviewLoading ? (
+          <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        ) : (
+          <NotesCanvas
+            preview={notesPreview?.content}
+            updatedAt={notesPreview?.updatedAt}
+            onView={() => navigation.navigate("NotesScreen")}
+          />
+        )}
 
-        <SpecialDates
-          dates={specialDates}
-          onAdd={() => setAddModalVisible(true)}
-          onLongPressDate={handleLongPressDate}
-        />
+        {specialDatesLoading ? (
+          <Shimmer radius={8} height={80} style={{ width: "100%" }} />
+        ) : (
+          <SpecialDates
+            dates={specialDates}
+            onAdd={() => setAddModalVisible(true)}
+            onLongPressDate={handleLongPressDate}
+          />
+        )}
 
-        <FavoriteMemories
-          memories={recentMemories}
-          currentUserId={user?.id}
-          onViewAll={() => navigation.navigate("AllFavoriteMemoriesScreen")}
-          onViewDetails={handleViewMemoryDetails}
-          onAdd={handleAddMemory}
-          onEdit={handleEditMemory}
-          onDelete={handleDeleteMemory}
-        />
+        {recentMemoriesLoading ? (
+          <Shimmer radius={8} height={80} style={{ width: "100%" }} />
+        ) : (
+          <FavoriteMemories
+            memories={recentMemories}
+            currentUserId={user?.id}
+            onViewAll={() => navigation.navigate("AllFavoriteMemoriesScreen")}
+            onViewDetails={handleViewMemoryDetails}
+            onAdd={handleAddMemory}
+            onEdit={handleEditMemory}
+            onDelete={handleDeleteMemory}
+          />
+        )}
       </ScrollView>
 
       <UpdateFavoriteMemoryModal

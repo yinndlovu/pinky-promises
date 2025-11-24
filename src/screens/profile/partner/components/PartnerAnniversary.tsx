@@ -9,6 +9,9 @@ import useToken from "../../../../hooks/useToken";
 import { SpecialDate } from "../../../../types/SpecialDate";
 import { useTheme } from "../../../../theme/ThemeContext";
 
+// screen content
+import Shimmer from "../../../../components/skeletons/Shimmer";
+
 const PartnerAnniversary = () => {
   // variables
   const { user } = useAuth();
@@ -17,7 +20,8 @@ const PartnerAnniversary = () => {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // fetch functions
-  const { data: specialDates = [] } = useSpecialDates(user?.id, token);
+  const { data: specialDates = [], isLoading: specialDatesLoading } =
+    useSpecialDates(user?.id, token);
 
   // helpers
   const formatDisplayDate = (
@@ -73,6 +77,14 @@ const PartnerAnniversary = () => {
   // declarations
   const anniversaryDisplay = getAnniversaryDisplay();
   const dayMetDisplay = getDayMetDisplay();
+
+  if (specialDatesLoading) {
+    return (
+      <View style={styles.wrapper}>
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>

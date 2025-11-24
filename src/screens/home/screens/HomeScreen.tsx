@@ -45,6 +45,7 @@ import InteractionAnimationModal from "../../../components/modals/output/Interac
 import ProcessingAnimation from "../../../components/loading/ProcessingAnimation";
 import NotificationsDropdown from "../../../components/dropdowns/NotificationsDropdown";
 import AvatarSkeleton from "../../../components/skeletons/AvatarSkeleton";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -91,24 +92,33 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [animationMessage, setAnimationMessage] = useState("");
 
   // data
-  const { data: partner, refetch: refetchPartner } = usePartner(
-    user?.id,
-    token
-  );
-  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
-    partner?.id,
-    token
-  );
-  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
-    partner?.id,
-    token
-  );
-  const { data: upcomingDate, refetch: refetchUpcomingDate } =
-    useUpcomingSpecialDate(user?.id, token);
+  const {
+    data: partner,
+    refetch: refetchPartner,
+    isLoading: partnerLoading,
+  } = usePartner(user?.id, token);
+  const {
+    data: partnerStatus,
+    refetch: refetchPartnerStatus,
+    isLoading: partnerStatusLoading,
+  } = useUserStatus(partner?.id, token);
+  const {
+    data: partnerMood,
+    refetch: refetchPartnerMood,
+    isLoading: partnerMoodLoading,
+  } = useUserMood(partner?.id, token);
+  const {
+    data: upcomingDate,
+    refetch: refetchUpcomingDate,
+    isLoading: upcomingDateLoading,
+  } = useUpcomingSpecialDate(user?.id, token);
   const { data: unseenInteractions = [], refetch: refetchUnseen } =
     useUnseenInteractions(user?.id, token);
-  const { data: activities = [], refetch: refetchActivities } =
-    useRecentActivities(user?.id, token);
+  const {
+    data: activities = [],
+    refetch: refetchActivities,
+    isLoading: activitiesLoading,
+  } = useRecentActivities(user?.id, token);
   const {
     avatarUri,
     profilePicUpdatedAt,
@@ -498,21 +508,25 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       >
         <Text style={styles.partnerLabel}>PARTNER</Text>
 
-        <ProfileCard
-          partner={partner}
-          avatarUri={avatarUri}
-          status={status}
-          statusColor={statusColor}
-          mood={mood}
-          isActive={isActive}
-          batteryLevel={batteryLevel}
-          distanceFromHome={distanceFromHome}
-          lastSeen={lastSeen}
-          onPress={() => navigation.navigate("PartnerProfile")}
-          renderPartnerImage={renderPartnerImage}
-          userLocation={userLocation}
-          userTimezone={userTimezone}
-        />
+        {partnerLoading || partnerStatusLoading || partnerMoodLoading ? (
+          <Shimmer height={50} radius={24} style={{ width: "100%" }} />
+        ) : (
+          <ProfileCard
+            partner={partner}
+            avatarUri={avatarUri}
+            status={status}
+            statusColor={statusColor}
+            mood={mood}
+            isActive={isActive}
+            batteryLevel={batteryLevel}
+            distanceFromHome={distanceFromHome}
+            lastSeen={lastSeen}
+            onPress={() => navigation.navigate("PartnerProfile")}
+            renderPartnerImage={renderPartnerImage}
+            userLocation={userLocation}
+            userTimezone={userTimezone}
+          />
+        )}
 
         <View style={styles.buttonRow}>
           <BlurView intensity={50} tint="dark" style={styles.blurButton}>
@@ -615,8 +629,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </>
         )}
-
-        {upcomingDate && (
+        {upcomingDateLoading ? (
+          <View style={styles.upcomingContainer}>
+            <Shimmer height={20} radius={14} style={{ width: "100%" }} />
+          </View>
+        ) : upcomingDate ? (
           <View style={styles.upcomingContainer}>
             <Text style={styles.upcomingLabel}>UPCOMING</Text>
             <View style={styles.eventCard}>
@@ -645,11 +662,24 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
             </View>
           </View>
-        )}
+        ) : null}
 
         <PortalPreview partner={partner} navigation={navigation} />
-
-        <RecentActivity activities={activities} />
+        {activitiesLoading ? (
+          <View>
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+          </View>
+        ) : (
+          <RecentActivity activities={activities} />
+        )}
       </ScrollView>
       {showError && (
         <View style={styles.toast}>

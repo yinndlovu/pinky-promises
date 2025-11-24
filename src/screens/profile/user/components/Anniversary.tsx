@@ -19,6 +19,7 @@ import { useTheme } from "../../../../theme/ThemeContext";
 // screen content
 import UpdateSpecialDateModal from "../../../../components/modals/input/UpdateSpecialDateModal";
 import AlertModal from "../../../../components/modals/output/AlertModal";
+import Shimmer from "../../../../components/skeletons/Shimmer";
 
 const Anniversary: React.FC<AnniversaryProps> = () => {
   // variables
@@ -41,7 +42,8 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   const [loading, setLoading] = useState(false);
 
   // data
-  const { data: specialDates = [] } = useSpecialDates(user?.id, token);
+  const { data: specialDates = [], isLoading: specialDatesLoading } =
+    useSpecialDates(user?.id, token);
 
   // helpers
   const getAnniversaryDisplay = () => {
@@ -178,6 +180,14 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   // declarations
   const anniversaryDisplay = getAnniversaryDisplay();
   const dayMetDisplay = getDayMetDisplay();
+
+  if (specialDatesLoading) {
+    return (
+      <View style={styles.wrapper}>
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>

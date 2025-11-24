@@ -2,14 +2,15 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   View,
+  ScrollView,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import {
@@ -25,12 +26,14 @@ import { useTheme } from "../../../theme/ThemeContext";
 // content
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 const SentMessagesScreen = () => {
   // variables
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
@@ -93,6 +96,35 @@ const SentMessagesScreen = () => {
     setRefreshing(false);
   };
 
+  if (messagesLoading) {
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top,
+          backgroundColor: theme.colors.background,
+          paddingHorizontal: 16,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+      </ScrollView>
+    </View>;
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Text
@@ -106,12 +138,7 @@ const SentMessagesScreen = () => {
       >
         These are all the sweet messages you sent
       </Text>
-      {messagesLoading ? (
-        <ActivityIndicator
-          color={theme.colors.primary}
-          style={{ marginTop: 40 }}
-        />
-      ) : error ? (
+      {error ? (
         <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
           {error.message || "Failed to load messages"}
         </Text>
