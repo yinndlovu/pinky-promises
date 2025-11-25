@@ -27,7 +27,7 @@ export const lightTheme = {
     glowBackground: "rgba(255, 153, 204, 0.3)",
     animationBackground: "rgba(240, 235, 255, 0.8)",
     skeletonDark: "#f4f5ff",
-    skeletonHighlight: "rgba(185, 185, 185, 0.08)",
+    skeletonHighlight: "rgba(185, 185, 185, 0.2)",
   },
   fonts: {
     regular: {

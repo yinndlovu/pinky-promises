@@ -5,27 +5,16 @@ import { encode } from "base64-arraybuffer";
 // internal
 import { BASE_URL } from "../../../configuration/config";
 
-export async function getProfile(token: string) {
-  const response = await axios.get(`${BASE_URL}/profile/get-profile`, {
+export async function getProfile(token: string | null, userId: string) {
+  if (!token) {
+    return;
+  }
+
+  const response = await axios.get(`${BASE_URL}/profile/${userId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 
   return response.data.user;
-}
-
-export async function getUserProfile(userId: string, token: string | null) {
-  if (!token) {
-    return;
-  }
-  
-  const response = await axios.get(
-    `${BASE_URL}/profile/get-user-profile/${userId}`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
-
-  return response.data.profile;
 }
 
 export async function fetchProfilePicture(userId: string, token: string | null) {
@@ -34,7 +23,7 @@ export async function fetchProfilePicture(userId: string, token: string | null) 
   }
 
   const response = await axios.get(
-    `${BASE_URL}/profile/get-profile-picture/${userId}`,
+    `${BASE_URL}/profile/${userId}/profile-picture`,
     {
       headers: { Authorization: `Bearer ${token}` },
       responseType: "arraybuffer",
@@ -59,7 +48,7 @@ export async function updateProfilePicture(
   }
 
   return axios.put(
-    `${BASE_URL}/profile/update-profile-picture`,
+    `${BASE_URL}/profile/profile-picture/update`,
     { image: base64String },
     {
       headers: { Authorization: `Bearer ${token}` },

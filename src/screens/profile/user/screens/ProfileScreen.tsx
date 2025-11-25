@@ -769,7 +769,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       >
         {profileDataLoading ? (
           <View style={styles.profileRow}>
-            <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+            <Shimmer radius={8} height={120} style={{ width: "100%" }} />
           </View>
         ) : (
           <>
@@ -799,29 +799,39 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 <Feather name="edit-2" size={22} color={theme.colors.primary} />
               </TouchableOpacity>
             </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.partnerRow}>
-              <Text style={styles.partnerText}>
-                Partner:{" "}
-                <Text
-                  style={
-                    profileData?.partnerName &&
-                    profileData?.partnerName !== "No partner"
-                      ? styles.partnerName
-                      : styles.noPartnerName
-                  }
-                >
-                  {profileData?.name || "No partner"}
-                </Text>
-              </Text>
-            </View>
           </>
         )}
 
+        <View style={styles.divider} />
+
+        {profileDataLoading ? (
+          <View style={styles.partnerRow}>
+            <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          </View>
+        ) : (
+          <View style={styles.partnerRow}>
+            <Text style={styles.partnerText}>
+              Partner:{" "}
+              <Text
+                style={
+                  profileData?.partnerName &&
+                  profileData?.partnerName !== "No partner"
+                    ? styles.partnerName
+                    : styles.noPartnerName
+                }
+              >
+                {profileData?.name || "No partner"}
+              </Text>
+            </Text>
+          </View>
+        )}
+
         {statusLoading || moodDataLoading ? (
-          <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+          <Shimmer
+            radius={8}
+            height={80}
+            style={{ width: "100%", marginBottom: 14 }}
+          />
         ) : (
           <StatusMood
             status={homeStatus}
@@ -838,7 +848,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <Anniversary onEditAnniversary={() => {}} onEditDayMet={() => {}} />
 
         {favoritesLoading ? (
-          <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={150} style={{ width: "100%" }} />
         ) : (
           <Favorites
             favorites={favoritesObjectToArray(favorites)}
@@ -849,7 +859,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <View style={styles.divider} />
 
         {loveLanguageLoading ? (
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={40} style={{ width: "100%", marginBottom: 18 }} />
         ) : (
           <LoveLanguage
             loveLanguage={loveLanguage}
@@ -858,7 +868,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         )}
 
         {aboutLoading ? (
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={40} style={{ width: "100%", marginBottom: 18 }} />
         ) : (
           <MoreAboutYou
             about={about}
@@ -867,7 +877,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         )}
 
         {storedMessagesLoading ? (
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%", marginBottom: 60 }} />
         ) : (
           <MessageStorage
             name={profileData?.partnerName || "No one"}

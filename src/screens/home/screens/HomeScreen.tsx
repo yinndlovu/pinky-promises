@@ -47,7 +47,6 @@ import defaultAnimation from "../../../assets/animations/hug.json";
 
 // hooks
 import { useProfilePicture } from "../../../hooks/useProfilePicture";
-import { usePartner } from "../../../hooks/usePartner";
 import { useHome } from "../../../hooks/useHome";
 import { useHomeSelector } from "../../../hooks/useHomeSelector";
 import useToken from "../../../hooks/useToken";
@@ -68,7 +67,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // use states
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
@@ -148,14 +146,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const run = async () => {
         await checkAndUpdateHomeStatus(token);
 
-        // Invalidate home caches
         queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
-
-        // Also invalidate old queries for backward compatibility
-        queryClient.invalidateQueries({ queryKey: ["status", user?.id] });
-        queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user?.id],
-        });
       };
 
       run();
@@ -199,7 +190,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         await Promise.all(unseen.map((n) => markNotificationSeen(token, n.id)));
       }
 
-      // Update home cache to reflect seen notifications
       queryClient.setQueryData(["home", user?.id], (old: any) => {
         if (!old) return old;
         return {
@@ -211,7 +201,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         };
       });
 
-      // Refetch to get updated data
       const res = await refetchHome();
       if (res.data && Array.isArray(res.data.notifications)) {
         setOptimisticNotifications(res.data.notifications);
@@ -228,7 +217,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
     try {
       await interactWithPartner(token, action);
-      // Invalidate home cache to trigger refetch
       await queryClient.invalidateQueries({
         queryKey: ["home", user?.id],
       });
@@ -339,7 +327,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const distanceFromHome = partnerStatus?.distance ?? null;
 
   const lastSeen = partnerStatus?.updatedAt ?? null;
-  const userLocation = partnerStatus?.userLocation ?? null;
+  const userLocation = partnerStatus?.userSuburb ?? null;
   const userTimezone = partnerStatus?.timezoneOffset ?? null;
 
   return (
@@ -483,7 +471,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <Text style={styles.partnerLabel}>PARTNER</Text>
 
         {partnerLoading || partnerStatusLoading || partnerMoodLoading ? (
-          <Shimmer height={50} radius={24} style={{ width: "100%" }} />
+          <Shimmer height={120} radius={24} style={{ width: "100%" }} />
         ) : (
           <ProfileCard
             partner={partner}

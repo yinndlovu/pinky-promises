@@ -49,6 +49,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const { user } = useAuth();
   const token = useToken();
   const partnerId = user?.partnerId;
+  console.log("PARTNER ID IN SOCKET:", partnerId);
+  console.log("USER ID IN SOCKET:", user?.id);
+  console.log("TOKEN IN SOCKET:", token);
   const queryClient = useQueryClient();
 
   const connect = () => {
