@@ -1,12 +1,6 @@
 // external
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  ScrollView,
-  View,
-  Text,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { ScrollView, View, Text, TouchableOpacity } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -54,12 +48,8 @@ import defaultAnimation from "../../../assets/animations/hug.json";
 // hooks
 import { useProfilePicture } from "../../../hooks/useProfilePicture";
 import { usePartner } from "../../../hooks/usePartner";
-import { useUserStatus } from "../../../hooks/useStatus";
-import { useUserMood } from "../../../hooks/useMood";
-import { useUpcomingSpecialDate } from "../../../hooks/useSpecialDate";
-import { useUnseenInteractions } from "../../../hooks/useInteraction";
-import { useRecentActivities } from "../../../hooks/useRecentActivity";
-import { useNotifications } from "../../../hooks/useNotifications";
+import { useHome } from "../../../hooks/useHome";
+import { useHomeSelector } from "../../../hooks/useHomeSelector";
 import useToken from "../../../hooks/useToken";
 
 // types
@@ -91,41 +81,46 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [animationModalVisible, setAnimationModalVisible] = useState(false);
   const [animationMessage, setAnimationMessage] = useState("");
 
-  // data
+  // home data hook
   const {
-    data: partner,
-    refetch: refetchPartner,
-    isLoading: partnerLoading,
-  } = usePartner(user?.id, token);
-  const {
-    data: partnerStatus,
-    refetch: refetchPartnerStatus,
-    isLoading: partnerStatusLoading,
-  } = useUserStatus(partner?.id, token);
-  const {
-    data: partnerMood,
-    refetch: refetchPartnerMood,
-    isLoading: partnerMoodLoading,
-  } = useUserMood(partner?.id, token);
-  const {
-    data: upcomingDate,
-    refetch: refetchUpcomingDate,
-    isLoading: upcomingDateLoading,
-  } = useUpcomingSpecialDate(user?.id, token);
-  const { data: unseenInteractions = [], refetch: refetchUnseen } =
-    useUnseenInteractions(user?.id, token);
-  const {
-    data: activities = [],
-    refetch: refetchActivities,
-    isLoading: activitiesLoading,
-  } = useRecentActivities(user?.id, token);
+    data: _homeData,
+    isLoading: homeLoading,
+    refetch: refetchHome,
+  } = useHome(token, user?.id);
+
+  const rawActivities =
+    useHomeSelector(user?.id, (h) => h?.recentActivities || []) || [];
+  const activities = useMemo(() => {
+    return rawActivities.map((activity: any) => ({
+      id: activity.id,
+      description: activity.activity,
+      date: formatDateDMY(activity.createdAt),
+      time: formatTime(activity.createdAt),
+    }));
+  }, [rawActivities]);
+
+  const partner = useHomeSelector(user?.id, (h) => h?.partner) || null;
+  const notificationsData =
+    useHomeSelector(user?.id, (h) => h?.notifications || []) || [];
+  const unseenInteractions =
+    useHomeSelector(user?.id, (h) => h?.unseenInteractions || []) || [];
+  const upcomingDate =
+    useHomeSelector(user?.id, (h) => h?.upcomingSpecialDate) || null;
+  const partnerMood = useHomeSelector(user?.id, (m) => m?.partnerMood) || null;
+  const partnerStatus =
+    useHomeSelector(user?.id, (m) => m?.partnerStatus) || null;
+
+  const partnerLoading = homeLoading;
+  const activitiesLoading = homeLoading;
+  const upcomingDateLoading = homeLoading;
+  const partnerMoodLoading = homeLoading;
+  const partnerStatusLoading = homeLoading;
+
   const {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchPartnerPicture,
   } = useProfilePicture(partner?.id, token);
-  const { data: notificationsData = [], refetch: refetchNotifications } =
-    useNotifications(user?.id, token);
 
   const [optimisticNotifications, setOptimisticNotifications] = useState<
     Notification[]
@@ -153,6 +148,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const run = async () => {
         await checkAndUpdateHomeStatus(token);
 
+        // Invalidate home caches
+        queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
+
+        // Also invalidate old queries for backward compatibility
         queryClient.invalidateQueries({ queryKey: ["status", user?.id] });
         queryClient.invalidateQueries({
           queryKey: ["recentActivities", user?.id],
@@ -184,35 +183,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchPartner(),
-        refetchUpcomingDate(),
-        refetchActivities(),
-        refetchPartnerMood(),
-        refetchPartnerStatus(),
-        refetchUnseen(),
-        fetchPartnerPicture(),
-        refetchNotifications(),
-      ]);
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [
-    refetchPartner,
-    refetchUpcomingDate,
-    refetchActivities,
-    refetchPartnerMood,
-    refetchPartnerStatus,
-    refetchUnseen,
-    fetchPartnerPicture,
-    refetchNotifications,
-  ]);
-
   // handle toggle
   const toggleNotifications = async () => {
     const newVisible = !notificationsVisible;
@@ -229,9 +199,22 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         await Promise.all(unseen.map((n) => markNotificationSeen(token, n.id)));
       }
 
-      const res = await refetchNotifications();
-      if (Array.isArray(res.data)) {
-        setOptimisticNotifications(res.data);
+      // Update home cache to reflect seen notifications
+      queryClient.setQueryData(["home", user?.id], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          notifications: (old.notifications || []).map((n: any) => ({
+            ...n,
+            seen: true,
+          })),
+        };
+      });
+
+      // Refetch to get updated data
+      const res = await refetchHome();
+      if (res.data && Array.isArray(res.data.notifications)) {
+        setOptimisticNotifications(res.data.notifications);
       }
     }
   };
@@ -245,8 +228,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
     try {
       await interactWithPartner(token, action);
+      // Invalidate home cache to trigger refetch
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["home", user?.id],
       });
 
       setAnimationMessage(
@@ -254,7 +238,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       );
       setAnimationModalVisible(true);
       setCurrentAction(action);
-      refetchActivities();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to interact");
     } finally {
@@ -494,15 +477,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       />
 
       <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.primary}
-            colors={[theme.colors.primary]}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >

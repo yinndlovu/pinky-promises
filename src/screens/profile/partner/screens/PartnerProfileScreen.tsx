@@ -3,7 +3,6 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
-  ActivityIndicator,
   ScrollView,
   TouchableOpacity,
 } from "react-native";
@@ -44,9 +43,10 @@ import { usePartner } from "../../../../hooks/usePartner";
 import { useFavorites } from "../../../../hooks/useFavorites";
 import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
 import { useAbout } from "../../../../hooks/useAbout";
-import { usePartnerDistance, useUserStatus } from "../../../../hooks/useStatus";
+import { usePartnerDistance } from "../../../../hooks/useStatus";
 import { useReceivedMessages } from "../../../../hooks/useStoredMessages";
-import { useUserMood } from "../../../../hooks/useMood";
+import { useHome } from "../../../../hooks/useHome";
+import { useHomeSelector } from "../../../../hooks/useHomeSelector";
 
 const PartnerProfileScreen = ({ navigation }: any) => {
   // variables
@@ -79,15 +79,16 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     isLoading: partnerLoading,
   } = usePartner(user?.id, token);
   const {
-    data: partnerStatus,
-    refetch: refetchPartnerStatus,
-    isLoading: partnerStatusLoading,
-  } = useUserStatus(partner?.id, token);
-  const {
-    data: partnerMood,
-    refetch: refetchPartnerMood,
-    isLoading: partnerMoodLoading,
-  } = useUserMood(partner?.id, token);
+    data: _homeData,
+    isLoading: homeLoading,
+    refetch: refetchHomeData,
+  } = useHome(token, user?.id);
+  const partnerStatus =
+    useHomeSelector(user?.id, (state) => state?.partnerStatus) || null;
+  const partnerMood =
+    useHomeSelector(user?.id, (state) => state?.partnerMood) || null;
+  const partnerStatusLoading = homeLoading;
+  const partnerMoodLoading = homeLoading;
   const { data: partnerFavorites = {}, isLoading: partnerFavoritesLoading } =
     useFavorites(partner?.id, token);
   const { data: loveLanguage, isLoading: loveLanguageLoading } =
@@ -141,26 +142,16 @@ const PartnerProfileScreen = ({ navigation }: any) => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refetchPartnerData();
-
-      if (partner?.id) {
-        await Promise.all([
-          refetchPartnerMood(),
-          refetchPartnerStatus(),
-          fetchPartnerPicture(),
-        ]);
-      }
+      await Promise.all([
+        refetchPartnerData(),
+        refetchHomeData(),
+        fetchPartnerPicture(),
+      ]);
     } catch (e) {
     } finally {
       setRefreshing(false);
     }
-  }, [
-    refetchPartnerData,
-    refetchPartnerMood,
-    refetchPartnerStatus,
-    fetchPartnerPicture,
-    partner?.id,
-  ]);
+  }, [refetchPartnerData, refetchHomeData, fetchPartnerPicture]);
 
   // format data
   const mood = partnerMood?.mood || "No mood";

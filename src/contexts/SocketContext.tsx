@@ -79,16 +79,54 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     s.on(
       "partnerMoodUpdate",
-      (data: { mood: string; userId: string; description: string }) => {
+      (data: {
+        mood: string;
+        userId: string;
+        description: string;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
+      }) => {
         if (partnerId && String(partnerId) === String(data.userId)) {
-          queryClient.setQueryData(["partnerMood", partnerId], {
-            mood: data.mood,
-            description: data.description,
-            userId: data.userId,
+          queryClient.setQueryData(["home", user?.id], (old: any) => {
+            if (!old) {
+              return old;
+            }
+            return {
+              ...old,
+              partnerMood: {
+                mood: data.mood,
+                description: data.description,
+                userId: data.userId,
+              },
+            };
           });
         }
-        queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user?.id],
+
+        queryClient.setQueryData(["home", user?.id], (old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          const existingActivities = Array.isArray(old.recentActivities)
+            ? old.recentActivities
+            : [];
+
+          const updatedActivities = data.recentActivity
+            ? [
+                data.recentActivity,
+                ...existingActivities.filter(
+                  (activity: any) => activity.id !== data.recentActivity?.id
+                ),
+              ]
+            : existingActivities;
+
+          return {
+            ...old,
+            recentActivities: updatedActivities,
+          };
         });
       }
     );
@@ -96,17 +134,49 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     s.on(
       "partnerStatusUpdate",
       (data: {
-        id: string;
-        userId: string;
-        isAtHome: boolean;
-        updatedAt: string;
-        unreachable: boolean;
-        distance?: number | null;
+        statusData: {
+          id: string;
+          userId: string;
+          isAtHome: boolean;
+          updatedAt: string;
+          unreachable: boolean;
+          distance?: number | null;
+          batteryLevel?: number | null;
+          userLocation?: string | null;
+          timezoneOffset?: number | null;
+        };
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (partnerId && String(partnerId) === String(data.userId)) {
-          queryClient.setQueryData(["status", partnerId], data);
-          queryClient.invalidateQueries({
-            queryKey: ["recentActivities", user?.id],
+        const { statusData, recentActivity } = data;
+
+        if (partnerId && String(partnerId) === String(statusData.userId)) {
+          queryClient.setQueryData(["home", user?.id], (old: any) => {
+            if (!old) {
+              return old;
+            }
+
+            const existingActivities = Array.isArray(old.recentActivities)
+              ? old.recentActivities
+              : [];
+
+            const updatedActivities = recentActivity
+              ? [
+                  recentActivity,
+                  ...existingActivities.filter(
+                    (activity: any) => activity.id !== recentActivity.id
+                  ),
+                ]
+              : existingActivities;
+
+            return {
+              ...old,
+              partnerStatus: statusData,
+              recentActivities: updatedActivities,
+            };
           });
         }
       }
@@ -121,24 +191,51 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         partnerId: string;
         createdAt: string;
         seen: boolean;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
         if (!user?.id) {
           return;
         }
 
-        queryClient.setQueryData<any[]>(
-          ["unseenInteractions", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
+        const recentActivity = data.recentActivity;
 
-            return [data, ...old];
+        queryClient.setQueryData(["home", user?.id], (old: any) => {
+          if (!old) {
+            return old;
           }
-        );
 
-        queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          const existingActivities = Array.isArray(old.recentActivities)
+            ? old.recentActivities
+            : [];
+
+          const updatedActivities = recentActivity
+            ? [
+                recentActivity,
+                ...existingActivities.filter(
+                  (activity: any) => activity.id !== recentActivity.id
+                ),
+              ]
+            : existingActivities;
+
+          const unseenInteractions = Array.isArray(old.unseenInteractions)
+            ? old.unseenInteractions
+            : [];
+
+          const updatedUnseen = unseenInteractions.some(
+            (interaction: any) => interaction.id === data.id
+          )
+            ? unseenInteractions
+            : [data, ...unseenInteractions];
+
+          return {
+            ...old,
+            unseenInteractions: updatedUnseen,
+            recentActivities: updatedActivities,
+          };
         });
       }
     );
@@ -214,6 +311,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
+      // Update old query for backward compatibility
       queryClient.setQueryData<any[]>(["timeline", user.id], (old) => {
         if (!old || !Array.isArray(old)) {
           return [data.newRecord];
@@ -226,8 +324,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         return [data.newRecord, ...old];
       });
 
-      queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user.id],
+      // Update home cache
+      queryClient.setQueryData(["home", user?.id], (old: any) => {
+        if (!old) return old;
+        const existingTimeline = old.timeline || [];
+        if (existingTimeline.some((x: any) => x.id === data.newRecord.id)) {
+          return old;
+        }
+        return {
+          ...old,
+          timeline: [data.newRecord, ...existingTimeline],
+        };
       });
     });
 
@@ -246,19 +353,24 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData<any[]>(["notifications", user.id], (old) => {
-          if (!old || !Array.isArray(old)) {
-            return [n];
-          }
-
-          if (old.some((x) => x.id === n.id)) {
+        queryClient.setQueryData(["home", user.id], (old: any) => {
+          if (!old) {
             return old;
           }
 
-          return [n, ...old];
-        });
+          const existingNotifications = Array.isArray(old.notifications)
+            ? old.notifications
+            : [];
 
-        queryClient.invalidateQueries({ queryKey: ["notifications", user.id] });
+          if (existingNotifications.some((x: any) => x.id === n.id)) {
+            return old;
+          }
+
+          return {
+            ...old,
+            notifications: [n, ...existingNotifications],
+          };
+        });
       }
     );
 
@@ -488,6 +600,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
+        // Update old queries for backward compatibility
         queryClient.setQueryData<any[]>(
           ["allFavoriteMemories", user.id],
           (old) => {
@@ -518,8 +631,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         );
 
-        queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+        // Update home cache
+        queryClient.setQueryData(["home", user?.id], (old: any) => {
+          if (!old) return old;
+          const existingMemories = old.favoriteMemories || [];
+          if (existingMemories.some((x: any) => x.id === data.id)) {
+            return old;
+          }
+          return {
+            ...old,
+            favoriteMemories: [data, ...existingMemories],
+          };
         });
       }
     );
@@ -540,6 +662,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
+        // Update old queries for backward compatibility
         queryClient.setQueryData<any[]>(
           ["allFavoriteMemories", user.id],
           (old) => {
@@ -562,8 +685,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         );
 
-        queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+        // Update home cache
+        queryClient.setQueryData(["home", user?.id], (old: any) => {
+          if (!old) return old;
+          return {
+            ...old,
+            favoriteMemories: (old.favoriteMemories || []).filter(
+              (x: any) => x.id !== data.id
+            ),
+          };
         });
       }
     );
@@ -659,6 +789,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
+    queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
+
+    // Also invalidate old queries for backward compatibility
     const tasks: Promise<unknown>[] = [];
 
     if (partnerId) {
