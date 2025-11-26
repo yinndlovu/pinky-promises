@@ -6,7 +6,7 @@ export async function getTimeline(token: string | null) {
     return;
   }
 
-  const res = await axios.get(`${BASE_URL}/timeline/records`, {
+  const res = await axios.get(`${BASE_URL}/timeline`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

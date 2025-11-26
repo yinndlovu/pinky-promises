@@ -14,16 +14,19 @@ export async function getProfile(token: string | null, userId: string) {
     headers: { Authorization: `Bearer ${token}` },
   });
 
-  return response.data.user;
+  return response.data;
 }
 
-export async function fetchProfilePicture(userId: string, token: string | null) {
+export async function fetchProfilePicture(
+  userId: string,
+  token: string | null
+) {
   if (!token) {
     throw new Error("No token provided");
   }
 
   const response = await axios.get(
-    `${BASE_URL}/profile/${userId}/profile-picture`,
+    `${BASE_URL}/user/${userId}/profile-picture`,
     {
       headers: { Authorization: `Bearer ${token}` },
       responseType: "arraybuffer",
@@ -48,7 +51,7 @@ export async function updateProfilePicture(
   }
 
   return axios.put(
-    `${BASE_URL}/profile/profile-picture/update`,
+    `${BASE_URL}/user/profile-picture/update`,
     { image: base64String },
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -64,21 +67,21 @@ export async function updateProfileField(
   if (!token) {
     return;
   }
-  
+
   let url = "";
   let body: Record<string, string> = {};
 
   switch (field) {
     case "name":
-      url = `${BASE_URL}/profile/update-name`;
+      url = `${BASE_URL}/user/name/update`;
       body = { name: value };
       break;
     case "username":
-      url = `${BASE_URL}/profile/update-username`;
+      url = `${BASE_URL}/user/username/update`;
       body = { username: value };
       break;
     case "bio":
-      url = `${BASE_URL}/profile/update-bio`;
+      url = `${BASE_URL}/user/bio/update`;
       body = { bio: value };
       break;
   }

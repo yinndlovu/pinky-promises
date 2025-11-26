@@ -10,9 +10,9 @@ export async function addHomeLocation(
   if (!token) {
     return;
   }
-  
+
   const res = await axios.put(
-    `${BASE_URL}/location/add-home-location`,
+    `${BASE_URL}/home-location/add`,
     { latitude, longitude },
     {
       headers: {
@@ -30,7 +30,7 @@ export async function getHomeLocation(token: string) {
     return JSON.parse(local);
   }
 
-  const res = await axios.get(`${BASE_URL}/location/get-home-location`, {
+  const res = await axios.get(`${BASE_URL}/home-location/get`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -42,7 +42,7 @@ export async function getHomeLocation(token: string) {
 }
 
 export async function removeHomeLocation(token: string) {
-  const res = await axios.delete(`${BASE_URL}/location/remove`, {
+  const res = await axios.delete(`${BASE_URL}/home-location/remove`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

@@ -7,7 +7,7 @@ export async function updateUserStatus(
   homeDistance?: number
 ) {
   await axios.put(
-    `${BASE_URL}/user-status/update-status`,
+    `${BASE_URL}/user-status/update`,
     isAtHome
       ? { isAtHome }
       : {
@@ -21,17 +21,4 @@ export async function updateUserStatus(
       },
     }
   );
-}
-
-export async function fetchUserStatus(token: string, userId: string) {
-  const res = await axios.get(
-    `${BASE_URL}/user-status/get-status/${userId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return res.data.status;
 }

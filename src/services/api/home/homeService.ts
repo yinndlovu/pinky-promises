@@ -11,5 +11,6 @@ export async function getHomeScreenData(token: string | null) {
       Authorization: `Bearer ${token}`,
     },
   });
+
   return res.data;
 }

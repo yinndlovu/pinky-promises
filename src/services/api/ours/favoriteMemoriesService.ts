@@ -10,7 +10,7 @@ export async function getFavoriteMemoryById(
   }
 
   const res = await axios.get(
-    `${BASE_URL}/favorite-memories/get-favorite-memory/${memoryId}`,
+    `${BASE_URL}/favorite-memories/${memoryId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -26,24 +26,7 @@ export async function getAllFavoriteMemories(token: string | null) {
     return;
   }
 
-  const res = await axios.get(
-    `${BASE_URL}/favorite-memories/get-favorite-memories`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return res.data.memories;
-}
-
-export async function getRecentFavoriteMemories(token: string | null) {
-  if (!token) {
-    return;
-  }
-
-  const res = await axios.get(`${BASE_URL}/favorite-memories/recent`, {
+  const res = await axios.get(`${BASE_URL}/favorite-memories`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -62,7 +45,7 @@ export async function createFavoriteMemory(
   }
 
   const res = await axios.post(
-    `${BASE_URL}/favorite-memories/add-favorite-memory`,
+    `${BASE_URL}/favorite-memories/add`,
     { memory, date },
     {
       headers: {
@@ -85,7 +68,7 @@ export async function updateFavoriteMemory(
   }
 
   const res = await axios.put(
-    `${BASE_URL}/favorite-memories/edit-favorite-memory/${memoryId}`,
+    `${BASE_URL}/favorite-memories/${memoryId}/update`,
     { memory, date },
     {
       headers: {
@@ -105,12 +88,9 @@ export async function deleteFavoriteMemory(
     return;
   }
 
-  await axios.delete(
-    `${BASE_URL}/favorite-memories/delete-favorite-memory/${memoryId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  await axios.delete(`${BASE_URL}/favorite-memories/${memoryId}/delete`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 }

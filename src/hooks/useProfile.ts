@@ -1,35 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  getUserProfile,
-  getProfile,
-} from "../services/api/profiles/profileService";
+import { getHomeScreenData } from "../services/api/home/homeService";
 
-export function useUserProfile(userId: string, token: string | null) {
+export function useHome(token: string | null, userId?: string) {
   return useQuery({
-    queryKey: ["userProfile", userId],
+    queryKey: ["profile", userId],
     queryFn: async () => {
-      if (!token) {
-        return null;
-      }
-
-      return await getUserProfile(userId, token);
-    },
-    enabled: !!userId && !!token,
-    staleTime: 1000 * 60 * 5,
-  });
-}
-
-export function useProfile(userId: string, token: string | null) {
-  return useQuery({
-    queryKey: ["profileData", userId],
-    queryFn: async () => {
-      if (!token) {
-        return null;
-      }
-
-      return await getProfile(token);
+      return await getHomeScreenData(token);
     },
     enabled: !!token && !!userId,
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 10,
   });
 }

@@ -6,7 +6,7 @@ export async function getNotes(token: string | null) {
     return;
   }
 
-  const res = await axios.get(`${BASE_URL}/notes/get-notes`, {
+  const res = await axios.get(`${BASE_URL}/notes`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -21,7 +21,7 @@ export async function updateNotes(token: string | null, content: string) {
   }
 
   const res = await axios.put(
-    `${BASE_URL}/notes/update-notes`,
+    `${BASE_URL}/notes/update`,
     { content },
     {
       headers: {

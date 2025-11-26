@@ -9,7 +9,7 @@ export async function storeMessage(
   if (!token) {
     return;
   }
-  
+
   const res = await axios.post(
     `${BASE_URL}/messages/store`,
     { title, message },
@@ -24,33 +24,13 @@ export async function storeMessage(
 }
 
 export async function viewMessage(token: string, messageId: string) {
-  const res = await axios.get(`${BASE_URL}/messages/view/${messageId}`, {
+  const res = await axios.get(`${BASE_URL}/messages/${messageId}/view`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
   return res.data.message;
-}
-
-export async function getStoredMessages(token: string) {
-  const res = await axios.get(`${BASE_URL}/messages/stored`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data.messages;
-}
-
-export async function getReceivedMessages(token: string) {
-  const res = await axios.get(`${BASE_URL}/messages/received`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data.messages;
 }
 
 export async function updateMessage(
@@ -64,7 +44,7 @@ export async function updateMessage(
   }
 
   const res = await axios.put(
-    `${BASE_URL}/messages/update/${messageId}`,
+    `${BASE_URL}/messages/${messageId}/update`,
     {
       title,
       message,
@@ -84,14 +64,11 @@ export async function deleteMessage(token: string | null, messageId: string) {
     return;
   }
 
-  const res = await axios.delete(
-    `${BASE_URL}/messages/delete/${messageId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const res = await axios.delete(`${BASE_URL}/messages/${messageId}/delete`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return res.data;
 }
