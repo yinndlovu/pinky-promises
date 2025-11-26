@@ -5,11 +5,7 @@ import { encode } from "base64-arraybuffer";
 // internal
 import { BASE_URL } from "../../../configuration/config";
 
-export async function getProfile(token: string | null, userId: string) {
-  if (!token) {
-    return;
-  }
-
+export async function getProfile(token: string, userId: string) {
   const response = await axios.get(`${BASE_URL}/profile/${userId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -17,14 +13,7 @@ export async function getProfile(token: string | null, userId: string) {
   return response.data;
 }
 
-export async function fetchProfilePicture(
-  userId: string,
-  token: string | null
-) {
-  if (!token) {
-    throw new Error("No token provided");
-  }
-
+export async function fetchProfilePicture(userId: string, token: string) {
   const response = await axios.get(
     `${BASE_URL}/user/${userId}/profile-picture`,
     {
@@ -43,13 +32,9 @@ export async function fetchProfilePicture(
 }
 
 export async function updateProfilePicture(
-  token: string | null,
+  token: string,
   base64String: string
 ) {
-  if (!token) {
-    return;
-  }
-
   return axios.put(
     `${BASE_URL}/user/profile-picture/update`,
     { image: base64String },
@@ -62,12 +47,8 @@ export async function updateProfilePicture(
 export async function updateProfileField(
   field: "name" | "username" | "bio",
   value: string,
-  token: string | null
+  token: string
 ) {
-  if (!token) {
-    return;
-  }
-
   let url = "";
   let body: Record<string, string> = {};
 

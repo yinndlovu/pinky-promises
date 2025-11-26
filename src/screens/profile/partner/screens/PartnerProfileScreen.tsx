@@ -1,14 +1,8 @@
 // external
-import { useEffect, useState, useCallback, useMemo } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { useEffect, useState, useMemo } from "react";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useLayoutEffect } from "react";
-import { RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,21 +29,19 @@ import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
 import Shimmer from "../../../../components/skeletons/Shimmer";
+import ErrorState from "../../../../components/common/ErrorState";
 
 // hooks
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
-import { usePartner } from "../../../../hooks/usePartner";
-import { useFavorites } from "../../../../hooks/useFavorites";
-import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
-import { useAbout } from "../../../../hooks/useAbout";
-import { usePartnerDistance } from "../../../../hooks/useStatus";
-import { useReceivedMessages } from "../../../../hooks/useStoredMessages";
 import { useHome } from "../../../../hooks/useHome";
 import { useHomeSelector } from "../../../../hooks/useHomeSelector";
+import { useProfile } from "../../../../hooks/useProfile";
+import { useProfileSelector } from "../../../../hooks/useProfileSelector";
 
-const PartnerProfileScreen = ({ navigation }: any) => {
+const PartnerProfileScreen = ({ navigation, route }: any) => {
   // variables
+  const { userId } = route.params as { userId: string };
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -65,48 +57,47 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
   // use states (processing)
   const [removingPartner, setRemovingPartner] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [failed, setFailed] = useState(false);
 
   // use states (message storage)
   const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
 
-  // data
+  // data fetch
   const {
-    data: partner,
-    refetch: refetchPartnerData,
-    isLoading: partnerLoading,
-  } = usePartner(user?.id, token);
-  const {
-    data: _homeData,
-    isLoading: homeLoading,
-    refetch: refetchHomeData,
-  } = useHome(token, user?.id);
-  const partnerStatus =
-    useHomeSelector(user?.id, (state) => state?.partnerStatus) || null;
-  const partnerMood =
-    useHomeSelector(user?.id, (state) => state?.partnerMood) || null;
-  const partnerStatusLoading = homeLoading;
-  const partnerMoodLoading = homeLoading;
-  const { data: partnerFavorites = {}, isLoading: partnerFavoritesLoading } =
-    useFavorites(partner?.id, token);
-  const { data: loveLanguage, isLoading: loveLanguageLoading } =
-    useLoveLanguage(partner?.id, token);
-  const { data: partnerAbout, isLoading: partnerAboutLoading } = useAbout(
-    partner?.id,
-    token
-  );
-  const { data: partnerDistance } = usePartnerDistance(user?.id, token);
-  const {
-    data: partnerStoredMessages = [],
-    isLoading: partnerStoredMessagesLoading,
-  } = useReceivedMessages(user?.id, token);
+    data: _profileData,
+    isLoading: profileLoading,
+    refetch: refetchProfileData,
+    isError: profileError,
+  } = useProfile(token, userId);
+  const { data: _homeData, isLoading: homeLoading } = useHome(token, user?.id);
   const {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchPartnerPicture,
-  } = useProfilePicture(partner?.id, token);
+  } = useProfilePicture(userId, token);
+
+  // select the data from home selector
+  const partnerStatus =
+    useHomeSelector(user?.id, (state) => state?.partnerStatus) || null;
+  const partnerMood =
+    useHomeSelector(user?.id, (state) => state?.partnerMood) || null;
+
+  // select data from profile selector
+  const partner =
+    useProfileSelector(userId, (state) => state?.userData) || null;
+  const partnerFavorites =
+    useProfileSelector(userId, (state) => state?.userFavorites) || {};
+  const loveLanguage =
+    useProfileSelector(userId, (state) => state?.loveLanguage) || null;
+  const partnerAbout =
+    useProfileSelector(userId, (state) => state?.aboutUser) || null;
+  const partnerDistance =
+    useProfileSelector(userId, (state) => state?.partnerDistance) || null;
+  const partnerStoredMessages =
+    useProfileSelector(userId, (state) => state?.storedMessages) || [];
+  const specialDates =
+    useProfileSelector(userId, (state) => state?.specialDates) || [];
 
   // use layouts
   useLayoutEffect(() => {
@@ -124,12 +115,12 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
   // use effects
   useEffect(() => {
-    if (token && partner?.id) {
+    if (token && userId) {
       Promise.resolve(fetchPartnerPicture()).finally(() =>
         setAvatarFetched(true)
       );
     }
-  }, [partner?.id, token]);
+  }, [userId, token]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -137,21 +128,6 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     });
     return () => unsubscribe();
   }, []);
-
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchPartnerData(),
-        refetchHomeData(),
-        fetchPartnerPicture(),
-      ]);
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [refetchPartnerData, refetchHomeData, fetchPartnerPicture]);
 
   // format data
   const mood = partnerMood?.mood || "No mood";
@@ -263,6 +239,15 @@ const PartnerProfileScreen = ({ navigation }: any) => {
     );
   };
 
+  if (profileError) {
+    return (
+      <ErrorState
+        message="Failed to load partner profile. Try again?"
+        onRetry={() => refetchProfileData()}
+      />
+    );
+  }
+
   if (!partner) {
     return (
       <View style={styles.centered}>
@@ -295,19 +280,10 @@ const PartnerProfileScreen = ({ navigation }: any) => {
         </View>
       )}
       <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.primary}
-            colors={[theme.colors.primary]}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        {partnerLoading ? (
+        {profileLoading ? (
           <View style={styles.profileRow}>
             <Shimmer radius={8} height={40} style={{ width: "100%" }} />
           </View>
@@ -376,7 +352,7 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           </>
         )}
 
-        {partnerStatusLoading || partnerMoodLoading ? (
+        {homeLoading || homeLoading ? (
           <Shimmer radius={8} height={20} style={{ width: "100%" }} />
         ) : (
           <PartnerStatusMood
@@ -388,9 +364,12 @@ const PartnerProfileScreen = ({ navigation }: any) => {
           />
         )}
 
-        <PartnerAnniversary />
+        <PartnerAnniversary
+          specialDates={specialDates}
+          specialDatesLoading={profileLoading}
+        />
 
-        {partnerFavoritesLoading ? (
+        {profileLoading ? (
           <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         ) : (
           <PartnerFavorites
@@ -400,19 +379,19 @@ const PartnerProfileScreen = ({ navigation }: any) => {
 
         <View style={styles.divider} />
 
-        {loveLanguageLoading ? (
+        {profileLoading ? (
           <Shimmer radius={8} height={20} style={{ width: "100%" }} />
         ) : (
           <PartnerLoveLanguage loveLanguage={loveLanguage} />
         )}
 
-        {partnerAboutLoading ? (
+        {profileLoading ? (
           <Shimmer radius={8} height={20} style={{ width: "100%" }} />
         ) : (
           <PartnerMoreAboutYou about={partnerAbout} />
         )}
 
-        {partnerStoredMessagesLoading ? (
+        {profileLoading ? (
           <Shimmer radius={8} height={30} style={{ width: "100%" }} />
         ) : (
           <PartnerMessageStorage

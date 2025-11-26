@@ -5,7 +5,7 @@ export function useHome(token: string | null, userId?: string) {
   return useQuery({
     queryKey: ["home", userId],
     queryFn: async () => {
-      return await getHomeScreenData(token);
+      return await getHomeScreenData(token!);
     },
     enabled: !!token && !!userId,
     staleTime: 1000 * 60 * 5,

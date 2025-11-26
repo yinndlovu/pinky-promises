@@ -40,6 +40,7 @@ import ProcessingAnimation from "../../../components/loading/ProcessingAnimation
 import NotificationsDropdown from "../../../components/dropdowns/NotificationsDropdown";
 import AvatarSkeleton from "../../../components/skeletons/AvatarSkeleton";
 import Shimmer from "../../../components/skeletons/Shimmer";
+import ErrorState from "../../../components/common/ErrorState";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -84,6 +85,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     data: _homeData,
     isLoading: homeLoading,
     refetch: refetchHome,
+    isError: homeError,
   } = useHome(token, user?.id);
 
   const rawActivities =
@@ -330,6 +332,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const userLocation = partnerStatus?.userSuburb ?? null;
   const userTimezone = partnerStatus?.timezoneOffset ?? null;
 
+  if (homeError) {
+    return (
+      <ErrorState
+        message="Failed to load overview. Try again?"
+        onRetry={() => refetchHome()}
+      />
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
@@ -483,7 +494,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             batteryLevel={batteryLevel}
             distanceFromHome={distanceFromHome}
             lastSeen={lastSeen}
-            onPress={() => navigation.navigate("PartnerProfile")}
+            onPress={() =>
+              navigation.navigate("PartnerProfile", { userId: partner?.id })
+            }
             renderPartnerImage={renderPartnerImage}
             userLocation={userLocation}
             userTimezone={userTimezone}
