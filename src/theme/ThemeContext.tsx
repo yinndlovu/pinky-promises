@@ -12,6 +12,7 @@ import * as Updates from "expo-updates";
 
 // internal
 import { lightTheme, darkTheme } from "./themes";
+import { AccentThemeName, accentThemes } from "./accentThemes";
 
 type Mode = "system" | "light" | "dark";
 
@@ -25,9 +26,18 @@ const ThemeContext = createContext<Ctx | null>(null);
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [mode, setModeState] = useState<Mode>("system");
+  const [accent, setAccent] = useState<AccentThemeName>("default");
   const [systemScheme, setSystemScheme] = useState<"light" | "dark">(
     () => Appearance.getColorScheme() ?? "light"
   );
+
+  useEffect(() => {
+    AsyncStorage.getItem("accentTheme").then((name) => {
+      if (name && name in accentThemes) {
+        setAccent(name as AccentThemeName);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     AsyncStorage.getItem("themeMode").then((m) => {
@@ -48,7 +58,21 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const active = mode === "system" ? systemScheme : mode;
-  const theme = active === "dark" ? darkTheme : lightTheme;
+  const baseTheme = active === "dark" ? darkTheme : lightTheme;
+  const accentColors = accentThemes[accent];
+
+  const theme = {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      ...accentColors,
+    },
+  };
+
+  setAccentTheme: async (name: AccentThemeName) => {
+    setAccent(name);
+    await AsyncStorage.setItem("accentTheme", name);
+  };
 
   const value = useMemo(
     () => ({
