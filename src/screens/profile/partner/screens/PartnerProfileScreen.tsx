@@ -40,8 +40,10 @@ import { useProfile } from "../../../../hooks/useProfile";
 import { useProfileSelector } from "../../../../hooks/useProfileSelector";
 
 const PartnerProfileScreen = ({ navigation, route }: any) => {
-  // variables
+  // param variables
   const { userId } = route.params as { userId: string };
+
+  // hook variables
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -63,7 +65,7 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
   const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
   const [selectedMessage, setSelectedMessage] = useState<any>(null);
 
-  // data fetch
+  // fetch profile data
   const {
     data: _profileData,
     isLoading: profileLoading,

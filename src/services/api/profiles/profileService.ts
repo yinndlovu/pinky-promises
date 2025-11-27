@@ -7,7 +7,19 @@ import { BASE_URL } from "../../../configuration/config";
 
 export async function getProfile(token: string, userId: string) {
   const response = await axios.get(`${BASE_URL}/profile/${userId}`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+}
+
+export async function getUser(token: string, userId: string) {
+  const response = await axios.get(`${BASE_URL}/user/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   return response.data;
@@ -28,7 +40,10 @@ export async function fetchProfilePicture(userId: string, token: string) {
   const lastModified = response.headers["last-modified"];
   const updatedAt = lastModified ? new Date(lastModified) : new Date();
 
-  return { uri: base64, updatedAt };
+  return {
+    uri: base64,
+    updatedAt,
+  };
 }
 
 export async function updateProfilePicture(

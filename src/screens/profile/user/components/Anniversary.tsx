@@ -13,7 +13,6 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { AnniversaryProps, SpecialDate } from "../../../../types/SpecialDate";
 import { formatProfileDisplayDate } from "../../../../utils/formatters/formatDate";
 import useToken from "../../../../hooks/useToken";
-import { useSpecialDates } from "../../../../hooks/useSpecialDate";
 import { useTheme } from "../../../../theme/ThemeContext";
 
 // screen content
@@ -21,7 +20,10 @@ import UpdateSpecialDateModal from "../../../../components/modals/input/UpdateSp
 import AlertModal from "../../../../components/modals/output/AlertModal";
 import Shimmer from "../../../../components/skeletons/Shimmer";
 
-const Anniversary: React.FC<AnniversaryProps> = () => {
+const Anniversary: React.FC<AnniversaryProps> = ({
+  specialDates,
+  specialDatesLoading,
+}) => {
   // variables
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -40,10 +42,6 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // data
-  const { data: specialDates = [], isLoading: specialDatesLoading } =
-    useSpecialDates(user?.id, token);
 
   // helpers
   const getAnniversaryDisplay = () => {
@@ -184,7 +182,7 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   if (specialDatesLoading) {
     return (
       <View style={styles.wrapper}>
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={90} style={{ width: "100%" }} />
       </View>
     );
   }

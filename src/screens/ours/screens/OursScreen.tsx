@@ -44,7 +44,6 @@ import Shimmer from "../../../components/skeletons/Shimmer";
 import useToken from "../../../hooks/useToken";
 import { useRecentMemories } from "../../../hooks/useMemory";
 import { useNotesPreview } from "../../../hooks/useNotes";
-import { useSpecialDates } from "../../../hooks/useSpecialDate";
 
 type Props = NativeStackScreenProps<any>;
 

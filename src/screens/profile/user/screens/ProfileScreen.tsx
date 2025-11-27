@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   ScrollView,
   View,
@@ -10,7 +10,6 @@ import {
   Modal,
   TextInput,
   TouchableWithoutFeedback,
-  RefreshControl,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
@@ -58,32 +57,29 @@ import ConfirmationModal from "../../../../components/modals/selection/Confirmat
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
 import Shimmer from "../../../../components/skeletons/Shimmer";
+import ErrorState from "../../../../components/common/ErrorState";
 
 // hooks
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { useProfileSelector } from "../../../../hooks/useProfileSelector";
 import { useProfile } from "../../../../hooks/useProfile";
-import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
-import { useUserStatus } from "../../../../hooks/useStatus";
-import { useRequests } from "../../../../hooks/useRequests";
-import { useFavorites } from "../../../../hooks/useFavorites";
-import { useMood } from "../../../../hooks/useMood";
-import { useAbout } from "../../../../hooks/useAbout";
-import { useStoredMessages } from "../../../../hooks/useStoredMessages";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  // variables
+  // hook variables
   const insets = useSafeAreaInsets();
-  const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
   const styles = useMemo(() => createProfileStyles(theme), [theme]);
   const modalStyles = useMemo(() => createModalStyles(theme), [theme]);
+
+  // variables
+  const HEADER_HEIGHT = 60;
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -97,7 +93,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loadingName, setLoadingName] = useState(false);
   const [loadingUsername, setLoadingUsername] = useState(false);
   const [loadingBio, setLoadingBio] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -136,38 +131,38 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editTitle, setEditTitle] = useState("");
   const [editMessageText, setEditMessageText] = useState("");
 
-  // data
+  // fetch profile data
   const {
-    data: profileData,
+    data: _profileData,
+    isLoading: profileLoading,
     refetch: refetchProfileData,
-    isLoading: profileDataLoading,
-  } = useProfile(user?.id, token);
-  const { data: loveLanguage, isLoading: loveLanguageLoading } =
-    useLoveLanguage(user?.id, token);
-  const {
-    data: status,
-    refetch: refetchStatus,
-    isLoading: statusLoading,
-  } = useUserStatus(user?.id, token);
-  const { data: pendingRequestsData, refetch: refetchPendingRequestsData } =
-    useRequests(user?.id, token);
-  const { data: favorites = {}, isLoading: favoritesLoading } = useFavorites(
-    user?.id,
-    token
-  );
-  const {
-    data: moodData,
-    refetch: refetchMoodData,
-    isLoading: moodDataLoading,
-  } = useMood(user?.id, token);
-  const { data: about, isLoading: aboutLoading } = useAbout(user?.id, token);
-  const { data: storedMessages = [], isLoading: storedMessagesLoading } =
-    useStoredMessages(user?.id, token);
+    isError: profileError,
+  } = useProfile(token, user?.id);
   const {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchProfilePicture,
   } = useProfilePicture(user?.id, token);
+
+  // select data from profile selector
+  const userData =
+    useProfileSelector(user?.id, (state) => state?.loveLanguage) || null;
+  const specialDates =
+    useProfileSelector(user?.id, (state) => state?.specialDates) || [];
+  const loveLanguage =
+    useProfileSelector(user?.id, (state) => state?.loveLanguage) || null;
+  const status =
+    useProfileSelector(user?.id, (state) => state?.userStatus) || null;
+  const partnerRequests =
+    useProfileSelector(user?.id, (state) => state?.partnerRequests) || [];
+  const favorites =
+    useProfileSelector(user?.id, (state) => state?.userFavorites) || {};
+  const userMood =
+    useProfileSelector(user?.id, (state) => state?.userMood) || null;
+  const aboutUser =
+    useProfileSelector(user?.id, (state) => state?.aboutUser) || null;
+  const storedMessages =
+    useProfileSelector(user?.id, (state) => state?.storedMessage) || null;
 
   // use effects
   useEffect(() => {
@@ -208,33 +203,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchProfileData(),
-        refetchStatus(),
-        refetchPendingRequestsData(),
-        refetchMoodData(),
-        fetchProfilePicture(),
-      ]);
-
-      await queryClient.invalidateQueries({
-        queryKey: ["specialDates", user?.id],
-      });
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [
-    refetchMoodData,
-    refetchStatus,
-    refetchProfileData,
-    refetchPendingRequestsData,
-    fetchProfilePicture,
-  ]);
-
   const homeStatus = status?.unreachable
     ? "unreachable"
     : status?.isAtHome
@@ -251,7 +219,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     ? "You are currently not home"
     : "You must add your home location to use this feature";
 
-  const pendingRequestsCount = pendingRequestsData?.filter(
+  const pendingRequestsCount = partnerRequests?.filter(
     (req: any) => req.status === "pending"
   ).length;
 
@@ -268,20 +236,20 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return await updateMessage(token, messageId, title, message);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
 
       setEditMessageModalVisible(false);
       setEditingMessage(null);
       setEditTitle("");
       setEditMessageText("");
       setAlertTitle("Message Updated");
-      setAlertMessage("You have updated the message");
+      setAlertMessage("You have updated the message.");
       setShowSuccessAlert(true);
     },
     onError: (error: any) => {
       setAlertTitle("Failed");
       setAlertMessage(
-        error.response?.data?.error || "Failed to update message"
+        error.response?.data?.error || "Failed to update message."
       );
       setShowErrorAlert(true);
     },
@@ -292,17 +260,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       return await deleteMessage(token, messageId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
 
       setConfirmationVisible(false);
       setAlertTitle("Message Deleted");
-      setAlertMessage("You have deleted the message");
+      setAlertMessage("You have deleted the message.");
       setShowSuccessAlert(true);
     },
     onError: (error: any) => {
       setAlertTitle("Failed");
       setAlertMessage(
-        error.response?.data?.error || "Failed to delete message"
+        error.response?.data?.error || "Failed to delete message."
       );
       setShowErrorAlert(true);
     },
@@ -377,20 +345,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
     setSaving(true);
     try {
+      if (!token) {
+        setLoveLanguageModalVisible(false);
+        setError("Session expired. Log in again and try again.");
+        return;
+      }
+
       await updateLoveLanguage(token, newLoveLanguage);
-
       await queryClient.invalidateQueries({
-        queryKey: ["loveLanguage", user?.id],
+        queryKey: ["profile", user?.id],
       });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
-      });
-
       setLoveLanguageModalVisible(false);
       setSuccess("You have updated your love language");
     } catch (err: any) {
@@ -403,18 +367,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleSaveAbout = async (newAbout: string) => {
     setSaving(true);
     try {
+      if (!token) {
+        setAboutModalVisible(false);
+        setError("Session expired. Log in again and try again.");
+        return;
+      }
+
       await updateAboutUser(token, newAbout);
-
       await queryClient.invalidateQueries({
-        queryKey: ["about", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["profile", user?.id],
       });
 
       setAboutModalVisible(false);
@@ -433,18 +394,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleSaveFavorites = async (newFavorites: FavoritesType) => {
     setSaving(true);
     try {
+      if (!token) {
+        setFavoritesModalVisible(false);
+        setError("Session expired. Log in again and retry.");
+        return;
+      }
+
       await updateUserFavorites(token, newFavorites);
-
       await queryClient.invalidateQueries({
-        queryKey: ["favorites", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["profile", user?.id],
       });
 
       setFavoritesModalVisible(false);
@@ -474,9 +432,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     if (!result.canceled && result.assets && result.assets[0].base64) {
       try {
+        if (!token) {
+          setError("Session expired. Log in again and retry.");
+          return;
+        }
         if (result.assets[0].base64.length > 10 * 1024 * 1024) {
           setError("Image is too large. Make sure it's less than 10 MB.");
-
           return;
         }
 
@@ -486,7 +447,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
 
         await updateProfilePicture(token, base64String);
-
         setSuccess("Profile picture uploaded");
         await fetchProfilePicture();
       } catch (err: any) {
@@ -496,7 +456,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         ) {
           setError("Image is too large. Make sure is less than 10 MB.");
         } else {
-          setError("Failed to upload profile picture");
+          setError(
+            err.response?.data?.error || "Failed to upload profile picture"
+          );
         }
       } finally {
         setUploading(false);
@@ -519,25 +481,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setLoadingBio(true);
       }
 
-      await updateProfileField(field, value, token);
+      if (!token) {
+        setAlertTitle("Action Failed");
+        setAlertMessage(
+          "Couldn't update your " +
+            field +
+            ". Your session may have expired. Log in again."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
 
+      await updateProfileField(field, value, token);
       await queryClient.invalidateQueries({
-        queryKey: ["profileData", user?.id],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["profile", user?.id],
       });
     } catch (err: any) {
-      setError(`Failed to update ${field}`);
+      setError(err.response.data.error || `Failed to update ${field}`);
     } finally {
       if (field === "name") {
         setLoadingName(false);
       }
-
       if (field === "username") {
         setLoadingUsername(false);
       }
-
       if (field === "bio") {
         setLoadingBio(false);
       }
@@ -554,12 +521,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       await storeMessage(token, title, message);
 
       setAlertTitle("Message Stored");
-      setAlertMessage("You have stored a message");
+      setAlertMessage("You have stored a message.");
       setStoreMessageModalVisible(false);
       setShowSuccessAlert(true);
     } catch (error: any) {
       setAlertTitle("Failed");
-      setAlertMessage(error.response?.data?.error || "Failed to store message");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to store message."
+      );
       setStoreMessageModalVisible(false);
       setShowErrorAlert(true);
     } finally {
@@ -608,7 +577,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setAlertTitle("Missing Fields");
       setAlertMessage("Please fill in all fields");
       setShowErrorAlert(true);
-
       return;
     }
 
@@ -620,37 +588,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   // fiels for editing
-  const originalName = profileData?.name || "";
-  const originalUsername = profileData?.username || "";
-  const originalBio = profileData?.bio || "";
+  const originalName = userData?.name || "";
+  const originalUsername = userData?.username || "";
+  const originalBio = userData?.bio || "";
 
-  if (!profileData && !profileDataLoading) {
+  if (!userData && !profileLoading) {
     return (
-      <View style={styles.centered}>
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.accent}
-              colors={[theme.colors.accent]}
-              progressBackgroundColor={theme.colors.background}
-            />
-          }
-          contentContainerStyle={styles.centered}
-          showsVerticalScrollIndicator={false}
-        >
-          <Text
-            style={{
-              color: theme.colors.text,
-              fontSize: 18,
-              fontWeight: "bold",
-            }}
-          >
-            Something went wrong viewing your profile
-          </Text>
-        </ScrollView>
-      </View>
+      <ErrorState
+        message="Ran into some trouble showing you your profile. Try again?"
+        onRetry={() => refetchProfileData()}
+      />
+    );
+  }
+
+  if (profileError) {
+    return (
+      <ErrorState
+        message="Ran into some trouble showing you your profile. Try again?"
+        onRetry={() => refetchProfileData()}
+      />
     );
   }
 
@@ -755,19 +711,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.accent}
-            colors={[theme.colors.accent]}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        {profileDataLoading ? (
+        {profileLoading ? (
           <View style={styles.profileRow}>
             <Shimmer radius={8} height={120} style={{ width: "100%" }} />
           </View>
@@ -781,18 +728,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 {renderProfileImage()}
               </TouchableOpacity>
               <View style={styles.infoWrapper}>
-                <Text style={styles.name}>{profileData?.name || ""}</Text>
-                <Text style={styles.username}>
-                  @{profileData?.username || ""}
-                </Text>
-                <Text style={styles.bio}>{profileData?.bio || ""}</Text>
+                <Text style={styles.name}>{userData?.name || ""}</Text>
+                <Text style={styles.username}>@{userData?.username || ""}</Text>
+                <Text style={styles.bio}>{userData?.bio || ""}</Text>
               </View>
               <TouchableOpacity
                 style={styles.editButton}
                 onPress={() => {
-                  setEditName(profileData?.name || "");
-                  setEditUsername(profileData?.username || "");
-                  setEditBio(profileData?.bio || "");
+                  setEditName(userData?.name || "");
+                  setEditUsername(userData?.username || "");
+                  setEditBio(userData?.bio || "");
                   setEditModalVisible(true);
                 }}
               >
@@ -804,7 +749,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         <View style={styles.divider} />
 
-        {profileDataLoading ? (
+        {profileLoading ? (
           <View style={styles.partnerRow}>
             <Shimmer radius={8} height={20} style={{ width: "100%" }} />
           </View>
@@ -814,19 +759,19 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
               Partner:{" "}
               <Text
                 style={
-                  profileData?.partnerName &&
-                  profileData?.partnerName !== "No partner"
+                  userData?.partnerName &&
+                  userData?.partnerName !== "No partner"
                     ? styles.partnerName
                     : styles.noPartnerName
                 }
               >
-                {profileData?.name || "No partner"}
+                {userData?.name || "No partner"}
               </Text>
             </Text>
           </View>
         )}
 
-        {statusLoading || moodDataLoading ? (
+        {profileLoading ? (
           <Shimmer
             radius={8}
             height={80}
@@ -836,18 +781,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <StatusMood
             status={homeStatus}
             statusDescription={statusDescription}
-            mood={moodData?.mood || "No mood set"}
-            moodDescription={moodData?.description}
-            onEdit={() => refetchMoodData()}
+            mood={userMood?.mood || "No mood set"}
+            moodDescription={userMood?.description}
+            onEdit={() => refetchProfileData()}
             onAddHome={() => {
-              refetchStatus();
+              refetchProfileData();
             }}
           />
         )}
 
-        <Anniversary onEditAnniversary={() => {}} onEditDayMet={() => {}} />
+        <Anniversary
+          specialDates={specialDates}
+          specialDatesLoading={profileLoading}
+          onEditAnniversary={() => {}}
+          onEditDayMet={() => {}}
+        />
 
-        {favoritesLoading ? (
+        {profileLoading ? (
           <Shimmer radius={8} height={150} style={{ width: "100%" }} />
         ) : (
           <Favorites
@@ -858,29 +808,41 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
         <View style={styles.divider} />
 
-        {loveLanguageLoading ? (
-          <Shimmer radius={8} height={40} style={{ width: "100%", marginBottom: 18 }} />
+        {profileLoading ? (
+          <Shimmer
+            radius={8}
+            height={40}
+            style={{ width: "100%", marginBottom: 18 }}
+          />
         ) : (
           <LoveLanguage
-            loveLanguage={loveLanguage}
+            loveLanguage={loveLanguage.loveLanguage}
             onEdit={() => setLoveLanguageModalVisible(true)}
           />
         )}
 
-        {aboutLoading ? (
-          <Shimmer radius={8} height={40} style={{ width: "100%", marginBottom: 18 }} />
+        {profileLoading ? (
+          <Shimmer
+            radius={8}
+            height={40}
+            style={{ width: "100%", marginBottom: 18 }}
+          />
         ) : (
           <MoreAboutYou
-            about={about}
+            about={aboutUser.about}
             onEdit={() => setAboutModalVisible(true)}
           />
         )}
 
-        {storedMessagesLoading ? (
-          <Shimmer radius={8} height={20} style={{ width: "100%", marginBottom: 60 }} />
+        {profileLoading ? (
+          <Shimmer
+            radius={8}
+            height={60}
+            style={{ width: "100%", marginBottom: 60 }}
+          />
         ) : (
           <MessageStorage
-            name={profileData?.partnerName || "No one"}
+            name={userData?.partnerName || "No one"}
             messages={storedMessages}
             onAdd={handleAddMessage}
             onLongPress={handleLongPressMessage}
@@ -908,7 +870,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <UpdateAboutModal
             visible={aboutModalVisible}
             loading={saving}
-            initialAbout={about}
+            initialAbout={aboutUser.about}
             onClose={() => setAboutModalVisible(false)}
             onSave={handleSaveAbout}
           />

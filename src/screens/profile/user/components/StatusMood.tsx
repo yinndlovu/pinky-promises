@@ -1,11 +1,6 @@
 // external
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQueryClient } from "@tanstack/react-query";
@@ -116,23 +111,26 @@ const StatusMood: React.FC<StatusMoodProps> = ({
     try {
       setSaving(true);
 
+      if (!token) {
+        setAlertTitle("Action Failed");
+        setAlertMessage(
+          "Couldn't add your home location. Your session may have expired. Log in again and retry"
+        );
+        setShowErrorAlert(true);
+        return;
+      }
+
       await AsyncStorage.setItem("homeLocation", JSON.stringify(location));
       await addHomeLocation(token, location.latitude, location.longitude);
       await startBackgroundLocationTracking();
 
-      setAlertTitle("Home location added");
+      setAlertTitle("Home Location Added");
       setAlertMessage(
         "You have added your home location. Your partner can now see when you are home."
       );
 
       await queryClient.invalidateQueries({
-        queryKey: ["status", user?.id],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["partnerDistance", user?.id],
+        queryKey: ["profile", user?.id],
       });
 
       setShowSuccessAlert(true);
@@ -151,13 +149,18 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   const handleSaveMood = async (newMood: string) => {
     try {
       setUpdatingMood(true);
+
+      if (!token) {
+        setAlertTitle("Action Failed");
+        setAlertMessage(
+          "Couldn't save your new mood. Your session may have expired. Log in again and retry"
+        );
+        setShowErrorAlert(true);
+        return;
+      }
+
       await updateMood(token, newMood);
-
-      await queryClient.invalidateQueries({ queryKey: ["moodData", user?.id] });
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
-      });
-
+      await queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
       setAlertTitle("Mood updated");
       setAlertMessage(`Your mood is now ${newMood}.`);
       setShowSuccessAlert(true);
@@ -172,7 +175,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       }
     } catch (err: any) {
       setAlertTitle("Failed");
-      setAlertMessage(err?.response?.data?.error || "Failed to update mood");
+      setAlertMessage(err?.response?.data?.error || "Failed to update mood.");
       setShowErrorAlert(true);
     } finally {
       setUpdatingMood(false);

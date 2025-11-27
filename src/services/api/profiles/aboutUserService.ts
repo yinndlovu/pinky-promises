@@ -1,11 +1,7 @@
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
-export async function updateAboutUser(token: string | null, about: string) {
-  if (!token) {
-    return;
-  }
-
+export async function updateAboutUser(token: string, about: string) {
   const res = await axios.put(
     `${BASE_URL}/about/update`,
     { about },
