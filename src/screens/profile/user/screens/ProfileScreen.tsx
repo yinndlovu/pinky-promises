@@ -15,7 +15,6 @@ import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -55,7 +54,7 @@ import StoreMessageModal from "../../../../components/modals/input/StoreMessageM
 import AlertModal from "../../../../components/modals/output/AlertModal";
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
-import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
+import ProfileImage from "../../../../components/common/ProfileImage";
 import Shimmer from "../../../../components/skeletons/Shimmer";
 import ErrorState from "../../../../components/common/ErrorState";
 
@@ -64,6 +63,7 @@ import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
 import { useProfileSelector } from "../../../../hooks/useProfileSelector";
 import { useProfile } from "../../../../hooks/useProfile";
+import { useRequestsCount } from "../../../../hooks/useRequests";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
@@ -144,6 +144,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     fetchPicture: fetchProfilePicture,
   } = useProfilePicture(user?.id, token);
 
+  // fetch request count
+  const { requestsCount, refetch: refetchRequests } = useRequestsCount(token);
+
   // select data from profile selector
   const userData =
     useProfileSelector(user?.id, (state) => state?.loveLanguage) || null;
@@ -153,8 +156,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     useProfileSelector(user?.id, (state) => state?.loveLanguage) || null;
   const status =
     useProfileSelector(user?.id, (state) => state?.userStatus) || null;
-  const partnerRequests =
-    useProfileSelector(user?.id, (state) => state?.partnerRequests) || [];
   const favorites =
     useProfileSelector(user?.id, (state) => state?.userFavorites) || {};
   const userMood =
@@ -219,10 +220,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     ? "You are currently not home"
     : "You must add your home location to use this feature";
 
-  const pendingRequestsCount = partnerRequests?.filter(
-    (req: any) => req.status === "pending"
-  ).length;
-
   const updateMessageMutation = useMutation({
     mutationFn: async ({
       messageId,
@@ -275,71 +272,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setShowErrorAlert(true);
     },
   });
-
-  // helpers
-  const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt && user?.id) {
-      const timestamp = Math.floor(
-        new Date(profilePicUpdatedAt).getTime() / 1000
-      );
-      const cachedImageUrl = buildCachedImageUrl(
-        user?.id.toString(),
-        timestamp
-      );
-
-      return (
-        <Image
-          source={
-            failed
-              ? require("../../../../assets/default-avatar-two.png")
-              : { uri: cachedImageUrl }
-          }
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-          onError={() => setFailed(true)}
-        />
-      );
-    }
-
-    if (!avatarFetched) {
-      return (
-        <AvatarSkeleton
-          style={styles.avatar}
-          darkColor={theme.colors.skeletonDark}
-          highlightColor={theme.colors.skeletonHighlight}
-        />
-      );
-    }
-
-    if (!avatarUri) {
-      return (
-        <Image
-          source={require("../../../../assets/default-avatar-two.png")}
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? { uri: avatarUri }
-            : require("../../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        cachePolicy="disk"
-        contentFit="cover"
-        transition={200}
-        onError={() => setFailed(true)}
-      />
-    );
-  };
 
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
@@ -665,7 +597,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           onPress={() => navigation.navigate("PendingRequests")}
         >
           <Feather name="users" size={22} color={theme.colors.text} />
-          {pendingRequestsCount > 0 && (
+          {requestsCount > 0 && (
             <View
               style={{
                 position: "absolute",
@@ -687,7 +619,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                   fontWeight: "bold",
                 }}
               >
-                {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
+                {requestsCount > 99 ? "99+" : requestsCount}
               </Text>
             </View>
           )}
@@ -725,7 +657,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                 style={styles.avatarWrapper}
                 onPress={handleAvatarPress}
               >
-                {renderProfileImage()}
+                <ProfileImage
+                  avatarUri={avatarUri}
+                  avatarFetched={avatarFetched}
+                  updatedAt={profilePicUpdatedAt}
+                  style={styles.avatar}
+                  userId={user?.id}
+                />
               </TouchableOpacity>
               <View style={styles.infoWrapper}>
                 <Text style={styles.name}>{userData?.name || ""}</Text>

@@ -1,11 +1,7 @@
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
-export async function getPartner(token: string | null) {
-  if (!token) {
-    return;
-  }
-
+export async function getPartner(token: string) {
   const res = await axios.get(`${BASE_URL}/partnership/get-partner`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -15,13 +11,9 @@ export async function getPartner(token: string | null) {
   return res.data.partner;
 }
 
-export async function sendPartnerRequest(token: string | null, partnerId: string) {
-  if (!token) {
-    return;
-  }
-
+export async function sendPartnerRequest(token: string, partnerId: string) {
   const res = await axios.post(
-    `${BASE_URL}/partnership/add-partner`,
+    `${BASE_URL}/partnership/add`,
     { partnerId },
     {
       headers: {
@@ -33,13 +25,9 @@ export async function sendPartnerRequest(token: string | null, partnerId: string
   return res.data;
 }
 
-export async function checkPendingRequest(token: string | null, partnerId: string) {
-  if (!token) {
-    return;
-  }
-
+export async function checkPendingRequest(token: string, partnerId: string) {
   const res = await axios.get(
-    `${BASE_URL}/partnership/check-pending/${partnerId}`,
+    `${BASE_URL}/partnership/request/check/${partnerId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -50,13 +38,9 @@ export async function checkPendingRequest(token: string | null, partnerId: strin
   return res.data;
 }
 
-export async function cancelPartnerRequest(token: string | null, partnerId: string) {
-  if (!token) {
-    return;
-  }
-  
+export async function cancelPartnerRequest(token: string, partnerId: string) {
   const res = await axios.delete(
-    `${BASE_URL}/partnership/cancel-request/${partnerId}`,
+    `${BASE_URL}/partnership/request/cancel/${partnerId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -67,13 +51,9 @@ export async function cancelPartnerRequest(token: string | null, partnerId: stri
   return res.data;
 }
 
-export async function getIncomingRequest(token: string | null, fromUserId: string) {
-  if (!token) {
-    return;
-  }
-
+export async function getIncomingRequest(token: string, fromUserId: string) {
   const res = await axios.get(
-    `${BASE_URL}/partnership/incoming-request/${fromUserId}`,
+    `${BASE_URL}/partnership/request/incoming/${fromUserId}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -84,13 +64,9 @@ export async function getIncomingRequest(token: string | null, fromUserId: strin
   return res.data;
 }
 
-export async function acceptPartnerRequest(token: string | null, requestId: string) {
-  if (!token) {
-    return;
-  }
-
+export async function acceptPartnerRequest(token: string, requestId: string) {
   const res = await axios.post(
-    `${BASE_URL}/partnership/accept-partner-request`,
+    `${BASE_URL}/partnership/request/accept`,
     { requestId },
     {
       headers: {
@@ -102,30 +78,29 @@ export async function acceptPartnerRequest(token: string | null, requestId: stri
   return res.data;
 }
 
-export async function getReceivedPartnerRequests(token: string | null) {
-  if (!token) {
-    return;
-  }
-
-  const res = await axios.get(
-    `${BASE_URL}/partnership/get-received-partner-requests`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+export async function getReceivedPartnerRequests(token: string) {
+  const res = await axios.get(`${BASE_URL}/partnership/requests`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return res.data.requests;
 }
 
-export async function rejectPartnerRequest(token: string | null, requestId: string) {
-  if (!token) {
-    return;
-  }
+export async function getReceivedRequestsCount(token: string) {
+  const response = await axios.get(`${BASE_URL}/partnership/requests/count`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
+  return response.data;
+}
+
+export async function rejectPartnerRequest(token: string, requestId: string) {
   const res = await axios.post(
-    `${BASE_URL}/partnership/reject-partner-request`,
+    `${BASE_URL}/partnership/request/reject`,
     { requestId },
     {
       headers: {
@@ -137,13 +112,9 @@ export async function rejectPartnerRequest(token: string | null, requestId: stri
   return res.data;
 }
 
-export async function removePartner(token: string | null) {
-  if (!token) {
-    return;
-  }
-  
+export async function removePartner(token: string) {
   const res = await axios.post(
-    `${BASE_URL}/partnership/remove-partner`,
+    `${BASE_URL}/partnership/remove`,
     {},
     {
       headers: {

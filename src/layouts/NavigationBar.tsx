@@ -8,17 +8,19 @@ import type {
 } from "@react-navigation/native";
 import type { BottomTabNavigationEventMap } from "@react-navigation/bottom-tabs";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 
 // internal
-import { buildCachedImageUrl } from "../utils/cache/imageCacheUtils";
 import { NavItem, NAV_ITEMS } from "./NavItem";
+
+// internal (hooks)
 import { useAuth } from "../contexts/AuthContext";
 import useToken from "../hooks/useToken";
 import { useProfilePicture } from "../hooks/useProfilePicture";
 import { useGift } from "../hooks/useGift";
-import AvatarSkeleton from "../components/skeletons/AvatarSkeleton";
 import { useTheme } from "../theme/ThemeContext";
+
+// content
+import ProfileImage from "../components/common/ProfileImage";
 
 // types
 type Props = {
@@ -27,7 +29,7 @@ type Props = {
 };
 
 export default function NavigationBar({ navigation, currentRoute }: Props) {
-  // variables
+  // hook variables
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
@@ -46,106 +48,23 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   } = useProfilePicture(user?.id, token);
 
   // use states
-  const [failed, setFailed] = useState(false);
   const [avatarFetched, setAvatarFetched] = useState(false);
 
   // use effects
   useEffect(() => {
-    if (token) {
+    if (token && user?.id) {
       Promise.resolve(fetchUserAvatar()).finally(() => setAvatarFetched(true));
     }
-  }, [token]);
-
-  // helpers
-  const renderProfileIcon = () => {
-    if (!avatarFetched) {
-      return (
-        <AvatarSkeleton
-          style={styles.avatar}
-          darkColor={theme.colors.skeletonDark}
-          highlightColor={theme.colors.skeletonHighlight}
-        />
-      );
-    }
-
-    if (avatarUri && profilePicUpdatedAt && user?.id) {
-      const timestamp = Math.floor(
-        new Date(profilePicUpdatedAt).getTime() / 1000
-      );
-      const cachedImageUrl = buildCachedImageUrl(
-        user?.id.toString(),
-        timestamp
-      );
-
-      return (
-        <View style={styles.avatarContainer}>
-          <Image
-            source={
-              failed
-                ? require("../assets/default-avatar-two.png")
-                : { uri: cachedImageUrl }
-            }
-            style={[
-              styles.avatar,
-              {
-                borderColor:
-                  currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
-              },
-            ]}
-            cachePolicy="disk"
-            contentFit="cover"
-            transition={200}
-            onError={() => setFailed(true)}
-          />
-        </View>
-      );
-    }
-
-    if (!avatarUri) {
-      return (
-        <Image
-          source={require("../assets/default-avatar-two.png")}
-          style={[
-            styles.avatar,
-            {
-              borderColor:
-                currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
-            },
-          ]}
-          contentFit="cover"
-          cachePolicy="disk"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? { uri: avatarUri }
-            : require("../assets/default-avatar-two.png")
-        }
-        style={[
-          styles.avatar,
-          {
-            borderColor:
-              currentRoute === "Profile" ? ACTIVE_COLOR : INACTIVE_COLOR,
-          },
-        ]}
-        contentFit="cover"
-        cachePolicy="disk"
-        transition={200}
-        onError={() => setFailed(true)}
-      />
-    );
-  };
+  }, [token, user?.senderId]);
 
   // check if there is an unclaimed gift
   const hasUnclaimedGift = !!gift;
 
   return (
-    <SafeAreaView edges={["bottom"]} style={{ backgroundColor: theme.colors.background }}>
+    <SafeAreaView
+      edges={["bottom"]}
+      style={{ backgroundColor: theme.colors.background }}
+    >
       <View style={styles.container}>
         {NAV_ITEMS.map((item) => {
           const isActive = currentRoute === item.name;
@@ -186,7 +105,21 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
               ]}
             >
               {item.name === "Profile" ? (
-                renderProfileIcon()
+                <ProfileImage
+                  avatarUri={avatarUri}
+                  userId={user?.id}
+                  avatarFetched={avatarFetched}
+                  updatedAt={profilePicUpdatedAt}
+                  style={[
+                    styles.avatar,
+                    {
+                      borderColor:
+                        currentRoute === "Profile"
+                          ? ACTIVE_COLOR
+                          : INACTIVE_COLOR,
+                    },
+                  ]}
+                />
               ) : (
                 <View>
                   <Feather

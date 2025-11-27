@@ -27,7 +27,7 @@ import PartnerStatusMood from "../components/PartnerStatusMood";
 import PartnerAnniversary from "../components/PartnerAnniversary";
 import PartnerMessageStorage from "../components/PartnerMessageStorage";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
-import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
+import ProfileImage from "../../../../components/common/ProfileImage";
 import Shimmer from "../../../../components/skeletons/Shimmer";
 import ErrorState from "../../../../components/common/ErrorState";
 
@@ -56,10 +56,11 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
   const [showPictureViewer, setShowPictureViewer] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [avatarFetched, setAvatarFetched] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
 
   // use states (processing)
   const [removingPartner, setRemovingPartner] = useState(false);
-  const [failed, setFailed] = useState(false);
 
   // use states (message storage)
   const [viewMessageModalVisible, setViewMessageModalVisible] = useState(false);
@@ -131,6 +132,17 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
   // format data
   const mood = partnerMood?.mood || "No mood";
   const moodDescription =
@@ -156,6 +168,11 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
   const handleRemovePartner = async () => {
     setRemovingPartner(true);
     try {
+      if (!token) {
+        setToastMessage("Couldn't remove partner. Log in again and retry.");
+        return;
+      }
+
       await removePartner(token);
       await queryClient.invalidateQueries({
         queryKey: ["partnerData", user?.id],
@@ -175,70 +192,6 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
   const handleViewMessage = (message: any) => {
     setSelectedMessage(message);
     setViewMessageModalVisible(true);
-  };
-
-  const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt && partner.id) {
-      const timestamp = Math.floor(
-        new Date(profilePicUpdatedAt).getTime() / 1000
-      );
-      const cachedImageUrl = buildCachedImageUrl(
-        partner.id.toString(),
-        timestamp
-      );
-
-      return (
-        <Image
-          source={
-            failed
-              ? require("../../../../assets/default-avatar-two.png")
-              : { uri: cachedImageUrl }
-          }
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-          onError={() => setFailed(true)}
-        />
-      );
-    }
-
-    if (!avatarFetched) {
-      return (
-        <AvatarSkeleton
-          style={styles.avatar}
-          darkColor={theme.colors.skeletonDark}
-          highlightColor={theme.colors.skeletonHighlight}
-        />
-      );
-    }
-
-    if (!avatarUri) {
-      return (
-        <Image
-          source={require("../../../../assets/default-avatar-two.png")}
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? { uri: avatarUri }
-            : require("../../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        cachePolicy="disk"
-        contentFit="cover"
-        transition={200}
-        onError={() => setFailed(true)}
-      />
-    );
   };
 
   if (profileError) {
@@ -294,7 +247,13 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
             <View style={styles.profileRow}>
               <View style={styles.avatarWrapper}>
                 <TouchableOpacity onPress={() => setShowPictureViewer(true)}>
-                  {renderProfileImage()}
+                  <ProfileImage
+                    avatarUri={avatarUri}
+                    avatarFetched={avatarFetched}
+                    updatedAt={profilePicUpdatedAt}
+                    style={styles.avatar}
+                    userId={userId}
+                  />
                 </TouchableOpacity>
               </View>
               <View style={styles.infoWrapper}>
@@ -435,6 +394,12 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
           message={selectedMessage}
           type="stored"
         />
+
+        {showToast && (
+          <View style={styles.toast}>
+            <Text style={styles.toastText}>{toastMessage}</Text>
+          </View>
+        )}
       </View>
     </View>
   );
