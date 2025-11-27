@@ -1,11 +1,7 @@
 import { BASE_URL } from "../../../configuration/config";
 import axios from "axios";
 
-export async function sendSweetMessage(token: string | null, message: string) {
-  if (!token) {
-    return;
-  }
-  
+export async function sendSweetMessage(token: string, message: string) {
   const res = await axios.post(
     `${BASE_URL}/sweet-message/send`,
     { message },
@@ -19,28 +15,17 @@ export async function sendSweetMessage(token: string | null, message: string) {
   return res.data;
 }
 
-export async function viewSweetMessage(token: string | null, sweetId: string) {
-  if (!token) {
-    return;
-  }
-
-  const res = await axios.get(
-    `${BASE_URL}/sweet-message/${sweetId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+export async function viewSweetMessage(token: string, sweetId: string) {
+  const res = await axios.get(`${BASE_URL}/sweet-message/${sweetId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
   return res.data;
 }
 
-export async function deleteSweetMessage(token: string | null, sweetId: string) {
-  if (!token) {
-    return;
-  }
-
+export async function deleteSweetMessage(token: string, sweetId: string) {
   const res = await axios.delete(
     `${BASE_URL}/sweet-message/${sweetId}/delete`,
     {
@@ -51,4 +36,24 @@ export async function deleteSweetMessage(token: string | null, sweetId: string) 
   );
 
   return res.data;
+}
+
+export async function getSentSweetMessages(token: string) {
+  const response = await axios.get(`${BASE_URL}/sweet-message/sent`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
+}
+
+export async function getReceivedSweetMessages(token: string) {
+  const response = await axios.get(`${BASE_URL}/sweet-messages/received`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.data;
 }

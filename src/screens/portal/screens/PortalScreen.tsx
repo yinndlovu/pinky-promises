@@ -4,36 +4,31 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  RefreshControl,
   Text,
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
 // internal
 import {
   sendSweetMessage,
-  getLastUnseenSweetMessage,
   viewSweetMessage,
-  getSentSweetMessages,
-  getReceivedSweetMessages,
   deleteSweetMessage,
 } from "../../../services/api/portal/sweetMessageService";
 import {
   ventToPartner,
-  getLastUnseenVentMessage,
   viewVentMessage,
-  getSentVentMessages,
-  getReceivedVentMessages,
   deleteVentMessage,
 } from "../../../services/api/portal/ventMessageService";
 import { Message } from "../../../types/Message";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useTheme } from "../../../theme/ThemeContext";
+import { usePortal } from "../../../hooks/usePortal";
+import { usePortalSelector } from "../../../hooks/usePortalSelector";
 
 // screen content
 import SweetMessagesSection from "../components/SweetMessagesSection";
@@ -76,99 +71,37 @@ export default function PortalScreen({ navigation }: Props) {
   const [inputModalVisible, setInputModalVisible] = useState(false);
 
   // use states (processing)
-  const [refreshing, setRefreshing] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // fetch functions
+  // fetch portal data
   const {
-    data: unseenSweetMessage,
-    refetch: refetchUnseenSweetMessage,
-    isLoading: unseenSweetMessageLoading,
-  } = useQuery({
-    queryKey: ["unseenSweetMessage", user?.id],
-    queryFn: async () => {
-      const unseenSweet = await getLastUnseenSweetMessage(token);
-      return unseenSweet.sweet || null;
-    },
-    enabled: !!user?.id && !!token,
-    staleTime: 0,
-  });
+    data: _portalData,
+    isLoading: portalDataLoading,
+    refetch: refetchPortalData,
+  } = usePortal(token, user?.id);
 
-  const {
-    data: unseenVentMessage,
-    refetch: refetchUnseenVentMessage,
-    isLoading: unseenVentMessageLoading,
-  } = useQuery({
-    queryKey: ["unseenVentMessage", user?.id],
-    queryFn: async () => {
-      const unseenVent = await getLastUnseenVentMessage(token);
-      return unseenVent.vent || null;
-    },
-    enabled: !!user?.id && !!token,
-    staleTime: 0,
-  });
-
-  const {
-    data: sweetMessagesSent = [],
-    refetch: refetchSweetMessagesSent,
-    isLoading: sweetMessagesSentLoading,
-  } = useQuery<Message[]>({
-    queryKey: ["sweetMessagesSent", user?.id],
-    queryFn: async () => {
-      const sentSweet = await getSentSweetMessages(token);
-      return sentSweet.sweets || sentSweet;
-    },
-    enabled: !!user?.id && !!token,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: sweetMessagesReceived = [],
-    refetch: refetchSweetMessagesReceived,
-    isLoading: sweetMessagesReceivedLoading,
-  } = useQuery<Message[]>({
-    queryKey: ["sweetMessagesReceived", user?.id],
-    queryFn: async () => {
-      const receivedSweet = await getReceivedSweetMessages(token);
-      return receivedSweet.sweets || receivedSweet;
-    },
-    enabled: !!user?.id && !!token,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: ventMessagesSent = [],
-    refetch: refetchVentMessagesSent,
-    isLoading: ventMessagesSentLoading,
-  } = useQuery<Message[]>({
-    queryKey: ["ventMessagesSent", user?.id],
-    queryFn: async () => {
-      const sentVent = await getSentVentMessages(token);
-      return sentVent.vents || sentVent;
-    },
-    enabled: !!user?.id && !!token,
-    staleTime: 1000 * 60 * 60,
-  });
-
-  const {
-    data: ventMessagesReceived = [],
-    refetch: refetchVentMessagesReceived,
-    isLoading: ventMessagesReceivedLoading,
-  } = useQuery<Message[]>({
-    queryKey: ["ventMessagesReceived", user?.id],
-    queryFn: async () => {
-      const receivedVent = await getReceivedVentMessages(token);
-      return receivedVent.vents || receivedVent;
-    },
-    enabled: !!user?.id && !!token,
-    staleTime: 1000 * 60 * 60,
-  });
+  // select portal data from selector
+  const sweetMessagesSent =
+    usePortalSelector(user?.id, (portal) => portal?.sentSweetMessages) || [];
+  const sweetMessagesReceived =
+    usePortalSelector(user?.id, (portal) => portal?.receivedSweetMessages) ||
+    [];
+  const unseenSweetMessage =
+    usePortalSelector(user?.id, (portal) => portal?.unseenSweetMessage) || null;
+  const unseenVentMessage =
+    usePortalSelector(user?.id, (portal) => portal?.unseenVentMessage) || null;
+  const ventMessagesSent =
+    usePortalSelector(user?.id, (portal) => portal?.sentVentMessages) || [];
 
   // handlers
   const handleDelete = async () => {
     try {
+      if (!token) {
+        setToastMessage("Your session has expired. Log in and retry.");
+        return;
+      }
       if (!selectedMessage) {
         return;
       }
@@ -178,14 +111,17 @@ export default function PortalScreen({ navigation }: Props) {
       if (inputType === "sweet") {
         await deleteSweetMessage(token, selectedMessage.id);
         await queryClient.invalidateQueries({
-          queryKey: ["sweetMessagesSent", user?.id],
+          queryKey: ["portal", user?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["sentSweetMessages", user?.id],
         });
 
         setToastMessage("Sweet message deleted");
       } else {
         await deleteVentMessage(token, selectedMessage.id);
         await queryClient.invalidateQueries({
-          queryKey: ["ventMessagesSent", user?.id],
+          queryKey: ["portal", user?.id],
         });
 
         setToastMessage("Vent message deleted");
@@ -194,7 +130,7 @@ export default function PortalScreen({ navigation }: Props) {
       setDeleting(false);
       setConfirmVisible(false);
     } catch (err: any) {
-      setToastMessage(err?.response?.data?.error || "Failed to delete message");
+      setToastMessage(err.response?.data?.error || "Failed to delete message");
       setDeleting(false);
       setConfirmVisible(false);
     } finally {
@@ -206,8 +142,9 @@ export default function PortalScreen({ navigation }: Props) {
   const handleLongPress = (msg: Message) => {
     const isSent =
       (inputType === "sweet" &&
-        sweetMessagesSent.some((m) => m.id === msg.id)) ||
-      (inputType === "vent" && ventMessagesSent.some((m) => m.id === msg.id));
+        sweetMessagesSent.some((m: Message) => m.id === msg.id)) ||
+      (inputType === "vent" &&
+        ventMessagesSent.some((m: Message) => m.id === msg.id));
 
     if (!isSent) {
       return;
@@ -223,28 +160,36 @@ export default function PortalScreen({ navigation }: Props) {
   };
 
   const handleSendMessage = async (text: string) => {
+    if (!token) {
+      setToastMessage("Your session has expired. Log in again and retry.");
+      return;
+    }
+
     setLoading(true);
     try {
       if (inputType === "sweet") {
         await sendSweetMessage(token, text);
         await queryClient.invalidateQueries({
-          queryKey: ["sweetMessagesSent", user?.id],
+          queryKey: ["portal", user?.id],
+        });
+        await queryClient.invalidateQueries({
+          queryKey: ["sentSweetMessages", user?.id],
         });
 
-        setAlertMessage("Message stored for your baby to find");
+        setAlertMessage("Message stored for your baby to find.");
         setAlertTitle("Message Stored");
       } else {
         await ventToPartner(token, text);
         await queryClient.invalidateQueries({
-          queryKey: ["ventMessagesSent", user?.id],
+          queryKey: ["portal", user?.id],
         });
 
         setAlertTitle("Vented Successfully");
-        setAlertMessage("Vent message stored for your baby to see");
+        setAlertMessage("Vent message stored for your baby to see.");
       }
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["portal", user?.id],
       });
 
       setInputModalVisible(false);
@@ -259,6 +204,11 @@ export default function PortalScreen({ navigation }: Props) {
   };
 
   const handleViewMessage = async (msg: Message, type: "sweet" | "vent") => {
+    if (!token) {
+      setToastMessage("Your session has expired. Log in again and retry.");
+      return;
+    }
+
     setViewLoading(true);
     try {
       let messageData;
@@ -270,63 +220,22 @@ export default function PortalScreen({ navigation }: Props) {
         const res = await viewVentMessage(token, msg.id);
         messageData = res.vent;
       }
-
       setViewedMessage(messageData);
       setViewType(type);
       setViewModalVisible(true);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["home", user?.id],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["portal", user?.id],
+      });
     } catch (err: any) {
       setToastMessage(err.response?.data?.error || "Failed to load message");
     } finally {
       setViewLoading(false);
     }
   };
-
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([
-      refetchUnseenSweetMessage(),
-      refetchUnseenVentMessage(),
-      refetchSweetMessagesReceived(),
-      refetchSweetMessagesSent(),
-      refetchVentMessagesReceived(),
-      refetchVentMessagesSent(),
-    ]);
-    setRefreshing(false);
-  };
-
-  // use effects
-  useEffect(() => {
-    if (!viewModalVisible && viewType) {
-      queryClient.invalidateQueries({
-        queryKey: [
-          viewType === "sweet" ? "unseenSweetMessage" : "unseenVentMessage",
-          user?.id,
-        ],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: [
-          viewType === "sweet" ? "sweetMessagesSent" : "ventMessagesSent",
-          user?.id,
-        ],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: [
-          viewType === "sweet"
-            ? "sweetMessagesReceived"
-            : "ventMessagesReceived",
-          user?.id,
-        ],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["portalActivityCount", user.id],
-      });
-      setViewType(null);
-    }
-  }, [viewModalVisible]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -341,43 +250,36 @@ export default function PortalScreen({ navigation }: Props) {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
 
-  {
-    deleting && (
-      <View style={styles.loadingOverlay}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
-
-  if (
-    unseenSweetMessageLoading ||
-    unseenVentMessageLoading ||
-    sweetMessagesReceivedLoading ||
-    sweetMessagesSentLoading ||
-    ventMessagesSentLoading ||
-    ventMessagesReceivedLoading
-  ) {
+  if (portalDataLoading) {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer
+          radius={8}
+          height={30}
+          style={{ width: "100%", marginTop: 15 }}
+        />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={55} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={55} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={55} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={55} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={50} style={{ width: "100%" }} />
+        <Shimmer
+          radius={8}
+          height={55}
+          style={{ width: "100%", marginBottom: 40 }}
+        />
       </ScrollView>
     </View>;
   }
@@ -404,15 +306,6 @@ export default function PortalScreen({ navigation }: Props) {
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.primary}
-            colors={[theme.colors.primary]}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
       >
         <SweetMessagesSection
           sent={sweetMessagesSent}
@@ -432,7 +325,6 @@ export default function PortalScreen({ navigation }: Props) {
 
         <VentMessagesSection
           sent={ventMessagesSent}
-          received={ventMessagesReceived}
           onLongPress={handleLongPress}
           onAdd={() => {
             setInputType("vent");

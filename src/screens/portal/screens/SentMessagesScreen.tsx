@@ -55,18 +55,22 @@ const SentMessagesScreen = () => {
   } = useQuery<Message[]>({
     queryKey: ["sentSweetMessages", user?.id],
     queryFn: async () => {
-      const res = await getSentSweetMessages(token);
+      const res = await getSentSweetMessages(token!);
       return res.sweets || res;
     },
     enabled: !!user?.id && !!token,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 60,
   });
 
   // handlers
   const handleViewMessage = async (msg: Message) => {
     setViewLoading(true);
-
     try {
+      if (!token) {
+        setToastMessage("Your session has expired. Log in again and retry.");
+        return;
+      }
+
       const res = await viewSweetMessage(token, msg.id);
       setViewedMessage(res.sweet);
       setViewModalVisible(true);
@@ -84,7 +88,7 @@ const SentMessagesScreen = () => {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
@@ -106,21 +110,29 @@ const SentMessagesScreen = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginTop: 16 }}
+        />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginBottom: 40 }}
+        />
       </ScrollView>
     </View>;
   }

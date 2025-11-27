@@ -25,12 +25,12 @@ export const accentThemes = {
     accent: "#555555",
   },
   christmas: {
-    primary: "#f02525ff",
+    primary: "#ee3f3fff",
     primaryMuted: "#db7272ff",
     accent: "#f31010ff",
   },
   valentine: {
-    primary: "#f02525ff",
+    primary: "#ee3f3fff",
     primaryMuted: "#db7272ff",
     accent: "#f31010ff",
   },

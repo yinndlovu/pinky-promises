@@ -1,8 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-export const useProfileSelector = <T>(
+export const usePortalSelector = <T>(
   userId: string | undefined,
-  selector: (profile: any) => T
+  selector: (portal: any) => T
 ): T | undefined => {
   const qc = useQueryClient();
 
@@ -10,10 +10,10 @@ export const useProfileSelector = <T>(
     return undefined;
   }
 
-  const profileData = qc.getQueryData(["profile", userId]);
-  if (!profileData) {
+  const portalData = qc.getQueryData(["portal", userId]);
+  if (!portalData) {
     return undefined;
   }
 
-  return selector(profileData);
+  return selector(portalData);
 };
