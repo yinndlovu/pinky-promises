@@ -13,18 +13,20 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+// internal (hooks)
+import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
+import { useMemories } from "../../../hooks/useMemories";
+import { useTheme } from "../../../theme/ThemeContext";
+
 // internal
 import {
   getFavoriteMemoryById,
   deleteFavoriteMemory,
   updateFavoriteMemory,
 } from "../../../services/api/ours/favoriteMemoriesService";
-import { Memory } from "../../../types/Memory";
-import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
-import useToken from "../../../hooks/useToken";
-import { useMemories } from "../../../hooks/useMemory";
-import { useTheme } from "../../../theme/ThemeContext";
+import { Memory } from "../../../types/Memory";
 
 // modals
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
@@ -69,6 +71,16 @@ const AllFavoriteMemoriesScreen = () => {
 
   // handlers
   const handleViewMemoryDetails = async (memoryId: string) => {
+    if (!token) {
+      setAlertTitle("Couldn't view memory");
+      setAlertMessage(
+        "It appears that your session has expired. " +
+          " You need to log out and log in again to continue."
+      );
+      setShowError(true);
+      return;
+    }
+
     setDetailsLoading(true);
     setDetailsModalVisible(true);
     try {
@@ -88,7 +100,9 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleAction = (action: "edit" | "delete") => {
-    if (!selectedMemory) return;
+    if (!selectedMemory) {
+      return;
+    }
     setActionModalVisible(false);
 
     if (action === "edit") {
@@ -100,9 +114,18 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleDeleteMemory = async (memory: Memory) => {
+    if (!token) {
+      setAlertTitle("Couldn't delete memory");
+      setAlertMessage(
+        "It appears that your session has expired. " +
+          " You need to log out and log in again to continue."
+      );
+      setShowError(true);
+      return;
+    }
+
     setEditLoading(true);
     setActionModalVisible(false);
-
     try {
       await deleteFavoriteMemory(token, memory.id);
 
@@ -111,15 +134,17 @@ const AllFavoriteMemoriesScreen = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", user?.id],
+        queryKey: ["ours", user?.id],
       });
 
-      setAlertTitle("Deleted");
-      setAlertMessage("Favorite memory deleted");
+      setAlertTitle("Memory Deleted");
+      setAlertMessage(
+        "You have deleted that memory from your favorite memories."
+      );
       setShowSuccess(true);
     } catch (err) {
       setAlertTitle("Failed");
-      setAlertMessage("Failed to delete favorite memory");
+      setAlertMessage("Failed to delete favorite memory.");
       setShowError(true);
     }
 
@@ -128,6 +153,16 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleSaveEditMemory = async (memoryText: string, date: string) => {
+    if (!token) {
+      setAlertTitle("Couldn't edit memory");
+      setAlertMessage(
+        "It appears that your session has expired. " +
+          " You need to log out and log in again to continue."
+      );
+      setShowError(true);
+      return;
+    }
+
     if (!editingMemory) {
       return;
     }
@@ -144,16 +179,16 @@ const AllFavoriteMemoriesScreen = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", user?.id],
+        queryKey: ["ours", user?.id],
       });
 
-      setAlertTitle("Updated");
-      setAlertMessage("Favorite memory updated");
+      setAlertTitle("Memory Updated");
+      setAlertMessage("You have made some changes in that favorite memory.");
       setShowSuccess(true);
     } catch (err: any) {
       setAlertTitle("Failed");
       setAlertMessage(
-        err.response?.data?.error || "Failed to update favorite memory"
+        err.response?.data?.error || "Failed to update favorite memory."
       );
       setShowError(true);
     }
@@ -178,21 +213,41 @@ const AllFavoriteMemoriesScreen = () => {
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Text
+          style={{
+            color: theme.colors.text,
+            textAlign: "center",
+            marginTop: 10,
+            fontSize: 16,
+            fontWeight: "bold",
+            marginBottom: 15,
+          }}
+        >
+          These are all your favorite memories
+        </Text>
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginTop: 10 }}
+        />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginBottom: 20 }}
+        />
       </ScrollView>
     </View>;
   }

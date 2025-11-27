@@ -50,7 +50,7 @@ const TimelineScreen = () => {
     data: timeline = [],
     refetch: refetchTimeline,
     isLoading: isTimelineLoading,
-  } = useTimeline(user?.id, token);
+  } = useTimeline(token, user?.id);
 
   // use effects
   useEffect(() => {
@@ -67,6 +67,10 @@ const TimelineScreen = () => {
   // handlers
   const addTimelineMutation = useMutation({
     mutationFn: async (record: string) => {
+      if (!token) {
+        setToastMessage("Your session has expired. Log in again and retry.");
+        return;
+      }
       return await createTimelineRecord(token, record);
     },
     onSuccess: () => {

@@ -59,13 +59,12 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [monthlyGiftModalVisible, setMonthlyGiftModalVisible] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
 
-  // data fetch
+  // fetch data
   const {
     data: _giftsData,
     isLoading: giftsLoading,

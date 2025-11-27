@@ -16,8 +16,9 @@ import { NavItem, NAV_ITEMS } from "./NavItem";
 import { useAuth } from "../contexts/AuthContext";
 import useToken from "../hooks/useToken";
 import { useProfilePicture } from "../hooks/useProfilePicture";
-import { useGift } from "../hooks/useGifts";
+import { useGifts } from "../hooks/useGifts";
 import { useTheme } from "../theme/ThemeContext";
+import { useGiftsSelector } from "../hooks/useGiftsSelector";
 
 // content
 import ProfileImage from "../components/common/ProfileImage";
@@ -39,13 +40,17 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   const ACTIVE_COLOR = theme.colors.primary;
   const INACTIVE_COLOR = theme.colors.muted;
 
-  // data
-  const { data: gift } = useGift(user?.id, token);
+  // fetch data
+  const { data: _giftsData } = useGifts(token, user?.id);
   const {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchUserAvatar,
   } = useProfilePicture(user?.id, token);
+
+  // select data from gifts selector
+  const gift =
+    useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) || null;
 
   // use states
   const [avatarFetched, setAvatarFetched] = useState(false);
