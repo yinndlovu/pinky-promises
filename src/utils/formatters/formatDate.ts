@@ -16,7 +16,7 @@ export function formatDateYearly(dateString: string) {
   const ampm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12;
   hours = hours === 0 ? 12 : hours;
-  const formattedHours = hours.toString().padStart(2, "0");
+  const formattedHours = hours.toString();
 
   const showYear = year !== now.getFullYear();
   return `${day} ${month}${
