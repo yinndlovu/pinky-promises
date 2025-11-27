@@ -19,6 +19,6 @@ export function useUser(token: string | null, userId?: string) {
       return await getUser(token!, userId!);
     },
     enabled: !!token && !!userId,
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60 * 12,
   });
 }

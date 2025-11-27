@@ -99,16 +99,16 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }));
   }, [rawActivities]);
 
-  const partner = useHomeSelector(user?.id, (h) => h?.partner) || null;
+  const partner = useHomeSelector(user?.id, (home) => home?.partner) || null;
   const notificationsData =
-    useHomeSelector(user?.id, (h) => h?.notifications || []) || [];
+    useHomeSelector(user?.id, (home) => home?.notifications || []) || [];
   const unseenInteractions =
-    useHomeSelector(user?.id, (h) => h?.unseenInteractions || []) || [];
+    useHomeSelector(user?.id, (home) => home?.unseenInteractions || []) || [];
   const upcomingDate =
-    useHomeSelector(user?.id, (h) => h?.upcomingSpecialDate) || null;
+    useHomeSelector(user?.id, (home) => home?.upcomingSpecialDate) || null;
   const partnerMood = useHomeSelector(user?.id, (m) => m?.partnerMood) || null;
   const partnerStatus =
-    useHomeSelector(user?.id, (m) => m?.partnerStatus) || null;
+    useHomeSelector(user?.id, (home) => home?.partnerStatus) || null;
 
   const partnerLoading = homeLoading;
   const activitiesLoading = homeLoading;

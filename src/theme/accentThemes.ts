@@ -17,7 +17,7 @@ export const accentThemes = {
   calm: {
     primary: "#4fa3ff",
     primaryMuted: "#8ac6ff",
-    accent: "#2e88f",
+    accent: "#2e88ff",
   },
   sad: {
     primary: "#7a7a7a",

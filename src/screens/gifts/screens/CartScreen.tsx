@@ -76,6 +76,10 @@ const CartScreen = () => {
   // mutations
   const addItemMutation = useMutation({
     mutationFn: async ({ item, value }: { item: string; value: string }) => {
+      if (!token) {
+        setToastMessage("Your session expired. Log in again and retry.");
+        return;
+      }
       return await addItem(token, item, value);
     },
     onSuccess: () => {
@@ -118,6 +122,10 @@ const CartScreen = () => {
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
+      if (!token) {
+        setToastMessage("Your session expired. Log in again and retry.");
+        return;
+      }
       return clearCart(token);
     },
     onSuccess: () => {

@@ -16,7 +16,7 @@ import { NavItem, NAV_ITEMS } from "./NavItem";
 import { useAuth } from "../contexts/AuthContext";
 import useToken from "../hooks/useToken";
 import { useProfilePicture } from "../hooks/useProfilePicture";
-import { useGift } from "../hooks/useGift";
+import { useGift } from "../hooks/useGifts";
 import { useTheme } from "../theme/ThemeContext";
 
 // content
