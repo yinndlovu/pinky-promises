@@ -12,7 +12,6 @@ export interface AppVersionInfo {
 
 export async function getLatestVersion(): Promise<AppVersionInfo> {
   const response = await axios.get(`${BASE_URL}/version/latest`);
-
   return response.data.latestVersion;
 }
 

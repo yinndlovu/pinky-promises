@@ -2,7 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function updateLoveLanguage(token: string, loveLanguage: string) {
-  const res = await axios.put(
+  const response = await axios.put(
     `${BASE_URL}/love-language/update`,
     { loveLanguage },
     {
@@ -12,5 +12,5 @@ export async function updateLoveLanguage(token: string, loveLanguage: string) {
     }
   );
 
-  return res.data.loveLanguage;
+  return response.data.loveLanguage;
 }

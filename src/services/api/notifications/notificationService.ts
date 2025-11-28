@@ -2,14 +2,10 @@ import { BASE_URL } from "../../../configuration/config";
 import axios from "axios";
 
 export async function markNotificationSeen(
-  token: string | null,
+  token: string,
   notificationId: string
 ) {
-  if (!token) {
-    return;
-  }
-
-  const res = await axios.patch(
+  const response = await axios.patch(
     `${BASE_URL}/notifications/${notificationId}/seen`,
     {},
     {
@@ -19,5 +15,5 @@ export async function markNotificationSeen(
     }
   );
 
-  return res.data;
+  return response.data;
 }

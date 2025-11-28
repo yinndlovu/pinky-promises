@@ -2,7 +2,7 @@ import { BASE_URL } from "../../../configuration/config";
 import axios from "axios";
 
 export async function sendSweetMessage(token: string, message: string) {
-  const res = await axios.post(
+  const response = await axios.post(
     `${BASE_URL}/sweet-message/send`,
     { message },
     {
@@ -12,21 +12,21 @@ export async function sendSweetMessage(token: string, message: string) {
     }
   );
 
-  return res.data;
+  return response.data;
 }
 
 export async function viewSweetMessage(token: string, sweetId: string) {
-  const res = await axios.get(`${BASE_URL}/sweet-message/${sweetId}`, {
+  const response = await axios.get(`${BASE_URL}/sweet-message/${sweetId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data;
+  return response.data;
 }
 
 export async function deleteSweetMessage(token: string, sweetId: string) {
-  const res = await axios.delete(
+  const response = await axios.delete(
     `${BASE_URL}/sweet-message/${sweetId}/delete`,
     {
       headers: {
@@ -35,7 +35,7 @@ export async function deleteSweetMessage(token: string, sweetId: string) {
     }
   );
 
-  return res.data;
+  return response.data;
 }
 
 export async function getSentSweetMessages(token: string) {

@@ -2,7 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function updateAboutUser(token: string, about: string) {
-  const res = await axios.put(
+  const response = await axios.put(
     `${BASE_URL}/about/update`,
     { about },
     {
@@ -12,5 +12,5 @@ export async function updateAboutUser(token: string, about: string) {
     }
   );
 
-  return res.data.about;
+  return response.data.about;
 }

@@ -1,9 +1,6 @@
 export const lightTheme = {
   dark: false,
   colors: {
-    primary: "#f363a8ff",
-    primaryMuted: "#db8bb0ff",
-    accent: "#e03487",
     background: "#ffffff",
     card: "#ffffff",
     text: "#20242cff",
@@ -16,7 +13,6 @@ export const lightTheme = {
     separator: "#e5e7ebff",
     separatorAlt: "#b7b8bbff",
     cancelButton: "#e5e7ebff",
-    actionButton: "rgba(238, 134, 184, 0.93)",
     absoluteFillObject: "rgba(122, 125, 173, 0.7)",
     modalOverlay: "rgba(0,0,0,0.4)",
     ripple: "rgba(228, 176, 208, 0.3)",
@@ -51,9 +47,6 @@ export const lightTheme = {
 export const darkTheme = {
   dark: true,
   colors: {
-    primary: "#e03487",
-    primaryMuted: "#a0225c",
-    accent: "#e03487",
     background: "#23243a",
     card: "#23243a",
     text: "#ffffff",
@@ -66,7 +59,6 @@ export const darkTheme = {
     separator: "#393a4a",
     separatorAlt: "#393a4a",
     cancelButton: "#393a4a",
-    actionButton: "rgba(194, 58, 124, 0.3)",
     absoluteFillObject: "rgba(35,36,58,0.7)",
     modalOverlay: "rgba(0,0,0,0.4)",
     ripple: "rgba(167, 72, 130, 0.3)",

@@ -2,7 +2,7 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function ventToPartner(token: string, message: string) {
-  const res = await axios.post(
+  const response = await axios.post(
     `${BASE_URL}/vent-message/send`,
     { message },
     {
@@ -12,25 +12,25 @@ export async function ventToPartner(token: string, message: string) {
     }
   );
 
-  return res.data;
+  return response.data;
 }
 
 export async function viewVentMessage(token: string, ventId: string) {
-  const res = await axios.get(`${BASE_URL}/vent-message/${ventId}`, {
+  const response = await axios.get(`${BASE_URL}/vent-message/${ventId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data;
+  return response.data;
 }
 
 export async function deleteVentMessage(token: string, ventId: string) {
-  const res = await axios.delete(`${BASE_URL}/vent-message/${ventId}/delete`, {
+  const response = await axios.delete(`${BASE_URL}/vent-message/${ventId}/delete`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data;
+  return response.data;
 }

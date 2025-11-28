@@ -2,13 +2,13 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function getNotificationPreferences(token: string) {
-  const res = await axios.get(`${BASE_URL}/notifications/preferences`, {
+  const response = await axios.get(`${BASE_URL}/notifications/preferences`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data;
+  return response.data;
 }
 
 export async function setNotificationPreference(
@@ -16,7 +16,7 @@ export async function setNotificationPreference(
   type: string,
   value: boolean
 ) {
-  const res = await axios.post(
+  const response = await axios.post(
     `${BASE_URL}/notifications/preference/set`,
     { type, value },
     {
@@ -26,21 +26,21 @@ export async function setNotificationPreference(
     }
   );
 
-  return res.data.value;
+  return response.data.value;
 }
 
 export async function getReminderInterval(token: string) {
-  const res = await axios.get(`${BASE_URL}/notifications/interval`, {
+  const response = await axios.get(`${BASE_URL}/notifications/interval`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data.hours;
+  return response.data.hours;
 }
 
 export async function setReminderInterval(token: string, hours: number) {
-  const res = await axios.post(
+  const response = await axios.post(
     `${BASE_URL}/notifications/interval/set`,
     { hours },
     {
@@ -50,5 +50,5 @@ export async function setReminderInterval(token: string, hours: number) {
     }
   );
 
-  return res.data.hours;
+  return response.data.hours;
 }

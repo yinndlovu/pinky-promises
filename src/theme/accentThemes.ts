@@ -4,11 +4,13 @@ export const accentThemes = {
       primary: "#f363a8ff",
       primaryMuted: "#db8bb0ff",
       accent: "#f363a8ff",
+      actionButton: "rgba(238, 134, 184, 0.93)",
     },
     dark: {
       primary: "#e03487",
       primaryMuted: "#a0225c",
       accent: "#e03487",
+      actionButton: "rgba(194, 58, 124, 0.3)",
     },
   },
   green: {

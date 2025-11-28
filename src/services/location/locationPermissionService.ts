@@ -4,14 +4,12 @@ import { LOCATION_TASK_NAME } from "../../background/LocationTask";
 
 export async function requestLocationPermissions() {
   const { status } = await Location.requestForegroundPermissionsAsync();
-
   if (status !== "granted") {
     throw new Error("Foreground location permission denied");
   }
 
   const { status: bgStatus } =
     await Location.requestBackgroundPermissionsAsync();
-
   if (bgStatus !== "granted") {
     throw new Error("Background location permission denied");
   }
@@ -25,7 +23,6 @@ export async function requestLocationPermissions() {
 export async function startBackgroundLocationTracking() {
   try {
     const isEnabled = await Location.hasServicesEnabledAsync();
-
     if (!isEnabled) {
       throw new Error("Location services are not enabled on your device");
     }
