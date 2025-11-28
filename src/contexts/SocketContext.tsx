@@ -49,9 +49,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const { user } = useAuth();
   const token = useToken();
   const partnerId = user?.partnerId;
-  console.log("PARTNER ID IN SOCKET:", partnerId);
-  console.log("USER ID IN SOCKET:", user?.id);
-  console.log("TOKEN IN SOCKET:", token);
   const queryClient = useQueryClient();
 
   const connect = () => {
@@ -251,19 +248,17 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         createdAt: string;
         userId: string;
         userName: string;
+        count: number;
       }) => {
         if (!user?.id) {
           return;
         }
 
         queryClient.invalidateQueries({
-          queryKey: ["unseenVentMessage", user.id],
+          queryKey: ["portal", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["portalActivityCount", user.id],
+          queryKey: ["home", user.id],
         });
       }
     );
@@ -282,29 +277,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         queryClient.invalidateQueries({
-          queryKey: ["unseenVentMessage", user.id],
+          queryKey: ["home", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["portalActivityCount", user.id],
+          queryKey: ["portal", user.id],
         });
-
-        queryClient.setQueryData<any[]>(
-          ["sentSweetMessages", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
-
-            if (old.some((x) => x.id === data.id)) {
-              return old;
-            }
-
-            return [data, ...old];
-          }
-        );
-
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["receivedSweetMessages", user.id],
         });
       }
     );
@@ -314,7 +293,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // Update old query for backward compatibility
       queryClient.setQueryData<any[]>(["timeline", user.id], (old) => {
         if (!old || !Array.isArray(old)) {
           return [data.newRecord];
@@ -325,19 +303,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         return [data.newRecord, ...old];
-      });
-
-      // Update home cache
-      queryClient.setQueryData(["home", user?.id], (old: any) => {
-        if (!old) return old;
-        const existingTimeline = old.timeline || [];
-        if (existingTimeline.some((x: any) => x.id === data.newRecord.id)) {
-          return old;
-        }
-        return {
-          ...old,
-          timeline: [data.newRecord, ...existingTimeline],
-        };
       });
     });
 
@@ -379,9 +344,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     s.on("favoritesUpdate", (data: { updated: any }) => {
       if (partnerId && String(partnerId) == data.updated.userId) {
-        queryClient.invalidateQueries({ queryKey: ["favorites", partnerId] });
+        queryClient.invalidateQueries({ queryKey: ["profile", partnerId] });
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["home", user.id],
         });
       }
     });
@@ -401,13 +366,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         queryClient.invalidateQueries({
-          queryKey: ["specialDates", user.id],
+          queryKey: ["ours", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["upcomingSpecialDate", user.id],
+          queryKey: ["home", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["profile", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", partnerId],
         });
       }
     );
@@ -427,13 +395,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         queryClient.invalidateQueries({
-          queryKey: ["specialDates", user.id],
+          queryKey: ["ours", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["upcomingSpecialDate", user.id],
+          queryKey: ["home", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["profile", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", partnerId],
         });
       }
     );
@@ -453,13 +424,16 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         queryClient.invalidateQueries({
-          queryKey: ["specialDates", user.id],
+          queryKey: ["ours", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["upcomingSpecialDate", user.id],
+          queryKey: ["home", user.id],
         });
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["profile", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", partnerId],
         });
       }
     );
@@ -479,23 +453,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData<any[]>(
-          ["partnerStoredMessages", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
-
-            if (old.some((x) => x.id === data.id)) {
-              return old;
-            }
-
-            return [data, ...old];
-          }
-        );
-
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["home", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", partnerId],
         });
       }
     );
@@ -515,27 +477,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData<any[]>(
-          ["partnerStoredMessages", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
-
-            const existingIndex = old.findIndex((x) => x.id === data.id);
-
-            if (existingIndex !== -1) {
-              const updated = [...old];
-              updated[existingIndex] = data;
-              return updated;
-            }
-
-            return [data, ...old];
-          }
-        );
-
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["home", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", partnerId],
         });
       }
     );
@@ -555,19 +501,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData<any[]>(
-          ["partnerStoredMessages", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [];
-            }
-
-            return old.filter((x) => x.id !== data.id);
-          }
-        );
-
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["home", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", partnerId],
         });
       }
     );
@@ -576,12 +514,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       "updateLoveLanguage",
       (data: { userId: string; loveLanguage: string }) => {
         if (partnerId && String(partnerId) === String(data.userId)) {
-          queryClient.setQueryData(
-            ["loveLanguage", partnerId],
-            data.loveLanguage
-          );
           queryClient.invalidateQueries({
-            queryKey: ["recentActivities", user.id],
+            queryKey: ["home", user.id],
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["profile", partnerId],
           });
         }
       }
@@ -603,48 +540,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        // Update old queries for backward compatibility
-        queryClient.setQueryData<any[]>(
-          ["allFavoriteMemories", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
-
-            if (old.some((x) => x.id === data.id)) {
-              return old;
-            }
-
-            return [data, ...old];
-          }
-        );
-
-        queryClient.setQueryData<any[]>(
-          ["recentFavoriteMemories", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
-
-            if (old.some((x) => x.id === data.id)) {
-              return old;
-            }
-
-            return [data, ...old];
-          }
-        );
-
-        // Update home cache
-        queryClient.setQueryData(["home", user?.id], (old: any) => {
-          if (!old) return old;
-          const existingMemories = old.favoriteMemories || [];
-          if (existingMemories.some((x: any) => x.id === data.id)) {
-            return old;
-          }
-          return {
-            ...old,
-            favoriteMemories: [data, ...existingMemories],
-          };
+        queryClient.invalidateQueries({
+          queryKey: ["ours", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["allFavoriteMemories", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["home", user.id],
         });
       }
     );
@@ -665,38 +568,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        // Update old queries for backward compatibility
-        queryClient.setQueryData<any[]>(
-          ["allFavoriteMemories", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [];
-            }
-
-            return old.filter((x) => x.id !== data.id);
-          }
-        );
-
-        queryClient.setQueryData<any[]>(
-          ["recentFavoriteMemories", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [];
-            }
-
-            return old.filter((x) => x.id !== data.id);
-          }
-        );
-
-        // Update home cache
-        queryClient.setQueryData(["home", user?.id], (old: any) => {
-          if (!old) return old;
-          return {
-            ...old,
-            favoriteMemories: (old.favoriteMemories || []).filter(
-              (x: any) => x.id !== data.id
-            ),
-          };
+        queryClient.invalidateQueries({
+          queryKey: ["ours", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["allFavoriteMemories", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["home", user.id],
         });
       }
     );
@@ -716,56 +595,25 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!user.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
-
-        queryClient.setQueryData<any[]>(
-          ["recentFavoriteMemories", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
-
-            const existingIndex = old.findIndex((x) => x.id === data.id);
-
-            if (existingIndex !== -1) {
-              const updated = [...old];
-              updated[existingIndex] = data;
-              return updated;
-            }
-
-            return [data, ...old];
-          }
-        );
-
-        queryClient.setQueryData<any[]>(
-          ["allFavoriteMemories", user.id],
-          (old) => {
-            if (!old || !Array.isArray(old)) {
-              return [data];
-            }
-
-            const existingIndex = old.findIndex((x) => x.id === data.id);
-
-            if (existingIndex !== -1) {
-              const updated = [...old];
-              updated[existingIndex] = data;
-              return updated;
-            }
-
-            return [data, ...old];
-          }
-        );
-
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["ours", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["allFavoriteMemories", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["home", user.id],
         });
       }
     );
 
     s.on("updateAbout", (data: { aboutUser: any }) => {
       if (partnerId && String(partnerId) === String(data.aboutUser.userId)) {
-        queryClient.setQueryData(["about", partnerId], data.aboutUser.about);
         queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user.id],
+          queryKey: ["home", user.id],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["profile", partnerId],
         });
       }
     });
@@ -793,38 +641,21 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
+    queryClient.invalidateQueries({ queryKey: ["portal", user?.id] });
 
-    // Also invalidate old queries for backward compatibility
     const tasks: Promise<unknown>[] = [];
 
     if (partnerId) {
       tasks.push(
-        queryClient.invalidateQueries({ queryKey: ["partnerMood", partnerId] }),
-        queryClient.invalidateQueries({ queryKey: ["status", partnerId] })
+        queryClient.invalidateQueries({ queryKey: ["profile", partnerId] }),
+        queryClient.invalidateQueries({ queryKey: ["ours", user?.id] }),
+        queryClient.invalidateQueries({ queryKey: ["timeline", user?.id] })
       );
     }
 
     tasks.push(
       queryClient.invalidateQueries({
-        queryKey: ["unseenInteractions", user.id],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user.id],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ["portalActivityCount", user.id],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ["unseenVentMessage", user.id],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ["unseenSweetMessage", user.id],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ["timeline", user.id],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ["notifications", user.id],
+        queryKey: ["gifts", user.id],
       })
     );
     Promise.allSettled(tasks);
