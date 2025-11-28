@@ -94,7 +94,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loadingUsername, setLoadingUsername] = useState(false);
   const [loadingBio, setLoadingBio] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // use states (modals)
@@ -180,11 +179,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   useEffect(() => {
     if (error) {
       setShowError(true);
-
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -230,6 +228,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       title: string;
       message: string;
     }) => {
+      if (!token) {
+        setAlertTitle("Update Failed");
+        setAlertMessage(
+          "It appears that your session has expired. Try to log in again and retry."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
       return await updateMessage(token, messageId, title, message);
     },
     onSuccess: () => {
@@ -254,6 +260,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: string) => {
+      if (!token) {
+        setAlertTitle("Delete Failed");
+        setAlertMessage(
+          "It appears that your session has expired. Try to log in again and retry."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
       return await deleteMessage(token, messageId);
     },
     onSuccess: () => {
@@ -450,6 +464,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleStoreMessage = async (title: string, message: string) => {
     setStoringMessage(true);
     try {
+      if (!token) {
+        setAlertTitle("Failed to Store");
+        setAlertMessage(
+          "It appears that your session has expired. Try to log in again and retry."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
       await storeMessage(token, title, message);
 
       setAlertTitle("Message Stored");

@@ -448,7 +448,7 @@ const OursScreen = ({ navigation }: Props) => {
         showsVerticalScrollIndicator={false}
       >
         {oursDataLoading ? (
-          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%", marginBottom: 32 }} />
         ) : (
           <NotesCanvas
             preview={notesPreview?.content}
@@ -458,7 +458,7 @@ const OursScreen = ({ navigation }: Props) => {
         )}
 
         {oursDataLoading ? (
-          <Shimmer radius={8} height={100} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={150} style={{ width: "100%", marginBottom: 32 }} />
         ) : (
           <SpecialDates
             dates={specialDates}
@@ -468,7 +468,7 @@ const OursScreen = ({ navigation }: Props) => {
         )}
 
         {oursDataLoading ? (
-          <Shimmer radius={8} height={120} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={150} style={{ width: "100%", marginBottom: 32 }} />
         ) : (
           <FavoriteMemories
             memories={favoriteMemories}

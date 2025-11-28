@@ -112,6 +112,10 @@ const CartScreen = () => {
 
   const deleteItemMutation = useMutation({
     mutationFn: async (itemId: string) => {
+      if (!token) {
+        setToastMessage("Your session has expired. Log in again and retry.");
+        return;
+      }
       return await deleteItem(token, itemId);
     },
     onSuccess: () => {

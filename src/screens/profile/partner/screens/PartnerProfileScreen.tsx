@@ -4,7 +4,6 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useLayoutEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 
@@ -240,7 +239,7 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
       >
         {profileLoading ? (
           <View style={styles.profileRow}>
-            <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+            <Shimmer radius={8} height={120} style={{ width: "100%" }} />
           </View>
         ) : (
           <>
@@ -292,29 +291,40 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
                 <Text style={styles.messageButtonText}>Message</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.divider} />
-
-            <View style={styles.partnerRow}>
-              <Text style={styles.partnerText}>
-                Partner:{" "}
-                <Text style={styles.partnerName}>
-                  {partner?.partnerName || "You"}
-                </Text>
-              </Text>
-              <Text style={styles.distanceText}>
-                {partnerDistance?.distance !== undefined
-                  ? `${formatDistance(partnerDistance.distance)} `
-                  : ""}
-                <Text style={styles.apartText}>
-                  {partnerDistance?.distance !== undefined ? "apart" : ""}
-                </Text>
-              </Text>
-            </View>
           </>
         )}
 
+        <View style={styles.divider} />
+
+        {profileLoading ? (
+          <View style={styles.partnerRow}>
+            <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          </View>
+        ) : (
+          <View style={styles.partnerRow}>
+            <Text style={styles.partnerText}>
+              Partner:{" "}
+              <Text style={styles.partnerName}>
+                {partner?.partnerName || "You"}
+              </Text>
+            </Text>
+            <Text style={styles.distanceText}>
+              {partnerDistance?.distance !== undefined
+                ? `${formatDistance(partnerDistance.distance)} `
+                : ""}
+              <Text style={styles.apartText}>
+                {partnerDistance?.distance !== undefined ? "apart" : ""}
+              </Text>
+            </Text>
+          </View>
+        )}
+
         {homeLoading || homeLoading ? (
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer
+            radius={8}
+            height={80}
+            style={{ width: "100%", marginBottom: 14 }}
+          />
         ) : (
           <PartnerStatusMood
             status={status}
@@ -331,7 +341,7 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
         />
 
         {profileLoading ? (
-          <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={150} style={{ width: "100%" }} />
         ) : (
           <PartnerFavorites
             favorites={favoritesObjectToArray(partnerFavorites)}
@@ -341,19 +351,31 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
         <View style={styles.divider} />
 
         {profileLoading ? (
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer
+            radius={8}
+            height={40}
+            style={{ width: "100%", marginBottom: 18 }}
+          />
         ) : (
           <PartnerLoveLanguage loveLanguage={loveLanguage} />
         )}
 
         {profileLoading ? (
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer
+            radius={8}
+            height={40}
+            style={{ width: "100%", marginBottom: 18 }}
+          />
         ) : (
           <PartnerMoreAboutYou about={partnerAbout} />
         )}
 
         {profileLoading ? (
-          <Shimmer radius={8} height={30} style={{ width: "100%" }} />
+          <Shimmer
+            radius={8}
+            height={60}
+            style={{ width: "100%", marginBottom: 60 }}
+          />
         ) : (
           <PartnerMessageStorage
             name={partner?.name}

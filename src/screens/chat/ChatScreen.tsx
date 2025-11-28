@@ -235,6 +235,10 @@ export default function ChatScreen() {
       socket.emit("chat:send", { message: inputText });
     } else {
       try {
+        if (!token) {
+          return;
+        }
+
         const data = await sendChatMessage(token, inputText);
 
         if (data.userMessage && data.botReply) {

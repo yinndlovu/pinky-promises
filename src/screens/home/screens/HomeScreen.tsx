@@ -164,7 +164,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -218,6 +218,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     setInteractionLoading(true);
 
     try {
+      if (!token) {
+        setError("Your session has expired. Log in again and retry.");
+        return;
+      }
       await interactWithPartner(token, action);
       await queryClient.invalidateQueries({
         queryKey: ["home", user?.id],

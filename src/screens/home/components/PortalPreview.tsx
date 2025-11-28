@@ -8,13 +8,13 @@ import {
   Animated,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useQuery } from "@tanstack/react-query";
 
 // internal
-import { getPortalActivityCount } from "../../../services/api/gifts/countService";
+import { useHomeSelector } from "../../../hooks/useHomeSelector";
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useTheme } from "../../../theme/ThemeContext";
+import { useHome } from "../../../hooks/useHome";
 
 // content
 import Shimmer from "../../../components/skeletons/Shimmer";
@@ -42,15 +42,13 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // fetch functions
-  const { data: portalActivityCount, isLoading: activityLoading } = useQuery({
-    queryKey: ["portalActivityCount", user?.id],
-    queryFn: async () => {
-      return getPortalActivityCount(token);
-    },
-    staleTime: 1000 * 60,
-    enabled: !!partner && !!token,
-  });
+  const { data: _homeData, isLoading: homeLoading } = useHome(token, user?.id);
 
+  // select data
+  const portalActivityCount =
+    useHomeSelector(user?.id, (home) => home?.counts) || null;
+
+  // allocate data
   const totalUnseen = portalActivityCount?.total || 0;
   const sweetTotal = portalActivityCount?.sweetTotal || 0;
   const ventTotal = portalActivityCount?.ventTotal || 0;
@@ -159,10 +157,10 @@ const PortalPreview: React.FC<PortalPreviewProps> = ({
     }
   };
 
-  if (activityLoading) {
+  if (homeLoading) {
     return (
       <View style={styles.container}>
-        <Shimmer radius={12} height={20} />
+        <Shimmer radius={12} height={30} />
       </View>
     );
   }

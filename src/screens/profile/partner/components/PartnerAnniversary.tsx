@@ -82,7 +82,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
   if (specialDatesLoading) {
     return (
       <View style={styles.wrapper}>
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={90} style={{ width: "100%" }} />
       </View>
     );
   }

@@ -1,4 +1,4 @@
-// ThemeProvider.serverDriven.tsx
+// external
 import React, {
   createContext,
   useContext,
@@ -10,11 +10,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Appearance } from "react-native";
 import * as Updates from "expo-updates";
 
+// internal
 import { lightTheme, darkTheme } from "./themes";
 import { AccentThemeName, accentThemes } from "./accentThemes";
 import useToken from "../hooks/useToken";
 import { getServerTheme } from "../services/api/theme/themeService";
 
+// types
 type Mode = "system" | "light" | "dark";
 
 type ServerTheme = {
