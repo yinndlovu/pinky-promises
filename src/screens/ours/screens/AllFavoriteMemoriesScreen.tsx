@@ -7,7 +7,6 @@ import {
   FlatList,
   ScrollView,
   TouchableOpacity,
-  RefreshControl,
   ActivityIndicator,
 } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
@@ -47,7 +46,6 @@ const AllFavoriteMemoriesScreen = () => {
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
-  const [refreshing, setRefreshing] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
@@ -196,13 +194,6 @@ const AllFavoriteMemoriesScreen = () => {
     setEditLoading(false);
   };
 
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetchMemories();
-    setRefreshing(false);
-  };
-
   if (memoriesLoading) {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ScrollView
@@ -292,15 +283,6 @@ const AllFavoriteMemoriesScreen = () => {
               </View>
             </TouchableOpacity>
           )}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
-              colors={[theme.colors.primary]}
-              progressBackgroundColor={theme.colors.background}
-            />
-          }
           ListEmptyComponent={
             <Text
               style={{

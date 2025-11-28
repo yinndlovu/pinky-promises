@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  RefreshControl,
 } from "react-native";
 import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";

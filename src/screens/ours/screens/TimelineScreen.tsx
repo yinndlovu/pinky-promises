@@ -11,7 +11,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  RefreshControl,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -41,7 +40,6 @@ const TimelineScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
@@ -92,13 +90,6 @@ const TimelineScreen = () => {
     if (inputValue.trim()) {
       addTimelineMutation.mutate(inputValue.trim());
     }
-  };
-
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetchTimeline();
-    setRefreshing(false);
   };
 
   return (
@@ -180,15 +171,6 @@ const TimelineScreen = () => {
             >
               No events yet. Tap + to add your first event
             </Text>
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
-              colors={[theme.colors.primary]}
-              progressBackgroundColor={theme.colors.background}
-            />
           }
         />
       )}

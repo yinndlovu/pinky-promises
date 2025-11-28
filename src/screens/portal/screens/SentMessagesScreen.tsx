@@ -7,7 +7,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  RefreshControl,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -43,7 +42,6 @@ const SentMessagesScreen = () => {
   const [showToast, setShowToast] = useState(false);
 
   // use states (processing)
-  const [refreshing, setRefreshing] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
 
   // fetch functions
@@ -92,13 +90,6 @@ const SentMessagesScreen = () => {
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
-
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetchMessages();
-    setRefreshing(false);
-  };
 
   if (messagesLoading) {
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -174,15 +165,6 @@ const SentMessagesScreen = () => {
             </TouchableOpacity>
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
-              colors={[theme.colors.primary]}
-              progressBackgroundColor={theme.colors.background}
-            />
-          }
           ListEmptyComponent={
             <Text
               style={{
