@@ -1,12 +1,6 @@
 // external
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import {
-  ScrollView,
-  View,
-  Text,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { ScrollView, View, Text, TouchableOpacity } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -45,6 +39,8 @@ import InteractionAnimationModal from "../../../components/modals/output/Interac
 import ProcessingAnimation from "../../../components/loading/ProcessingAnimation";
 import NotificationsDropdown from "../../../components/dropdowns/NotificationsDropdown";
 import AvatarSkeleton from "../../../components/skeletons/AvatarSkeleton";
+import Shimmer from "../../../components/skeletons/Shimmer";
+import ErrorState from "../../../components/common/ErrorState";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -52,13 +48,8 @@ import defaultAnimation from "../../../assets/animations/hug.json";
 
 // hooks
 import { useProfilePicture } from "../../../hooks/useProfilePicture";
-import { usePartner } from "../../../hooks/usePartner";
-import { useUserStatus } from "../../../hooks/useStatus";
-import { useUserMood } from "../../../hooks/useMood";
-import { useUpcomingSpecialDate } from "../../../hooks/useSpecialDate";
-import { useUnseenInteractions } from "../../../hooks/useInteraction";
-import { useRecentActivities } from "../../../hooks/useRecentActivity";
-import { useNotifications } from "../../../hooks/useNotifications";
+import { useHome } from "../../../hooks/useHome";
+import { useHomeSelector } from "../../../hooks/useHomeSelector";
 import useToken from "../../../hooks/useToken";
 
 // types
@@ -77,7 +68,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // use states
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
@@ -90,32 +80,47 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [animationModalVisible, setAnimationModalVisible] = useState(false);
   const [animationMessage, setAnimationMessage] = useState("");
 
-  // data
-  const { data: partner, refetch: refetchPartner } = usePartner(
-    user?.id,
-    token
-  );
-  const { data: partnerStatus, refetch: refetchPartnerStatus } = useUserStatus(
-    partner?.id,
-    token
-  );
-  const { data: partnerMood, refetch: refetchPartnerMood } = useUserMood(
-    partner?.id,
-    token
-  );
-  const { data: upcomingDate, refetch: refetchUpcomingDate } =
-    useUpcomingSpecialDate(user?.id, token);
-  const { data: unseenInteractions = [], refetch: refetchUnseen } =
-    useUnseenInteractions(user?.id, token);
-  const { data: activities = [], refetch: refetchActivities } =
-    useRecentActivities(user?.id, token);
+  // home data hook
+  const {
+    data: _homeData,
+    isLoading: homeLoading,
+    refetch: refetchHome,
+    isError: homeError,
+  } = useHome(token, user?.id);
+
+  const rawActivities =
+    useHomeSelector(user?.id, (h) => h?.recentActivities || []) || [];
+  const activities = useMemo(() => {
+    return rawActivities.map((activity: any) => ({
+      id: activity.id,
+      description: activity.activity,
+      date: formatDateDMY(activity.createdAt),
+      time: formatTime(activity.createdAt),
+    }));
+  }, [rawActivities]);
+
+  const partner = useHomeSelector(user?.id, (home) => home?.partner) || null;
+  const notificationsData =
+    useHomeSelector(user?.id, (home) => home?.notifications || []) || [];
+  const unseenInteractions =
+    useHomeSelector(user?.id, (home) => home?.unseenInteractions || []) || [];
+  const upcomingDate =
+    useHomeSelector(user?.id, (home) => home?.upcomingSpecialDate) || null;
+  const partnerMood = useHomeSelector(user?.id, (m) => m?.partnerMood) || null;
+  const partnerStatus =
+    useHomeSelector(user?.id, (home) => home?.partnerStatus) || null;
+
+  const partnerLoading = homeLoading;
+  const activitiesLoading = homeLoading;
+  const upcomingDateLoading = homeLoading;
+  const partnerMoodLoading = homeLoading;
+  const partnerStatusLoading = homeLoading;
+
   const {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchPartnerPicture,
   } = useProfilePicture(partner?.id, token);
-  const { data: notificationsData = [], refetch: refetchNotifications } =
-    useNotifications(user?.id, token);
 
   const [optimisticNotifications, setOptimisticNotifications] = useState<
     Notification[]
@@ -143,10 +148,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const run = async () => {
         await checkAndUpdateHomeStatus(token);
 
-        queryClient.invalidateQueries({ queryKey: ["status", user?.id] });
-        queryClient.invalidateQueries({
-          queryKey: ["recentActivities", user?.id],
-        });
+        queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
       };
 
       run();
@@ -162,7 +164,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -173,35 +175,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     });
     return () => unsubscribe();
   }, []);
-
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchPartner(),
-        refetchUpcomingDate(),
-        refetchActivities(),
-        refetchPartnerMood(),
-        refetchPartnerStatus(),
-        refetchUnseen(),
-        fetchPartnerPicture(),
-        refetchNotifications(),
-      ]);
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [
-    refetchPartner,
-    refetchUpcomingDate,
-    refetchActivities,
-    refetchPartnerMood,
-    refetchPartnerStatus,
-    refetchUnseen,
-    fetchPartnerPicture,
-    refetchNotifications,
-  ]);
 
   // handle toggle
   const toggleNotifications = async () => {
@@ -219,9 +192,20 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         await Promise.all(unseen.map((n) => markNotificationSeen(token, n.id)));
       }
 
-      const res = await refetchNotifications();
-      if (Array.isArray(res.data)) {
-        setOptimisticNotifications(res.data);
+      queryClient.setQueryData(["home", user?.id], (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          notifications: (old.notifications || []).map((n: any) => ({
+            ...n,
+            seen: true,
+          })),
+        };
+      });
+
+      const res = await refetchHome();
+      if (res.data && Array.isArray(res.data.notifications)) {
+        setOptimisticNotifications(res.data.notifications);
       }
     }
   };
@@ -234,9 +218,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     setInteractionLoading(true);
 
     try {
+      if (!token) {
+        setError("Your session has expired. Log in again and retry.");
+        return;
+      }
       await interactWithPartner(token, action);
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["home", user?.id],
       });
 
       setAnimationMessage(
@@ -244,7 +232,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       );
       setAnimationModalVisible(true);
       setCurrentAction(action);
-      refetchActivities();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to interact");
     } finally {
@@ -346,8 +333,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const distanceFromHome = partnerStatus?.distance ?? null;
 
   const lastSeen = partnerStatus?.updatedAt ?? null;
-  const userLocation = partnerStatus?.userLocation ?? null;
+  const userLocation = partnerStatus?.userSuburb ?? null;
   const userTimezone = partnerStatus?.timezoneOffset ?? null;
+
+  if (homeError) {
+    return (
+      <ErrorState
+        message="Failed to load overview. Try again?"
+        onRetry={() => refetchHome()}
+      />
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -484,35 +480,32 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       />
 
       <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.primary}
-            colors={[theme.colors.primary]}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.partnerLabel}>PARTNER</Text>
 
-        <ProfileCard
-          partner={partner}
-          avatarUri={avatarUri}
-          status={status}
-          statusColor={statusColor}
-          mood={mood}
-          isActive={isActive}
-          batteryLevel={batteryLevel}
-          distanceFromHome={distanceFromHome}
-          lastSeen={lastSeen}
-          onPress={() => navigation.navigate("PartnerProfile")}
-          renderPartnerImage={renderPartnerImage}
-          userLocation={userLocation}
-          userTimezone={userTimezone}
-        />
+        {partnerLoading || partnerStatusLoading || partnerMoodLoading ? (
+          <Shimmer height={120} radius={24} style={{ width: "100%" }} />
+        ) : (
+          <ProfileCard
+            partner={partner}
+            avatarUri={avatarUri}
+            status={status}
+            statusColor={statusColor}
+            mood={mood}
+            isActive={isActive}
+            batteryLevel={batteryLevel}
+            distanceFromHome={distanceFromHome}
+            lastSeen={lastSeen}
+            onPress={() =>
+              navigation.navigate("PartnerProfile", { userId: partner?.id })
+            }
+            renderPartnerImage={renderPartnerImage}
+            userLocation={userLocation}
+            userTimezone={userTimezone}
+          />
+        )}
 
         <View style={styles.buttonRow}>
           <BlurView intensity={50} tint="dark" style={styles.blurButton}>
@@ -615,8 +608,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             </View>
           </>
         )}
-
-        {upcomingDate && (
+        {upcomingDateLoading ? (
+          <View style={styles.upcomingContainer}>
+            <Shimmer height={20} radius={14} style={{ width: "100%" }} />
+          </View>
+        ) : upcomingDate ? (
           <View style={styles.upcomingContainer}>
             <Text style={styles.upcomingLabel}>UPCOMING</Text>
             <View style={styles.eventCard}>
@@ -645,11 +641,24 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               </Text>
             </View>
           </View>
-        )}
+        ) : null}
 
         <PortalPreview partner={partner} navigation={navigation} />
-
-        <RecentActivity activities={activities} />
+        {activitiesLoading ? (
+          <View>
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <View style={{ height: 12 }} />
+            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+          </View>
+        ) : (
+          <RecentActivity activities={activities} />
+        )}
       </ScrollView>
       {showError && (
         <View style={styles.toast}>

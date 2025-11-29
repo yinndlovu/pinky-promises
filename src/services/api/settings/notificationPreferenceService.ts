@@ -1,75 +1,22 @@
 import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
-export const NOTIFICATION_TYPES = [
-  {
-    key: "giftNotification",
-    label: "Gift notifications",
-    description: "Receive notifications when you receive a gift",
-  },
-  {
-    key: "interactionNotification",
-    label: "Interaction notifications",
-    description: "Receive notifications when your partner interacts with you",
-  },
-  {
-    key: "locationChangeNotification",
-    label: "Location change notifications",
-    description:
-      "Receive notifications when your partner change their home location",
-  },
-  {
-    key: "profileUpdateNotification",
-    label: "Profile update notifications",
-    description:
-      "Receive notifications when your partner updates their profile",
-  },
-  {
-    key: "oursUpdateNotification",
-    label: "Ours update notifications",
-    description:
-      "Receive notifications when your partner updates anything between you two",
-  },
-  {
-    key: "messageNotification",
-    label: "Message notifications",
-    description:
-      "Receive notifications when your partner leaves a message for you",
-  },
-  {
-    key: "movementNotification",
-    label: "Movement notifications",
-    description:
-      "Receive notifications when your partner leaves or arrives at home",
-  },
-  {
-    key: "reminderNotification",
-    label: "Reminder notifications",
-    description: "Receive casual notifications to remind you of stuff",
-  },
-];
-
-export async function getNotificationPreference(token: string, type: string) {
-  const res = await axios.get(`${BASE_URL}/notifications/preference/get`, {
-    params: { type },
+export async function getNotificationPreferences(token: string) {
+  const response = await axios.get(`${BASE_URL}/notifications/preferences`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data.value;
+  return response.data;
 }
 
 export async function setNotificationPreference(
-  token: string | null,
+  token: string,
   type: string,
   value: boolean
 ) {
-  if (!token) {
-    return;
-  }
-  
-  const res = await axios.post(
+  const response = await axios.post(
     `${BASE_URL}/notifications/preference/set`,
     { type, value },
     {
@@ -79,29 +26,21 @@ export async function setNotificationPreference(
     }
   );
 
-  return res.data.value;
+  return response.data.value;
 }
 
-export async function getReminderInterval(token: string | null) {
-  if (!token) {
-    return;
-  }
-
-  const res = await axios.get(`${BASE_URL}/notifications/interval/get`, {
+export async function getReminderInterval(token: string) {
+  const response = await axios.get(`${BASE_URL}/notifications/interval`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data.hours;
+  return response.data.hours;
 }
 
-export async function setReminderInterval(token: string | null, hours: number) {
-  if (!token) {
-    return;
-  }
-  
-  const res = await axios.post(
+export async function setReminderInterval(token: string, hours: number) {
+  const response = await axios.post(
     `${BASE_URL}/notifications/interval/set`,
     { hours },
     {
@@ -110,6 +49,6 @@ export async function setReminderInterval(token: string | null, hours: number) {
       },
     }
   );
-  
-  return res.data.hours;
+
+  return response.data.hours;
 }

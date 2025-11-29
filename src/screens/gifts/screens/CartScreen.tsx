@@ -9,7 +9,6 @@ import {
   Modal,
   TextInput,
   TouchableWithoutFeedback,
-  RefreshControl,
   Pressable,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -47,9 +46,6 @@ const CartScreen = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
-  // use states (processing)
-  const [refreshing, setRefreshing] = useState(false);
-
   // use states (modals)
   const [showSuccess, setShowSuccess] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -73,9 +69,25 @@ const CartScreen = () => {
     isLoading: cartTotalLoading,
   } = useCartTotal(user?.id, token);
 
+    // use effects
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
+
   // mutations
   const addItemMutation = useMutation({
     mutationFn: async ({ item, value }: { item: string; value: string }) => {
+      if (!token) {
+        setToastMessage("Your session expired. Log in again and retry.");
+        return;
+      }
       return await addItem(token, item, value);
     },
     onSuccess: () => {
@@ -100,6 +112,10 @@ const CartScreen = () => {
 
   const deleteItemMutation = useMutation({
     mutationFn: async (itemId: string) => {
+      if (!token) {
+        setToastMessage("Your session has expired. Log in again and retry.");
+        return;
+      }
       return await deleteItem(token, itemId);
     },
     onSuccess: () => {
@@ -118,6 +134,10 @@ const CartScreen = () => {
 
   const clearCartMutation = useMutation({
     mutationFn: async () => {
+      if (!token) {
+        setToastMessage("Your session expired. Log in again and retry.");
+        return;
+      }
       return clearCart(token);
     },
     onSuccess: () => {
@@ -181,28 +201,6 @@ const CartScreen = () => {
     return `${amount.toFixed(0)}`;
   };
 
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([refetchCartItems(), refetchCartTotal()]);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  // use effects
-  useEffect(() => {
-    if (toastMessage) {
-      setShowToast(true);
-      const timer = setTimeout(() => {
-        setShowToast(false);
-        setToastMessage(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [toastMessage]);
-
   const renderCartItem = (item: CartItem) => (
     <View key={item.id} style={styles.cartItem}>
       <View style={styles.itemInfo}>
@@ -252,15 +250,6 @@ const CartScreen = () => {
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[theme.colors.primary]}
-            tintColor={theme.colors.primary}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
       >
         {safeCartItems.length === 0 ? (
           renderEmptyState()

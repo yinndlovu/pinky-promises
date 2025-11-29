@@ -6,7 +6,7 @@ export async function updateGeoInfo(
   latitude: number,
   longitude: number
 ) {
-  const res = await axios.put(
+  const response = await axios.put(
     `${BASE_URL}/user-geo/update`,
     { latitude, longitude },
     {
@@ -16,5 +16,5 @@ export async function updateGeoInfo(
     }
   );
 
-  return res.data;
+  return response.data;
 }

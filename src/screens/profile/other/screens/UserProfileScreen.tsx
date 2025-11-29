@@ -15,11 +15,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import { buildCachedImageUrl } from "../../../../utils/cache/imageCacheUtils";
+
+// internal (hooks)
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
-import { getUserProfile } from "../../../../services/api/profiles/profileService";
+import { useUser } from "../../../../hooks/useProfile";
 import { usePartnerRequestStatus } from "../../../../hooks/usePartnerRequestStatus";
 import { useTheme } from "../../../../theme/ThemeContext";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 // screen content
 import AlertModal from "../../../../components/modals/output/AlertModal";
@@ -33,17 +36,18 @@ const fallbackAvatar = require("../../../../assets/default-avatar-two.png");
 type Props = NativeStackScreenProps<any, "UserProfile">;
 
 const UserProfileScreen = ({ route, navigation }: Props) => {
-  // variables
+  // param variables
   const { userId } = route.params as { userId: string };
+
+  // hook variables
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
   const token = useToken();
   const { theme } = useTheme();
   const styles = useMemo(() => createUserProfileStyles(theme), [theme]);
+  const { user } = useAuth();
 
   // use states
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [sendingRequest, setSendingRequest] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
@@ -51,6 +55,9 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
   const [failed, setFailed] = useState(false);
+
+  // fetch user
+  const { data: userData, isLoading: userDataLoading } = useUser(token, userId);
 
   // hook
   const {
@@ -61,19 +68,6 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     incomingRequestId,
     checkRequestStatus,
   } = usePartnerRequestStatus();
-
-  const fetchUser = async () => {
-    try {
-      const userData = await getUserProfile(userId, token);
-      setUser(userData);
-
-      await checkRequestStatus(token, userId);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // handlers
   const handlePartnerAction = async () => {
@@ -92,7 +86,10 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
           if (incomingRequestId) {
             await acceptRequest(token, incomingRequestId);
             await queryClient.invalidateQueries({
-              queryKey: ["partnerData", user?.id],
+              queryKey: ["home", user?.id],
+            });
+            await queryClient.invalidateQueries({
+              queryKey: ["profile", user?.id],
             });
 
             navigation.replace("PartnerProfile", { userId });
@@ -127,8 +124,6 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
 
   // use effects
   useEffect(() => {
-    fetchUser();
-
     if (token && userId) {
       fetchUserPicture();
     }
@@ -199,11 +194,11 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
   };
 
   // declarations
-  const name = user?.name || "User";
-  const username = user?.username || "user";
-  const bio = user?.bio || "";
+  const name = userData?.name || "User";
+  const username = userData?.username || "user";
+  const bio = userData?.bio || "";
 
-  if (loading) {
+  if (userDataLoading) {
     return (
       <View style={styles.centered}>
         <LoadingSpinner showMessage={false} size="medium" />
@@ -211,7 +206,7 @@ const UserProfileScreen = ({ route, navigation }: Props) => {
     );
   }
 
-  if (!user) {
+  if (!userData) {
     return (
       <View style={styles.centered}>
         <Text

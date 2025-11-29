@@ -1,23 +1,26 @@
 // external
 import { View, Text, StyleSheet } from "react-native";
-import { useMemo } from "react";
+import React, { useMemo } from "react";
 
-// internal
-import { useSpecialDates } from "../../../../hooks/useSpecialDate";
-import { useAuth } from "../../../../contexts/AuthContext";
-import useToken from "../../../../hooks/useToken";
+// internal (hooks)
 import { SpecialDate } from "../../../../types/SpecialDate";
 import { useTheme } from "../../../../theme/ThemeContext";
+// screen content
+import Shimmer from "../../../../components/skeletons/Shimmer";
 
-const PartnerAnniversary = () => {
+// types
+type PartnerAnniversaryProps = {
+  specialDates: SpecialDate[];
+  specialDatesLoading: boolean;
+};
+
+const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
+  specialDates,
+  specialDatesLoading,
+}) => {
   // variables
-  const { user } = useAuth();
-  const token = useToken();
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-
-  // fetch functions
-  const { data: specialDates = [] } = useSpecialDates(user?.id, token);
 
   // helpers
   const formatDisplayDate = (
@@ -25,7 +28,9 @@ const PartnerAnniversary = () => {
     timeInfo?: string
   ): { date: string; timeInfo?: string } => {
     if (!dateString || dateString === "Not set") {
-      return { date: "Not set" };
+      return {
+        date: "Not set",
+      };
     }
 
     try {
@@ -73,6 +78,14 @@ const PartnerAnniversary = () => {
   // declarations
   const anniversaryDisplay = getAnniversaryDisplay();
   const dayMetDisplay = getDayMetDisplay();
+
+  if (specialDatesLoading) {
+    return (
+      <View style={styles.wrapper}>
+        <Shimmer radius={8} height={90} style={{ width: "100%" }} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>

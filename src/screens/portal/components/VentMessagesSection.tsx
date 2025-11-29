@@ -12,7 +12,6 @@ import { useTheme } from "../../../theme/ThemeContext";
 
 export default function VentMessagesSection({
   sent,
-  received,
   onLongPress,
   onAdd,
   onViewMessage,

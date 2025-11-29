@@ -1,5 +1,5 @@
 // external
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   ScrollView,
   View,
@@ -10,13 +10,11 @@ import {
   Modal,
   TextInput,
   TouchableWithoutFeedback,
-  RefreshControl,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Image } from "expo-image";
 import type { StackScreenProps } from "@react-navigation/stack";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -56,35 +54,32 @@ import StoreMessageModal from "../../../../components/modals/input/StoreMessageM
 import AlertModal from "../../../../components/modals/output/AlertModal";
 import ConfirmationModal from "../../../../components/modals/selection/ConfirmationModal";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
-import LoadingSpinner from "../../../../components/loading/LoadingSpinner";
-import AvatarSkeleton from "../../../../components/skeletons/AvatarSkeleton";
+import ProfileImage from "../../../../components/common/ProfileImage";
+import Shimmer from "../../../../components/skeletons/Shimmer";
+import ErrorState from "../../../../components/common/ErrorState";
 
 // hooks
 import useToken from "../../../../hooks/useToken";
 import { useProfilePicture } from "../../../../hooks/useProfilePicture";
+import { useProfileSelector } from "../../../../hooks/useProfileSelector";
 import { useProfile } from "../../../../hooks/useProfile";
-import { useLoveLanguage } from "../../../../hooks/useLoveLanguage";
-import { useUserStatus } from "../../../../hooks/useStatus";
-import { useRequests } from "../../../../hooks/useRequests";
-import { useFavorites } from "../../../../hooks/useFavorites";
-import { usePartner } from "../../../../hooks/usePartner";
-import { useMood } from "../../../../hooks/useMood";
-import { useAbout } from "../../../../hooks/useAbout";
-import { useStoredMessages } from "../../../../hooks/useStoredMessages";
+import { useRequestsCount } from "../../../../hooks/useRequests";
 
 // types
 type ProfileScreenProps = StackScreenProps<any, any>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  // variables
+  // hook variables
   const insets = useSafeAreaInsets();
-  const HEADER_HEIGHT = 60;
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
   const styles = useMemo(() => createProfileStyles(theme), [theme]);
   const modalStyles = useMemo(() => createModalStyles(theme), [theme]);
+
+  // variables
+  const HEADER_HEIGHT = 60;
 
   // use states
   const [error, setError] = useState<string | null>(null);
@@ -98,9 +93,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [loadingName, setLoadingName] = useState(false);
   const [loadingUsername, setLoadingUsername] = useState(false);
   const [loadingBio, setLoadingBio] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // use states (modals)
@@ -137,32 +130,39 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const [editTitle, setEditTitle] = useState("");
   const [editMessageText, setEditMessageText] = useState("");
 
-  // data
+  // fetch profile data
   const {
-    data: profileData,
+    data: _profileData,
+    isLoading: profileLoading,
     refetch: refetchProfileData,
-    isLoading: profileDataLoading,
-  } = useProfile(user?.id, token);
-  const { data: loveLanguage } = useLoveLanguage(user?.id, token);
-  const { data: status, refetch: refetchStatus } = useUserStatus(
-    user?.id,
-    token
-  );
-  const { data: pendingRequestsData, refetch: refetchPendingRequestsData } =
-    useRequests(user?.id, token);
-  const { data: favorites = {} } = useFavorites(user?.id, token);
-  const { data: partnerData, refetch: refetchPartnerData } = usePartner(
-    user?.id,
-    token
-  );
-  const { data: moodData, refetch: refetchMoodData } = useMood(user?.id, token);
-  const { data: about } = useAbout(user?.id, token);
-  const { data: storedMessages = [] } = useStoredMessages(user?.id, token);
+    isError: profileError,
+  } = useProfile(token, user?.id);
   const {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchProfilePicture,
   } = useProfilePicture(user?.id, token);
+
+  // fetch request count
+  const { requestsCount, refetch: refetchRequests } = useRequestsCount(token);
+
+  // select data from profile selector
+  const userData =
+    useProfileSelector(user?.id, (state) => state?.loveLanguage) || null;
+  const specialDates =
+    useProfileSelector(user?.id, (state) => state?.specialDates) || [];
+  const loveLanguage =
+    useProfileSelector(user?.id, (state) => state?.loveLanguage) || null;
+  const status =
+    useProfileSelector(user?.id, (state) => state?.userStatus) || null;
+  const favorites =
+    useProfileSelector(user?.id, (state) => state?.userFavorites) || {};
+  const userMood =
+    useProfileSelector(user?.id, (state) => state?.userMood) || null;
+  const aboutUser =
+    useProfileSelector(user?.id, (state) => state?.aboutUser) || null;
+  const storedMessages =
+    useProfileSelector(user?.id, (state) => state?.storedMessage) || null;
 
   // use effects
   useEffect(() => {
@@ -179,11 +179,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   useEffect(() => {
     if (error) {
       setShowError(true);
-
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -203,35 +202,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  // refresh screen
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchProfileData(),
-        refetchStatus(),
-        refetchPendingRequestsData(),
-        refetchPartnerData(),
-        refetchMoodData(),
-        fetchProfilePicture(),
-      ]);
-
-      await queryClient.invalidateQueries({
-        queryKey: ["specialDates", user?.id],
-      });
-    } catch (e) {
-    } finally {
-      setRefreshing(false);
-    }
-  }, [
-    refetchPartnerData,
-    refetchMoodData,
-    refetchStatus,
-    refetchProfileData,
-    refetchPendingRequestsData,
-    fetchProfilePicture,
-  ]);
-
   const homeStatus = status?.unreachable
     ? "unreachable"
     : status?.isAtHome
@@ -248,10 +218,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     ? "You are currently not home"
     : "You must add your home location to use this feature";
 
-  const pendingRequestsCount = pendingRequestsData?.filter(
-    (req: any) => req.status === "pending"
-  ).length;
-
   const updateMessageMutation = useMutation({
     mutationFn: async ({
       messageId,
@@ -262,23 +228,31 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       title: string;
       message: string;
     }) => {
+      if (!token) {
+        setAlertTitle("Update Failed");
+        setAlertMessage(
+          "It appears that your session has expired. Try to log in again and retry."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
       return await updateMessage(token, messageId, title, message);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
 
       setEditMessageModalVisible(false);
       setEditingMessage(null);
       setEditTitle("");
       setEditMessageText("");
       setAlertTitle("Message Updated");
-      setAlertMessage("You have updated the message");
+      setAlertMessage("You have updated the message.");
       setShowSuccessAlert(true);
     },
     onError: (error: any) => {
       setAlertTitle("Failed");
       setAlertMessage(
-        error.response?.data?.error || "Failed to update message"
+        error.response?.data?.error || "Failed to update message."
       );
       setShowErrorAlert(true);
     },
@@ -286,108 +260,47 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: string) => {
+      if (!token) {
+        setAlertTitle("Delete Failed");
+        setAlertMessage(
+          "It appears that your session has expired. Try to log in again and retry."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
       return await deleteMessage(token, messageId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["storedMessages", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
 
       setConfirmationVisible(false);
       setAlertTitle("Message Deleted");
-      setAlertMessage("You have deleted the message");
+      setAlertMessage("You have deleted the message.");
       setShowSuccessAlert(true);
     },
     onError: (error: any) => {
       setAlertTitle("Failed");
       setAlertMessage(
-        error.response?.data?.error || "Failed to delete message"
+        error.response?.data?.error || "Failed to delete message."
       );
       setShowErrorAlert(true);
     },
   });
 
-  // helpers
-  const renderProfileImage = () => {
-    if (avatarUri && profilePicUpdatedAt && user?.id) {
-      const timestamp = Math.floor(
-        new Date(profilePicUpdatedAt).getTime() / 1000
-      );
-      const cachedImageUrl = buildCachedImageUrl(
-        user?.id.toString(),
-        timestamp
-      );
-
-      return (
-        <Image
-          source={
-            failed
-              ? require("../../../../assets/default-avatar-two.png")
-              : { uri: cachedImageUrl }
-          }
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-          onError={() => setFailed(true)}
-        />
-      );
-    }
-
-    if (!avatarFetched) {
-      return (
-        <AvatarSkeleton
-          style={styles.avatar}
-          darkColor={theme.colors.skeletonDark}
-          highlightColor={theme.colors.skeletonHighlight}
-        />
-      );
-    }
-
-    if (!avatarUri) {
-      return (
-        <Image
-          source={require("../../../../assets/default-avatar-two.png")}
-          style={styles.avatar}
-          cachePolicy="disk"
-          contentFit="cover"
-          transition={200}
-        />
-      );
-    }
-
-    return (
-      <Image
-        source={
-          avatarUri
-            ? { uri: avatarUri }
-            : require("../../../../assets/default-avatar-two.png")
-        }
-        style={styles.avatar}
-        cachePolicy="disk"
-        contentFit="cover"
-        transition={200}
-        onError={() => setFailed(true)}
-      />
-    );
-  };
-
   // handlers
   const handleSaveLoveLanguage = async (newLoveLanguage: string) => {
     setSaving(true);
     try {
+      if (!token) {
+        setLoveLanguageModalVisible(false);
+        setError("Session expired. Log in again and try again.");
+        return;
+      }
+
       await updateLoveLanguage(token, newLoveLanguage);
-
       await queryClient.invalidateQueries({
-        queryKey: ["loveLanguage", user?.id],
+        queryKey: ["profile", user?.id],
       });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
-      });
-
       setLoveLanguageModalVisible(false);
       setSuccess("You have updated your love language");
     } catch (err: any) {
@@ -400,18 +313,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleSaveAbout = async (newAbout: string) => {
     setSaving(true);
     try {
+      if (!token) {
+        setAboutModalVisible(false);
+        setError("Session expired. Log in again and try again.");
+        return;
+      }
+
       await updateAboutUser(token, newAbout);
-
       await queryClient.invalidateQueries({
-        queryKey: ["about", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["profile", user?.id],
       });
 
       setAboutModalVisible(false);
@@ -430,18 +340,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleSaveFavorites = async (newFavorites: FavoritesType) => {
     setSaving(true);
     try {
+      if (!token) {
+        setFavoritesModalVisible(false);
+        setError("Session expired. Log in again and retry.");
+        return;
+      }
+
       await updateUserFavorites(token, newFavorites);
-
       await queryClient.invalidateQueries({
-        queryKey: ["favorites", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["profile", user?.id],
       });
 
       setFavoritesModalVisible(false);
@@ -471,9 +378,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
     if (!result.canceled && result.assets && result.assets[0].base64) {
       try {
+        if (!token) {
+          setError("Session expired. Log in again and retry.");
+          return;
+        }
         if (result.assets[0].base64.length > 10 * 1024 * 1024) {
           setError("Image is too large. Make sure it's less than 10 MB.");
-
           return;
         }
 
@@ -483,7 +393,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         const base64String = `data:${mimeType};base64,${result.assets[0].base64}`;
 
         await updateProfilePicture(token, base64String);
-
         setSuccess("Profile picture uploaded");
         await fetchProfilePicture();
       } catch (err: any) {
@@ -493,7 +402,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         ) {
           setError("Image is too large. Make sure is less than 10 MB.");
         } else {
-          setError("Failed to upload profile picture");
+          setError(
+            err.response?.data?.error || "Failed to upload profile picture"
+          );
         }
       } finally {
         setUploading(false);
@@ -516,25 +427,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         setLoadingBio(true);
       }
 
-      await updateProfileField(field, value, token);
+      if (!token) {
+        setAlertTitle("Action Failed");
+        setAlertMessage(
+          "Couldn't update your " +
+            field +
+            ". Your session may have expired. Log in again."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
 
+      await updateProfileField(field, value, token);
       await queryClient.invalidateQueries({
-        queryKey: ["profileData", user?.id],
-      });
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["profile", user?.id],
       });
     } catch (err: any) {
-      setError(`Failed to update ${field}`);
+      setError(err.response.data.error || `Failed to update ${field}`);
     } finally {
       if (field === "name") {
         setLoadingName(false);
       }
-
       if (field === "username") {
         setLoadingUsername(false);
       }
-
       if (field === "bio") {
         setLoadingBio(false);
       }
@@ -548,15 +464,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const handleStoreMessage = async (title: string, message: string) => {
     setStoringMessage(true);
     try {
+      if (!token) {
+        setAlertTitle("Failed to Store");
+        setAlertMessage(
+          "It appears that your session has expired. Try to log in again and retry."
+        );
+        setShowErrorAlert(true);
+        return;
+      }
       await storeMessage(token, title, message);
 
       setAlertTitle("Message Stored");
-      setAlertMessage("You have stored a message");
+      setAlertMessage("You have stored a message.");
       setStoreMessageModalVisible(false);
       setShowSuccessAlert(true);
     } catch (error: any) {
       setAlertTitle("Failed");
-      setAlertMessage(error.response?.data?.error || "Failed to store message");
+      setAlertMessage(
+        error.response?.data?.error || "Failed to store message."
+      );
       setStoreMessageModalVisible(false);
       setShowErrorAlert(true);
     } finally {
@@ -605,7 +531,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       setAlertTitle("Missing Fields");
       setAlertMessage("Please fill in all fields");
       setShowErrorAlert(true);
-
       return;
     }
 
@@ -617,45 +542,25 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   // fiels for editing
-  const originalName = profileData?.name || "";
-  const originalUsername = profileData?.username || "";
-  const originalBio = profileData?.bio || "";
+  const originalName = userData?.name || "";
+  const originalUsername = userData?.username || "";
+  const originalBio = userData?.bio || "";
 
-  if (profileDataLoading) {
+  if (!userData && !profileLoading) {
     return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
-      </View>
+      <ErrorState
+        message="Ran into some trouble showing you your profile. Try again?"
+        onRetry={() => refetchProfileData()}
+      />
     );
   }
 
-  if (!profileData && !profileDataLoading) {
+  if (profileError) {
     return (
-      <View style={styles.centered}>
-        <ScrollView
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.accent}
-              colors={[theme.colors.accent]}
-              progressBackgroundColor={theme.colors.background}
-            />
-          }
-          contentContainerStyle={styles.centered}
-          showsVerticalScrollIndicator={false}
-        >
-          <Text
-            style={{
-              color: theme.colors.text,
-              fontSize: 18,
-              fontWeight: "bold",
-            }}
-          >
-            Something went wrong viewing your profile
-          </Text>
-        </ScrollView>
-      </View>
+      <ErrorState
+        message="Ran into some trouble showing you your profile. Try again?"
+        onRetry={() => refetchProfileData()}
+      />
     );
   }
 
@@ -714,7 +619,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           onPress={() => navigation.navigate("PendingRequests")}
         >
           <Feather name="users" size={22} color={theme.colors.text} />
-          {pendingRequestsCount > 0 && (
+          {requestsCount > 0 && (
             <View
               style={{
                 position: "absolute",
@@ -736,7 +641,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                   fontWeight: "bold",
                 }}
               >
-                {pendingRequestsCount > 99 ? "99+" : pendingRequestsCount}
+                {requestsCount > 99 ? "99+" : requestsCount}
               </Text>
             </View>
           )}
@@ -760,94 +665,150 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.accent}
-            colors={[theme.colors.accent]}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.profileRow}>
-          <TouchableOpacity
-            style={styles.avatarWrapper}
-            onPress={handleAvatarPress}
-          >
-            {renderProfileImage()}
-          </TouchableOpacity>
-          <View style={styles.infoWrapper}>
-            <Text style={styles.name}>{profileData?.name || ""}</Text>
-            <Text style={styles.username}>@{profileData?.username || ""}</Text>
-            <Text style={styles.bio}>{profileData?.bio || ""}</Text>
+        {profileLoading ? (
+          <View style={styles.profileRow}>
+            <Shimmer radius={8} height={120} style={{ width: "100%" }} />
           </View>
-          <TouchableOpacity
-            style={styles.editButton}
-            onPress={() => {
-              setEditName(profileData?.name || "");
-              setEditUsername(profileData?.username || "");
-              setEditBio(profileData?.bio || "");
-              setEditModalVisible(true);
-            }}
-          >
-            <Feather name="edit-2" size={22} color={theme.colors.primary} />
-          </TouchableOpacity>
-        </View>
+        ) : (
+          <>
+            <View style={styles.profileRow}>
+              <TouchableOpacity
+                style={styles.avatarWrapper}
+                onPress={handleAvatarPress}
+              >
+                <ProfileImage
+                  avatarUri={avatarUri}
+                  avatarFetched={avatarFetched}
+                  updatedAt={profilePicUpdatedAt}
+                  style={styles.avatar}
+                  userId={user?.id}
+                />
+              </TouchableOpacity>
+              <View style={styles.infoWrapper}>
+                <Text style={styles.name}>{userData?.name || ""}</Text>
+                <Text style={styles.username}>@{userData?.username || ""}</Text>
+                <Text style={styles.bio}>{userData?.bio || ""}</Text>
+              </View>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={() => {
+                  setEditName(userData?.name || "");
+                  setEditUsername(userData?.username || "");
+                  setEditBio(userData?.bio || "");
+                  setEditModalVisible(true);
+                }}
+              >
+                <Feather name="edit-2" size={22} color={theme.colors.primary} />
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
 
         <View style={styles.divider} />
 
-        <View style={styles.partnerRow}>
-          <Text style={styles.partnerText}>
-            Partner:{" "}
-            <Text
-              style={
-                partnerData?.name && partnerData?.name !== "No partner"
-                  ? styles.partnerName
-                  : styles.noPartnerName
-              }
-            >
-              {partnerData?.name || "No partner"}
+        {profileLoading ? (
+          <View style={styles.partnerRow}>
+            <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          </View>
+        ) : (
+          <View style={styles.partnerRow}>
+            <Text style={styles.partnerText}>
+              Partner:{" "}
+              <Text
+                style={
+                  userData?.partnerName &&
+                  userData?.partnerName !== "No partner"
+                    ? styles.partnerName
+                    : styles.noPartnerName
+                }
+              >
+                {userData?.name || "No partner"}
+              </Text>
             </Text>
-          </Text>
-        </View>
+          </View>
+        )}
 
-        <StatusMood
-          status={homeStatus}
-          statusDescription={statusDescription}
-          mood={moodData?.mood || "No mood set"}
-          moodDescription={moodData?.description}
-          onEdit={() => refetchMoodData()}
-          onAddHome={() => {
-            refetchStatus();
-          }}
+        {profileLoading ? (
+          <Shimmer
+            radius={8}
+            height={80}
+            style={{ width: "100%", marginBottom: 14 }}
+          />
+        ) : (
+          <StatusMood
+            status={homeStatus}
+            statusDescription={statusDescription}
+            mood={userMood?.mood || "No mood set"}
+            moodDescription={userMood?.description}
+            onEdit={() => refetchProfileData()}
+            onAddHome={() => {
+              refetchProfileData();
+            }}
+          />
+        )}
+
+        <Anniversary
+          specialDates={specialDates}
+          specialDatesLoading={profileLoading}
+          onEditAnniversary={() => {}}
+          onEditDayMet={() => {}}
         />
 
-        <Anniversary onEditAnniversary={() => {}} onEditDayMet={() => {}} />
-
-        <Favorites
-          favorites={favoritesObjectToArray(favorites)}
-          onEdit={() => setFavoritesModalVisible(true)}
-        />
+        {profileLoading ? (
+          <Shimmer radius={8} height={150} style={{ width: "100%" }} />
+        ) : (
+          <Favorites
+            favorites={favoritesObjectToArray(favorites)}
+            onEdit={() => setFavoritesModalVisible(true)}
+          />
+        )}
 
         <View style={styles.divider} />
 
-        <LoveLanguage
-          loveLanguage={loveLanguage}
-          onEdit={() => setLoveLanguageModalVisible(true)}
-        />
+        {profileLoading ? (
+          <Shimmer
+            radius={8}
+            height={40}
+            style={{ width: "100%", marginBottom: 18 }}
+          />
+        ) : (
+          <LoveLanguage
+            loveLanguage={loveLanguage.loveLanguage}
+            onEdit={() => setLoveLanguageModalVisible(true)}
+          />
+        )}
 
-        <MoreAboutYou about={about} onEdit={() => setAboutModalVisible(true)} />
+        {profileLoading ? (
+          <Shimmer
+            radius={8}
+            height={40}
+            style={{ width: "100%", marginBottom: 18 }}
+          />
+        ) : (
+          <MoreAboutYou
+            about={aboutUser.about}
+            onEdit={() => setAboutModalVisible(true)}
+          />
+        )}
 
-        <MessageStorage
-          name={partnerData?.name || "No one"}
-          messages={storedMessages}
-          onAdd={handleAddMessage}
-          onLongPress={handleLongPressMessage}
-          onPress={handleViewMessage}
-        />
+        {profileLoading ? (
+          <Shimmer
+            radius={8}
+            height={60}
+            style={{ width: "100%", marginBottom: 60 }}
+          />
+        ) : (
+          <MessageStorage
+            name={userData?.partnerName || "No one"}
+            messages={storedMessages}
+            onAdd={handleAddMessage}
+            onLongPress={handleLongPressMessage}
+            onPress={handleViewMessage}
+          />
+        )}
 
         <View style={{ zIndex: 1000 }}>
           <UpdateFavoritesModal
@@ -869,7 +830,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <UpdateAboutModal
             visible={aboutModalVisible}
             loading={saving}
-            initialAbout={about}
+            initialAbout={aboutUser.about}
             onClose={() => setAboutModalVisible(false)}
             onSave={handleSaveAbout}
           />

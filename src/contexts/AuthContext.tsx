@@ -26,7 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const validateToken = async (): Promise<boolean> => {
     try {
       const token = await AsyncStorage.getItem("token");
-
       if (!token) {
         return false;
       }
@@ -41,7 +40,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (response.status === 200) {
         setUser(response.data.user);
-
         return true;
       }
       
@@ -62,7 +60,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const checkAuthStatus = async () => {
     try {
       const isValid = await validateToken();
-
       setIsAuthenticated(isValid);
     } catch (error) {
       setIsAuthenticated(false);
@@ -109,7 +106,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }

@@ -23,6 +23,7 @@ import ResetSuccessScreen from "../screens/auth/reset-password/ResetSuccessScree
 import LoginScreen from "../screens/auth/login/LoginScreen";
 import MainTabs from "./MainTabs";
 import ChatScreen from "../screens/chat/ChatScreen";
+import PartnerChatScreen from "../screens/chat/screens/MessagingScreen";
 
 // components
 import AIHeader from "./components/AIHeader";
@@ -182,6 +183,11 @@ export default function RootNavigator() {
             </TouchableOpacity>
           ),
         })}
+      />
+      <RootStack.Screen
+        name="PartnerChatScreen"
+        component={PartnerChatScreen}
+        options={{ headerShown: false }}
       />
     </RootStack.Navigator>
   );

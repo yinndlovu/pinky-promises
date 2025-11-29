@@ -5,11 +5,18 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  RefreshControl,
 } from "react-native";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// internal (hooks)
+import { useAuth } from "../../../contexts/AuthContext";
+import useToken from "../../../hooks/useToken";
+import { useMemories } from "../../../hooks/useMemories";
+import { useTheme } from "../../../theme/ThemeContext";
 
 // internal
 import {
@@ -17,30 +24,28 @@ import {
   deleteFavoriteMemory,
   updateFavoriteMemory,
 } from "../../../services/api/ours/favoriteMemoriesService";
-import { Memory } from "../../../types/Memory";
-import { useAuth } from "../../../contexts/AuthContext";
 import { formatDateDMY } from "../../../utils/formatters/formatDate";
-import useToken from "../../../hooks/useToken";
-import { useMemories } from "../../../hooks/useMemory";
-import { useTheme } from "../../../theme/ThemeContext";
+import { Memory } from "../../../types/Memory";
 
-// confirmation modal
+// modals
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
 
+// content
+import Shimmer from "../../../components/skeletons/Shimmer";
+
 const AllFavoriteMemoriesScreen = () => {
-  // variables
+  // hooks
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const currentUserId = user?.id;
   const token = useToken();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
-  const [refreshing, setRefreshing] = useState(false);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsMemory, setDetailsMemory] = useState<any>(null);
@@ -64,6 +69,16 @@ const AllFavoriteMemoriesScreen = () => {
 
   // handlers
   const handleViewMemoryDetails = async (memoryId: string) => {
+    if (!token) {
+      setAlertTitle("Couldn't view memory");
+      setAlertMessage(
+        "It appears that your session has expired. " +
+          " You need to log out and log in again to continue."
+      );
+      setShowError(true);
+      return;
+    }
+
     setDetailsLoading(true);
     setDetailsModalVisible(true);
     try {
@@ -76,14 +91,16 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleLongPress = (item: Memory) => {
-    if (item.userId === currentUserId) {
+    if (item.userId === user?.id) {
       setSelectedMemory(item);
       setActionModalVisible(true);
     }
   };
 
   const handleAction = (action: "edit" | "delete") => {
-    if (!selectedMemory) return;
+    if (!selectedMemory) {
+      return;
+    }
     setActionModalVisible(false);
 
     if (action === "edit") {
@@ -95,9 +112,18 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleDeleteMemory = async (memory: Memory) => {
+    if (!token) {
+      setAlertTitle("Couldn't delete memory");
+      setAlertMessage(
+        "It appears that your session has expired. " +
+          " You need to log out and log in again to continue."
+      );
+      setShowError(true);
+      return;
+    }
+
     setEditLoading(true);
     setActionModalVisible(false);
-
     try {
       await deleteFavoriteMemory(token, memory.id);
 
@@ -106,15 +132,17 @@ const AllFavoriteMemoriesScreen = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", user?.id],
+        queryKey: ["ours", user?.id],
       });
 
-      setAlertTitle("Deleted");
-      setAlertMessage("Favorite memory deleted");
+      setAlertTitle("Memory Deleted");
+      setAlertMessage(
+        "You have deleted that memory from your favorite memories."
+      );
       setShowSuccess(true);
     } catch (err) {
       setAlertTitle("Failed");
-      setAlertMessage("Failed to delete favorite memory");
+      setAlertMessage("Failed to delete favorite memory.");
       setShowError(true);
     }
 
@@ -123,6 +151,16 @@ const AllFavoriteMemoriesScreen = () => {
   };
 
   const handleSaveEditMemory = async (memoryText: string, date: string) => {
+    if (!token) {
+      setAlertTitle("Couldn't edit memory");
+      setAlertMessage(
+        "It appears that your session has expired. " +
+          " You need to log out and log in again to continue."
+      );
+      setShowError(true);
+      return;
+    }
+
     if (!editingMemory) {
       return;
     }
@@ -139,16 +177,16 @@ const AllFavoriteMemoriesScreen = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", user?.id],
+        queryKey: ["ours", user?.id],
       });
 
-      setAlertTitle("Updated");
-      setAlertMessage("Favorite memory updated");
+      setAlertTitle("Memory Updated");
+      setAlertMessage("You have made some changes in that favorite memory.");
       setShowSuccess(true);
     } catch (err: any) {
       setAlertTitle("Failed");
       setAlertMessage(
-        err.response?.data?.error || "Failed to update favorite memory"
+        err.response?.data?.error || "Failed to update favorite memory."
       );
       setShowError(true);
     }
@@ -156,12 +194,54 @@ const AllFavoriteMemoriesScreen = () => {
     setEditLoading(false);
   };
 
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetchMemories();
-    setRefreshing(false);
-  };
+  if (memoriesLoading) {
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top,
+          backgroundColor: theme.colors.background,
+          paddingHorizontal: 16,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text
+          style={{
+            color: theme.colors.text,
+            textAlign: "center",
+            marginTop: 10,
+            fontSize: 16,
+            fontWeight: "bold",
+            marginBottom: 15,
+          }}
+        >
+          These are all your favorite memories
+        </Text>
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginTop: 10 }}
+        />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginBottom: 20 }}
+        />
+      </ScrollView>
+    </View>;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -177,12 +257,7 @@ const AllFavoriteMemoriesScreen = () => {
       >
         These are all your favorite memories
       </Text>
-      {memoriesLoading ? (
-        <ActivityIndicator
-          color={theme.colors.primary}
-          style={{ marginTop: 40 }}
-        />
-      ) : error ? (
+      {error ? (
         <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
           {error.message || "Failed to load favorite memories"}
         </Text>
@@ -208,15 +283,6 @@ const AllFavoriteMemoriesScreen = () => {
               </View>
             </TouchableOpacity>
           )}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
-              colors={[theme.colors.primary]}
-              progressBackgroundColor={theme.colors.background}
-            />
-          }
           ListEmptyComponent={
             <Text
               style={{

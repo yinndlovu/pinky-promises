@@ -1,4 +1,6 @@
 export type AnniversaryProps = {
+  specialDates: SpecialDate[];
+  specialDatesLoading: boolean;
   anniversaryDate?: string;
   dayMet?: string;
   onEditAnniversary?: () => void;

@@ -13,14 +13,17 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { AnniversaryProps, SpecialDate } from "../../../../types/SpecialDate";
 import { formatProfileDisplayDate } from "../../../../utils/formatters/formatDate";
 import useToken from "../../../../hooks/useToken";
-import { useSpecialDates } from "../../../../hooks/useSpecialDate";
 import { useTheme } from "../../../../theme/ThemeContext";
 
 // screen content
 import UpdateSpecialDateModal from "../../../../components/modals/input/UpdateSpecialDateModal";
 import AlertModal from "../../../../components/modals/output/AlertModal";
+import Shimmer from "../../../../components/skeletons/Shimmer";
 
-const Anniversary: React.FC<AnniversaryProps> = () => {
+const Anniversary: React.FC<AnniversaryProps> = ({
+  specialDates,
+  specialDatesLoading,
+}) => {
   // variables
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -39,9 +42,6 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // data
-  const { data: specialDates = [] } = useSpecialDates(user?.id, token);
 
   // helpers
   const getAnniversaryDisplay = () => {
@@ -113,6 +113,14 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
 
     if (editingDate) {
       try {
+        if (!token) {
+          setAlertTitle("Couldn't Update");
+          setAlertMessage(
+            "Your session seems to have expired. Log in again and retry."
+          );
+          setShowErrorAlert(true);
+          return;
+        }
         await updateSpecialDate(
           token,
           editingDate.id,
@@ -120,11 +128,15 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
           title,
           description
         );
-        setAlertTitle("Updated");
+        setAlertTitle(
+          modalType === "anniversary"
+            ? "Anniversary Day Updated"
+            : "Meetversary Updated"
+        );
         setAlertMessage(
           modalType === "anniversary"
-            ? "Your anniversary date has been updated."
-            : "The day you met has been updated."
+            ? "You have updated your anniversary day."
+            : "You have updated your meetversary."
         );
         setLoading(false);
         setModalVisible(false);
@@ -140,12 +152,24 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
       }
     } else {
       try {
+        if (!token) {
+          setAlertTitle("Couldn't Add");
+          setAlertMessage(
+            "Your session seems to have expired. Log in again and retry."
+          );
+          setShowErrorAlert(true);
+          return;
+        }
         await createSpecialDate(token, date, title, description);
-        setAlertTitle("Created");
+        setAlertTitle(
+          modalType === "anniversary"
+            ? "Anniversary Day Added"
+            : "Meetversary Added"
+        );
         setAlertMessage(
           modalType === "anniversary"
-            ? "Your anniversary date has been set."
-            : "The day you met has been set."
+            ? "You have added a new anniversary day."
+            : "You have added the day you first met your baby."
         );
         setLoading(false);
         setModalVisible(false);
@@ -178,6 +202,14 @@ const Anniversary: React.FC<AnniversaryProps> = () => {
   // declarations
   const anniversaryDisplay = getAnniversaryDisplay();
   const dayMetDisplay = getDayMetDisplay();
+
+  if (specialDatesLoading) {
+    return (
+      <View style={styles.wrapper}>
+        <Shimmer radius={8} height={90} style={{ width: "100%" }} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.wrapper}>

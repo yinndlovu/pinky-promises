@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { View, StyleSheet, Animated, ViewStyle } from "react-native";
 
+// types
 type Props = {
   style?: ViewStyle;
   darkColor?: string;

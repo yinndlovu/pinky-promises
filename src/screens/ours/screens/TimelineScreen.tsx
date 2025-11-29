@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   View,
+  ScrollView,
   Text,
   StyleSheet,
   TouchableOpacity,
@@ -10,10 +11,10 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  RefreshControl,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import { createTimelineRecord } from "../../../services/api/ours/timelineService";
@@ -24,7 +25,7 @@ import { useTimeline } from "../../../hooks/useTimeline";
 import { useTheme } from "../../../theme/ThemeContext";
 
 // content
-import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 const TimelineScreen = () => {
   // variables
@@ -32,13 +33,13 @@ const TimelineScreen = () => {
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
   const [modalVisible, setModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
 
@@ -47,7 +48,7 @@ const TimelineScreen = () => {
     data: timeline = [],
     refetch: refetchTimeline,
     isLoading: isTimelineLoading,
-  } = useTimeline(user?.id, token);
+  } = useTimeline(token, user?.id);
 
   // use effects
   useEffect(() => {
@@ -64,6 +65,10 @@ const TimelineScreen = () => {
   // handlers
   const addTimelineMutation = useMutation({
     mutationFn: async (record: string) => {
+      if (!token) {
+        setToastMessage("Your session has expired. Log in again and retry.");
+        return;
+      }
       return await createTimelineRecord(token, record);
     },
     onSuccess: () => {
@@ -85,13 +90,6 @@ const TimelineScreen = () => {
     if (inputValue.trim()) {
       addTimelineMutation.mutate(inputValue.trim());
     }
-  };
-
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetchTimeline();
-    setRefreshing(false);
   };
 
   return (
@@ -126,15 +124,30 @@ const TimelineScreen = () => {
       </View>
 
       {isTimelineLoading ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: insets.top,
+            backgroundColor: theme.colors.background,
+            paddingHorizontal: 16,
           }}
+          showsVerticalScrollIndicator={false}
         >
-          <LoadingSpinner showMessage={false} size="medium" />
-        </View>
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+        </ScrollView>
       ) : (
         <FlatList
           data={Array.isArray(timeline) ? timeline : []}
@@ -158,15 +171,6 @@ const TimelineScreen = () => {
             >
               No events yet. Tap + to add your first event
             </Text>
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
-              colors={[theme.colors.primary]}
-              progressBackgroundColor={theme.colors.background}
-            />
           }
         />
       )}

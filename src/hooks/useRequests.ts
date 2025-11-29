@@ -1,17 +1,35 @@
-import { useQuery } from "@tanstack/react-query";
-import { getReceivedPartnerRequests } from "../services/api/profiles/partnerService";
+import { useEffect, useState } from "react";
+import { getReceivedRequestsCount } from "../services/api/profiles/partnerService";
 
-export function useRequests(userId: string, token: string | null) {
-  return useQuery({
-    queryKey: ["pendingRequestCount", userId],
-    queryFn: async () => {
-      if (!token) {
-        return 0;
-      }
+export function useRequestsCount(token: string | null) {
+  const [requestsCount, setRequestsCount] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<any>(null);
 
-      return await getReceivedPartnerRequests(token);
-    },
-    enabled: !!token && !!userId,
-    staleTime: 1000 * 60 * 5,
-  });
+  const fetchCount = async () => {
+    if (!token) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const count = await getReceivedRequestsCount(token);
+      setRequestsCount(count);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCount();
+  }, [token]);
+
+  return {
+    requestsCount,
+    loading,
+    error,
+    refetch: fetchCount,
+  };
 }

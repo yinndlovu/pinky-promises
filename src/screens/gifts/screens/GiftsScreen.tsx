@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  RefreshControl,
   TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,20 +22,21 @@ import UpdateMonthlyGiftModal from "../../../components/modals/input/UpdateMonth
 import AlertModal from "../../../components/modals/output/AlertModal";
 
 // internal
-import { claimMonthlyGift } from "../../../services/api/gifts/monthlyGiftService";
-import { updateSetMonthlyGift } from "../../../services/api/gifts/setMonthlyGiftService";
-import { useAuth } from "../../../contexts/AuthContext";
 import {
   formatDateDMY,
   formatTime,
 } from "../../../utils/formatters/formatDate";
-import useToken from "../../../hooks/useToken";
 import {
-  useGift,
-  usePastGifts,
-  useSetMonthlyGift,
-} from "../../../hooks/useGift";
+  claimMonthlyGift,
+  updateSetMonthlyGift,
+} from "../../../services/api/gifts/giftsService";
+
+// internal (hooks)
+import { useGifts } from "../../../hooks/useGifts";
+import { useGiftsSelector } from "../../../hooks/useGiftsSelector";
 import { useTheme } from "../../../theme/ThemeContext";
+import useToken from "../../../hooks/useToken";
+import { useAuth } from "../../../contexts/AuthContext";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -59,20 +59,26 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalLoading, setModalLoading] = useState(false);
   const [monthlyGiftModalVisible, setMonthlyGiftModalVisible] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
   const [isOnline, setIsOnline] = useState(true);
 
-  // data
-  const { data: gift, refetch: refetchGift } = useGift(user?.id, token);
-  const { data: pastGifts = [], refetch: refetchPastGifts } = usePastGifts(
-    user?.id,
-    token
-  );
-  const { data: setMonthlyGift, refetch: refetchSetMonthlyGift } =
-    useSetMonthlyGift(user?.id, token);
+  // fetch data
+  const {
+    data: _giftsData,
+    isLoading: giftsLoading,
+    refetch: refetchGifts,
+    isError: giftsError,
+  } = useGifts(token, user?.id);
+
+  // select the data
+  const gift =
+    useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) || null;
+  const setMonthlyGift =
+    useGiftsSelector(user?.id, (gifts) => gifts?.setMonthlyGift) || null;
+  const pastGifts =
+    useGiftsSelector(user?.id, (gifts) => gifts?.claimedGifts) || [];
 
   // use effects
   useEffect(() => {
@@ -88,28 +94,19 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
 
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        refetchGift(),
-        refetchPastGifts(),
-        refetchSetMonthlyGift(),
-      ]);
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
   // handlers
   const handleClaim = async () => {
     if (!gift) {
+      return;
+    }
+
+    if (!token) {
+      setToastMessage("Your session has expired. Log in again and retry.");
       return;
     }
 
@@ -122,9 +119,8 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
 
       setTimeout(() => {
         queryClient.invalidateQueries({
-          queryKey: ["unclaimedGift", user?.id],
+          queryKey: ["gifts", user?.id],
         });
-        queryClient.invalidateQueries({ queryKey: ["pastGifts", user?.id] });
       }, 1000);
     } catch (err: any) {
       setToastMessage(err.response?.data?.error || "Failed to open present");
@@ -134,12 +130,16 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleSaveSetGift = async (giftName: string) => {
-    setModalLoading(true);
+    if (!token) {
+      setToastMessage("Your session has expired. Log in again and retry.");
+      return;
+    }
 
+    setModalLoading(true);
     try {
       await updateSetMonthlyGift(token, giftName);
       await queryClient.invalidateQueries({
-        queryKey: ["setMonthlyGift", user?.id],
+        queryKey: ["gifts", user?.id],
       });
       setMonthlyGiftModalVisible(false);
 
@@ -154,14 +154,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       setModalLoading(false);
     }
   };
-
-  /*if (setMonthlyGiftLoading) {
-    return (
-      <View style={styles.centered}>
-        <LoadingSpinner showMessage={false} size="medium" />
-      </View>
-    );
-  }*/
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -208,7 +200,11 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
           }}
           // onPress={() => navigation.navigate("GameListScreen")}
         >
-          <Ionicons name="game-controller-outline" size={22} color={theme.colors.text} />
+          <Ionicons
+            name="game-controller-outline"
+            size={22}
+            color={theme.colors.text}
+          />
         </TouchableOpacity>
         <Text
           style={{
@@ -241,15 +237,6 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            colors={[theme.colors.primary]}
-            tintColor={theme.colors.primary}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
       >
         <SetMonthlyGift
           giftName={setMonthlyGift?.setMonthlyGift || "No present set"}

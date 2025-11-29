@@ -13,6 +13,7 @@ export type RootStackParamList = {
   GameWaitingScreen: { roomId?: string } | undefined;
   GameSetupScreen: undefined;
   GameSessionScreen: { sessionId?: string } | undefined;
+  PartnerChatScreen: { partnerId?: string } | undefined;
 };
 
 export type HomeStackParamList = {

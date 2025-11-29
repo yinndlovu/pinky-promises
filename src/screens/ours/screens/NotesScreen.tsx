@@ -56,6 +56,11 @@ const NotesScreen: React.FC = () => {
   // use effects
   useEffect(() => {
     const fetchNotes = async () => {
+      if (!token) {
+        setError("Your session has expired. Log in again and retry.");
+        return;
+      }
+
       setLoading(true);
       setError(null);
       try {
@@ -112,6 +117,12 @@ const NotesScreen: React.FC = () => {
 
   // auto saving notes
   useEffect(() => {
+    if (!token) {
+      setError(
+        "Notes are not saving. Your session has expired. Log in again and retry."
+      );
+      return;
+    }
     if (loading || lastSavedContent.current === content) {
       return;
     }
@@ -124,7 +135,6 @@ const NotesScreen: React.FC = () => {
     saveTimeout.current = setTimeout(async () => {
       try {
         await updateNotes(token, content);
-
         lastSavedContent.current = content;
 
         if (socket?.connected) {

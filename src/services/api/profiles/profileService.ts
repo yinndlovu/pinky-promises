@@ -5,36 +5,29 @@ import { encode } from "base64-arraybuffer";
 // internal
 import { BASE_URL } from "../../../configuration/config";
 
-export async function getProfile(token: string) {
-  const response = await axios.get(`${BASE_URL}/profile/get-profile`, {
-    headers: { Authorization: `Bearer ${token}` },
+export async function getProfile(token: string, userId: string) {
+  const response = await axios.get(`${BASE_URL}/profile/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 
-  return response.data.user;
+  return response.data;
 }
 
-export async function getUserProfile(userId: string, token: string | null) {
-  if (!token) {
-    return;
-  }
-  
-  const response = await axios.get(
-    `${BASE_URL}/profile/get-user-profile/${userId}`,
-    {
-      headers: { Authorization: `Bearer ${token}` },
-    }
-  );
+export async function getUser(token: string, userId: string) {
+  const response = await axios.get(`${BASE_URL}/user/${userId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-  return response.data.profile;
+  return response.data;
 }
 
-export async function fetchProfilePicture(userId: string, token: string | null) {
-  if (!token) {
-    throw new Error("No token provided");
-  }
-
+export async function fetchProfilePicture(userId: string, token: string) {
   const response = await axios.get(
-    `${BASE_URL}/profile/get-profile-picture/${userId}`,
+    `${BASE_URL}/user/${userId}/profile-picture`,
     {
       headers: { Authorization: `Bearer ${token}` },
       responseType: "arraybuffer",
@@ -47,19 +40,18 @@ export async function fetchProfilePicture(userId: string, token: string | null) 
   const lastModified = response.headers["last-modified"];
   const updatedAt = lastModified ? new Date(lastModified) : new Date();
 
-  return { uri: base64, updatedAt };
+  return {
+    uri: base64,
+    updatedAt,
+  };
 }
 
 export async function updateProfilePicture(
-  token: string | null,
+  token: string,
   base64String: string
 ) {
-  if (!token) {
-    return;
-  }
-
   return axios.put(
-    `${BASE_URL}/profile/update-profile-picture`,
+    `${BASE_URL}/user/profile-picture/update`,
     { image: base64String },
     {
       headers: { Authorization: `Bearer ${token}` },
@@ -70,26 +62,22 @@ export async function updateProfilePicture(
 export async function updateProfileField(
   field: "name" | "username" | "bio",
   value: string,
-  token: string | null
+  token: string
 ) {
-  if (!token) {
-    return;
-  }
-  
   let url = "";
   let body: Record<string, string> = {};
 
   switch (field) {
     case "name":
-      url = `${BASE_URL}/profile/update-name`;
+      url = `${BASE_URL}/user/name/update`;
       body = { name: value };
       break;
     case "username":
-      url = `${BASE_URL}/profile/update-username`;
+      url = `${BASE_URL}/user/username/update`;
       body = { username: value };
       break;
     case "bio":
-      url = `${BASE_URL}/profile/update-bio`;
+      url = `${BASE_URL}/user/bio/update`;
       body = { bio: value };
       break;
   }

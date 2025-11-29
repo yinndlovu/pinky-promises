@@ -2,15 +2,11 @@ import axios from "axios";
 import { BASE_URL } from "../../../configuration/config";
 
 export async function storeMessage(
-  token: string | null,
+  token: string,
   title: string,
   message: string
 ) {
-  if (!token) {
-    return;
-  }
-  
-  const res = await axios.post(
+  const response = await axios.post(
     `${BASE_URL}/messages/store`,
     { title, message },
     {
@@ -20,51 +16,27 @@ export async function storeMessage(
     }
   );
 
-  return res.data;
+  return response.data;
 }
 
 export async function viewMessage(token: string, messageId: string) {
-  const res = await axios.get(`${BASE_URL}/messages/view/${messageId}`, {
+  const response = await axios.get(`${BASE_URL}/messages/${messageId}/view`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return res.data.message;
-}
-
-export async function getStoredMessages(token: string) {
-  const res = await axios.get(`${BASE_URL}/messages/stored`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data.messages;
-}
-
-export async function getReceivedMessages(token: string) {
-  const res = await axios.get(`${BASE_URL}/messages/received`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  return res.data.messages;
+  return response.data.message;
 }
 
 export async function updateMessage(
-  token: string | null,
+  token: string,
   messageId: string,
   title: string,
   message: string
 ) {
-  if (!token) {
-    return;
-  }
-
-  const res = await axios.put(
-    `${BASE_URL}/messages/update/${messageId}`,
+  const response = await axios.put(
+    `${BASE_URL}/messages/${messageId}/update`,
     {
       title,
       message,
@@ -76,22 +48,15 @@ export async function updateMessage(
     }
   );
 
-  return res.data;
+  return response.data;
 }
 
-export async function deleteMessage(token: string | null, messageId: string) {
-  if (!token) {
-    return;
-  }
+export async function deleteMessage(token: string, messageId: string) {
+  const response = await axios.delete(`${BASE_URL}/messages/${messageId}/delete`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-  const res = await axios.delete(
-    `${BASE_URL}/messages/delete/${messageId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  return res.data;
+  return response.data;
 }

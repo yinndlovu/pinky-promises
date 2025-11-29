@@ -15,10 +15,10 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 
 // internal
-import {
-  NOTIFICATION_TYPES,
-  setNotificationPreference,
-} from "../../../services/api/settings/notificationPreferenceService";
+import { setNotificationPreference } from "../../../services/api/settings/notificationPreferenceService";
+import { NOTIFICATION_TYPES } from "../../../constants/NOTIFICATION_TYPES";
+
+// internal (hooks)
 import { useAuth } from "../../../contexts/AuthContext";
 import useToken from "../../../hooks/useToken";
 import { useNotificationPrefs } from "../../../hooks/useNotificationPrefs";
@@ -49,7 +49,7 @@ const NotificationsScreen = () => {
 
   // data
   const { data: preferences = {}, isLoading: preferencesLoading } =
-    useNotificationPrefs(user?.id, token);
+    useNotificationPrefs(token, user?.id);
 
   // use effects
   useEffect(() => {
@@ -81,7 +81,9 @@ const NotificationsScreen = () => {
   const handleToggle = async (type: string, value: boolean) => {
     setUpdating((prev) => ({ ...prev, [type]: true }));
     try {
-      await setNotificationPreference(token, type, value);
+      if (token) {
+        await setNotificationPreference(token, type, value);
+      }
 
       setLocalPreferences((prev) => ({ ...prev, [type]: value }));
 

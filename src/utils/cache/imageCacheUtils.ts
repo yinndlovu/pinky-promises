@@ -14,7 +14,7 @@ export const buildCachedImageUrl = (
       ? updatedAt
       : Math.floor(new Date(updatedAt).getTime() / 1000);
 
-  return `${BASE_URL}/profile/get-profile-picture/${userId}?v=${version}`;
+  return `${BASE_URL}/user/${userId}/profile-picture?v=${version}`;
 };
 
 export const preloadProfileImages = (images: CachedImageInfo[]): void => {

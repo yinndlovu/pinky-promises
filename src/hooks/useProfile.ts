@@ -1,35 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import {
-  getUserProfile,
-  getProfile,
-} from "../services/api/profiles/profileService";
+import { getProfile, getUser } from "../services/api/profiles/profileService";
 
-export function useUserProfile(userId: string, token: string | null) {
+export function useProfile(token: string | null, userId?: string) {
   return useQuery({
-    queryKey: ["userProfile", userId],
+    queryKey: ["profile", userId],
     queryFn: async () => {
-      if (!token) {
-        return null;
-      }
-
-      return await getUserProfile(userId, token);
+      return await getProfile(token!, userId!);
     },
-    enabled: !!userId && !!token,
-    staleTime: 1000 * 60 * 5,
+    enabled: !!token && !!userId,
+    staleTime: 1000 * 60 * 10,
   });
 }
 
-export function useProfile(userId: string, token: string | null) {
+export function useUser(token: string | null, userId?: string) {
   return useQuery({
-    queryKey: ["profileData", userId],
+    queryKey: ["user", userId],
     queryFn: async () => {
-      if (!token) {
-        return null;
-      }
-
-      return await getProfile(token);
+      return await getUser(token!, userId!);
     },
     enabled: !!token && !!userId,
-    staleTime: 1000 * 60 * 60 * 24,
+    staleTime: 1000 * 60 * 60 * 12,
   });
 }

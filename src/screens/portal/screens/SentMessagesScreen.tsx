@@ -2,14 +2,14 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   View,
+  ScrollView,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  ActivityIndicator,
-  RefreshControl,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import {
@@ -25,12 +25,14 @@ import { useTheme } from "../../../theme/ThemeContext";
 // content
 import ViewMessageModal from "../../../components/modals/output/ViewMessageModal";
 import LoadingSpinner from "../../../components/loading/LoadingSpinner";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 const SentMessagesScreen = () => {
   // variables
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
+  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
@@ -40,7 +42,6 @@ const SentMessagesScreen = () => {
   const [showToast, setShowToast] = useState(false);
 
   // use states (processing)
-  const [refreshing, setRefreshing] = useState(false);
   const [viewLoading, setViewLoading] = useState(false);
 
   // fetch functions
@@ -52,18 +53,22 @@ const SentMessagesScreen = () => {
   } = useQuery<Message[]>({
     queryKey: ["sentSweetMessages", user?.id],
     queryFn: async () => {
-      const res = await getSentSweetMessages(token);
+      const res = await getSentSweetMessages(token!);
       return res.sweets || res;
     },
     enabled: !!user?.id && !!token,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 1000 * 60 * 60,
   });
 
   // handlers
   const handleViewMessage = async (msg: Message) => {
     setViewLoading(true);
-
     try {
+      if (!token) {
+        setToastMessage("Your session has expired. Log in again and retry.");
+        return;
+      }
+
       const res = await viewSweetMessage(token, msg.id);
       setViewedMessage(res.sweet);
       setViewModalVisible(true);
@@ -81,17 +86,47 @@ const SentMessagesScreen = () => {
       const timer = setTimeout(() => {
         setShowToast(false);
         setToastMessage(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
 
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refetchMessages();
-    setRefreshing(false);
-  };
+  if (messagesLoading) {
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: insets.top,
+          backgroundColor: theme.colors.background,
+          paddingHorizontal: 16,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginTop: 16 }}
+        />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <View style={{ height: 12 }} />
+        <Shimmer
+          radius={8}
+          height={40}
+          style={{ width: "100%", marginBottom: 40 }}
+        />
+      </ScrollView>
+    </View>;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -106,12 +141,7 @@ const SentMessagesScreen = () => {
       >
         These are all the sweet messages you sent
       </Text>
-      {messagesLoading ? (
-        <ActivityIndicator
-          color={theme.colors.primary}
-          style={{ marginTop: 40 }}
-        />
-      ) : error ? (
+      {error ? (
         <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
           {error.message || "Failed to load messages"}
         </Text>
@@ -135,15 +165,6 @@ const SentMessagesScreen = () => {
             </TouchableOpacity>
           )}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={theme.colors.primary}
-              colors={[theme.colors.primary]}
-              progressBackgroundColor={theme.colors.background}
-            />
-          }
           ListEmptyComponent={
             <Text
               style={{

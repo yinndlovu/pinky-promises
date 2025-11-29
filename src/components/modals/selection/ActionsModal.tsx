@@ -18,7 +18,7 @@ type ActionsModalProps = {
   visible: boolean;
   onClose: () => void;
   onAction: (actionKey: string) => void;
-};
+};34
 
 // actions
 const ACTIONS = [

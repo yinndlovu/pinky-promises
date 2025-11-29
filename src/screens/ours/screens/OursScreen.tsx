@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  RefreshControl,
 } from "react-native";
 import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
@@ -38,18 +37,20 @@ import NotesCanvas from "../components/NotesCanvas";
 import SpecialDates from "../components/SpecialDates";
 import FavoriteMemories from "../components/FavoriteMemories";
 import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
+import Shimmer from "../../../components/skeletons/Shimmer";
 
 // hooks
 import useToken from "../../../hooks/useToken";
-import { useRecentMemories } from "../../../hooks/useMemory";
-import { useNotesPreview } from "../../../hooks/useNotes";
-import { useSpecialDates } from "../../../hooks/useSpecialDate";
+import { useOurs } from "../../../hooks/useOurs";
+import { useOursSelector } from "../../../hooks/useOursSelector";
 
 type Props = NativeStackScreenProps<any>;
 
 const OursScreen = ({ navigation }: Props) => {
   // variables
   const HEADER_HEIGHT = 60;
+
+  // hooks
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -74,7 +75,6 @@ const OursScreen = ({ navigation }: Props) => {
   const [alertTitle, setAlertTitle] = useState("");
 
   // use states (processing)
-  const [refreshing, setRefreshing] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editingMemory, setEditingMemory] = useState<any | null>(null);
   const [memoryModalLoading, setMemoryModalLoading] = useState(false);
@@ -86,15 +86,19 @@ const OursScreen = ({ navigation }: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
 
-  // data
-  const { data: recentMemories = [], refetch: refetchRecentMemories } =
-    useRecentMemories(user?.id, token);
-  const { data: notesPreview, refetch: refetchNotesPreview } = useNotesPreview(
-    user?.id,
-    token
-  );
-  const { data: specialDates = [], refetch: refetchSpecialDates } =
-    useSpecialDates(user?.id, token);
+  // fetch data
+  const {
+    data: _oursData,
+    refetch: refetchOursData,
+    isLoading: oursDataLoading,
+  } = useOurs(token, user?.id);
+
+  // select data
+  const notesPreview = useOursSelector(user?.id, (ours) => ours?.notes) || null;
+  const specialDates =
+    useOursSelector(user?.id, (ours) => ours?.specialDates) || [];
+  const favoriteMemories =
+    useOursSelector(user?.id, (ours) => ours?.recentFavoriteMemories) || [];
 
   // handlers
   const handleAddSpecialDate = async (
@@ -102,34 +106,38 @@ const OursScreen = ({ navigation }: Props) => {
     title: string,
     description?: string
   ) => {
-    setAddingSpecialDate(true);
+    if (!token) {
+      setError("Your session has expired. Log in again and retry.");
+      return;
+    }
 
+    setAddingSpecialDate(true);
     try {
       await createSpecialDate(token, date, title, description);
 
-      setAlertMessage("Special date created");
-      setAlertTitle("Created");
+      setAlertMessage("You have added " + title + " into your special dates.");
+      setAlertTitle("Special Date Added");
       setShowSuccess(true);
       setAddModalVisible(false);
       setSelectedDate(null);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates", user?.id],
+        queryKey: ["ours", user?.id],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["upcomingSpecialDate", user?.id],
+        queryKey: ["profile", user?.id],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["profile", user?.partnerId],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["home", user?.id],
       });
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to add special date");
+      setError(
+        err.response?.data?.error ||
+          "Failed to add " + title + " into your special dates"
+      );
       setAddModalVisible(false);
     } finally {
       setAddModalVisible(false);
@@ -156,38 +164,48 @@ const OursScreen = ({ navigation }: Props) => {
     title: string,
     description?: string
   ) => {
-    setUpdatingSpecialDate(true);
-
+    if (!token) {
+      setError("Your session has expired. Log in again and retry.");
+      return;
+    }
     if (!selectedDate) {
+      setError("You have not selected a special date");
       return;
     }
 
+    setUpdatingSpecialDate(true);
     try {
       await updateSpecialDate(token, selectedDate.id, date, title, description);
 
-      setAlertMessage("Special date updated");
-      setAlertTitle("Updated");
+      if (title === selectedDate.title) {
+        setAlertMessage("You have updated " + title + ".");
+      } else {
+        setAlertMessage(
+          "You have updated " + selectedDate.title + " into " + title + "."
+        );
+      }
+      setAlertTitle("Special Date Updated");
       setEditModalVisible(false);
       setSelectedDate(null);
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates", user?.id],
+        queryKey: ["ours", user?.id],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["upcomingSpecialDate", user?.id],
+        queryKey: ["profile", user?.id],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["profile", user?.partnerId],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["home", user?.id],
       });
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to update special date");
+      setError(
+        err.response?.data?.error ||
+          "Failed to update " + selectedDate.title + ""
+      );
       setEditModalVisible(false);
     } finally {
       setEditModalVisible(false);
@@ -196,38 +214,44 @@ const OursScreen = ({ navigation }: Props) => {
   };
 
   const handleDeleteSpecialDate = async () => {
+    if (!token) {
+      setError("Your session has expired. Log in again and retry.");
+      return;
+    }
     if (!selectedDate) {
+      setError("You have not selected a date");
       return;
     }
 
     setDeleting(true);
-
     try {
       await deleteSpecialDate(token, selectedDate.id);
 
       setDeleteModalVisible(false);
       setSelectedDate(null);
-      setAlertMessage("Special date deleted");
-      setAlertTitle("Deleted");
+      setAlertMessage(
+        "You have deleted " + selectedDate.title + " from special dates."
+      );
+      setAlertTitle("Special Date Deleted");
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["specialDates", user?.id],
+        queryKey: ["ours", user?.id],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["upcomingSpecialDate", user?.id],
+        queryKey: ["profile", user?.id],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
+        queryKey: ["profile", user?.partnerId],
       });
-
       await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
+        queryKey: ["home", user?.id],
       });
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to delete special date");
+      setError(
+        err.response?.data?.error ||
+          "Failed to delete " + selectedDate.title + " from special dates"
+      );
     } finally {
       setDeleting(false);
       setDeleteModalVisible(false);
@@ -245,28 +269,23 @@ const OursScreen = ({ navigation }: Props) => {
   };
 
   const handleDeleteMemory = async (memory: any) => {
-    setMemoryModalLoading(true);
+    if (!token) {
+      setError("Your session has expired. Log in again and retry.");
+      return;
+    }
 
+    setMemoryModalLoading(true);
     try {
       await deleteFavoriteMemory(token, memory.id);
-      setAlertMessage("Favorite memory deleted");
-      setAlertTitle("Deleted");
+      setAlertMessage("You have deleted a favorite memory.");
+      setAlertTitle("Memory Deleted");
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", user?.id],
+        queryKey: ["ours", user?.id],
       });
-
       await queryClient.invalidateQueries({
         queryKey: ["allFavoriteMemories", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to delete favorite memory");
@@ -276,37 +295,32 @@ const OursScreen = ({ navigation }: Props) => {
   };
 
   const handleSaveMemory = async (memoryText: string, date: string) => {
-    setMemoryModalLoading(true);
+    if (!token) {
+      setError("Your session has expired. Log in again and retry.");
+      return;
+    }
 
+    setMemoryModalLoading(true);
     try {
       if (editingMemory) {
         await updateFavoriteMemory(token, editingMemory.id, memoryText, date);
 
-        setAlertMessage("Favorite memory updated");
-        setAlertTitle("Updated");
+        setAlertMessage("You have updated a favorite memory.");
+        setAlertTitle("Memory Updated");
       } else {
         await createFavoriteMemory(token, memoryText, date);
-        setAlertMessage("Favorite memory added");
-        setAlertTitle("Added");
+        setAlertMessage("You have added a new favorite memory.");
+        setAlertTitle("New Memory Added");
       }
 
       setMemoryModalVisible(false);
       setShowSuccess(true);
 
       await queryClient.invalidateQueries({
-        queryKey: ["recentFavoriteMemories", user?.id],
+        queryKey: ["ours", user?.id],
       });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["recentActivities", user?.id],
-      });
-
       await queryClient.invalidateQueries({
         queryKey: ["allFavoriteMemories", user?.id],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: ["aiContext", user?.id],
       });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to save favorite memory");
@@ -316,6 +330,13 @@ const OursScreen = ({ navigation }: Props) => {
   };
 
   const handleViewMemoryDetails = async (memoryId: string) => {
+    if (!token) {
+      setError(
+        "Action failed, your session has expired. Log in again and retry."
+      );
+      return;
+    }
+
     setDetailsLoading(true);
     setDetailsModalVisible(true);
     try {
@@ -335,7 +356,7 @@ const OursScreen = ({ navigation }: Props) => {
       const timer = setTimeout(() => {
         setShowError(false);
         setError(null);
-      }, 3000);
+      }, 4000);
       return () => clearTimeout(timer);
     }
   }, [error]);
@@ -346,17 +367,6 @@ const OursScreen = ({ navigation }: Props) => {
     });
     return () => unsubscribe();
   }, []);
-
-  // refresh screen
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await Promise.all([
-      refetchNotesPreview(),
-      refetchSpecialDates(),
-      refetchRecentMemories(),
-    ]);
-    setRefreshing(false);
-  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -435,37 +445,40 @@ const OursScreen = ({ navigation }: Props) => {
       <ScrollView
         contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.primary}
-            colors={[theme.colors.primary]}
-            progressBackgroundColor={theme.colors.background}
-          />
-        }
       >
-        <NotesCanvas
-          preview={notesPreview?.content}
-          updatedAt={notesPreview?.updatedAt}
-          onView={() => navigation.navigate("NotesScreen")}
-        />
+        {oursDataLoading ? (
+          <Shimmer radius={8} height={70} style={{ width: "100%", marginBottom: 32 }} />
+        ) : (
+          <NotesCanvas
+            preview={notesPreview?.content}
+            updatedAt={notesPreview?.updatedAt}
+            onView={() => navigation.navigate("NotesScreen")}
+          />
+        )}
 
-        <SpecialDates
-          dates={specialDates}
-          onAdd={() => setAddModalVisible(true)}
-          onLongPressDate={handleLongPressDate}
-        />
+        {oursDataLoading ? (
+          <Shimmer radius={8} height={150} style={{ width: "100%", marginBottom: 32 }} />
+        ) : (
+          <SpecialDates
+            dates={specialDates}
+            onAdd={() => setAddModalVisible(true)}
+            onLongPressDate={handleLongPressDate}
+          />
+        )}
 
-        <FavoriteMemories
-          memories={recentMemories}
-          currentUserId={user?.id}
-          onViewAll={() => navigation.navigate("AllFavoriteMemoriesScreen")}
-          onViewDetails={handleViewMemoryDetails}
-          onAdd={handleAddMemory}
-          onEdit={handleEditMemory}
-          onDelete={handleDeleteMemory}
-        />
+        {oursDataLoading ? (
+          <Shimmer radius={8} height={150} style={{ width: "100%", marginBottom: 32 }} />
+        ) : (
+          <FavoriteMemories
+            memories={favoriteMemories}
+            currentUserId={user?.id}
+            onViewAll={() => navigation.navigate("AllFavoriteMemoriesScreen")}
+            onViewDetails={handleViewMemoryDetails}
+            onAdd={handleAddMemory}
+            onEdit={handleEditMemory}
+            onDelete={handleDeleteMemory}
+          />
+        )}
       </ScrollView>
 
       <UpdateFavoriteMemoryModal
