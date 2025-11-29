@@ -202,11 +202,11 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
     );
   }
 
-  if (!partner) {
+  if (!partner && !homeLoading && !profileLoading) {
     return (
       <View style={styles.centered}>
         <Text
-          style={{ color: theme.colors.text, fontSize: 22, fontWeight: "bold" }}
+          style={{ color: theme.colors.text, fontSize: 18, fontWeight: "bold" }}
         >
           You have no partner
         </Text>
