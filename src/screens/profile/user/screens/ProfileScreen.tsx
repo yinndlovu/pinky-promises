@@ -148,7 +148,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // select data from profile selector
   const userData =
-    useProfileSelector(user?.id, (state) => state?.loveLanguage) || null;
+    useProfileSelector(user?.id, (state) => state?.userData) || null;
   const specialDates =
     useProfileSelector(user?.id, (state) => state?.specialDates) || [];
   const loveLanguage =
@@ -725,7 +725,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                     : styles.noPartnerName
                 }
               >
-                {userData?.name || "No partner"}
+                {userData?.partnerName || "No partner"}
               </Text>
             </Text>
           </View>
@@ -776,7 +776,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           />
         ) : (
           <LoveLanguage
-            loveLanguage={loveLanguage.loveLanguage}
+            loveLanguage={loveLanguage?.loveLanguage}
             onEdit={() => setLoveLanguageModalVisible(true)}
           />
         )}
@@ -789,7 +789,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           />
         ) : (
           <MoreAboutYou
-            about={aboutUser.about}
+            about={aboutUser?.about}
             onEdit={() => setAboutModalVisible(true)}
           />
         )}
@@ -822,7 +822,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <UpdateLoveLanguageModal
             visible={loveLanguageModalVisible}
             loading={saving}
-            initialLoveLanguage={loveLanguage}
+            initialLoveLanguage={loveLanguage?.loveLanguage}
             onClose={() => setLoveLanguageModalVisible(false)}
             onSave={handleSaveLoveLanguage}
           />
@@ -830,7 +830,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <UpdateAboutModal
             visible={aboutModalVisible}
             loading={saving}
-            initialAbout={aboutUser.about}
+            initialAbout={aboutUser?.about}
             onClose={() => setAboutModalVisible(false)}
             onSave={handleSaveAbout}
           />

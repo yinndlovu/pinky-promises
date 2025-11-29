@@ -26,6 +26,7 @@ const ErrorState = ({ message, onRetry }: any) => {
           fontSize: 15,
           color: theme.colors.text,
           textAlign: "center",
+          paddingHorizontal: 20,
         }}
       >
         {message}
