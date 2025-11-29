@@ -50,6 +50,213 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const token = useToken();
   const partnerId = user?.partnerId;
   const queryClient = useQueryClient();
+  const userIdKey = user?.id;
+
+  const arrayify = (value: any) => (Array.isArray(value) ? value : []);
+
+  const withPossibleKeys = (value: string | number | undefined | null) => {
+    if (value === undefined || value === null) {
+      return [];
+    }
+
+    const variants = new Set<string | number>();
+    variants.add(value);
+
+    const numeric = Number(value);
+    if (!Number.isNaN(numeric)) {
+      variants.add(numeric);
+    }
+
+    const stringified = String(value);
+    variants.add(stringified);
+
+    return Array.from(variants);
+  };
+
+  const setProfileData = (
+    targetId: string | number | undefined | null,
+    updater: (old: any) => any
+  ) => {
+    withPossibleKeys(targetId).forEach((key) => {
+      queryClient.setQueryData(["profile", key], (old: any) => {
+        if (!old) {
+          return old;
+        }
+        return updater(old);
+      });
+    });
+  };
+
+  const setHomeData = (updater: (old: any) => any) => {
+    if (userIdKey === undefined || userIdKey === null) {
+      return;
+    }
+
+    queryClient.setQueryData(["home", userIdKey], (old: any) => {
+      if (!old) {
+        return old;
+      }
+
+      return updater(old);
+    });
+  };
+
+  const setPortalData = (updater: (old: any) => any) => {
+    if (userIdKey === undefined || userIdKey === null) {
+      return;
+    }
+
+    queryClient.setQueryData(["portal", userIdKey], (old: any) => {
+      if (!old) {
+        return old;
+      }
+
+      return updater(old);
+    });
+  };
+
+  const setOursData = (updater: (old: any) => any) => {
+    if (userIdKey === undefined || userIdKey === null) {
+      return;
+    }
+
+    queryClient.setQueryData(["ours", userIdKey], (old: any) => {
+      if (!old) {
+        return old;
+      }
+
+      return updater(old);
+    });
+  };
+
+  const setAllFavoriteMemories = (updater: (old: any) => any) => {
+    if (userIdKey === undefined || userIdKey === null) {
+      return;
+    }
+
+    queryClient.setQueryData(["allFavoriteMemories", userIdKey], (old: any) => {
+      if (!old) {
+        return old;
+      }
+
+      return updater(old);
+    });
+  };
+
+  const setReceivedSweetMessages = (updater: (old: any) => any) => {
+    if (userIdKey === undefined || userIdKey === null) {
+      return;
+    }
+
+    queryClient.setQueryData(
+      ["receivedSweetMessages", userIdKey],
+      (old: any) => {
+        if (!old) {
+          return old;
+        }
+
+        return updater(old);
+      }
+    );
+  };
+
+  const mergeCounts = (
+    current: any,
+    next?: any,
+    delta?: { sweet?: number; vent?: number }
+  ) => {
+    if (next) {
+      return next;
+    }
+
+    if (!delta) {
+      return current;
+    }
+
+    const base = current || { total: 0, sweetTotal: 0, ventTotal: 0 };
+    const totalDelta = (delta.sweet ?? 0) + (delta.vent ?? 0);
+
+    return {
+      ...base,
+      total: (base.total ?? 0) + totalDelta,
+      sweetTotal: (base.sweetTotal ?? 0) + (delta.sweet ?? 0),
+      ventTotal: (base.ventTotal ?? 0) + (delta.vent ?? 0),
+    };
+  };
+
+  const pushRecentActivity = (activity?: any) => {
+    if (!activity) {
+      return;
+    }
+
+    const normalized = {
+      ...activity,
+      activity: activity.activity || activity.description || "",
+      description: activity.description || activity.activity || "",
+    };
+
+    setHomeData((old: any) => {
+      const existing = arrayify(old.recentActivities);
+      const filtered = existing.filter(
+        (entry) => entry && String(entry.id) !== String(normalized.id)
+      );
+
+      return {
+        ...old,
+        recentActivities: [normalized, ...filtered].slice(0, 20),
+      };
+    });
+  };
+
+  const upsertById = (
+    list: any,
+    item: any,
+    options?: { limit?: number; preserveExtras?: boolean }
+  ) => {
+    const arr = arrayify(list);
+    const existing = arr.find(
+      (entry) => entry && String(entry.id) === String(item.id)
+    );
+    const filtered = arr.filter(
+      (entry) => entry && String(entry.id) !== String(item.id)
+    );
+
+    const nextItem =
+      options?.preserveExtras && existing ? { ...existing, ...item } : item;
+
+    const updated = [nextItem, ...filtered];
+
+    if (typeof options?.limit === "number") {
+      return updated.slice(0, options.limit);
+    }
+
+    return updated;
+  };
+
+  const replaceById = (list: any, item: any) => {
+    const arr = arrayify(list);
+    const idx = arr.findIndex(
+      (entry) => entry && String(entry.id) === String(item.id)
+    );
+
+    if (idx === -1) {
+      return upsertById(arr, item);
+    }
+
+    const next = [...arr];
+    next[idx] = { ...next[idx], ...item };
+    return next;
+  };
+
+  const removeById = (list: any, id: string | number) => {
+    const arr = arrayify(list);
+    return arr.filter((entry) => entry && String(entry.id) !== String(id));
+  };
+
+  const sortSpecialDates = (dates: any[]) =>
+    [...dates].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
 
   const connect = () => {
     if (!token || isConnecting.current || socket?.connected) {
@@ -248,17 +455,45 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         createdAt: string;
         userId: string;
         userName: string;
-        count: number;
+        count: {
+          total: number;
+          sweetTotal: number;
+          ventTotal: number;
+        } | null;
       }) => {
         if (!user?.id) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["portal", user.id],
+        const normalizedMessage = {
+          id: data.id,
+          message: data.message,
+          createdAt: data.createdAt,
+          seen: false,
+          userId: data.userId,
+          userName: data.userName,
+        };
+
+        setPortalData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            unseenVentMessage: normalizedMessage,
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+
+        setHomeData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            counts: mergeCounts(old.counts, data.count, { vent: 1 }),
+          };
         });
       }
     );
@@ -271,20 +506,57 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         createdAt: string;
         userId: string;
         userName: string;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
         if (!user?.id || String(data.userId) !== String(partnerId)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+        const normalizedMessage = {
+          id: data.id,
+          message: data.message,
+          createdAt: data.createdAt,
+          seen: false,
+          userId: data.userId,
+          userName: data.userName,
+        };
+
+        setPortalData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            receivedSweetMessages: upsertById(
+              old.receivedSweetMessages,
+              normalizedMessage,
+              { limit: 6, preserveExtras: true }
+            ),
+            unseenSweetMessage: normalizedMessage,
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["portal", user.id],
+
+        setReceivedSweetMessages((old: any) =>
+          upsertById(old, normalizedMessage)
+        );
+
+        setHomeData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            counts: mergeCounts(old.counts, undefined, { sweet: 1 }),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["receivedSweetMessages", user.id],
-        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -342,13 +614,23 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     );
 
-    s.on("favoritesUpdate", (data: { updated: any }) => {
-      if (partnerId && String(partnerId) == data.updated.userId) {
-        queryClient.invalidateQueries({ queryKey: ["profile", partnerId] });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
-        });
+    s.on("favoritesUpdate", (data: { updated: any; recentActivity?: any }) => {
+      if (!partnerId || String(partnerId) !== String(data.updated.userId)) {
+        return;
       }
+
+      setProfileData(data.updated.userId, (old: any) => {
+        if (!old) {
+          return old;
+        }
+
+        return {
+          ...old,
+          userFavorites: { ...(old.userFavorites || {}), ...data.updated },
+        };
+      });
+
+      pushRecentActivity(data.recentActivity);
     });
 
     s.on(
@@ -360,23 +642,69 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         description: string;
         userId: string;
         partnerId: string;
+        upcomingSpecialDate?: any;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
         if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["ours", user.id],
+        const newDate = {
+          id: data.id,
+          date: data.date,
+          title: data.title,
+          description: data.description,
+          userId: data.userId,
+          partnerId: data.partnerId,
+        };
+
+        setOursData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          const dates = upsertById(old.specialDates, newDate, {
+            preserveExtras: true,
+          });
+          return {
+            ...old,
+            specialDates: sortSpecialDates(dates),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+
+        [data.userId, data.partnerId].forEach((targetId) =>
+          setProfileData(targetId, (old: any) => {
+            if (!old) {
+              return old;
+            }
+
+            const dates = upsertById(old.specialDates, newDate, {
+              preserveExtras: true,
+            });
+            return {
+              ...old,
+              specialDates: sortSpecialDates(dates),
+            };
+          })
+        );
+
+        setHomeData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            upcomingSpecialDate:
+              data.upcomingSpecialDate ?? old.upcomingSpecialDate,
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", partnerId],
-        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -389,23 +717,65 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         description: string;
         userId: string;
         partnerId: string;
+        upcomingSpecialDate?: any;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["ours", user.id],
+        const updatedDate = {
+          id: data.id,
+          date: data.date,
+          title: data.title,
+          description: data.description,
+          userId: data.userId,
+          partnerId: data.partnerId,
+        };
+
+        setOursData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          const dates = replaceById(old.specialDates, updatedDate);
+          return {
+            ...old,
+            specialDates: sortSpecialDates(dates),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+
+        [data.userId, data.partnerId].forEach((targetId) =>
+          setProfileData(targetId, (old: any) => {
+            if (!old) {
+              return old;
+            }
+
+            const dates = replaceById(old.specialDates, updatedDate);
+            return {
+              ...old,
+              specialDates: sortSpecialDates(dates),
+            };
+          })
+        );
+
+        setHomeData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            upcomingSpecialDate:
+              data.upcomingSpecialDate ?? old.upcomingSpecialDate,
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", partnerId],
-        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -418,23 +788,56 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         description: string;
         userId: string;
         partnerId: string;
+        upcomingSpecialDate?: any;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["ours", user.id],
+        setOursData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          const dates = removeById(old.specialDates, data.id);
+          return {
+            ...old,
+            specialDates: sortSpecialDates(dates),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+
+        [data.userId, data.partnerId].forEach((targetId) =>
+          setProfileData(targetId, (old: any) => {
+            if (!old) {
+              return old;
+            }
+
+            const dates = removeById(old.specialDates, data.id);
+            return {
+              ...old,
+              specialDates: sortSpecialDates(dates),
+            };
+          })
+        );
+
+        setHomeData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            upcomingSpecialDate:
+              data.upcomingSpecialDate ?? old.upcomingSpecialDate,
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", partnerId],
-        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -448,17 +851,38 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         updatedAt: string;
         userId: string;
         partnerId: string;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+        const stored = {
+          id: data.id,
+          title: data.title,
+          message: data.message,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          userId: data.userId,
+          partnerId: data.partnerId,
+        };
+
+        setProfileData(data.userId, (old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            storedMessages: upsertById(old.storedMessages, stored),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", partnerId],
-        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -472,17 +896,38 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         updatedAt: string;
         userId: string;
         partnerId: string;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+        const stored = {
+          id: data.id,
+          title: data.title,
+          message: data.message,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+          userId: data.userId,
+          partnerId: data.partnerId,
+        };
+
+        setProfileData(data.userId, (old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            storedMessages: replaceById(old.storedMessages, stored),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", partnerId],
-        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -496,31 +941,54 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         updatedAt: string;
         userId: string;
         partnerId: string;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
+        setProfileData(data.userId, (old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            storedMessages: removeById(old.storedMessages, data.id),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", partnerId],
-        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
     s.on(
       "updateLoveLanguage",
-      (data: { userId: string; loveLanguage: string }) => {
-        if (partnerId && String(partnerId) === String(data.userId)) {
-          queryClient.invalidateQueries({
-            queryKey: ["home", user.id],
-          });
-          queryClient.invalidateQueries({
-            queryKey: ["profile", partnerId],
-          });
+      (data: {
+        userId: string;
+        loveLanguage: string;
+        recentActivity?: any;
+      }) => {
+        if (!partnerId || String(partnerId) !== String(data.userId)) {
+          return;
         }
+
+        setProfileData(data.userId, (old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            loveLanguage: data.loveLanguage,
+          };
+        });
+
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -535,20 +1003,44 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         userId: string;
         createdAt: string;
         updatedAt: string;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["ours", user.id],
+        const memory = {
+          id: data.id,
+          memory: data.memory,
+          date: data.date,
+          author: data.author,
+          partnerId: data.partnerId,
+          userId: data.userId,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        };
+
+        setOursData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            recentFavoriteMemories: upsertById(
+              old.recentFavoriteMemories,
+              memory,
+              { limit: 6, preserveExtras: true }
+            ),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["allFavoriteMemories", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
-        });
+
+        setAllFavoriteMemories((old: any) => upsertById(old, memory));
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -563,20 +1055,32 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         userId: string;
         createdAt: string;
         updatedAt: string;
+        recentActivity?: {
+          id: string;
+          description: string;
+          createdAt: string;
+        };
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
 
-        queryClient.invalidateQueries({
-          queryKey: ["ours", user.id],
+        setOursData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            recentFavoriteMemories: removeById(
+              old.recentFavoriteMemories,
+              data.id
+            ),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["allFavoriteMemories", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
-        });
+
+        setAllFavoriteMemories((old: any) => removeById(old, data.id));
+        pushRecentActivity(data.recentActivity);
       }
     );
 
@@ -592,30 +1096,56 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         createdAt: string;
         updatedAt: string;
       }) => {
-        if (!user.id || String(data.partnerId) !== String(user.id)) {
+        if (!user?.id || String(data.partnerId) !== String(user.id)) {
           return;
         }
-        queryClient.invalidateQueries({
-          queryKey: ["ours", user.id],
+
+        const memory = {
+          id: data.id,
+          memory: data.memory,
+          date: data.date,
+          author: data.author,
+          partnerId: data.partnerId,
+          userId: data.userId,
+          createdAt: data.createdAt,
+          updatedAt: data.updatedAt,
+        };
+
+        setOursData((old: any) => {
+          if (!old) {
+            return old;
+          }
+
+          return {
+            ...old,
+            recentFavoriteMemories: replaceById(
+              old.recentFavoriteMemories,
+              memory
+            ),
+          };
         });
-        queryClient.invalidateQueries({
-          queryKey: ["allFavoriteMemories", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
-        });
+
+        setAllFavoriteMemories((old: any) => replaceById(old, memory));
       }
     );
 
-    s.on("updateAbout", (data: { aboutUser: any }) => {
-      if (partnerId && String(partnerId) === String(data.aboutUser.userId)) {
-        queryClient.invalidateQueries({
-          queryKey: ["home", user.id],
-        });
-        queryClient.invalidateQueries({
-          queryKey: ["profile", partnerId],
-        });
+    s.on("updateAbout", (data: { aboutUser: any; recentActivity?: any }) => {
+      if (!partnerId || String(partnerId) !== String(data.aboutUser.userId)) {
+        return;
       }
+
+      setProfileData(data.aboutUser.userId, (old: any) => {
+        if (!old) {
+          return old;
+        }
+
+        return {
+          ...old,
+          aboutUser: data.aboutUser,
+        };
+      });
+
+      pushRecentActivity(data.recentActivity);
     });
 
     setSocket(s);
@@ -665,7 +1195,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     if (token && user?.id) {
       connect();
     }
-
     return () => {
       disconnect();
     };
@@ -690,7 +1219,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", handleAppStateChange);
-
     return () => {
       sub.remove();
     };
