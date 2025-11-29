@@ -27,7 +27,7 @@ export default function ProfileStackScreen() {
   return (
     <ProfileStack.Navigator
       screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
+        ...TransitionPresets.ScaleFromCenterAndroid,
         headerShown: false,
         cardStyle: { backgroundColor: theme.colors.background },
       }}

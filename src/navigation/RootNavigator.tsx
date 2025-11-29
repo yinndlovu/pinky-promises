@@ -39,7 +39,7 @@ export default function RootNavigator() {
     <RootStack.Navigator
       initialRouteName={isAuthenticated ? "Main" : "Welcome"}
       screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
+        ...TransitionPresets.ScaleFromCenterAndroid,
         headerShown: false,
         cardStyle: { backgroundColor: theme.colors.background },
         transitionSpec: {

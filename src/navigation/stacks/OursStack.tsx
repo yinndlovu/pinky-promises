@@ -22,7 +22,7 @@ export default function OursStackScreen() {
   return (
     <OursStack.Navigator
       screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
+        ...TransitionPresets.ScaleFromCenterAndroid,
         headerShown: false,
         cardStyle: { backgroundColor: theme.colors.background },
       }}

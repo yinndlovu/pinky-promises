@@ -25,7 +25,7 @@ export default function HomeStackScreen() {
   return (
     <HomeStack.Navigator
       screenOptions={{
-        ...TransitionPresets.SlideFromRightIOS,
+        ...TransitionPresets.ScaleFromCenterAndroid,
         headerShown: false,
         cardStyle: { backgroundColor: theme.colors.background },
       }}

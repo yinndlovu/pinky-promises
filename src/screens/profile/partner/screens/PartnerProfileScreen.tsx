@@ -357,7 +357,7 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
             style={{ width: "100%", marginBottom: 18 }}
           />
         ) : (
-          <PartnerLoveLanguage loveLanguage={loveLanguage} />
+          <PartnerLoveLanguage loveLanguage={loveLanguage?.loveLanguage} />
         )}
 
         {profileLoading ? (
@@ -367,7 +367,7 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
             style={{ width: "100%", marginBottom: 18 }}
           />
         ) : (
-          <PartnerMoreAboutYou about={partnerAbout} />
+          <PartnerMoreAboutYou about={partnerAbout?.about} />
         )}
 
         {profileLoading ? (
