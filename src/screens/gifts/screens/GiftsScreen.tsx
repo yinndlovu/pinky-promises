@@ -20,6 +20,8 @@ import PastGiftsList from "../components/PastGiftsList";
 import ClaimedGiftModal from "../../../components/modals/output/ClaimedGiftModal";
 import UpdateMonthlyGiftModal from "../../../components/modals/input/UpdateMonthlyGiftModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
+import Shimmer from "../../../components/skeletons/Shimmer";
+import ErrorState from "../../../components/common/ErrorState";
 
 // internal
 import {
@@ -154,6 +156,13 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
       setModalLoading(false);
     }
   };
+
+  if (giftsError) {
+    <ErrorState
+      message="Failed to load presents information. Try again?"
+      onRetry={() => refetchGifts()}
+    />;
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>

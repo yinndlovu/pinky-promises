@@ -38,6 +38,7 @@ import SpecialDates from "../components/SpecialDates";
 import FavoriteMemories from "../components/FavoriteMemories";
 import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
 import Shimmer from "../../../components/skeletons/Shimmer";
+import ErrorState from "../../../components/common/ErrorState";
 
 // hooks
 import useToken from "../../../hooks/useToken";
@@ -91,6 +92,7 @@ const OursScreen = ({ navigation }: Props) => {
     data: _oursData,
     refetch: refetchOursData,
     isLoading: oursDataLoading,
+    isError: oursError,
   } = useOurs(token, user?.id);
 
   // select data
@@ -368,6 +370,15 @@ const OursScreen = ({ navigation }: Props) => {
     return () => unsubscribe();
   }, []);
 
+  if (oursError) {
+    return (
+      <ErrorState
+        message="Something went wrong trying to show you you and your partner's data. Try again?"
+        onRetry={() => refetchOursData()}
+      />
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {!isOnline && (
@@ -447,7 +458,11 @@ const OursScreen = ({ navigation }: Props) => {
         showsVerticalScrollIndicator={false}
       >
         {oursDataLoading ? (
-          <Shimmer radius={8} height={70} style={{ width: "100%", marginBottom: 32 }} />
+          <Shimmer
+            radius={16}
+            height={200}
+            style={{ width: "100%", marginBottom: 32 }}
+          />
         ) : (
           <NotesCanvas
             preview={notesPreview?.content}
@@ -457,7 +472,11 @@ const OursScreen = ({ navigation }: Props) => {
         )}
 
         {oursDataLoading ? (
-          <Shimmer radius={8} height={150} style={{ width: "100%", marginBottom: 32 }} />
+          <Shimmer
+            radius={16}
+            height={200}
+            style={{ width: "100%", marginBottom: 32 }}
+          />
         ) : (
           <SpecialDates
             dates={specialDates}
@@ -467,7 +486,11 @@ const OursScreen = ({ navigation }: Props) => {
         )}
 
         {oursDataLoading ? (
-          <Shimmer radius={8} height={150} style={{ width: "100%", marginBottom: 32 }} />
+          <Shimmer
+            radius={16}
+            height={200}
+            style={{ width: "100%", marginBottom: 32 }}
+          />
         ) : (
           <FavoriteMemories
             memories={favoriteMemories}

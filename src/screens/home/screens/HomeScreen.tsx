@@ -147,8 +147,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     useCallback(() => {
       const run = async () => {
         await checkAndUpdateHomeStatus(token);
-
-        queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
+        await queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
+        await queryClient.invalidateQueries({
+          queryKey: ["profile", user?.id],
+        });
       };
 
       run();

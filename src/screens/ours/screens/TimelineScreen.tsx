@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // internal
 import { createTimelineRecord } from "../../../services/api/ours/timelineService";
@@ -33,7 +32,6 @@ const TimelineScreen = () => {
   const { user } = useAuth();
   const token = useToken();
   const { theme } = useTheme();
-  const insets = useSafeAreaInsets();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // use states
@@ -126,27 +124,29 @@ const TimelineScreen = () => {
       {isTimelineLoading ? (
         <ScrollView
           contentContainerStyle={{
-            paddingTop: insets.top,
+            paddingTop: 12,
             backgroundColor: theme.colors.background,
             paddingHorizontal: 16,
           }}
           showsVerticalScrollIndicator={false}
         >
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
           <View style={{ height: 12 }} />
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
           <View style={{ height: 12 }} />
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
           <View style={{ height: 12 }} />
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
           <View style={{ height: 12 }} />
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
           <View style={{ height: 12 }} />
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
           <View style={{ height: 12 }} />
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
           <View style={{ height: 12 }} />
-          <Shimmer radius={8} height={20} style={{ width: "100%" }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
+          <View style={{ height: 12 }} />
+          <Shimmer radius={8} height={70} style={{ width: "100%" }} />
         </ScrollView>
       ) : (
         <FlatList

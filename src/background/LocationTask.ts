@@ -12,7 +12,6 @@ const LOCATION_TASK_NAME = "background-location-task";
 
 TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   const token = await AsyncStorage.getItem("token");
-
   if (!token) {
     return;
   }
@@ -24,14 +23,12 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
   if (data) {
     const { locations } = data as any;
     const location = locations[0];
-
     if (!location) {
       return;
     }
 
     try {
       const home = await getHomeLocation(token);
-
       if (!home) {
         return;
       }

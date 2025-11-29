@@ -110,7 +110,6 @@ const StatusMood: React.FC<StatusMoodProps> = ({
   }) => {
     try {
       setSaving(true);
-
       if (!token) {
         setAlertTitle("Action Failed");
         setAlertMessage(
@@ -132,6 +131,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
       await queryClient.invalidateQueries({
         queryKey: ["profile", user?.id],
       });
+      await queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
 
       setShowSuccessAlert(true);
     } catch (err: any) {
@@ -161,6 +161,7 @@ const StatusMood: React.FC<StatusMoodProps> = ({
 
       await updateMood(token, newMood);
       await queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
+      await queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
       setAlertTitle("Mood updated");
       setAlertMessage(`Your mood is now ${newMood}.`);
       setShowSuccessAlert(true);

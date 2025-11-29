@@ -32,6 +32,7 @@ import FavoriteMemoryDetailsModal from "../../../components/modals/output/Favori
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
+import ErrorState from "../../../components/common/ErrorState";
 
 // content
 import Shimmer from "../../../components/skeletons/Shimmer";
@@ -64,7 +65,7 @@ const AllFavoriteMemoriesScreen = () => {
     data: memories = [],
     refetch: refetchMemories,
     isLoading: memoriesLoading,
-    error,
+    isError: memoriesError,
   } = useMemories(user?.id, token);
 
   // handlers
@@ -221,26 +222,32 @@ const AllFavoriteMemoriesScreen = () => {
           height={40}
           style={{ width: "100%", marginTop: 10 }}
         />
+        <Shimmer radius={8} height={80} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={80} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={80} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={80} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={80} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
-        <View style={{ height: 12 }} />
-        <Shimmer radius={8} height={40} style={{ width: "100%" }} />
+        <Shimmer radius={8} height={80} style={{ width: "100%" }} />
         <View style={{ height: 12 }} />
         <Shimmer
           radius={8}
-          height={40}
+          height={80}
           style={{ width: "100%", marginBottom: 20 }}
         />
       </ScrollView>
     </View>;
+  }
+
+  if (memoriesError) {
+    <ErrorState
+      message="Something went wrong trying to get you and your partner's favorite memories. Try again?"
+      onRetry={() => refetchMemories()}
+    />;
   }
 
   return (
@@ -257,45 +264,40 @@ const AllFavoriteMemoriesScreen = () => {
       >
         These are all your favorite memories
       </Text>
-      {error ? (
-        <Text style={{ color: "red", textAlign: "center", marginTop: 40 }}>
-          {error.message || "Failed to load favorite memories"}
-        </Text>
-      ) : (
-        <FlatList
-          data={memories}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 18, paddingBottom: 40 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() => handleViewMemoryDetails(item.id)}
-              onLongPress={() => handleLongPress(item)}
-              delayLongPress={400}
-              activeOpacity={0.7}
-              style={styles.memoryItem}
-            >
-              <Text style={styles.memoryText}>{item.memory}</Text>
-              <View style={styles.metaRow}>
-                <Text style={styles.metaText}>
-                  {item.author ? `By ${item.author}` : "By Unknown"}
-                </Text>
-                <Text style={styles.metaText}>{formatDateDMY(item.date)}</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <Text
-              style={{
-                color: theme.colors.muted,
-                textAlign: "center",
-                marginTop: 40,
-              }}
-            >
-              No favorite memories yet
-            </Text>
-          }
-        />
-      )}
+
+      <FlatList
+        data={memories}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ padding: 18, paddingBottom: 40 }}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => handleViewMemoryDetails(item.id)}
+            onLongPress={() => handleLongPress(item)}
+            delayLongPress={400}
+            activeOpacity={0.7}
+            style={styles.memoryItem}
+          >
+            <Text style={styles.memoryText}>{item.memory}</Text>
+            <View style={styles.metaRow}>
+              <Text style={styles.metaText}>
+                {item.author ? `By ${item.author}` : "By Unknown"}
+              </Text>
+              <Text style={styles.metaText}>{formatDateDMY(item.date)}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={
+          <Text
+            style={{
+              color: theme.colors.muted,
+              textAlign: "center",
+              marginTop: 40,
+            }}
+          >
+            No favorite memories yet
+          </Text>
+        }
+      />
 
       <FavoriteMemoryDetailsModal
         visible={detailsModalVisible}
