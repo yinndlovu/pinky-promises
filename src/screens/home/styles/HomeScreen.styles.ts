@@ -173,7 +173,7 @@ export const createHomeStyles = (theme: AppTheme) =>
       zIndex: 100,
     },
     interactionCard: {
-      backgroundColor: theme.colors.surface,
+      backgroundColor: theme.colors.surfaceAlt,
       borderRadius: 16,
       padding: 18,
       marginBottom: 6,

@@ -191,8 +191,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const normalized = {
       ...activity,
-      activity: activity.activity || activity.description || "",
-      description: activity.description || activity.activity || "",
+      activity: activity.activity || activity.activity || "",
     };
 
     setHomeData((old: any) => {
@@ -292,7 +291,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         description: string;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -354,7 +353,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         };
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -400,7 +399,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         seen: boolean;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -508,7 +507,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         userName: string;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -645,7 +644,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         upcomingSpecialDate?: any;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -720,7 +719,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         upcomingSpecialDate?: any;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -791,7 +790,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         upcomingSpecialDate?: any;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -853,7 +852,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         partnerId: string;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -898,7 +897,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         partnerId: string;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -943,7 +942,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         partnerId: string;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -1005,7 +1004,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         updatedAt: string;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {
@@ -1057,7 +1056,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         updatedAt: string;
         recentActivity?: {
           id: string;
-          description: string;
+          activity: string;
           createdAt: string;
         };
       }) => {

@@ -20,7 +20,7 @@ import { getServerTheme } from "../services/api/theme/themeService";
 type Mode = "system" | "light" | "dark";
 
 type ServerTheme = {
-  accent?: string | null;
+  accentTheme?: string | null;
 };
 
 type Ctx = {
@@ -100,10 +100,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     (async () => {
       try {
         const response = (await getServerTheme(token)) as ServerTheme | null;
-        const serverAccent =
-          (response as any)?.accentTheme ??
-          (response as any)?.accentTheme ??
-          null;
+        const serverAccent = response?.accentTheme ?? null;
 
         if (serverAccent && serverAccent in accentThemes) {
           const name = serverAccent as AccentThemeName;
