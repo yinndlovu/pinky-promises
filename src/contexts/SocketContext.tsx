@@ -1147,6 +1147,92 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       pushRecentActivity(data.recentActivity);
     });
 
+    // Canvas socket events
+    s.on(
+      "canvas:newCanvas",
+      (data: {
+        by: number;
+        canvas: {
+          id: number;
+          title: string;
+          content: string;
+          userId: number;
+          partnerId: number;
+          createdAt: string;
+          updatedAt: string;
+        };
+      }) => {
+        if (!user?.id) return;
+
+        setOursData((old: any) => {
+          if (!old) return old;
+
+          const existingCanvases = arrayify(old.canvases);
+          const exists = existingCanvases.some(
+            (c: any) => c.id === data.canvas.id
+          );
+          if (exists) return old;
+
+          return {
+            ...old,
+            canvases: [data.canvas, ...existingCanvases],
+          };
+        });
+      }
+    );
+
+    s.on(
+      "canvas:contentUpdated",
+      (data: { by: number; canvasId: number; content: string }) => {
+        if (!user?.id) return;
+
+        setOursData((old: any) => {
+          if (!old) return old;
+
+          const canvases = arrayify(old.canvases).map((c: any) =>
+            c.id === data.canvasId
+              ? { ...c, content: data.content, updatedAt: new Date().toISOString() }
+              : c
+          );
+
+          return { ...old, canvases };
+        });
+      }
+    );
+
+    s.on(
+      "canvas:titleChanged",
+      (data: { by: number; canvasId: number; title: string }) => {
+        if (!user?.id) return;
+
+        setOursData((old: any) => {
+          if (!old) return old;
+
+          const canvases = arrayify(old.canvases).map((c: any) =>
+            c.id === data.canvasId
+              ? { ...c, title: data.title, updatedAt: new Date().toISOString() }
+              : c
+          );
+
+          return { ...old, canvases };
+        });
+      }
+    );
+
+    s.on("canvas:removed", (data: { by: number; canvasId: number }) => {
+      if (!user?.id) return;
+
+      setOursData((old: any) => {
+        if (!old) return old;
+
+        const canvases = arrayify(old.canvases).filter(
+          (c: any) => c.id !== data.canvasId
+        );
+
+        return { ...old, canvases };
+      });
+    });
+
     setSocket(s);
   };
 

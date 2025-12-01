@@ -27,18 +27,26 @@ import {
 } from "../../../services/api/ours/favoriteMemoriesService";
 import { useAuth } from "../../../contexts/AuthContext";
 import { useTheme } from "../../../theme/ThemeContext";
+import { useSocket } from "../../../contexts/SocketContext";
 
 // screen content
 import UpdateFavoriteMemoryModal from "../../../components/modals/input/UpdateFavoriteMemoryModal";
 import FavoriteMemoryDetailsModal from "../../../components/modals/output/FavoriteMemoryDetailsModal";
 import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
-import NotesCanvas from "../components/NotesCanvas";
+import CanvasSection from "../components/CanvasSection";
 import SpecialDates from "../components/SpecialDates";
 import FavoriteMemories from "../components/FavoriteMemories";
 import UpdateSpecialDateModal from "../../../components/modals/input/UpdateSpecialDateModal";
+import CreateCanvasModal from "../../../components/modals/input/CreateCanvasModal";
 import Shimmer from "../../../components/skeletons/Shimmer";
 import ErrorState from "../../../components/common/ErrorState";
+
+// services
+import { createCanvas } from "../../../services/api/ours/canvasService";
+
+// types
+import { Canvas } from "../../../types/Canvas";
 
 // hooks
 import useToken from "../../../hooks/useToken";
@@ -82,6 +90,8 @@ const OursScreen = ({ navigation }: Props) => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [addingSpecialDate, setAddingSpecialDate] = useState(false);
   const [updatingSpecialDate, setUpdatingSpecialDate] = useState(false);
+  const [createCanvasModalVisible, setCreateCanvasModalVisible] = useState(false);
+  const [creatingCanvas, setCreatingCanvas] = useState(false);
 
   // use states errors
   const [error, setError] = useState<string | null>(null);
@@ -96,11 +106,15 @@ const OursScreen = ({ navigation }: Props) => {
   } = useOurs(token, user?.id);
 
   // select data
-  const notesPreview = useOursSelector(user?.id, (ours) => ours?.notes) || null;
+  const canvases: Canvas[] =
+    useOursSelector(user?.id, (ours) => ours?.canvases) || [];
   const specialDates =
     useOursSelector(user?.id, (ours) => ours?.specialDates) || [];
   const favoriteMemories =
     useOursSelector(user?.id, (ours) => ours?.recentFavoriteMemories) || [];
+
+  // socket
+  const { socket } = useSocket();
 
   // handlers
   const handleAddSpecialDate = async (
@@ -351,6 +365,42 @@ const OursScreen = ({ navigation }: Props) => {
     setDetailsLoading(false);
   };
 
+  // canvas handlers
+  const handleCreateCanvas = async (title: string) => {
+    if (!token) {
+      setError("Your session has expired. Log in again and retry.");
+      return;
+    }
+
+    setCreatingCanvas(true);
+    try {
+      const newCanvas = await createCanvas(token, title);
+
+      // Emit to partner via socket
+      if (socket?.connected) {
+        socket.emit("canvas:created", { canvas: newCanvas });
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["ours", user?.id] });
+      setCreateCanvasModalVisible(false);
+
+      // Navigate to editor
+      navigation.navigate("CanvasEditorScreen", { canvasId: newCanvas.id });
+    } catch (err: any) {
+      setError(err.response?.data?.error || "Failed to create canvas");
+    } finally {
+      setCreatingCanvas(false);
+    }
+  };
+
+  const handleCanvasPress = (canvas: Canvas) => {
+    navigation.navigate("CanvasEditorScreen", { canvasId: canvas.id });
+  };
+
+  const handleExpandCanvases = () => {
+    navigation.navigate("AllCanvasesScreen");
+  };
+
   // use effects
   useEffect(() => {
     if (error) {
@@ -464,10 +514,11 @@ const OursScreen = ({ navigation }: Props) => {
             style={{ width: "100%", marginBottom: 32 }}
           />
         ) : (
-          <NotesCanvas
-            preview={notesPreview?.content}
-            updatedAt={notesPreview?.updatedAt}
-            onView={() => navigation.navigate("NotesScreen")}
+          <CanvasSection
+            canvases={canvases}
+            onExpand={handleExpandCanvases}
+            onCanvasPress={handleCanvasPress}
+            onAddCanvas={() => setCreateCanvasModalVisible(true)}
           />
         )}
 
@@ -568,6 +619,13 @@ const OursScreen = ({ navigation }: Props) => {
         onClose={() => setDetailsModalVisible(false)}
         memory={detailsMemory}
         loading={detailsLoading}
+      />
+
+      <CreateCanvasModal
+        visible={createCanvasModalVisible}
+        onClose={() => setCreateCanvasModalVisible(false)}
+        onSave={handleCreateCanvas}
+        loading={creatingCanvas}
       />
 
       {showError && error && (

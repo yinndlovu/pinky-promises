@@ -11,6 +11,8 @@ import { useTheme } from "../../theme/ThemeContext";
 // screens
 import OursScreen from "../../screens/ours/screens/OursScreen";
 import NotesScreen from "../../screens/ours/screens/NotesScreen";
+import AllCanvasesScreen from "../../screens/ours/screens/AllCanvasesScreen";
+import CanvasEditorScreen from "../../screens/ours/screens/CanvasEditorScreen";
 import TimelineScreen from "../../screens/ours/screens/TimelineScreen";
 import AllFavoriteMemoriesScreen from "../../screens/ours/screens/AllFavoriteMemoriesScreen";
 
@@ -37,6 +39,21 @@ export default function OursStackScreen() {
           headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
+        }}
+      />
+      <OursStack.Screen
+        name="AllCanvasesScreen"
+        component={AllCanvasesScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <OursStack.Screen
+        name="CanvasEditorScreen"
+        component={CanvasEditorScreen}
+        options={{
+          headerShown: false,
+          ...TransitionPresets.SlideFromRightIOS,
         }}
       />
       <OursStack.Screen

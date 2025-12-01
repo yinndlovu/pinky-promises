@@ -18,9 +18,13 @@ import type { StackScreenProps } from "@react-navigation/stack";
 import { useAuth } from "../../../contexts/AuthContext";
 import LogoutModal from "../../../components/modals/selection/LogoutModal";
 import { useTheme } from "../../../theme/ThemeContext";
+import useToken from "../../../hooks/useToken";
+import { useTrackingStatus, useStartTracking } from "../../../hooks/useStreak";
 
 // content
 import ThemePickerModal from "../../../components/modals/selection/ThemePickerModal";
+import StartTrackingModal from "../../../components/modals/streak/StartTrackingModal";
+import { SocialMediaPlatform } from "../../../types/Streak";
 
 // types
 type SettingsScreenProps = StackScreenProps<any, any>;
@@ -34,11 +38,20 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
   const [showSuccess, setShowSuccess] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showThemeModal, setShowThemeModal] = useState(false);
+  const [showStreakModal, setShowStreakModal] = useState(false);
 
   // variables
   const { theme, mode, setMode } = useTheme() as any;
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const token = useToken();
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // streak hooks
+  const { data: trackingStatus, refetch: refetchTracking } = useTrackingStatus(
+    token,
+    user?.id
+  );
+  const startTrackingMutation = useStartTracking(token);
 
   // handlers
   const handleLogout = async () => {
@@ -51,6 +64,27 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
       index: 0,
       routes: [{ name: "Welcome" }],
     });
+  };
+
+  const handleStartTracking = async (platforms: SocialMediaPlatform[]) => {
+    try {
+      await startTrackingMutation.mutateAsync(platforms);
+      setShowStreakModal(false);
+      setSuccess(`Now tracking streaks for ${platforms.join(" and ")}`);
+      refetchTracking();
+    } catch (error: any) {
+      setSuccess(error?.response?.data?.error || "Failed to start tracking");
+    }
+  };
+
+  const handleStreakPress = () => {
+    if (trackingStatus?.isTracking) {
+      // Navigate to streak screen if already tracking
+      navigation.navigate("StreakScreen");
+    } else {
+      // Show modal to start tracking
+      setShowStreakModal(true);
+    }
   };
 
   // use effects
@@ -127,6 +161,38 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
               />
             </Pressable>
           ))}
+
+          {/* Streak Tracking Option */}
+          <Pressable
+            style={styles.actionRow}
+            onPress={handleStreakPress}
+            android_ripple={{ color: theme.colors.ripple }}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", flex: 1 }}
+            >
+              <Feather
+                name="zap"
+                size={20}
+                color={theme.colors.accent}
+                style={styles.optionIcon}
+              />
+              <Text style={styles.actionText}>Streak Tracking</Text>
+            </View>
+            {trackingStatus?.isTracking && (
+              <View style={styles.trackingBadge}>
+                <Feather name="check" size={12} color={theme.colors.text} />
+                <Text style={styles.trackingBadgeText}>Active</Text>
+              </View>
+            )}
+            <Feather
+              name="chevron-right"
+              size={20}
+              color={theme.colors.text}
+              style={{ marginLeft: 8 }}
+            />
+          </Pressable>
+
           <Pressable
             style={styles.actionRow}
             onPress={() => setShowThemeModal(true)}
@@ -189,6 +255,14 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
         }}
       />
 
+      <StartTrackingModal
+        visible={showStreakModal}
+        onClose={() => setShowStreakModal(false)}
+        onStart={handleStartTracking}
+        loading={startTrackingMutation.isPending}
+        currentlyTracking={trackingStatus?.platforms || []}
+      />
+
       <LogoutModal
         visible={showLogoutModal}
         onClose={() => setShowLogoutModal(false)}
@@ -234,6 +308,20 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     optionIcon: {
       marginRight: 16,
+    },
+    trackingBadge: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+      gap: 4,
+    },
+    trackingBadgeText: {
+      color: theme.colors.text,
+      fontSize: 12,
+      fontWeight: "600",
     },
     logoutButton: {
       flexDirection: "row",

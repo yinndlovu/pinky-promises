@@ -10,7 +10,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // screen content
@@ -207,10 +207,10 @@ const GiftsScreen: React.FC<Props> = ({ navigation }) => {
             shadowOpacity: 0.1,
             shadowRadius: 4,
           }}
-          // onPress={() => navigation.navigate("GameListScreen")}
+          onPress={() => navigation.goBack()}
         >
-          <Ionicons
-            name="game-controller-outline"
+          <Feather
+            name="arrow-left"
             size={22}
             color={theme.colors.text}
           />

@@ -16,6 +16,9 @@ import UserProfileScreen from "../../screens/profile/other/screens/UserProfileSc
 import PortalScreen from "../../screens/portal/screens/PortalScreen";
 import SentMessagesScreen from "../../screens/portal/screens/SentMessagesScreen";
 import ReceivedMessagesScreen from "../../screens/portal/screens/ReceivedMessagesScreen";
+import StreakScreen from "../../screens/streak/StreakScreen";
+import GiftsScreen from "../../screens/gifts/screens/GiftsScreen";
+import CartScreen from "../../screens/gifts/screens/CartScreen";
 
 const HomeStack = createStackNavigator<HomeStackParamList>();
 
@@ -96,6 +99,32 @@ export default function HomeStackScreen() {
         options={{
           headerShown: true,
           title: "Received sweet messages",
+          headerTintColor: theme.colors.text,
+          headerStyle: { backgroundColor: "transparent" },
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
+      />
+      <HomeStack.Screen
+        name="StreakScreen"
+        component={StreakScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <HomeStack.Screen
+        name="PresentsScreen"
+        component={GiftsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <HomeStack.Screen
+        name="CartScreen"
+        component={CartScreen}
+        options={{
+          headerShown: true,
+          title: "Cart",
           headerTintColor: theme.colors.text,
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,

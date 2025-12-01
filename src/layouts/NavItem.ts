@@ -1,6 +1,6 @@
 export const NAV_ITEMS = [
   { name: "Home", icon: "home" as const },
-  { name: "Presents", icon: "gift" as const },
+  { name: "Period", icon: "droplet" as const },
   { name: "Ours", icon: "heart" as const },
   { name: "Profile", icon: "user" as const },
 ];

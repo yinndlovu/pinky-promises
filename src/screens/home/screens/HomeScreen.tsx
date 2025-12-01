@@ -18,6 +18,7 @@ import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
+  formatTimeAgo,
 } from "../../../utils/formatters/formatDate";
 import { useAuth } from "../../../contexts/AuthContext";
 import { checkAndUpdateHomeStatus } from "../../../helpers/checkHomeStatus";
@@ -41,6 +42,7 @@ import NotificationsDropdown from "../../../components/dropdowns/NotificationsDr
 import AvatarSkeleton from "../../../components/skeletons/AvatarSkeleton";
 import Shimmer from "../../../components/skeletons/Shimmer";
 import ErrorState from "../../../components/common/ErrorState";
+import ConfirmStreakModal from "../../../components/modals/streak/ConfirmStreakModal";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -51,6 +53,13 @@ import { useProfilePicture } from "../../../hooks/useProfilePicture";
 import { useHome } from "../../../hooks/useHome";
 import { useHomeSelector } from "../../../hooks/useHomeSelector";
 import useToken from "../../../hooks/useToken";
+import {
+  useStreakPreview,
+  usePendingEndedStreak,
+  useConfirmEndedStreak,
+} from "../../../hooks/useStreak";
+import { useGifts } from "../../../hooks/useGifts";
+import { useGiftsSelector } from "../../../hooks/useGiftsSelector";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -79,6 +88,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [actionsModalVisible, setActionsModalVisible] = useState(false);
   const [animationModalVisible, setAnimationModalVisible] = useState(false);
   const [animationMessage, setAnimationMessage] = useState("");
+  const [showStreakConfirmModal, setShowStreakConfirmModal] = useState(false);
+  const [confirmingStreak, setConfirmingStreak] = useState(false);
+
+  // streak hooks
+  const { data: streakPreview } = useStreakPreview(token, user?.id);
+  const { data: pendingStreak, refetch: refetchPendingStreak } =
+    usePendingEndedStreak(token, user?.id);
+  const confirmStreakMutation = useConfirmEndedStreak(token);
 
   // home data hook
   const {
@@ -115,6 +132,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const upcomingDateLoading = homeLoading;
   const partnerMoodLoading = homeLoading;
   const partnerStatusLoading = homeLoading;
+
+  // gifts data for presents card
+  const { data: _giftsData } = useGifts(token, user?.id);
+  const unclaimedGift = useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) || null;
+  const setMonthlyGift = useGiftsSelector(user?.id, (gifts) => gifts?.setMonthlyGift) || null;
 
   const {
     avatarUri,
@@ -177,6 +199,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     });
     return () => unsubscribe();
   }, []);
+
+  // Show streak confirmation modal when there's a pending accusation
+  useEffect(() => {
+    if (pendingStreak?.pendingEndedStreak && pendingStreak?.streak) {
+      setShowStreakConfirmModal(true);
+    }
+  }, [pendingStreak]);
 
   // handle toggle
   const toggleNotifications = async () => {
@@ -243,6 +272,24 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleCloseNotifications = () => {
     setNotificationsVisible(false);
+  };
+
+  const handleConfirmStreak = async (confirmed: boolean) => {
+    if (!pendingStreak?.streak?.id) return;
+
+    setConfirmingStreak(true);
+    try {
+      await confirmStreakMutation.mutateAsync({
+        streakId: pendingStreak.streak.id,
+        confirmed,
+      });
+      setShowStreakConfirmModal(false);
+      refetchPendingStreak();
+    } catch (error) {
+      console.error("Error confirming streak:", error);
+    } finally {
+      setConfirmingStreak(false);
+    }
   };
 
   // helpers
@@ -540,6 +587,157 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             onAction={handleInteraction}
           />
         </View>
+
+        {/* Streak Preview Card */}
+        {streakPreview && (
+          <TouchableOpacity
+            style={{
+              backgroundColor: theme.colors.surfaceAlt,
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 16,
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+            onPress={() => navigation.navigate("StreakScreen")}
+            activeOpacity={0.7}
+          >
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 12,
+                backgroundColor:
+                  streakPreview.type === "warning"
+                    ? "#FF6B6B"
+                    : streakPreview.type === "achievement"
+                    ? "#4CAF50"
+                    : streakPreview.type === "positive"
+                    ? "#FFD93D"
+                    : theme.colors.primary,
+                justifyContent: "center",
+                alignItems: "center",
+                marginRight: 14,
+              }}
+            >
+              <Feather
+                name={
+                  streakPreview.type === "warning"
+                    ? "alert-triangle"
+                    : streakPreview.type === "achievement"
+                    ? "award"
+                    : streakPreview.type === "scoreboard"
+                    ? "bar-chart-2"
+                    : "zap"
+                }
+                size={22}
+                color="#fff"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={{
+                  color: theme.colors.text,
+                  fontSize: 15,
+                  fontWeight: "600",
+                }}
+                numberOfLines={2}
+              >
+                {streakPreview.message}
+              </Text>
+              <Text
+                style={{
+                  color: theme.colors.muted,
+                  fontSize: 12,
+                  marginTop: 3,
+                }}
+              >
+                Tap to view streak details
+              </Text>
+            </View>
+            <Feather
+              name="chevron-right"
+              size={20}
+              color={theme.colors.muted}
+            />
+          </TouchableOpacity>
+        )}
+
+        {/* Presents Card */}
+        <TouchableOpacity
+          style={{
+            backgroundColor: theme.colors.surfaceAlt,
+            borderRadius: 16,
+            padding: 16,
+            marginBottom: 16,
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+          onPress={() => navigation.navigate("PresentsScreen")}
+          activeOpacity={0.7}
+        >
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              backgroundColor: unclaimedGift ? "#FF6B9D" : theme.colors.primary + "30",
+              justifyContent: "center",
+              alignItems: "center",
+              marginRight: 14,
+            }}
+          >
+            <Feather
+              name="gift"
+              size={22}
+              color={unclaimedGift ? "#fff" : theme.colors.primary}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                color: theme.colors.text,
+                fontSize: 15,
+                fontWeight: "600",
+              }}
+              numberOfLines={1}
+            >
+              {unclaimedGift
+                ? "You have a present waiting! 🎁"
+                : setMonthlyGift?.setMonthlyGift
+                ? `Favorite: ${setMonthlyGift.setMonthlyGift}`
+                : "View your presents"}
+            </Text>
+            <Text
+              style={{
+                color: theme.colors.muted,
+                fontSize: 12,
+                marginTop: 3,
+              }}
+            >
+              {unclaimedGift
+                ? "Tap to unwrap your gift"
+                : "Manage presents & wishlist"}
+            </Text>
+          </View>
+          {unclaimedGift && (
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: "#FF6B9D",
+                marginRight: 8,
+              }}
+            />
+          )}
+          <Feather
+            name="chevron-right"
+            size={20}
+            color={theme.colors.muted}
+          />
+        </TouchableOpacity>
+
         {unseenInteractions.length > 0 && (
           <>
             <Text style={styles.interactionCardTitle}>
@@ -686,6 +884,23 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           setAnimationModalVisible(false);
           setCurrentAction(null);
         }}
+      />
+
+      <ConfirmStreakModal
+        visible={showStreakConfirmModal}
+        onClose={() => setShowStreakConfirmModal(false)}
+        onConfirm={handleConfirmStreak}
+        loading={confirmingStreak}
+        streak={
+          pendingStreak?.streak
+            ? {
+                id: pendingStreak.streak.id,
+                partnerName: pendingStreak.streak.partnerName,
+                socialMedia: pendingStreak.streak.socialMedia,
+                createdAt: pendingStreak.streak.createdAt,
+              }
+            : null
+        }
       />
     </View>
   );

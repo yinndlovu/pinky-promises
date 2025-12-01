@@ -24,6 +24,9 @@ export type HomeStackParamList = {
   PortalScreen: undefined;
   SentMessagesScreen: undefined;
   ReceivedMessagesScreen: undefined;
+  StreakScreen: undefined;
+  PresentsScreen: undefined;
+  CartScreen: undefined;
 };
 
 export type ProfileStackParamList = {
@@ -36,6 +39,7 @@ export type ProfileStackParamList = {
   PendingRequests: undefined;
   AccountScreen: undefined;
   AboutScreen: undefined;
+  StreakScreen: undefined;
 };
 
 export type PresentsStackParamList = {
@@ -44,9 +48,17 @@ export type PresentsStackParamList = {
   CartScreen: undefined;
 };
 
+export type PeriodStackParamList = {
+  PeriodScreen: undefined;
+  CycleHistoryScreen: undefined;
+  AllAidsScreen: undefined;
+};
+
 export type OursStackParamList = {
   OursScreen: undefined;
   NotesScreen: undefined;
+  AllCanvasesScreen: undefined;
+  CanvasEditorScreen: { canvasId: number };
   TimelineScreen: undefined;
   AllFavoriteMemoriesScreen: undefined;
   CartScreen: undefined;

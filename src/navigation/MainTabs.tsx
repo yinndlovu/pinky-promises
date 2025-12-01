@@ -6,7 +6,7 @@ import NavigationBar from "../layouts/NavigationBar";
 
 // stack navigators
 import HomeStackScreen from "./stacks/HomeStack";
-import PresentsStackScreen from "./stacks/PresentsStack";
+import PeriodStackScreen from "./stacks/PeriodStack";
 import OursStackScreen from "./stacks/OursStack";
 import ProfileStackScreen from "./stacks/ProfileStack";
 
@@ -27,7 +27,7 @@ export default function MainTabs() {
       }}
     >
       <Tab.Screen name="Home" component={HomeStackScreen} />
-      <Tab.Screen name="Presents" component={PresentsStackScreen} />
+      <Tab.Screen name="Period" component={PeriodStackScreen} />
       <Tab.Screen name="Ours" component={OursStackScreen} />
       <Tab.Screen name="Profile" component={ProfileStackScreen} />
     </Tab.Navigator>

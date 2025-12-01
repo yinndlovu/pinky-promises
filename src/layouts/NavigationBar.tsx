@@ -16,9 +16,9 @@ import { NavItem, NAV_ITEMS } from "./NavItem";
 import { useAuth } from "../contexts/AuthContext";
 import useToken from "../hooks/useToken";
 import { useProfilePicture } from "../hooks/useProfilePicture";
-import { useGifts } from "../hooks/useGifts";
+import { usePeriod } from "../hooks/usePeriod";
 import { useTheme } from "../theme/ThemeContext";
-import { useGiftsSelector } from "../hooks/useGiftsSelector";
+import { usePeriodSelector } from "../hooks/usePeriodSelector";
 
 // content
 import ProfileImage from "../components/common/ProfileImage";
@@ -41,16 +41,15 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
   const INACTIVE_COLOR = theme.colors.muted;
 
   // fetch data
-  const { data: _giftsData } = useGifts(token, user?.id);
+  const { data: _periodData } = usePeriod(token, user?.id);
   const {
     avatarUri,
     profilePicUpdatedAt,
     fetchPicture: fetchUserAvatar,
   } = useProfilePicture(user?.id, token);
 
-  // select data from gifts selector
-  const gift =
-    useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) || null;
+  // select data from period selector
+  const periodStatus = usePeriodSelector(user?.id, (data) => data?.status);
 
   // use states
   const [avatarFetched, setAvatarFetched] = useState(false);
@@ -62,8 +61,9 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
     }
   }, [token, user?.senderId]);
 
-  // check if there is an unclaimed gift
-  const hasUnclaimedGift = !!gift;
+  // check if currently on period or period is late
+  const showPeriodIndicator =
+    periodStatus?.status === "on_period" || periodStatus?.status === "late";
 
   return (
     <SafeAreaView
@@ -86,7 +86,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
 
                 const startScreens: Record<string, string> = {
                   Home: "HomeScreen",
-                  Presents: "PresentsScreen",
+                  Period: "PeriodScreen",
                   Ours: "OursScreen",
                   Profile: "ProfileScreen",
                 };
@@ -132,7 +132,7 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
                     size={26}
                     color={isActive ? ACTIVE_COLOR : INACTIVE_COLOR}
                   />
-                  {item.name === "Presents" && hasUnclaimedGift && (
+                  {item.name === "Period" && showPeriodIndicator && (
                     <View
                       style={{
                         position: "absolute",
@@ -141,7 +141,10 @@ export default function NavigationBar({ navigation, currentRoute }: Props) {
                         width: 8,
                         height: 8,
                         borderRadius: 4,
-                        backgroundColor: "#ff1414ff",
+                        backgroundColor:
+                          periodStatus?.status === "late"
+                            ? "#ff6b6b"
+                            : "#ff6b9d",
                       }}
                     />
                   )}

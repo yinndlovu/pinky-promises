@@ -18,6 +18,7 @@ import NotificationsScreen from "../../screens/settings/notifications/Notificati
 import AccountScreen from "../../screens/settings/account/AccountScreen";
 import AboutScreen from "../../screens/settings/about/AboutScreen";
 import PendingRequestsScreen from "../../screens/requests/screens/PendingRequestsScreen";
+import StreakScreen from "../../screens/streak/StreakScreen";
 
 const ProfileStack = createStackNavigator<ProfileStackParamList>();
 
@@ -129,6 +130,13 @@ export default function ProfileStackScreen() {
           headerStyle: { backgroundColor: "transparent" },
           headerShadowVisible: false,
           headerTitleAlign: "center",
+        }}
+      />
+      <ProfileStack.Screen
+        name="StreakScreen"
+        component={StreakScreen}
+        options={{
+          headerShown: false,
         }}
       />
     </ProfileStack.Navigator>
