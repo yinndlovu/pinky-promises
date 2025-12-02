@@ -42,7 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setUser(response.data.user);
         return true;
       }
-      
+
       return false;
     } catch (error: any) {
       if (
