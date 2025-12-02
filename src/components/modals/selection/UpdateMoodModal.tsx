@@ -27,6 +27,7 @@ const MOOD_OPTIONS = [
   "Very happy",
   "Crying",
   "Neutral",
+  "Nervous"
 ];
 
 // types

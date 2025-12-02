@@ -174,4 +174,3 @@ export function useConfirmEndedStreak(token: string | null) {
     },
   });
 }
-
