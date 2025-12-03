@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from "react";
+// external
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -10,9 +11,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Animated,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// internal
 import { useTheme } from "../../../theme/ThemeContext";
 import useToken from "../../../hooks/useToken";
 import { createCustomAid } from "../../../services/api/period/periodService";
@@ -22,12 +27,14 @@ import {
   PeriodProblemEmojis,
 } from "../../../types/Period";
 
+// props
 interface Props {
   visible: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
+// constants
 const PROBLEMS: PeriodProblem[] = [
   "cramps",
   "bloating",
@@ -46,19 +53,70 @@ const PROBLEMS: PeriodProblem[] = [
   "hot_flashes",
 ];
 
-const AddCustomAidModal: React.FC<Props> = ({ visible, onClose, onSuccess }) => {
+const AddCustomAidModal: React.FC<Props> = ({
+  visible,
+  onClose,
+  onSuccess,
+}) => {
+  // hook variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const token = useToken();
+  const insets = useSafeAreaInsets();
 
-  const [selectedProblem, setSelectedProblem] = useState<PeriodProblem | null>(null);
+  // use states
+  const [selectedProblem, setSelectedProblem] = useState<PeriodProblem | null>(
+    null
+  );
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // use refs
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(300)).current;
+
+  // use effects
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 65,
+          friction: 11,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 300,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
+
+  // handlers
   const handleSubmit = async () => {
-    if (!token || !selectedProblem || !title.trim()) {
+    if (!token) {
+      setError("Your session has expired. Log in again and retry.");
+      return;
+    }
+
+    if (!selectedProblem || !title.trim()) {
       setError("Please select a problem and enter a title");
       return;
     }
@@ -73,7 +131,6 @@ const AddCustomAidModal: React.FC<Props> = ({ visible, onClose, onSuccess }) => 
         description: description.trim() || undefined,
       });
 
-      // Reset form
       setSelectedProblem(null);
       setTitle("");
       setDescription("");
@@ -96,110 +153,119 @@ const AddCustomAidModal: React.FC<Props> = ({ visible, onClose, onSuccess }) => 
   return (
     <Modal
       visible={visible}
-      animationType="slide"
+      animationType="fade"
       transparent
       statusBarTranslucent
     >
-      <BlurView intensity={20} tint="dark" style={styles.overlay}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={styles.keyboardView}
-        >
-          <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-              <Text style={styles.headerTitle}>Add Your Need</Text>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                <Feather name="x" size={24} color={theme.colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView
-              style={styles.content}
-              showsVerticalScrollIndicator={false}
+      <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
+        <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardView}
+          >
+            <Animated.View
+              style={[
+                styles.container,
+                {
+                  paddingBottom: Math.max(insets.bottom, 20),
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
             >
-              {/* Problem Selection */}
-              <Text style={styles.label}>What is this for?</Text>
-              <View style={styles.problemGrid}>
-                {PROBLEMS.map((problem) => (
-                  <TouchableOpacity
-                    key={problem}
-                    style={[
-                      styles.problemChip,
-                      selectedProblem === problem && styles.problemChipActive,
-                    ]}
-                    onPress={() => setSelectedProblem(problem)}
-                  >
-                    <Text style={styles.problemEmoji}>
-                      {PeriodProblemEmojis[problem]}
-                    </Text>
-                    <Text
-                      style={[
-                        styles.problemText,
-                        selectedProblem === problem && styles.problemTextActive,
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {PeriodProblemLabels[problem]}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.header}>
+                <Text style={styles.headerTitle}>Add Your Need</Text>
+                <TouchableOpacity
+                  onPress={handleClose}
+                  style={styles.closeButton}
+                >
+                  <Feather name="x" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
               </View>
 
-              {/* Title Input */}
-              <Text style={styles.label}>What helps you?</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g., Hot water bottle, Dark chocolate"
-                placeholderTextColor={theme.colors.muted}
-                value={title}
-                onChangeText={setTitle}
-                maxLength={100}
-              />
-
-              {/* Description Input */}
-              <Text style={styles.label}>More details (optional)</Text>
-              <TextInput
-                style={[styles.input, styles.textArea]}
-                placeholder="Any additional notes..."
-                placeholderTextColor={theme.colors.muted}
-                value={description}
-                onChangeText={setDescription}
-                multiline
-                numberOfLines={3}
-                maxLength={500}
-              />
-
-              {/* Error */}
-              {error && (
-                <View style={styles.errorContainer}>
-                  <Feather name="alert-circle" size={16} color="#ff6b6b" />
-                  <Text style={styles.errorText}>{error}</Text>
+              <ScrollView
+                style={styles.content}
+                showsVerticalScrollIndicator={false}
+              >
+                <Text style={styles.label}>What is this for?</Text>
+                <View style={styles.problemGrid}>
+                  {PROBLEMS.map((problem) => (
+                    <TouchableOpacity
+                      key={problem}
+                      style={[
+                        styles.problemChip,
+                        selectedProblem === problem && styles.problemChipActive,
+                      ]}
+                      onPress={() => setSelectedProblem(problem)}
+                    >
+                      <Text style={styles.problemEmoji}>
+                        {PeriodProblemEmojis[problem]}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.problemText,
+                          selectedProblem === problem &&
+                            styles.problemTextActive,
+                        ]}
+                        numberOfLines={1}
+                      >
+                        {PeriodProblemLabels[problem]}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-              )}
-            </ScrollView>
 
-            {/* Submit Button */}
-            <TouchableOpacity
-              style={[
-                styles.submitButton,
-                (!selectedProblem || !title.trim()) && styles.submitButtonDisabled,
-              ]}
-              onPress={handleSubmit}
-              disabled={loading || !selectedProblem || !title.trim()}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <>
-                  <Feather name="plus" size={18} color="#fff" />
-                  <Text style={styles.submitButtonText}>Add to My Needs</Text>
-                </>
-              )}
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </BlurView>
+                <Text style={styles.label}>What helps you?</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="e.g., Hot water bottle, Dark chocolate"
+                  placeholderTextColor={theme.colors.muted}
+                  value={title}
+                  onChangeText={setTitle}
+                  maxLength={100}
+                />
+
+                <Text style={styles.label}>More details (optional)</Text>
+                <TextInput
+                  style={[styles.input, styles.textArea]}
+                  placeholder="Any additional notes..."
+                  placeholderTextColor={theme.colors.muted}
+                  value={description}
+                  onChangeText={setDescription}
+                  multiline
+                  numberOfLines={3}
+                  maxLength={500}
+                />
+
+                {error && (
+                  <View style={styles.errorContainer}>
+                    <Feather name="alert-circle" size={16} color="#ff6b6b" />
+                    <Text style={styles.errorText}>{error}</Text>
+                  </View>
+                )}
+              </ScrollView>
+
+              <TouchableOpacity
+                style={[
+                  styles.submitButton,
+                  (!selectedProblem || !title.trim()) &&
+                    styles.submitButtonDisabled,
+                ]}
+                onPress={handleSubmit}
+                disabled={loading || !selectedProblem || !title.trim()}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <>
+                    <Feather name="plus" size={18} color="#fff" />
+                    <Text style={styles.submitButtonText}>Add to My Needs</Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+          </KeyboardAvoidingView>
+        </BlurView>
+      </Animated.View>
     </Modal>
   );
 };
@@ -219,7 +285,6 @@ const createStyles = (theme: any) =>
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       maxHeight: "90%",
-      paddingBottom: 34,
     },
     header: {
       flexDirection: "row",
@@ -327,4 +392,3 @@ const createStyles = (theme: any) =>
   });
 
 export default AddCustomAidModal;
-

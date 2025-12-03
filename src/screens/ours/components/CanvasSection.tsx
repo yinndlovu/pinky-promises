@@ -16,11 +16,13 @@ import { Canvas } from "../../../types/Canvas";
 import { formatDateTime } from "../../../helpers/notesHelpers";
 import { useTheme } from "../../../theme/ThemeContext";
 
+// helper variables
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CANVAS_WIDTH = SCREEN_WIDTH * 0.7;
 const ADD_BUTTON_WIDTH = 72;
 const CANVAS_GAP = 14;
 
+// props
 interface CanvasSectionProps {
   canvases: Canvas[];
   onExpand: () => void;
@@ -34,10 +36,14 @@ const CanvasSection: React.FC<CanvasSectionProps> = ({
   onCanvasPress,
   onAddCanvas,
 }) => {
+  // hook variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+
+  // use refs
   const scrollX = useRef(new Animated.Value(0)).current;
 
+  // helper
   const renderAddButton = () => (
     <TouchableOpacity
       style={styles.addButton}
@@ -80,10 +86,7 @@ const CanvasSection: React.FC<CanvasSectionProps> = ({
     return (
       <Animated.View
         key={canvas.id}
-        style={[
-          styles.canvasCardWrapper,
-          { transform: [{ scale }], opacity },
-        ]}
+        style={[styles.canvasCardWrapper, { transform: [{ scale }], opacity }]}
       >
         <TouchableOpacity
           style={styles.canvasCard}
@@ -135,7 +138,7 @@ const CanvasSection: React.FC<CanvasSectionProps> = ({
         snapToAlignment="start"
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
+          { useNativeDriver: false }
         )}
         scrollEventThrottle={16}
       >
@@ -267,4 +270,3 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
   });
 
 export default CanvasSection;
-

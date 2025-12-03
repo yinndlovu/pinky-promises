@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -47,6 +48,16 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const token = useToken();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  const basePrimaryColor = theme.colors.primary || "#e03487";
+  const primaryColorWithoutAlpha =
+    basePrimaryColor.length === 9
+      ? basePrimaryColor.slice(0, 7)
+      : basePrimaryColor;
+
+  const addOpacity = (hex: string, opacity: string) => {
+    return `${hex}${opacity}`;
+  };
+
   // states
   const [expandedPlatform, setExpandedPlatform] =
     useState<SocialMediaPlatform | null>(null);
@@ -63,7 +74,11 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
     isLoading,
     refetch: refetchStreakData,
   } = useStreakData(token, user?.id);
-  const { data: historyData, refetch: refetchHistory } = useStreakHistory(
+  const {
+    data: historyData,
+    isLoading: isLoadingHistory,
+    refetch: refetchHistory,
+  } = useStreakHistory(
     token,
     user?.id,
     expandedPlatform as SocialMediaPlatform
@@ -178,7 +193,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
         }
       >
         <LinearGradient
-          colors={[`${theme.colors.primary}30`, "transparent"]}
+          colors={[addOpacity(primaryColorWithoutAlpha, "30"), "transparent"]}
           style={styles.titleGradient}
         >
           <Text style={styles.mainTitle}>See who keeps ending the streak</Text>
@@ -311,67 +326,80 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
                     />
                   </TouchableOpacity>
 
-                  {isExpanded && historyData && (
+                  {isExpanded && (
                     <View style={styles.historyContainer}>
-                      {historyData.user.history.length === 0 &&
-                      historyData.partner.history.length === 0 ? (
-                        <Text style={styles.noHistoryText}>
-                          No streak endings recorded yet
-                        </Text>
-                      ) : (
-                        <>
-                          {historyData.user.history.length > 0 && (
-                            <View style={styles.historySection}>
-                              <Text style={styles.historySectionTitle}>
-                                Your endings
-                              </Text>
-                              {historyData.user.history
-                                .slice(0, 5)
-                                .map((entry, index) => (
-                                  <View
-                                    key={entry.id}
-                                    style={styles.historyItem}
-                                  >
-                                    <View style={styles.historyDot} />
-                                    <Text style={styles.historyText}>
-                                      You ended the streak{" "}
-                                      {formatTimeAgo(entry.createdAt)}
-                                    </Text>
-                                  </View>
-                                ))}
-                            </View>
-                          )}
-
-                          {historyData.partner.history.length > 0 && (
-                            <View style={styles.historySection}>
-                              <Text style={styles.historySectionTitle}>
-                                {historyData.partner.name}'s endings
-                              </Text>
-                              {historyData.partner.history
-                                .slice(0, 5)
-                                .map((entry, index) => (
-                                  <View
-                                    key={entry.id}
-                                    style={styles.historyItem}
-                                  >
+                      {isLoadingHistory ? (
+                        <View style={styles.historyLoadingContainer}>
+                          <ActivityIndicator
+                            size="small"
+                            color={theme.colors.primary}
+                          />
+                          <Text style={styles.historyLoadingText}>
+                            Loading history...
+                          </Text>
+                        </View>
+                      ) : historyData ? (
+                        historyData.user.history.length === 0 &&
+                        historyData.partner.history.length === 0 ? (
+                          <Text style={styles.noHistoryText}>
+                            No streak endings recorded yet
+                          </Text>
+                        ) : (
+                          <>
+                            {historyData.user.history.length > 0 && (
+                              <View style={styles.historySection}>
+                                <Text style={styles.historySectionTitle}>
+                                  Your endings
+                                </Text>
+                                {historyData.user.history
+                                  .slice(0, 5)
+                                  .map((entry, index) => (
                                     <View
-                                      style={[
-                                        styles.historyDot,
-                                        {
-                                          backgroundColor: theme.colors.primary,
-                                        },
-                                      ]}
-                                    />
-                                    <Text style={styles.historyText}>
-                                      {historyData.partner.name} ended the
-                                      streak {formatTimeAgo(entry.createdAt)}
-                                    </Text>
-                                  </View>
-                                ))}
-                            </View>
-                          )}
-                        </>
-                      )}
+                                      key={entry.id}
+                                      style={styles.historyItem}
+                                    >
+                                      <View style={styles.historyDot} />
+                                      <Text style={styles.historyText}>
+                                        You ended the streak{" "}
+                                        {formatTimeAgo(entry.createdAt)}
+                                      </Text>
+                                    </View>
+                                  ))}
+                              </View>
+                            )}
+
+                            {historyData.partner.history.length > 0 && (
+                              <View style={styles.historySection}>
+                                <Text style={styles.historySectionTitle}>
+                                  {historyData.partner.name}'s endings
+                                </Text>
+                                {historyData.partner.history
+                                  .slice(0, 5)
+                                  .map((entry, index) => (
+                                    <View
+                                      key={entry.id}
+                                      style={styles.historyItem}
+                                    >
+                                      <View
+                                        style={[
+                                          styles.historyDot,
+                                          {
+                                            backgroundColor:
+                                              theme.colors.primary,
+                                          },
+                                        ]}
+                                      />
+                                      <Text style={styles.historyText}>
+                                        {historyData.partner.name} ended the
+                                        streak {formatTimeAgo(entry.createdAt)}
+                                      </Text>
+                                    </View>
+                                  ))}
+                              </View>
+                            )}
+                          </>
+                        )
+                      ) : null}
                     </View>
                   )}
                 </View>
@@ -385,7 +413,10 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
           onPress={() => setShowLogModal(true)}
         >
           <LinearGradient
-            colors={[theme.colors.primary, `${theme.colors.primary}CC`]}
+            colors={[
+              primaryColorWithoutAlpha,
+              addOpacity(primaryColorWithoutAlpha, "CC"),
+            ]}
             style={styles.logStreakGradient}
           >
             <Feather name="plus" size={22} color={theme.colors.text} />
@@ -472,7 +503,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       marginBottom: 20,
     },
     mainTitle: {
-      fontSize: 24,
+      fontSize: 20,
       fontWeight: "bold",
       color: theme.colors.text,
       textAlign: "center",
@@ -600,6 +631,17 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       color: theme.colors.muted,
       textAlign: "center",
       paddingVertical: 12,
+    },
+    historyLoadingContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 20,
+      gap: 10,
+    },
+    historyLoadingText: {
+      fontSize: 14,
+      color: theme.colors.muted,
     },
     historySection: {
       marginBottom: 16,

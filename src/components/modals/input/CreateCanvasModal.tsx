@@ -212,4 +212,3 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
   });
 
 export default CreateCanvasModal;
-

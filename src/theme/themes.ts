@@ -27,6 +27,7 @@ export const lightTheme = {
     animationBackground: "rgba(240, 235, 255, 0.8)",
     skeletonDark: "#f4f5ff",
     skeletonHighlight: "rgba(185, 185, 185, 0.2)",
+    notification: "#f363a8ff",
   },
   fonts: {
     regular: {
@@ -77,6 +78,7 @@ export const darkTheme = {
     animationBackground: "rgba(5, 3, 12, 0.7)",
     skeletonDark: "#1e2035",
     skeletonHighlight: "rgba(255,255,255,0.10)",
+    notification: "#e03487",
   },
   fonts: {
     regular: {

@@ -135,8 +135,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   // gifts data for presents card
   const { data: _giftsData } = useGifts(token, user?.id);
-  const unclaimedGift = useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) || null;
-  const setMonthlyGift = useGiftsSelector(user?.id, (gifts) => gifts?.setMonthlyGift) || null;
+  const unclaimedGift =
+    useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) || null;
+  const setMonthlyGift =
+    useGiftsSelector(user?.id, (gifts) => gifts?.setMonthlyGift) || null;
 
   const {
     avatarUri,
@@ -588,7 +590,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           />
         </View>
 
-        {/* Streak Preview Card */}
         {streakPreview && (
           <TouchableOpacity
             style={{
@@ -663,7 +664,6 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           </TouchableOpacity>
         )}
 
-        {/* Presents Card */}
         <TouchableOpacity
           style={{
             backgroundColor: theme.colors.surfaceAlt,
@@ -681,7 +681,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               width: 40,
               height: 40,
               borderRadius: 12,
-              backgroundColor: unclaimedGift ? "#FF6B9D" : theme.colors.primary + "30",
+              backgroundColor: unclaimedGift ? "#FF6B9D" : "transparent",
               justifyContent: "center",
               alignItems: "center",
               marginRight: 14,
@@ -731,11 +731,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               }}
             />
           )}
-          <Feather
-            name="chevron-right"
-            size={20}
-            color={theme.colors.muted}
-          />
+          <Feather name="chevron-right" size={20} color={theme.colors.muted} />
         </TouchableOpacity>
 
         {unseenInteractions.length > 0 && (

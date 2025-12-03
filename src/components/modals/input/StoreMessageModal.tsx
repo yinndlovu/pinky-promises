@@ -1,5 +1,5 @@
 // external
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   Modal,
   View,
@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Dimensions,
+  Animated,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -48,6 +49,41 @@ const StoreMessageModal: React.FC<Props> = ({
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  // Animation values
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(300)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 65,
+          friction: 11,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(overlayOpacity, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 300,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
+
   // handlers
   const handleStore = async () => {
     if (!title.trim() || !message.trim()) {
@@ -73,10 +109,19 @@ const StoreMessageModal: React.FC<Props> = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal visible={visible} transparent animationType="fade">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
-          <View style={[styles.container, { paddingTop: insets.top + 2 }]}>
+        <Animated.View style={[styles.overlay, { opacity: overlayOpacity }]}>
+          <Animated.View
+            style={[
+              styles.container,
+              {
+                paddingTop: insets.top + 2,
+                paddingBottom: Math.max(insets.bottom, 20),
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
             <View style={styles.handle} />
             <View style={styles.header}>
               <TouchableOpacity
@@ -130,7 +175,7 @@ const StoreMessageModal: React.FC<Props> = ({
                 textAlignVertical="top"
               />
             </View>
-          </View>
+          </Animated.View>
 
           <AlertModal
             visible={showSuccessAlert}
@@ -149,7 +194,7 @@ const StoreMessageModal: React.FC<Props> = ({
             buttonText="Close"
             onClose={() => setShowErrorAlert(false)}
           />
-        </View>
+        </Animated.View>
       </TouchableWithoutFeedback>
     </Modal>
   );

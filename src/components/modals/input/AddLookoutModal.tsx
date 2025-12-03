@@ -1,3 +1,4 @@
+// external
 import React, { useState, useMemo } from "react";
 import {
   View,
@@ -14,10 +15,13 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import DateTimePicker from "@react-native-community/datetimepicker";
+
+// internal
 import { useTheme } from "../../../theme/ThemeContext";
 import useToken from "../../../hooks/useToken";
 import { createLookout } from "../../../services/api/period/periodService";
 
+// props
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -31,10 +35,12 @@ const AddLookoutModal: React.FC<Props> = ({
   onSuccess,
   periodUserId,
 }) => {
+  // hook variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const token = useToken();
 
+  // use states
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [showOnDate, setShowOnDate] = useState(new Date());
@@ -43,6 +49,7 @@ const AddLookoutModal: React.FC<Props> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // handlers
   const handleSubmit = async () => {
     if (!token || !periodUserId || !title.trim()) {
       setError("Please enter a title");
@@ -61,7 +68,6 @@ const AddLookoutModal: React.FC<Props> = ({
         priority,
       });
 
-      // Reset form
       setTitle("");
       setDescription("");
       setShowOnDate(new Date());
@@ -107,7 +113,10 @@ const AddLookoutModal: React.FC<Props> = ({
             {/* Header */}
             <View style={styles.header}>
               <Text style={styles.headerTitle}>Add Reminder</Text>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+              <TouchableOpacity
+                onPress={handleClose}
+                style={styles.closeButton}
+              >
                 <Feather name="x" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
@@ -155,9 +164,19 @@ const AddLookoutModal: React.FC<Props> = ({
                 style={styles.dateButton}
                 onPress={() => setShowDatePicker(true)}
               >
-                <Feather name="calendar" size={18} color={theme.colors.primary} />
-                <Text style={styles.dateButtonText}>{formatDate(showOnDate)}</Text>
-                <Feather name="chevron-right" size={18} color={theme.colors.muted} />
+                <Feather
+                  name="calendar"
+                  size={18}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.dateButtonText}>
+                  {formatDate(showOnDate)}
+                </Text>
+                <Feather
+                  name="chevron-right"
+                  size={18}
+                  color={theme.colors.muted}
+                />
               </TouchableOpacity>
 
               {showDatePicker && (
@@ -403,4 +422,3 @@ const createStyles = (theme: any) =>
   });
 
 export default AddLookoutModal;
-

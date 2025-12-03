@@ -85,6 +85,7 @@ export const createHomeStyles = (theme: AppTheme) =>
       width: "100%",
       paddingHorizontal: 8,
       marginTop: 16,
+      marginBottom: 16,
     },
     actionButton: {
       backgroundColor: theme.colors.actionButton,
@@ -107,7 +108,7 @@ export const createHomeStyles = (theme: AppTheme) =>
       overflow: "hidden",
     },
     upcomingContainer: {
-      marginTop: 24,
+      marginTop: 14,
       width: "100%",
     },
     upcomingLabel: {
