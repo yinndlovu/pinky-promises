@@ -1,14 +1,16 @@
 // external
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Keyboard,
 } from "react-native";
 import { Feather, FontAwesome5 } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -376,7 +378,6 @@ const OursScreen = ({ navigation }: Props) => {
     try {
       const newCanvas = await createCanvas(token, title);
 
-      // Emit to partner via socket
       if (socket?.connected) {
         socket.emit("canvas:created", { canvas: newCanvas });
       }
@@ -384,7 +385,6 @@ const OursScreen = ({ navigation }: Props) => {
       await queryClient.invalidateQueries({ queryKey: ["ours", user?.id] });
       setCreateCanvasModalVisible(false);
 
-      // Navigate to editor
       navigation.navigate("CanvasEditorScreen", { canvasId: newCanvas.id });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to create canvas");
@@ -419,6 +419,13 @@ const OursScreen = ({ navigation }: Props) => {
     });
     return () => unsubscribe();
   }, []);
+
+  // dismiss keyboard when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      Keyboard.dismiss();
+    }, [])
+  );
 
   if (oursError) {
     return (
