@@ -27,7 +27,7 @@ const PeriodStatusCard: React.FC<Props> = ({
         return {
           emoji: "🌸",
           label: isPartnerView ? "PARTNER'S PERIOD" : "CURRENTLY ON PERIOD",
-          days: status.daysSinceStart || 0,
+          days: (status.daysSinceStart || 0) + 1,
           subtext: `Day ${(status.daysSinceStart || 0) + 1} of ~${status.expectedEndDay || 5}`,
           gradientColors: ["#ff6b9d", "#c44569"] as [string, string],
           chipText: "On Period",
