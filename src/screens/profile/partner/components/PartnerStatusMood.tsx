@@ -1,14 +1,18 @@
 // external
 import React, { useEffect, useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { Feather } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withRepeat,
   withTiming,
+  withDelay,
   interpolate,
   Easing,
+  FadeIn,
+  FadeOut,
 } from "react-native-reanimated";
 
 // internal
@@ -22,103 +26,144 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   status = "unavailable",
   statusDescription,
   statusDistance,
+  userSuburb,
+  userLocation,
 }) => {
   // variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
+  // animation variables
+  const statusCardScale = useSharedValue(0.95);
+  const moodCardScale = useSharedValue(0.95);
+  const statusPulse = useSharedValue(1);
+  const moodFloat = useSharedValue(0);
+  const statusGlow = useSharedValue(0);
+  const moodGlow = useSharedValue(0);
+  const cardFadeIn = useSharedValue(0);
+
+  // Format location display
+  const formatLocation = () => {
+    if (!userLocation) return null;
+    if (userSuburb && userSuburb.trim() !== "") {
+      return `${userSuburb}, ${userLocation}`;
+    }
+    return userLocation;
+  };
+
+  const displayLocation = formatLocation();
+
   // use effects
   useEffect(() => {
-    floatAnimation.value = withRepeat(
-      withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.sin) }),
+    // Card entrance animations
+    cardFadeIn.value = withTiming(1, {
+      duration: 600,
+      easing: Easing.out(Easing.cubic),
+    });
+
+    statusCardScale.value = withSpring(1, {
+      damping: 12,
+      stiffness: 150,
+    });
+
+    moodCardScale.value = withDelay(
+      100,
+      withSpring(1, {
+        damping: 12,
+        stiffness: 150,
+      })
+    );
+  }, []);
+
+  useEffect(() => {
+    // Status pulse animation
+    statusPulse.value = withRepeat(
+      withTiming(1.15, {
+        duration: 2000,
+        easing: Easing.inOut(Easing.sin),
+      }),
       -1,
       true
     );
 
-    fadeInAnimation.value = withTiming(1, {
-      duration: 800,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, []);
-
-  useEffect(() => {
-    const statusValues = { home: 0, away: 1, unreachable: 2, unavailable: 3 };
-    const targetValue = statusValues[status as keyof typeof statusValues] || 3;
-
-    statusColorAnimation.value = withSpring(targetValue, {
-      damping: 15,
-      stiffness: 150,
-    });
-
-    pulseAnimation.value = withRepeat(
-      withTiming(1.2, { duration: 600, easing: Easing.out(Easing.cubic) }),
-      2,
+    // Status glow animation
+    statusGlow.value = withRepeat(
+      withTiming(1, {
+        duration: 3000,
+        easing: Easing.inOut(Easing.sin),
+      }),
+      -1,
       true
     );
   }, [status]);
 
   useEffect(() => {
-    if (mood && mood !== "No mood") {
-      moodBounceAnimation.value = withSpring(1, {
-        damping: 8,
-        stiffness: 200,
-      });
-    }
+    // Mood float animation
+    moodFloat.value = withRepeat(
+      withTiming(1, {
+        duration: 4000,
+        easing: Easing.inOut(Easing.sin),
+      }),
+      -1,
+      true
+    );
+
+    // Mood glow animation
+    moodGlow.value = withRepeat(
+      withTiming(1, {
+        duration: 2500,
+        easing: Easing.inOut(Easing.sin),
+      }),
+      -1,
+      true
+    );
   }, [mood]);
 
-  // animation variables
-  const pulseAnimation = useSharedValue(1);
-  const floatAnimation = useSharedValue(0);
-  const statusColorAnimation = useSharedValue(0);
-  const moodBounceAnimation = useSharedValue(0);
-  const fadeInAnimation = useSharedValue(0);
-
   // animated styles
-  const pulseStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulseAnimation.value }],
+  const statusCardAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: statusCardScale.value }],
+    opacity: cardFadeIn.value,
   }));
 
-  const floatStyle = useAnimatedStyle(() => ({
+  const moodCardAnimatedStyle = useAnimatedStyle(() => ({
     transform: [
+      { scale: moodCardScale.value },
       {
-        translateY: interpolate(floatAnimation.value, [0, 1], [0, -3]),
+        translateY: interpolate(moodFloat.value, [0, 1], [0, -4]),
       },
     ],
+    opacity: cardFadeIn.value,
   }));
 
-  const statusColorStyle = useAnimatedStyle(() => {
-    const colors = [
-      "#4caf50",
-      theme.colors.accent,
-      "#db8a47",
-      theme.colors.muted,
-    ];
-    const currentColor =
-      colors[Math.round(statusColorAnimation.value)] || colors[3];
+  const statusPulseStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: statusPulse.value }],
+  }));
+
+  const statusGlowStyle = useAnimatedStyle(() => {
+    const getStatusColor = () => {
+      switch (status) {
+        case "home":
+          return "#4caf50";
+        case "away":
+          return theme.colors.accent;
+        case "unreachable":
+          return "#db8a47";
+        default:
+          return theme.colors.muted;
+      }
+    };
 
     return {
-      backgroundColor: currentColor,
+      shadowColor: getStatusColor(),
+      shadowOpacity: interpolate(statusGlow.value, [0, 1], [0.2, 0.4]),
+      shadowRadius: interpolate(statusGlow.value, [0, 1], [8, 16]),
     };
   });
 
-  const moodBounceStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        scale: withSpring(moodBounceAnimation.value, {
-          damping: 8,
-          stiffness: 200,
-        }),
-      },
-    ],
-  }));
-
-  const fadeInStyle = useAnimatedStyle(() => ({
-    opacity: fadeInAnimation.value,
-    transform: [
-      {
-        translateY: interpolate(fadeInAnimation.value, [0, 1], [20, 0]),
-      },
-    ],
+  const moodGlowStyle = useAnimatedStyle(() => ({
+    shadowColor: theme.colors.primary,
+    shadowOpacity: interpolate(moodGlow.value, [0, 1], [0.15, 0.3]),
+    shadowRadius: interpolate(moodGlow.value, [0, 1], [6, 12]),
   }));
 
   // helpers
@@ -132,6 +177,19 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
         return "❓";
       default:
         return "⏸️";
+    }
+  };
+
+  const getStatusColor = () => {
+    switch (status) {
+      case "home":
+        return "#4caf50";
+      case "away":
+        return theme.colors.accent;
+      case "unreachable":
+        return "#db8a47";
+      default:
+        return theme.colors.muted;
     }
   };
 
@@ -156,60 +214,96 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
     return moodEmojis[mood.toLowerCase()] || moodEmojis.default;
   };
 
+  const getStatusText = () => {
+    switch (status) {
+      case "home":
+        return "Home";
+      case "away":
+        return "Away";
+      case "unreachable":
+        return "Unreachable";
+      default:
+        return "Unavailable";
+    }
+  };
+
   return (
-    <Animated.View style={[styles.wrapper, fadeInStyle]}>
-      <View style={styles.headerRow}>
-        <Text style={styles.statusLabel}>Status</Text>
-      </View>
-
-      <Animated.View style={[styles.statusRow, floatStyle]}>
-        <Animated.View style={[styles.statusIndicator, pulseStyle]}>
-          <Animated.View style={[styles.statusDot, statusColorStyle]} />
-        </Animated.View>
-
-        <View style={styles.statusContent}>
+    <View style={styles.wrapper}>
+      {/* Status Card */}
+      <Animated.View
+        entering={FadeIn.duration(400)}
+        style={[styles.statusCard, statusCardAnimatedStyle, statusGlowStyle]}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.cardHeaderLeft}>
+            <Animated.View style={[styles.statusIndicator, statusPulseStyle]}>
+              <View
+                style={[
+                  styles.statusDot,
+                  { backgroundColor: getStatusColor() },
+                ]}
+              />
+            </Animated.View>
+            <Text style={styles.cardTitle}>Status</Text>
+          </View>
           <Text style={styles.statusEmoji}>{getStatusEmoji(status)}</Text>
-          <Text
-            style={[
-              styles.statusValue,
-              status === "home"
-                ? { color: "#4caf50" }
-                : status === "away"
-                ? { color: theme.colors.accent }
-                : status === "unreachable"
-                ? { color: "#db8a47ff" }
-                : { color: theme.colors.muted },
-            ]}
-          >
-            {status === "home"
-              ? "Home"
-              : status === "away"
-              ? "Away"
-              : status === "unreachable"
-              ? "Unreachable"
-              : "Unavailable"}
+        </View>
+
+        <View style={styles.cardContent}>
+          <Text style={[styles.statusText, { color: getStatusColor() }]}>
+            {getStatusText()}
           </Text>
+          {displayLocation && (
+            <View style={styles.locationContainer}>
+              <Feather
+                name="map-pin"
+                size={14}
+                color={theme.colors.muted}
+                style={styles.locationIcon}
+              />
+              <Text style={styles.locationText}>{displayLocation}</Text>
+            </View>
+          )}
+          {statusDescription && (
+            <Text style={styles.statusDescription}>{statusDescription}</Text>
+          )}
+          {status === "away" && statusDistance && (
+            <View style={styles.distanceContainer}>
+              <Feather
+                name="navigation"
+                size={12}
+                color={theme.colors.primary}
+              />
+              <Text style={styles.distanceText}>
+                {formatDistance(statusDistance)} away
+              </Text>
+            </View>
+          )}
         </View>
       </Animated.View>
 
-      <Text style={styles.statusDescription}>{statusDescription}</Text>
+      {/* Mood Card */}
+      <Animated.View
+        entering={FadeIn.duration(400).delay(100)}
+        style={[styles.moodCard, moodCardAnimatedStyle, moodGlowStyle]}
+      >
+        <View style={styles.cardHeader}>
+          <View style={styles.cardHeaderLeft}>
+            <Text style={styles.moodEmoji}>{getMoodEmoji(mood)}</Text>
+            <Text style={styles.cardTitle}>Mood</Text>
+          </View>
+        </View>
 
-      {status === "away" && statusDistance && (
-        <Text style={styles.statusDistance}>
-          {`${formatDistance(statusDistance)} away from home`}
-        </Text>
-      )}
-
-      <View style={styles.moodRow}>
-        <Text style={styles.moodLabel}>Mood</Text>
-      </View>
-
-      <Animated.View style={[styles.moodContentRow, moodBounceStyle]}>
-        <Text style={styles.moodEmoji}>{getMoodEmoji(mood)}</Text>
-        <Text style={styles.moodValue}>{mood}</Text>
-        <Text style={styles.moodDescription}> - {moodDescription}</Text>
+        <View style={styles.cardContent}>
+          <Text style={styles.moodText}>
+            {mood && mood !== "No mood" ? mood : "No mood"}
+          </Text>
+          {moodDescription && (
+            <Text style={styles.moodDescription}>{moodDescription}</Text>
+          )}
+        </View>
       </Animated.View>
-    </Animated.View>
+    </View>
   );
 };
 
@@ -218,25 +312,52 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     wrapper: {
       width: "100%",
       marginBottom: 14,
+      gap: 16,
     },
-    loadingContainer: {
-      alignItems: "center",
-      justifyContent: "center",
-      paddingVertical: 20,
+    statusCard: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 20,
+      padding: 20,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 4,
+      borderWidth: 1,
+      borderColor: theme.colors.separator + "40",
     },
-    headerRow: {
+    moodCard: {
+      backgroundColor: theme.colors.surfaceAlt,
+      borderRadius: 20,
+      padding: 20,
+      shadowColor: theme.colors.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 4,
+      borderWidth: 1,
+      borderColor: theme.colors.separator + "40",
+    },
+    cardHeader: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 0,
+      marginBottom: 16,
     },
-    statusRow: {
+    cardHeaderLeft: {
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 0,
+      gap: 10,
+    },
+    cardTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: theme.colors.muted,
+      letterSpacing: 0.5,
     },
     statusIndicator: {
-      marginRight: 12,
+      width: 16,
+      height: 16,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -244,77 +365,63 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       width: 12,
       height: 12,
       borderRadius: 6,
-      shadowColor: theme.colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.3,
-      shadowRadius: 4,
-      elevation: 4,
-    },
-    statusContent: {
-      flexDirection: "row",
-      alignItems: "center",
     },
     statusEmoji: {
-      fontSize: 20,
-      marginRight: 8,
-    },
-    statusValue: {
-      color: theme.colors.text,
-      fontSize: 16,
-      fontWeight: "bold",
-      marginRight: 8,
-      marginTop: 5,
-    },
-    statusDescription: {
-      color: theme.colors.muted,
-      fontSize: 14,
-      marginBottom: 8,
-      marginLeft: 2,
-      marginTop: 6,
-    },
-    statusLabel: {
-      fontSize: 18,
-      color: theme.colors.muted,
-      fontWeight: "bold",
-      marginBottom: 2,
-    },
-    statusDistance: {
-      color: theme.colors.primary,
-      fontSize: 12,
-      marginBottom: 12,
-      marginLeft: 2,
-      opacity: 0.8,
-    },
-    moodRow: {
-      marginTop: 10,
-      marginBottom: 4,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    moodLabel: {
-      fontSize: 18,
-      color: theme.colors.muted,
-      fontWeight: "bold",
-      marginBottom: 2,
-    },
-    moodContentRow: {
-      flexDirection: "row",
-      alignItems: "center",
+      fontSize: 28,
     },
     moodEmoji: {
-      fontSize: 20,
-      marginRight: 8,
+      fontSize: 24,
     },
-    moodValue: {
-      fontSize: 16,
+    cardContent: {
+      gap: 8,
+    },
+    statusText: {
+      fontSize: 24,
+      fontWeight: "800",
       color: theme.colors.text,
-      fontWeight: "bold",
+      letterSpacing: 0.3,
     },
-    moodDescription: {
+    locationContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 4,
+    },
+    locationIcon: {
+      marginRight: 6,
+    },
+    locationText: {
       fontSize: 14,
       color: theme.colors.muted,
-      marginLeft: 4,
+      fontWeight: "500",
+    },
+    statusDescription: {
+      fontSize: 13,
+      color: theme.colors.mutedAlt,
+      marginTop: 4,
+      lineHeight: 18,
+    },
+    distanceContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 6,
+      gap: 6,
+    },
+    distanceText: {
+      fontSize: 12,
+      color: theme.colors.primary,
+      fontWeight: "600",
+    },
+    moodText: {
+      fontSize: 22,
+      fontWeight: "700",
+      color: theme.colors.text,
+      letterSpacing: 0.3,
+    },
+    moodDescription: {
+      fontSize: 13,
+      color: theme.colors.mutedAlt,
+      marginTop: 4,
+      lineHeight: 18,
     },
   });
 

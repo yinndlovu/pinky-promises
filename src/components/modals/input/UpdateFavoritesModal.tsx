@@ -66,6 +66,16 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
     setFavorites((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleSave = async () => {
+    try {
+      await onSave(favorites);
+      // Modal will be closed by the parent component after successful save
+    } catch (error) {
+      // Error is handled by the parent component
+      // Don't close modal on error so user can retry
+    }
+  };
+
   return (
     <Modal visible={visible} animationType="fade" transparent>
       <View style={styles.overlay}>
@@ -91,12 +101,14 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
           <View style={styles.buttonRow}>
             <TouchableOpacity
               style={[styles.saveButton, loading && { opacity: 0.5 }]}
-              onPress={() => onSave(favorites)}
+              onPress={handleSave}
               disabled={loading}
             >
-              <Text style={styles.saveButtonText}>
-                {loading ? "Saving..." : "Save"}
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="small" color={theme.colors.text} />
+              ) : (
+                <Text style={styles.saveButtonText}>Save</Text>
+              )}
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cancelButton}

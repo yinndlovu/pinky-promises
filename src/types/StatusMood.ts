@@ -14,4 +14,6 @@ export type PartnerStatusMoodProps = {
   status?: "home" | "away" | "unreachable" | "unavailable";
   statusDescription?: string;
   statusDistance?: number;
+  userSuburb?: string | null;
+  userLocation?: string | null;
 };

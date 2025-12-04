@@ -298,7 +298,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       }
 
       await updateLoveLanguage(token, newLoveLanguage);
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.id],
       });
       setLoveLanguageModalVisible(false);
@@ -320,7 +320,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       }
 
       await updateAboutUser(token, newAbout);
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.id],
       });
 
@@ -343,16 +343,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       if (!token) {
         setFavoritesModalVisible(false);
         setError("Session expired. Log in again and retry.");
+        setSaving(false);
         return;
       }
 
       await updateUserFavorites(token, newFavorites);
-      await queryClient.invalidateQueries({
-        queryKey: ["profile", user?.id],
-      });
 
       setFavoritesModalVisible(false);
       setSuccess("You have updated your favorites");
+
+      queryClient.invalidateQueries({
+        queryKey: ["profile", user?.id],
+      });
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to save favorites");
     } finally {
@@ -439,7 +441,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       }
 
       await updateProfileField(field, value, token);
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.id],
       });
     } catch (err: any) {
