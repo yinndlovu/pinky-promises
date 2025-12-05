@@ -18,7 +18,6 @@ import {
   formatDateDMY,
   formatTime,
   formatTimeLeft,
-  formatTimeAgo,
 } from "../../../utils/formatters/formatDate";
 import { useAuth } from "../../../contexts/AuthContext";
 import { checkAndUpdateHomeStatus } from "../../../helpers/checkHomeStatus";
@@ -43,6 +42,7 @@ import AvatarSkeleton from "../../../components/skeletons/AvatarSkeleton";
 import Shimmer from "../../../components/skeletons/Shimmer";
 import ErrorState from "../../../components/common/ErrorState";
 import ConfirmStreakModal from "../../../components/modals/streak/ConfirmStreakModal";
+import Resolutions from "../components/Resolutions";
 
 // animation files
 import { animationMap } from "../../../utils/animations/getAnimation";
@@ -126,6 +126,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const partnerMood = useHomeSelector(user?.id, (m) => m?.partnerMood) || null;
   const partnerStatus =
     useHomeSelector(user?.id, (home) => home?.partnerStatus) || null;
+  const resolutions =
+    useHomeSelector(user?.id, (home) => home?.resolutions || []) || [];
 
   const partnerLoading = homeLoading;
   const activitiesLoading = homeLoading;
@@ -171,8 +173,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     useCallback(() => {
       const run = async () => {
         await checkAndUpdateHomeStatus(token);
-        await queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
-        await queryClient.invalidateQueries({
+        queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
+        queryClient.invalidateQueries({
           queryKey: ["profile", user?.id],
         });
       };
@@ -202,7 +204,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     return () => unsubscribe();
   }, []);
 
-  // Show streak confirmation modal when there's a pending accusation
+  // show streak confirmation modal when there's a pending accusation
   useEffect(() => {
     if (pendingStreak?.pendingEndedStreak && pendingStreak?.streak) {
       setShowStreakConfirmModal(true);
@@ -226,7 +228,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       }
 
       queryClient.setQueryData(["home", user?.id], (old: any) => {
-        if (!old) return old;
+        if (!old) {
+          return old;
+        }
+
         return {
           ...old,
           notifications: (old.notifications || []).map((n: any) => ({
@@ -277,7 +282,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleConfirmStreak = async (confirmed: boolean) => {
-    if (!pendingStreak?.streak?.id) return;
+    if (!pendingStreak?.streak?.id) {
+      return;
+    }
 
     setConfirmingStreak(true);
     try {
@@ -840,6 +847,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         ) : null}
 
         <PortalPreview partner={partner} navigation={navigation} />
+
+        <Resolutions resolutions={resolutions} isLoading={homeLoading} />
+
         {activitiesLoading ? (
           <View>
             <Shimmer radius={12} height={16} style={{ width: "100%" }} />

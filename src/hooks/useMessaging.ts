@@ -66,11 +66,9 @@ export function useMessaging() {
   useFocusEffect(
     useCallback(() => {
       if (socket?.connected) {
-        // Emit that we're active in chat
         socket.emit("messaging:activeInChat", { active: true });
 
         return () => {
-          // Emit that we're no longer active when screen loses focus
           socket.emit("messaging:activeInChat", { active: false });
         };
       }
@@ -88,11 +86,46 @@ export function useMessaging() {
       type: string;
     }) => {
       setMessages((prev) => {
-        const exists = prev.some((m) => m.id === data.message.id);
-        if (exists) return prev;
+        const existsById = prev.some((m) => m.id === data.message.id);
+        if (existsById) {
+          setIsSending(false);
+          return prev;
+        }
+
+        if (data.type === "sent" && user?.id === data.message.senderId) {
+          const optimisticIndex = prev.findIndex(
+            (m) =>
+              typeof m.id === "number" &&
+              m.id > 1000000000000 &&
+              m.text === data.message.text &&
+              m.senderId === data.message.senderId &&
+              Math.abs(m.timestamp - data.message.timestamp) < 5000
+          );
+
+          if (optimisticIndex !== -1) {
+            const newMessages = [...prev];
+            newMessages[optimisticIndex] = data.message;
+            setIsSending(false);
+            return newMessages;
+          }
+        }
+
+        const isDuplicate = prev.some(
+          (m) =>
+            m.text === data.message.text &&
+            m.senderId === data.message.senderId &&
+            m.receiverId === data.message.receiverId &&
+            Math.abs(m.timestamp - data.message.timestamp) < 2000
+        );
+
+        if (isDuplicate) {
+          setIsSending(false);
+          return prev;
+        }
+
+        setIsSending(false);
         return [data.message, ...prev];
       });
-      setIsSending(false);
     };
 
     const onPartnerMessages = (data: { messages: PartnerMessage[] }) => {
@@ -179,7 +212,6 @@ export function useMessaging() {
       } catch (err: any) {
         console.error("Send message error:", err);
         setError(err?.response?.data?.error || "Failed to send message");
-        // remove optimistic message on error
         setMessages((prev) => prev.filter((m) => m.id !== timestamp));
         setIsSending(false);
       }

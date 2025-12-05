@@ -25,6 +25,7 @@ import PartnerLoveLanguage from "../components/PartnerLoveLanguage";
 import PartnerStatusMood from "../components/PartnerStatusMood";
 import PartnerAnniversary from "../components/PartnerAnniversary";
 import PartnerMessageStorage from "../components/PartnerMessageStorage";
+import PartnerResolutions from "../components/PartnerResolutions";
 import ViewMessageModal from "../../../../components/modals/output/ViewMessageModal";
 import ProfileImage from "../../../../components/common/ProfileImage";
 import Shimmer from "../../../../components/skeletons/Shimmer";
@@ -37,6 +38,7 @@ import { useHome } from "../../../../hooks/useHome";
 import { useHomeSelector } from "../../../../hooks/useHomeSelector";
 import { useProfile } from "../../../../hooks/useProfile";
 import { useProfileSelector } from "../../../../hooks/useProfileSelector";
+import { usePartnerResolutions } from "../../../../hooks/useResolutions";
 
 const PartnerProfileScreen = ({ navigation, route }: any) => {
   // param variables
@@ -100,6 +102,10 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
     useProfileSelector(userId, (state) => state?.storedMessages) || [];
   const specialDates =
     useProfileSelector(userId, (state) => state?.specialDates) || [];
+
+  // partner resolutions
+  const { data: partnerResolutions, isLoading: partnerResolutionsLoading } =
+    usePartnerResolutions(user?.id);
 
   // use layouts
   useLayoutEffect(() => {
@@ -385,6 +391,11 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
             onPress={handleViewMessage}
           />
         )}
+
+        <PartnerResolutions
+          resolutions={partnerResolutions || []}
+          isLoading={partnerResolutionsLoading}
+        />
       </ScrollView>
 
       <View style={{ zIndex: 1000 }}>
