@@ -7,10 +7,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
 import { validatePassword } from "../../../validators/validatePassword";
@@ -155,78 +160,88 @@ const NewPasswordScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   return (
-    <ImageBackground
-      source={require("../../../assets/app_background.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <AnimatedDialog
-          visible={true}
-          animation={goodEmoji}
-          loop={true}
-          message={
-            error
-              ? error
-              : `Correct PIN! Alright, lock in. Enter a new password. Enter something you will remember this time huh 😉`
-          }
-          mode="inline"
-        />
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="New Password"
-            placeholderTextColor="#b0b3c6"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              if (error) {
-                setError("");
-              }
-            }}
-            secureTextEntry={!showPassword}
-          />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={() => setShowPassword(!showPassword)}
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ImageBackground
+            source={require("../../../assets/app_background.png")}
+            style={styles.background}
+            resizeMode="cover"
           >
-            <Ionicons
-              name={showPassword ? "eye-off" : "eye"}
-              size={24}
-              color="#b0b3c6"
-            />
-          </TouchableOpacity>
-        </View>
+            <View style={styles.overlay}>
+              <AnimatedDialog
+                visible={true}
+                animation={goodEmoji}
+                loop={true}
+                message={
+                  error
+                    ? error
+                    : `Correct PIN! Alright, lock in. Enter a new password. Enter something you will remember this time huh 😉`
+                }
+                mode="inline"
+              />
 
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            placeholderTextColor="#b0b3c6"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry={!showConfirm}
-          />
-          <TouchableOpacity
-            style={styles.eyeIcon}
-            onPress={() => setShowConfirm(!showConfirm)}
-          >
-            <Ionicons
-              name={showConfirm ? "eye-off" : "eye"}
-              size={24}
-              color="#b0b3c6"
-            />
-          </TouchableOpacity>
-        </View>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="New Password"
+                  placeholderTextColor="#b0b3c6"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    if (error) {
+                      setError("");
+                    }
+                  }}
+                  secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={24}
+                    color="#b0b3c6"
+                  />
+                </TouchableOpacity>
+              </View>
 
-        <TouchableOpacity style={styles.nextButton} onPress={handleReset}>
-          <Text style={styles.nextButtonText}>
-            {loading ? "Resetting..." : "Reset Password"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ImageBackground>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Confirm Password"
+                  placeholderTextColor="#b0b3c6"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!showConfirm}
+                />
+                <TouchableOpacity
+                  style={styles.eyeIcon}
+                  onPress={() => setShowConfirm(!showConfirm)}
+                >
+                  <Ionicons
+                    name={showConfirm ? "eye-off" : "eye"}
+                    size={24}
+                    color="#b0b3c6"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity style={styles.nextButton} onPress={handleReset}>
+                <Text style={styles.nextButtonText}>
+                  {loading ? "Resetting..." : "Reset Password"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

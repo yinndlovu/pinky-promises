@@ -7,9 +7,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
 import { initiatePasswordReset } from "../../../services/api/auth/resetPasswordService";
@@ -93,6 +98,13 @@ const ExistingUsernameScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ImageBackground
       source={require("../../../assets/app_background.png")}
       style={styles.background}
@@ -129,6 +141,9 @@ const ExistingUsernameScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
     </ImageBackground>
+    </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

@@ -8,9 +8,14 @@ import {
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -71,7 +76,9 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
         setError("");
       } catch (e: any) {
         setAvailable(null);
-        setError(e.response?.data?.error || "Error checking username availability");
+        setError(
+          e.response?.data?.error || "Error checking username availability"
+        );
       } finally {
         setChecking(false);
       }
@@ -120,48 +127,60 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/app_background.png")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <View style={styles.overlay}>
-        <Text style={styles.label}>Choose a username</Text>
-        <TextInput
-          style={styles.input}
-          placeholder=""
-          placeholderTextColor="#b0b3c6"
-          value={username}
-          onChangeText={setUsername}
-          maxLength={20}
-          autoCapitalize="none"
-        />
-        {checking && (
-          <ActivityIndicator
-            size="small"
-            color="#e03487"
-            style={{ marginBottom: 8 }}
-          />
-        )}
-        {!checking && available === true && username && (
-          <Text style={styles.success}>You can have this username!</Text>
-        )}
-        {!checking && available === false && username && (
-          <Text style={styles.error}>You can't have this username...</Text>
-        )}
-        {!checking && error && <Text style={styles.error}>{error}</Text>}
-        <TouchableOpacity
-          style={[
-            styles.nextButton,
-            { opacity: checking || available === false ? 0.6 : 1 },
-          ]}
-          onPress={handleNext}
-          disabled={checking || available === false}
-        >
-          <Text style={styles.nextButtonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
-    </ImageBackground>
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ImageBackground
+            source={require("../../../assets/app_background.png")}
+            style={styles.background}
+            resizeMode="cover"
+          >
+            <View style={styles.overlay}>
+              <Text style={styles.label}>Choose a username</Text>
+              <TextInput
+                style={styles.input}
+                placeholder=""
+                placeholderTextColor="#b0b3c6"
+                value={username}
+                onChangeText={setUsername}
+                maxLength={20}
+                autoCapitalize="none"
+              />
+              {checking && (
+                <ActivityIndicator
+                  size="small"
+                  color="#e03487"
+                  style={{ marginBottom: 8 }}
+                />
+              )}
+              {!checking && available === true && username && (
+                <Text style={styles.success}>You can have this username!</Text>
+              )}
+              {!checking && available === false && username && (
+                <Text style={styles.error}>
+                  You can't have this username...
+                </Text>
+              )}
+              {!checking && error && <Text style={styles.error}>{error}</Text>}
+              <TouchableOpacity
+                style={[
+                  styles.nextButton,
+                  { opacity: checking || available === false ? 0.6 : 1 },
+                ]}
+                onPress={handleNext}
+                disabled={checking || available === false}
+              >
+                <Text style={styles.nextButtonText}>Next</Text>
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -170,9 +189,10 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 16,
+    paddingTop: 120,
   },
   background: {
     flex: 1,

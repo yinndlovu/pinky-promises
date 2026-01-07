@@ -7,8 +7,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -34,6 +39,13 @@ const NameScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ImageBackground
       source={require("../../../assets/app_background.png")}
       style={styles.background}
@@ -55,6 +67,9 @@ const NameScreen: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
     </ImageBackground>
+    </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -63,10 +78,11 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 16,
-  },
+    paddingTop: 120,
+  },  
   background: {
     flex: 1,
     width: "100%",

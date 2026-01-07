@@ -8,10 +8,15 @@ import {
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { Feather } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -108,6 +113,13 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
     password.length > 0;
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ImageBackground
       source={require("../../../assets/app_background.png")}
       style={styles.background}
@@ -206,6 +218,9 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
         </TouchableOpacity>
       </View>
     </ImageBackground>
+    </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -214,9 +229,10 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 16,
+    paddingTop: 120,
   },
   background: {
     flex: 1,
