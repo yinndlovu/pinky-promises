@@ -33,7 +33,7 @@ const PeriodStatusCard: React.FC<Props> = ({
           chipText: "On Period",
           chipBg: "#ff6b9d20",
           chipColor: "#ff6b9d",
-          action: isPartnerView ? null : onEndPeriod,
+          action: onEndPeriod,
           actionText: "End Period",
         };
       case "waiting":

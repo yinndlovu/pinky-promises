@@ -6,7 +6,6 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -14,6 +13,8 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import Slider from "@react-native-community/slider";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { useTheme } from "../../../theme/ThemeContext";
 import useToken from "../../../hooks/useToken";
 import { logIssue } from "../../../services/api/period/periodService";
@@ -23,6 +24,7 @@ import {
   PeriodProblemEmojis,
 } from "../../../types/Period";
 
+// props
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -47,34 +49,33 @@ const PROBLEMS: PeriodProblem[] = [
   "hot_flashes",
 ];
 
-const LogIssueModal: React.FC<Props> = ({
-  visible,
-  onClose,
-  onSuccess,
-}) => {
+const LogIssueModal: React.FC<Props> = ({ visible, onClose, onSuccess }) => {
+  // hook variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const token = useToken();
 
-  const [selectedProblem, setSelectedProblem] = useState<PeriodProblem | null>(null);
+  const [selectedProblem, setSelectedProblem] = useState<PeriodProblem | null>(
+    null
+  );
   const [severity, setSeverity] = useState(5);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getSeverityColor = () => {
+  const severityColor = useMemo(() => {
     if (severity <= 3) return "#4caf50";
     if (severity <= 6) return "#ff9800";
     return "#f44336";
-  };
+  }, [severity]);
 
-  const getSeverityLabel = () => {
+  const severityLabel = useMemo(() => {
     if (severity <= 2) return "Very Mild";
     if (severity <= 4) return "Mild";
     if (severity <= 6) return "Moderate";
     if (severity <= 8) return "Severe";
     return "Very Severe";
-  };
+  }, [severity]);
 
   const handleSubmit = async () => {
     if (!token || !selectedProblem) {
@@ -92,7 +93,6 @@ const LogIssueModal: React.FC<Props> = ({
         notes: notes.trim() || undefined,
       });
 
-      // Reset form
       setSelectedProblem(null);
       setSeverity(5);
       setNotes("");
@@ -123,21 +123,27 @@ const LogIssueModal: React.FC<Props> = ({
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardView}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-          <View style={styles.container}>
-            {/* Header */}
+          <SafeAreaView edges={["bottom"]} style={styles.container}>
             <View style={styles.header}>
               <Text style={styles.headerTitle}>Log Issue for Partner</Text>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
+              <TouchableOpacity
+                onPress={handleClose}
+                style={styles.closeButton}
+              >
                 <Feather name="x" size={24} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
-            <ScrollView
+            <KeyboardAwareScrollView
               style={styles.content}
+              contentContainerStyle={styles.contentContainer}
               showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              enableOnAndroid
+              extraScrollHeight={200}
             >
-              {/* Problem Selection */}
               <Text style={styles.label}>What are they experiencing?</Text>
               <View style={styles.problemGrid}>
                 {PROBLEMS.map((problem) => (
@@ -165,14 +171,15 @@ const LogIssueModal: React.FC<Props> = ({
                 ))}
               </View>
 
-              {/* Severity Slider */}
               <Text style={styles.label}>How severe is it?</Text>
               <View style={styles.severityContainer}>
                 <View style={styles.severityHeader}>
-                  <Text style={[styles.severityValue, { color: getSeverityColor() }]}>
+                  <Text
+                    style={[styles.severityValue, { color: severityColor }]}
+                  >
                     {severity}/10
                   </Text>
-                  <Text style={styles.severityLabel}>{getSeverityLabel()}</Text>
+                  <Text style={styles.severityLabel}>{severityLabel}</Text>
                 </View>
                 <Slider
                   style={styles.slider}
@@ -181,9 +188,9 @@ const LogIssueModal: React.FC<Props> = ({
                   step={1}
                   value={severity}
                   onValueChange={setSeverity}
-                  minimumTrackTintColor={getSeverityColor()}
+                  minimumTrackTintColor={severityColor}
                   maximumTrackTintColor={theme.colors.separator}
-                  thumbTintColor={getSeverityColor()}
+                  thumbTintColor={severityColor}
                 />
                 <View style={styles.severityLabels}>
                   <Text style={styles.severityEndLabel}>Mild</Text>
@@ -191,7 +198,6 @@ const LogIssueModal: React.FC<Props> = ({
                 </View>
               </View>
 
-              {/* Notes Input */}
               <Text style={styles.label}>Additional notes (optional)</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
@@ -204,16 +210,14 @@ const LogIssueModal: React.FC<Props> = ({
                 maxLength={500}
               />
 
-              {/* Error */}
               {error && (
                 <View style={styles.errorContainer}>
                   <Feather name="alert-circle" size={16} color="#ff6b6b" />
                   <Text style={styles.errorText}>{error}</Text>
                 </View>
               )}
-            </ScrollView>
+            </KeyboardAwareScrollView>
 
-            {/* Submit Button */}
             <TouchableOpacity
               style={[
                 styles.submitButton,
@@ -231,7 +235,7 @@ const LogIssueModal: React.FC<Props> = ({
                 </>
               )}
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         </KeyboardAvoidingView>
       </BlurView>
     </Modal>
@@ -253,7 +257,6 @@ const createStyles = (theme: any) =>
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       maxHeight: "90%",
-      paddingBottom: 34,
     },
     header: {
       flexDirection: "row",
@@ -272,7 +275,12 @@ const createStyles = (theme: any) =>
       padding: 4,
     },
     content: {
+      flexGrow: 1,
+      flexShrink: 1,
+    },
+    contentContainer: {
       padding: 20,
+      paddingBottom: 20,
     },
     label: {
       fontSize: 14,
@@ -394,4 +402,3 @@ const createStyles = (theme: any) =>
   });
 
 export default LogIssueModal;
-

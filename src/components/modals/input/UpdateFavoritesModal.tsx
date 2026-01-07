@@ -9,6 +9,8 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 // internal
@@ -78,7 +80,11 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent>
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.overlay}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      >
         <View style={styles.content}>
           <Text style={styles.title}>Update your favorites</Text>
           <ScrollView
@@ -119,7 +125,7 @@ const UpdateFavoritesModal: React.FC<UpdateFavoritesModalProps> = ({
             </TouchableOpacity>
           </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };

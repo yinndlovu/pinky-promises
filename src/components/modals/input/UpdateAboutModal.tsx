@@ -9,6 +9,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 // internal
@@ -47,7 +49,12 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
     <Modal visible={visible} animationType="fade" transparent>
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.overlay}>
-          <View style={styles.content}>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+          >
+            <View style={styles.content}>
             <Text style={styles.title}>Update more about you</Text>
             <TextInput
               style={styles.textArea}
@@ -79,6 +86,7 @@ const UpdateAboutModal: React.FC<UpdateAboutModalProps> = ({
               </TouchableOpacity>
             </View>
           </View>
+          </KeyboardAvoidingView>
         </View>
       </TouchableWithoutFeedback>
     </Modal>

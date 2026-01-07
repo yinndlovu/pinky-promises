@@ -196,14 +196,8 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
   return (
     <View style={styles.wrapper}>
       {/* Anniversary Card */}
-      <Animated.View
-        entering={FadeIn.duration(400)}
-        style={[
-          styles.anniversaryCard,
-          anniversaryCardAnimatedStyle,
-          anniversaryGlowStyle,
-        ]}
-      >
+      <Animated.View entering={FadeIn.duration(400)} style={styles.anniversaryCard}>
+        <Animated.View style={[anniversaryCardAnimatedStyle, anniversaryGlowStyle]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
             <View style={styles.iconContainer}>
@@ -257,17 +251,12 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
             </View>
           )}
         </View>
+        </Animated.View>
       </Animated.View>
 
       {/* Day Met Card */}
-      <Animated.View
-        entering={FadeIn.duration(400).delay(100)}
-        style={[
-          styles.dayMetCard,
-          dayMetCardAnimatedStyle,
-          dayMetGlowStyle,
-        ]}
-      >
+      <Animated.View entering={FadeIn.duration(400).delay(100)} style={styles.dayMetCard}>
+        <Animated.View style={[dayMetCardAnimatedStyle, dayMetGlowStyle]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
             <View style={[styles.iconContainer, styles.dayMetIconContainer]}>
@@ -319,6 +308,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
             </View>
           )}
         </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );

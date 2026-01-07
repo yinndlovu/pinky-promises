@@ -15,6 +15,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // internal
 import { useTheme } from "../../../theme/ThemeContext";
@@ -108,9 +109,9 @@ const AddLookoutModal: React.FC<Props> = ({
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
           style={styles.keyboardView}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
         >
-          <View style={styles.container}>
-            {/* Header */}
+          <SafeAreaView edges={["bottom"]} style={styles.container}>
             <View style={styles.header}>
               <Text style={styles.headerTitle}>Add Reminder</Text>
               <TouchableOpacity
@@ -125,7 +126,6 @@ const AddLookoutModal: React.FC<Props> = ({
               style={styles.content}
               showsVerticalScrollIndicator={false}
             >
-              {/* Info Banner */}
               <View style={styles.infoBanner}>
                 <Feather name="eye" size={18} color={theme.colors.primary} />
                 <Text style={styles.infoBannerText}>
@@ -134,7 +134,6 @@ const AddLookoutModal: React.FC<Props> = ({
                 </Text>
               </View>
 
-              {/* Title Input */}
               <Text style={styles.label}>What to look out for?</Text>
               <TextInput
                 style={styles.input}
@@ -145,7 +144,6 @@ const AddLookoutModal: React.FC<Props> = ({
                 maxLength={100}
               />
 
-              {/* Description Input */}
               <Text style={styles.label}>More details (optional)</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
@@ -158,7 +156,6 @@ const AddLookoutModal: React.FC<Props> = ({
                 maxLength={500}
               />
 
-              {/* Date Picker */}
               <Text style={styles.label}>When to show this?</Text>
               <TouchableOpacity
                 style={styles.dateButton}
@@ -192,7 +189,6 @@ const AddLookoutModal: React.FC<Props> = ({
                 />
               )}
 
-              {/* Priority Toggle */}
               <Text style={styles.label}>Priority</Text>
               <View style={styles.priorityRow}>
                 <TouchableOpacity
@@ -235,7 +231,6 @@ const AddLookoutModal: React.FC<Props> = ({
                 </TouchableOpacity>
               </View>
 
-              {/* Error */}
               {error && (
                 <View style={styles.errorContainer}>
                   <Feather name="alert-circle" size={16} color="#ff6b6b" />
@@ -244,7 +239,6 @@ const AddLookoutModal: React.FC<Props> = ({
               )}
             </ScrollView>
 
-            {/* Submit Button */}
             <TouchableOpacity
               style={[
                 styles.submitButton,
@@ -262,7 +256,7 @@ const AddLookoutModal: React.FC<Props> = ({
                 </>
               )}
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         </KeyboardAvoidingView>
       </BlurView>
     </Modal>
@@ -284,7 +278,7 @@ const createStyles = (theme: any) =>
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       maxHeight: "90%",
-      paddingBottom: 34,
+      paddingBottom: 20,
     },
     header: {
       flexDirection: "row",

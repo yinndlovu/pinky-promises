@@ -103,25 +103,22 @@ const PartnerLoveLanguage: React.FC<PartnerLoveLanguageProps> = ({
 
   if (!loveLanguage) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(400)}
-        style={[styles.wrapper, cardAnimatedStyle]}
-      >
-        <View style={styles.emptyCard}>
-          <View style={styles.emptyIconContainer}>
-            <Feather name="heart" size={32} color={theme.colors.mutedAlt} />
+      <Animated.View entering={FadeIn.duration(400)} style={styles.wrapper}>
+        <Animated.View style={cardAnimatedStyle}>
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIconContainer}>
+              <Feather name="heart" size={32} color={theme.colors.mutedAlt} />
+            </View>
+            <Text style={styles.emptyText}>No love language added yet</Text>
           </View>
-          <Text style={styles.emptyText}>No love language added yet</Text>
-        </View>
+        </Animated.View>
       </Animated.View>
     );
   }
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(400)}
-      style={[styles.card, cardAnimatedStyle, glowStyle]}
-    >
+    <Animated.View entering={FadeIn.duration(400)} style={styles.card}>
+      <Animated.View style={[cardAnimatedStyle, glowStyle]}>
       <View style={styles.cardHeader}>
         <View style={styles.cardHeaderLeft}>
           <View style={styles.iconContainer}>
@@ -150,6 +147,7 @@ const PartnerLoveLanguage: React.FC<PartnerLoveLanguageProps> = ({
           </Text>
         </View>
       </View>
+      </Animated.View>
     </Animated.View>
   );
 };

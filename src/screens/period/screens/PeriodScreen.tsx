@@ -1,12 +1,6 @@
 // external
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  RefreshControl,
-} from "react-native";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
@@ -57,7 +51,6 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
   const styles = useMemo(() => createPeriodStyles(theme), [theme]);
 
   // use states
-  const [refreshing, setRefreshing] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -103,11 +96,6 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
   const role = usePeriodSelector(user?.id, (d) => d?.role) || "none";
   const periodUserId = usePeriodSelector(user?.id, (d) => d?.periodUserId);
   const periodUserName = usePeriodSelector(user?.id, (d) => d?.periodUserName);
-
-  // Role determines what the user can do:
-  // "partner" = can log issues, start/end period, add lookouts
-  // "period_user" = can view their own data, add custom aids
-  // "none" = not set up yet
   const isPartnerView = role === "partner";
 
   // use effects
@@ -130,12 +118,6 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
   }, [toastMessage]);
 
   // handlers
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refetchPeriod();
-    setRefreshing(false);
-  }, [refetchPeriod]);
-
   const handleStartPeriod = async () => {
     if (!token || !user?.partnerId) {
       return;
@@ -144,7 +126,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
     setLoading(true);
     try {
       await startPeriod(token, user.partnerId);
-      await queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
       setAlertConfig({
         type: "success",
         title: "Period Started",
@@ -167,7 +149,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
     setLoading(true);
     try {
       await endPeriod(token, status.cycle.id);
-      await queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
       setAlertConfig({
         type: "success",
         title: "Period Ended",
@@ -188,7 +170,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
 
     try {
       await markLookoutSeen(token, lookoutId);
-      await queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
     } catch (err: any) {
       setToastMessage(err.response?.data?.error || "Failed to mark as seen");
     }
@@ -296,13 +278,6 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={styles.container}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={theme.colors.primary}
-          />
-        }
       >
         {!periodLoading && role === "none" && (
           <View style={styles.emptyState}>

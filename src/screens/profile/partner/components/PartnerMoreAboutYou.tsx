@@ -8,7 +8,6 @@ import Animated, {
   withSpring,
   withTiming,
   withDelay,
-  interpolate,
   Easing,
   FadeIn,
 } from "react-native-reanimated";
@@ -61,57 +60,59 @@ const PartnerMoreAboutYou: React.FC<PartnerAboutProps> = ({ about = "" }) => {
 
   if (!about) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(400)}
-        style={[styles.wrapper, cardAnimatedStyle]}
-      >
-        <View style={styles.emptyCard}>
-          <View style={styles.emptyIconContainer}>
-            <Feather name="file-text" size={32} color={theme.colors.mutedAlt} />
+      <Animated.View entering={FadeIn.duration(400)} style={styles.wrapper}>
+        <Animated.View style={cardAnimatedStyle}>
+          <View style={styles.emptyCard}>
+            <View style={styles.emptyIconContainer}>
+              <Feather
+                name="file-text"
+                size={32}
+                color={theme.colors.mutedAlt}
+              />
+            </View>
+            <Text style={styles.emptyText}>No information added yet</Text>
           </View>
-          <Text style={styles.emptyText}>No information added yet</Text>
-        </View>
+        </Animated.View>
       </Animated.View>
     );
   }
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(400)}
-      style={[styles.wrapper, cardAnimatedStyle]}
-    >
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            <View style={styles.iconContainer}>
-              <Feather name="user" size={18} color={theme.colors.primary} />
+    <Animated.View entering={FadeIn.duration(400)} style={styles.wrapper}>
+      <Animated.View style={cardAnimatedStyle}>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardHeaderLeft}>
+              <View style={styles.iconContainer}>
+                <Feather name="user" size={18} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.cardTitle}>More About You</Text>
             </View>
-            <Text style={styles.cardTitle}>More About You</Text>
           </View>
-        </View>
 
-        <View style={styles.quoteContainer}>
-          <Animated.View style={[styles.quoteMarkLeft, quoteMarkStyle]}>
-            <Text style={styles.quoteMark}>"</Text>
-          </Animated.View>
-          <View style={styles.textContainer}>
-            <Text style={styles.aboutText}>{about}</Text>
+          <View style={styles.quoteContainer}>
+            <Animated.View style={[styles.quoteMarkLeft, quoteMarkStyle]}>
+              <Text style={styles.quoteMark}>"</Text>
+            </Animated.View>
+            <View style={styles.textContainer}>
+              <Text style={styles.aboutText}>{about}</Text>
+            </View>
+            <View style={styles.quoteMarkRight}>
+              <Text style={styles.quoteMarkRightText}>"</Text>
+            </View>
           </View>
-          <View style={styles.quoteMarkRight}>
-            <Text style={styles.quoteMarkRightText}>"</Text>
-          </View>
-        </View>
 
-        <View style={styles.footer}>
-          <Feather
-            name="heart"
-            size={12}
-            color={theme.colors.mutedAlt}
-            style={styles.footerIcon}
-          />
-          <Text style={styles.footerText}>A glimpse into their world</Text>
+          <View style={styles.footer}>
+            <Feather
+              name="heart"
+              size={12}
+              color={theme.colors.mutedAlt}
+              style={styles.footerIcon}
+            />
+            <Text style={styles.footerText}>A glimpse into their world</Text>
+          </View>
         </View>
-      </View>
+      </Animated.View>
     </Animated.View>
   );
 };

@@ -42,6 +42,7 @@ import AvatarSkeleton from "../../../components/skeletons/AvatarSkeleton";
 import Shimmer from "../../../components/skeletons/Shimmer";
 import ErrorState from "../../../components/common/ErrorState";
 import ConfirmStreakModal from "../../../components/modals/streak/ConfirmStreakModal";
+import AttentivenessInsightsModal from "../../../components/modals/output/AttentivenessInsightsModal";
 import Resolutions from "../components/Resolutions";
 
 // animation files
@@ -58,6 +59,10 @@ import {
   usePendingEndedStreak,
   useConfirmEndedStreak,
 } from "../../../hooks/useStreak";
+import {
+  useAttentivenessInsights,
+  useMarkAttentivenessAsShown,
+} from "../../../hooks/useAttentiveness";
 import { useGifts } from "../../../hooks/useGifts";
 import { useGiftsSelector } from "../../../hooks/useGiftsSelector";
 
@@ -90,12 +95,20 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const [animationMessage, setAnimationMessage] = useState("");
   const [showStreakConfirmModal, setShowStreakConfirmModal] = useState(false);
   const [confirmingStreak, setConfirmingStreak] = useState(false);
+  const [showAttentivenessModal, setShowAttentivenessModal] = useState(false);
 
   // streak hooks
   const { data: streakPreview } = useStreakPreview(token, user?.id);
   const { data: pendingStreak, refetch: refetchPendingStreak } =
     usePendingEndedStreak(token, user?.id);
   const confirmStreakMutation = useConfirmEndedStreak(token);
+
+  // attentiveness hooks
+  const { data: attentivenessInsights } = useAttentivenessInsights(
+    token,
+    user?.id
+  );
+  const markAttentivenessAsShownMutation = useMarkAttentivenessAsShown(token);
 
   // home data hook
   const {
@@ -211,6 +224,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }
   }, [pendingStreak]);
 
+  // show attentiveness insights modal when available
+  useEffect(() => {
+    if (attentivenessInsights && attentivenessInsights.messages?.length > 0) {
+      // Small delay to ensure other modals don't conflict
+      const timer = setTimeout(() => {
+        setShowAttentivenessModal(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [attentivenessInsights]);
+
   // handle toggle
   const toggleNotifications = async () => {
     const newVisible = !notificationsVisible;
@@ -298,6 +322,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       console.error("Error confirming streak:", error);
     } finally {
       setConfirmingStreak(false);
+    }
+  };
+
+  const handleMarkAttentivenessAsShown = async (weekKey: string) => {
+    try {
+      await markAttentivenessAsShownMutation.mutateAsync(weekKey);
+    } catch (error) {
+      console.error("Error marking attentiveness as shown:", error);
     }
   };
 
@@ -907,6 +939,13 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               }
             : null
         }
+      />
+
+      <AttentivenessInsightsModal
+        visible={showAttentivenessModal}
+        insights={attentivenessInsights}
+        onClose={() => setShowAttentivenessModal(false)}
+        onMarkAsShown={handleMarkAttentivenessAsShown}
       />
     </View>
   );

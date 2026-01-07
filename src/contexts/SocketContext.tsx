@@ -1147,7 +1147,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       pushRecentActivity(data.recentActivity);
     });
 
-    // Canvas socket events
+    // canvas socket events
     s.on(
       "canvas:newCanvas",
       (data: {
@@ -1191,7 +1191,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
           const canvases = arrayify(old.canvases).map((c: any) =>
             c.id === data.canvasId
-              ? { ...c, content: data.content, updatedAt: new Date().toISOString() }
+              ? {
+                  ...c,
+                  content: data.content,
+                  updatedAt: new Date().toISOString(),
+                }
               : c
           );
 
@@ -1257,6 +1261,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
     queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
     queryClient.invalidateQueries({ queryKey: ["portal", user?.id] });
+    queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
+    queryClient.invalidateQueries({ queryKey: ["streak"] });
 
     const tasks: Promise<unknown>[] = [];
 
@@ -1264,7 +1270,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       tasks.push(
         queryClient.invalidateQueries({ queryKey: ["profile", partnerId] }),
         queryClient.invalidateQueries({ queryKey: ["ours", user?.id] }),
-        queryClient.invalidateQueries({ queryKey: ["timeline", user?.id] })
+        queryClient.invalidateQueries({ queryKey: ["timeline", user?.id] }),
+        queryClient.invalidateQueries({ queryKey: ["partnerPeriodStatus"] })
       );
     }
 

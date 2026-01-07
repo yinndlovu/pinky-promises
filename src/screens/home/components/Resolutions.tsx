@@ -12,13 +12,16 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { useTheme } from "../../../theme/ThemeContext";
 import { formatTimeLeft } from "../../../utils/formatters/formatDate";
-import { useResolutions, useCreateResolution, useMarkResolutionComplete } from "../../../hooks/useResolutions";
-import { useAuth } from "../../../contexts/AuthContext";
-import useToken from "../../../hooks/useToken";
+import {
+  useCreateResolution,
+  useMarkResolutionComplete,
+} from "../../../hooks/useResolutions";
 import type { Resolution } from "../../../services/api/resolutions/resolutionService";
 
 interface ResolutionsProps {
@@ -26,12 +29,15 @@ interface ResolutionsProps {
   isLoading?: boolean;
 }
 
-const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => {
+const Resolutions: React.FC<ResolutionsProps> = ({
+  resolutions,
+  isLoading,
+}) => {
+  // hook variables
   const { theme } = useTheme();
-  const { user } = useAuth();
-  const token = useToken();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  
+
+  // use states
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDueDate, setNewDueDate] = useState(new Date());
@@ -40,24 +46,38 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
   const createResolutionMutation = useCreateResolution();
   const markCompleteMutation = useMarkResolutionComplete();
 
+  // helpers
   const calculateTimeLeft = (dueDate: string) => {
     const now = new Date();
     const due = new Date(dueDate);
     const diffMs = due.getTime() - now.getTime();
-    
+
     if (diffMs <= 0) {
-      return { days: 0, hours: 0, minutes: 0 };
+      return {
+        days: 0,
+        hours: 0,
+        minutes: 0,
+      };
     }
 
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const hours = Math.floor(
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-    return { days, hours, minutes };
+    return {
+      days,
+      hours,
+      minutes,
+    };
   };
 
+  // handlers
   const handleCreateResolution = async () => {
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      return;
+    }
 
     try {
       await createResolutionMutation.mutateAsync({
@@ -81,13 +101,27 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
   };
 
   const sortedResolutions = useMemo(() => {
-    return [...resolutions].sort((a, b) => {
-      // Incomplete first, then by due date
-      if (a.completed !== b.completed) {
-        return a.completed ? 1 : -1;
-      }
-      return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-    });
+    const now = new Date();
+    return [...resolutions]
+      .map((item) => {
+        const timeLeft = calculateTimeLeft(item.dueDate);
+        const isOverdue =
+          !item.completed &&
+          timeLeft.days === 0 &&
+          timeLeft.hours === 0 &&
+          timeLeft.minutes === 0;
+        return {
+          ...item,
+          timeLeft,
+          isOverdue,
+        };
+      })
+      .sort((a, b) => {
+        if (a.completed !== b.completed) {
+          return a.completed ? 1 : -1;
+        }
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      });
   }, [resolutions]);
 
   if (isLoading) {
@@ -125,15 +159,12 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
           data={sortedResolutions}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => {
-            const timeLeft = calculateTimeLeft(item.dueDate);
-            const isOverdue = !item.completed && timeLeft.days === 0 && timeLeft.hours === 0 && timeLeft.minutes === 0;
-
             return (
               <TouchableOpacity
                 style={[
                   styles.resolutionItem,
                   item.completed && styles.resolutionItemCompleted,
-                  isOverdue && !item.completed && styles.resolutionItemOverdue,
+                  item.isOverdue && !item.completed && styles.resolutionItemOverdue,
                 ]}
                 onPress={() => !item.completed && handleMarkComplete(item.id)}
                 disabled={item.completed || markCompleteMutation.isPending}
@@ -150,7 +181,11 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
                     </Text>
                     {item.assignedByAdmin && (
                       <View style={styles.adminBadge}>
-                        <Feather name="user-check" size={12} color={theme.colors.primary} />
+                        <Feather
+                          name="user-check"
+                          size={12}
+                          color={theme.colors.primary}
+                        />
                       </View>
                     )}
                   </View>
@@ -158,14 +193,18 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
                     <Text
                       style={[
                         styles.timeLeft,
-                        isOverdue && !item.completed && styles.timeLeftOverdue,
+                        item.isOverdue && !item.completed && styles.timeLeftOverdue,
                       ]}
                     >
                       {item.completed
                         ? "Completed"
-                        : isOverdue
+                        : item.isOverdue
                         ? "Overdue"
-                        : formatTimeLeft(timeLeft.days, timeLeft.hours, timeLeft.minutes)}
+                        : formatTimeLeft(
+                            item.timeLeft.days,
+                            item.timeLeft.hours,
+                            item.timeLeft.minutes
+                          )}
                     </Text>
                     {!item.completed && (
                       <TouchableOpacity
@@ -194,10 +233,13 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
           }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           scrollEnabled={false}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          initialNumToRender={10}
         />
       )}
 
-      {/* Add Resolution Modal */}
       <Modal
         visible={showAddModal}
         transparent
@@ -205,7 +247,7 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
         onRequestClose={() => setShowAddModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+          <SafeAreaView edges={["bottom"]} style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Add Resolution</Text>
               <TouchableOpacity
@@ -216,39 +258,52 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
               </TouchableOpacity>
             </View>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Resolution title"
-              placeholderTextColor={theme.colors.muted}
-              value={newTitle}
-              onChangeText={setNewTitle}
-              autoFocus
-            />
-
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
+            <KeyboardAwareScrollView
+              style={styles.modalScrollContent}
+              contentContainerStyle={styles.modalScrollContainer}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              enableOnAndroid
+              extraScrollHeight={200}
             >
-              <Feather name="calendar" size={20} color={theme.colors.primary} />
-              <Text style={styles.dateButtonText}>
-                Due: {newDueDate.toLocaleDateString()}
-              </Text>
-            </TouchableOpacity>
-
-            {showDatePicker && (
-              <DateTimePicker
-                value={newDueDate}
-                mode="date"
-                display={Platform.OS === "ios" ? "spinner" : "default"}
-                onChange={(event, selectedDate) => {
-                  setShowDatePicker(Platform.OS === "ios");
-                  if (selectedDate) {
-                    setNewDueDate(selectedDate);
-                  }
-                }}
-                minimumDate={new Date()}
+              <TextInput
+                style={styles.input}
+                placeholder="Resolution title"
+                placeholderTextColor={theme.colors.muted}
+                value={newTitle}
+                onChangeText={setNewTitle}
+                autoFocus
               />
-            )}
+
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Feather
+                  name="calendar"
+                  size={20}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.dateButtonText}>
+                  Due: {newDueDate.toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={newDueDate}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={(event, selectedDate) => {
+                    setShowDatePicker(Platform.OS === "ios");
+                    if (selectedDate) {
+                      setNewDueDate(selectedDate);
+                    }
+                  }}
+                  minimumDate={new Date()}
+                />
+              )}
+            </KeyboardAwareScrollView>
 
             <TouchableOpacity
               style={[
@@ -260,10 +315,12 @@ const Resolutions: React.FC<ResolutionsProps> = ({ resolutions, isLoading }) => 
               disabled={!newTitle.trim() || createResolutionMutation.isPending}
             >
               <Text style={styles.submitButtonText}>
-                {createResolutionMutation.isPending ? "Adding..." : "Add Resolution"}
+                {createResolutionMutation.isPending
+                  ? "Adding..."
+                  : "Add Resolution"}
               </Text>
             </TouchableOpacity>
-          </View>
+          </SafeAreaView>
         </View>
       </Modal>
     </View>
@@ -390,13 +447,20 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       borderTopLeftRadius: 20,
       borderTopRightRadius: 20,
       padding: 20,
-      paddingBottom: 40,
+      paddingBottom: 20,
     },
     modalHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
       marginBottom: 20,
+    },
+    modalScrollContent: {
+      flexGrow: 1,
+      flexShrink: 1,
+    },
+    modalScrollContainer: {
+      paddingBottom: 20,
     },
     modalTitle: {
       fontSize: 20,
@@ -444,4 +508,3 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
   });
 
 export default Resolutions;
-

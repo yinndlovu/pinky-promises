@@ -7,7 +7,6 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
@@ -16,6 +15,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { useTheme } from "../../../theme/ThemeContext";
@@ -162,6 +162,7 @@ const AddCustomAidModal: React.FC<Props> = ({
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.keyboardView}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
           >
             <Animated.View
               style={[
@@ -182,9 +183,13 @@ const AddCustomAidModal: React.FC<Props> = ({
                 </TouchableOpacity>
               </View>
 
-              <ScrollView
+              <KeyboardAwareScrollView
                 style={styles.content}
+                contentContainerStyle={styles.contentContainer}
                 showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                enableOnAndroid
+                extraScrollHeight={200}
               >
                 <Text style={styles.label}>What is this for?</Text>
                 <View style={styles.problemGrid}>
@@ -242,7 +247,7 @@ const AddCustomAidModal: React.FC<Props> = ({
                     <Text style={styles.errorText}>{error}</Text>
                   </View>
                 )}
-              </ScrollView>
+              </KeyboardAwareScrollView>
 
               <TouchableOpacity
                 style={[
@@ -303,7 +308,12 @@ const createStyles = (theme: any) =>
       padding: 4,
     },
     content: {
+      flexGrow: 1,
+      flexShrink: 1,
+    },
+    contentContainer: {
       padding: 20,
+      paddingBottom: 20,
     },
     label: {
       fontSize: 14,

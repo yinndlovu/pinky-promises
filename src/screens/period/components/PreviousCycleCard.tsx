@@ -21,9 +21,11 @@ const PreviousCycleCard: React.FC<Props> = ({
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const lastCycle = cycles.find((c) => c.endDate) || null;
+  // Limit to max 5 previous periods
+  const limitedCycles = cycles.slice(0, 5);
+  const lastCycle = limitedCycles.find((c) => c.endDate) || null;
 
-  if (!lastCycle && cycles.length === 0) {
+  if (!lastCycle && limitedCycles.length === 0) {
     return null;
   }
 
@@ -74,7 +76,7 @@ const PreviousCycleCard: React.FC<Props> = ({
             <View style={[styles.statIcon, { backgroundColor: "#00b89420" }]}>
               <Feather name="calendar" size={18} color="#00b894" />
             </View>
-            <Text style={styles.statValue}>{cycles.length}</Text>
+            <Text style={styles.statValue}>{limitedCycles.length}</Text>
             <Text style={styles.statLabel}>Tracked</Text>
           </View>
         </View>

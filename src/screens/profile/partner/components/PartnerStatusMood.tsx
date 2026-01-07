@@ -230,10 +230,8 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
   return (
     <View style={styles.wrapper}>
       {/* Status Card */}
-      <Animated.View
-        entering={FadeIn.duration(400)}
-        style={[styles.statusCard, statusCardAnimatedStyle, statusGlowStyle]}
-      >
+      <Animated.View entering={FadeIn.duration(400)} style={styles.statusCard}>
+        <Animated.View style={[statusCardAnimatedStyle, statusGlowStyle]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
             <Animated.View style={[styles.statusIndicator, statusPulseStyle]}>
@@ -280,13 +278,12 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
             </View>
           )}
         </View>
+        </Animated.View>
       </Animated.View>
 
       {/* Mood Card */}
-      <Animated.View
-        entering={FadeIn.duration(400).delay(100)}
-        style={[styles.moodCard, moodCardAnimatedStyle, moodGlowStyle]}
-      >
+      <Animated.View entering={FadeIn.duration(400).delay(100)} style={styles.moodCard}>
+        <Animated.View style={[moodCardAnimatedStyle, moodGlowStyle]}>
         <View style={styles.cardHeader}>
           <View style={styles.cardHeaderLeft}>
             <Text style={styles.moodEmoji}>{getMoodEmoji(mood)}</Text>
@@ -302,6 +299,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
             <Text style={styles.moodDescription}>{moodDescription}</Text>
           )}
         </View>
+        </Animated.View>
       </Animated.View>
     </View>
   );

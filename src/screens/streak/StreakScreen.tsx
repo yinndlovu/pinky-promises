@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  RefreshControl,
   ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
@@ -62,7 +61,6 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const [expandedPlatform, setExpandedPlatform] =
     useState<SocialMediaPlatform | null>(null);
   const [showLogModal, setShowLogModal] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
   const [showErrorAlert, setShowErrorAlert] = useState(false);
@@ -95,15 +93,6 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const { avatarUri: userAvatar } = useProfilePicture(user?.id, token);
 
   // handlers
-  const handleRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refetchStreakData();
-    if (expandedPlatform) {
-      await refetchHistory();
-    }
-    setRefreshing(false);
-  }, [refetchStreakData, refetchHistory, expandedPlatform]);
-
   const toggleExpand = (platform: SocialMediaPlatform) => {
     setExpandedPlatform(expandedPlatform === platform ? null : platform);
   };
@@ -118,7 +107,11 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
         socialMedia: platform,
       });
       setShowLogModal(false);
-      handleRefresh();
+
+      refetchStreakData();
+      if (expandedPlatform) {
+        refetchHistory();
+      }
     } catch (error: any) {
       setAlertTitle("Couldn't Log");
       setAlertMessage(
@@ -134,7 +127,10 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const handleStopTracking = async (platform: SocialMediaPlatform) => {
     try {
       await stopTrackingMutation.mutateAsync(platform);
-      handleRefresh();
+      refetchStreakData();
+      if (expandedPlatform) {
+        refetchHistory();
+      }
     } catch (error: any) {
       setAlertTitle("Couldn't Stop Tracking");
       setAlertMessage(
@@ -184,13 +180,6 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={theme.colors.primary}
-          />
-        }
       >
         <LinearGradient
           colors={[addOpacity(primaryColorWithoutAlpha, "30"), "transparent"]}

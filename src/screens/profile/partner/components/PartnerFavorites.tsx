@@ -41,9 +41,9 @@ const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
   // Helper to get icon for favorite type
   const getFavoriteIcon = (label: string): string => {
     const lowerLabel = label.toLowerCase();
-    if (lowerLabel.includes("color")) return "palette";
+    if (lowerLabel.includes("color")) return "image";
     if (lowerLabel.includes("food")) return "coffee";
-    if (lowerLabel.includes("snack")) return "cookie";
+    if (lowerLabel.includes("snack")) return "circle";
     if (lowerLabel.includes("activity")) return "activity";
     if (lowerLabel.includes("holiday")) return "calendar";
     if (lowerLabel.includes("time")) return "clock";
@@ -74,27 +74,26 @@ const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
 
   if (favorites.length === 0) {
     return (
-      <Animated.View
-        entering={FadeIn.duration(400)}
-        style={[styles.wrapper, fadeInStyle]}
-      >
-        <View style={styles.headerContainer}>
-          <View style={styles.headerLeft}>
-            <View style={styles.iconContainer}>
-              <Feather name="star" size={20} color={theme.colors.primary} />
+      <Animated.View entering={FadeIn.duration(400)} style={styles.wrapper}>
+        <Animated.View style={fadeInStyle}>
+          <View style={styles.headerContainer}>
+            <View style={styles.headerLeft}>
+              <View style={styles.iconContainer}>
+                <Feather name="star" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.title}>Favorites</Text>
             </View>
-            <Text style={styles.title}>Favorites</Text>
           </View>
-        </View>
-        <View style={styles.emptyCard}>
-          <Feather
-            name="star"
-            size={32}
-            color={theme.colors.mutedAlt}
-            style={styles.emptyIcon}
-          />
-          <Text style={styles.emptyText}>No favorites added yet</Text>
-        </View>
+          <View style={styles.emptyCard}>
+            <Feather
+              name="star"
+              size={32}
+              color={theme.colors.mutedAlt}
+              style={styles.emptyIcon}
+            />
+            <Text style={styles.emptyText}>No favorites added yet</Text>
+          </View>
+        </Animated.View>
       </Animated.View>
     );
   }
@@ -106,59 +105,58 @@ const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
   }
 
   return (
-    <Animated.View
-      entering={FadeIn.duration(400)}
-      style={[styles.wrapper, fadeInStyle]}
-    >
-      <View style={styles.headerContainer}>
-        <View style={styles.headerLeft}>
-          <View style={styles.iconContainer}>
-            <Feather name="star" size={20} color={theme.colors.primary} />
+    <Animated.View entering={FadeIn.duration(400)} style={styles.wrapper}>
+      <Animated.View style={fadeInStyle}>
+        <View style={styles.headerContainer}>
+          <View style={styles.headerLeft}>
+            <View style={styles.iconContainer}>
+              <Feather name="star" size={20} color={theme.colors.primary} />
+            </View>
+            <Text style={styles.title}>Favorites</Text>
           </View>
-          <Text style={styles.title}>Favorites</Text>
+          <Text style={styles.countBadge}>{favorites.length}</Text>
         </View>
-        <Text style={styles.countBadge}>{favorites.length}</Text>
-      </View>
 
-      <View style={styles.cardsContainer}>
-        {rows.map((row, rowIdx) => (
-          <View style={styles.row} key={rowIdx}>
-            {row.map((item, itemIdx) => {
-              const globalIdx = rowIdx * 2 + itemIdx;
-              return (
-                <Animated.View
-                  entering={FadeIn.duration(300).delay(globalIdx * 50)}
-                  key={itemIdx}
-                  style={[
-                    styles.favoriteCard,
-                    row.length === 1 && styles.singleCard,
-                  ]}
-                >
-                  <View style={styles.cardHeader}>
-                    <View style={styles.cardIconContainer}>
-                      <Feather
-                        name={getFavoriteIcon(item.label) as any}
-                        size={16}
-                        color={theme.colors.primary}
-                      />
+        <View style={styles.cardsContainer}>
+          {rows.map((row, rowIdx) => (
+            <View style={styles.row} key={rowIdx}>
+              {row.map((item, itemIdx) => {
+                const globalIdx = rowIdx * 2 + itemIdx;
+                return (
+                  <Animated.View
+                    entering={FadeIn.duration(300).delay(globalIdx * 50)}
+                    key={itemIdx}
+                    style={[
+                      styles.favoriteCard,
+                      row.length === 1 && styles.singleCard,
+                    ]}
+                  >
+                    <View style={styles.cardHeader}>
+                      <View style={styles.cardIconContainer}>
+                        <Feather
+                          name={getFavoriteIcon(item.label) as any}
+                          size={16}
+                          color={theme.colors.primary}
+                        />
+                      </View>
+                      <Text style={styles.emoji}>{getFavoriteEmoji(item.label)}</Text>
                     </View>
-                    <Text style={styles.emoji}>{getFavoriteEmoji(item.label)}</Text>
-                  </View>
-                  <View style={styles.cardContent}>
-                    <Text style={styles.label} numberOfLines={1}>
-                      {item.label}
-                    </Text>
-                    <Text style={styles.value} numberOfLines={2}>
-                      {item.value}
-                    </Text>
-                  </View>
-                </Animated.View>
-              );
-            })}
-            {row.length === 1 && <View style={styles.placeholderCard} />}
-          </View>
-        ))}
-      </View>
+                    <View style={styles.cardContent}>
+                      <Text style={styles.label} numberOfLines={1}>
+                        {item.label}
+                      </Text>
+                      <Text style={styles.value} numberOfLines={2}>
+                        {item.value}
+                      </Text>
+                    </View>
+                  </Animated.View>
+                );
+              })}
+              {row.length === 1 && <View style={styles.placeholderCard} />}
+            </View>
+          ))}
+        </View>
+      </Animated.View>
     </Animated.View>
   );
 };
