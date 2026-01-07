@@ -185,16 +185,16 @@ const Anniversary: React.FC<AnniversaryProps> = ({
       }
     }
 
-    await queryClient.invalidateQueries({
+    queryClient.invalidateQueries({
       queryKey: ["specialDates", user?.id],
     });
-    await queryClient.invalidateQueries({
+    queryClient.invalidateQueries({
       queryKey: ["recentActivities", user?.id],
     });
-    await queryClient.invalidateQueries({
+    queryClient.invalidateQueries({
       queryKey: ["upcomingSpecialDate", user?.id],
     });
-    await queryClient.invalidateQueries({
+    queryClient.invalidateQueries({
       queryKey: ["aiContext", user?.id],
     });
   };

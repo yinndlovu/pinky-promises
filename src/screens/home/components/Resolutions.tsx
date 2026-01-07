@@ -23,6 +23,7 @@ import {
   useMarkResolutionComplete,
 } from "../../../hooks/useResolutions";
 import type { Resolution } from "../../../services/api/resolutions/resolutionService";
+import useToken from "../../../hooks/useToken";
 
 interface ResolutionsProps {
   resolutions: Resolution[];
@@ -36,6 +37,7 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   // hook variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const token = useToken();
 
   // use states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -43,8 +45,8 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   const [newDueDate, setNewDueDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  const createResolutionMutation = useCreateResolution();
-  const markCompleteMutation = useMarkResolutionComplete();
+  const createResolutionMutation = useCreateResolution(token);
+  const markCompleteMutation = useMarkResolutionComplete(token);
 
   // helpers
   const calculateTimeLeft = (dueDate: string) => {
@@ -101,7 +103,6 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   };
 
   const sortedResolutions = useMemo(() => {
-    const now = new Date();
     return [...resolutions]
       .map((item) => {
         const timeLeft = calculateTimeLeft(item.dueDate);
@@ -164,7 +165,9 @@ const Resolutions: React.FC<ResolutionsProps> = ({
                 style={[
                   styles.resolutionItem,
                   item.completed && styles.resolutionItemCompleted,
-                  item.isOverdue && !item.completed && styles.resolutionItemOverdue,
+                  item.isOverdue &&
+                    !item.completed &&
+                    styles.resolutionItemOverdue,
                 ]}
                 onPress={() => !item.completed && handleMarkComplete(item.id)}
                 disabled={item.completed || markCompleteMutation.isPending}
@@ -193,7 +196,9 @@ const Resolutions: React.FC<ResolutionsProps> = ({
                     <Text
                       style={[
                         styles.timeLeft,
-                        item.isOverdue && !item.completed && styles.timeLeftOverdue,
+                        item.isOverdue &&
+                          !item.completed &&
+                          styles.timeLeftOverdue,
                       ]}
                     >
                       {item.completed

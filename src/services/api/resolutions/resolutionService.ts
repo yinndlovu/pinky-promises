@@ -70,4 +70,3 @@ export async function getPartnerResolutions(
 
   return response.data;
 }
-

@@ -24,7 +24,7 @@ type IconName = ComponentProps<typeof MaterialCommunityIcons>["name"];
 
 interface AttentivenessInsightsModalProps {
   visible: boolean;
-  insights: AttentivenessInsights | null;
+  insights: AttentivenessInsights | null | undefined;
   onClose: () => void;
   onMarkAsShown: (weekKey: string) => void;
 }

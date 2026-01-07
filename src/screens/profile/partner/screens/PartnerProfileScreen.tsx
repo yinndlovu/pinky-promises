@@ -105,7 +105,7 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
 
   // partner resolutions
   const { data: partnerResolutions, isLoading: partnerResolutionsLoading } =
-    usePartnerResolutions(user?.id);
+    usePartnerResolutions(token, user?.id);
 
   // use layouts
   useLayoutEffect(() => {
@@ -179,7 +179,7 @@ const PartnerProfileScreen = ({ navigation, route }: any) => {
       }
 
       await removePartner(token);
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["partnerData", user?.id],
       });
 

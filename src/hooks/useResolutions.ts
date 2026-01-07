@@ -3,13 +3,10 @@ import {
   getResolutions,
   createResolution,
   markResolutionComplete,
-  type Resolution,
+  getPartnerResolutions,
 } from "../services/api/resolutions/resolutionService";
-import useToken from "./useToken";
 
-export function useResolutions(userId?: string) {
-  const token = useToken();
-
+export function useResolutions(token: string | null, userId?: string) {
   return useQuery({
     queryKey: ["resolutions", userId],
     queryFn: async () => {
@@ -20,8 +17,7 @@ export function useResolutions(userId?: string) {
   });
 }
 
-export function useCreateResolution() {
-  const token = useToken();
+export function useCreateResolution(token: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -41,8 +37,7 @@ export function useCreateResolution() {
   });
 }
 
-export function useMarkResolutionComplete() {
-  const token = useToken();
+export function useMarkResolutionComplete(token: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -56,9 +51,7 @@ export function useMarkResolutionComplete() {
   });
 }
 
-export function usePartnerResolutions(userId?: string) {
-  const token = useToken();
-
+export function usePartnerResolutions(token: string | null, userId?: string) {
   return useQuery({
     queryKey: ["partnerResolutions", userId],
     queryFn: async () => {
@@ -68,4 +61,3 @@ export function usePartnerResolutions(userId?: string) {
     staleTime: 1000 * 60 * 5,
   });
 }
-

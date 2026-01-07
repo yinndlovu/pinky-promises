@@ -16,6 +16,7 @@ import Animated, {
 // internal (hooks)
 import { SpecialDate } from "../../../../types/SpecialDate";
 import { useTheme } from "../../../../theme/ThemeContext";
+
 // screen content
 import Shimmer from "../../../../components/skeletons/Shimmer";
 
@@ -60,7 +61,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
       })
     );
 
-    // Glow animations
+    // glow animations
     anniversaryGlow.value = withTiming(1, {
       duration: 2000,
       easing: Easing.inOut(Easing.sin),
@@ -195,119 +196,125 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
 
   return (
     <View style={styles.wrapper}>
-      {/* Anniversary Card */}
-      <Animated.View entering={FadeIn.duration(400)} style={styles.anniversaryCard}>
-        <Animated.View style={[anniversaryCardAnimatedStyle, anniversaryGlowStyle]}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            <View style={styles.iconContainer}>
-              <Feather name="heart" size={20} color="#ff6b9d" />
+      <Animated.View
+        entering={FadeIn.duration(400)}
+        style={styles.anniversaryCard}
+      >
+        <Animated.View
+          style={[anniversaryCardAnimatedStyle, anniversaryGlowStyle]}
+        >
+          <View style={styles.cardHeader}>
+            <View style={styles.cardHeaderLeft}>
+              <View style={styles.iconContainer}>
+                <Feather name="heart" size={20} color="#ff6b9d" />
+              </View>
+              <Text style={styles.cardTitle}>Anniversary</Text>
             </View>
-            <Text style={styles.cardTitle}>Anniversary</Text>
+            <Text style={styles.heartEmoji}>💕</Text>
           </View>
-          <Text style={styles.heartEmoji}>💕</Text>
-        </View>
 
-        <View style={styles.cardContent}>
-          {anniversaryDisplay.date !== "Not set" ? (
-            <>
-              <Text style={styles.dateText}>{anniversaryDisplay.date}</Text>
-              {anniversaryDisplay.timeInfo && (
-                <View style={styles.timeInfoContainer}>
-                  <Feather
-                    name="clock"
-                    size={14}
-                    color={theme.colors.primary}
-                    style={styles.timeIcon}
-                  />
-                  <Text style={styles.timeInfo}>
-                    {anniversaryDisplay.timeInfo}
+          <View style={styles.cardContent}>
+            {anniversaryDisplay.date !== "Not set" ? (
+              <>
+                <Text style={styles.dateText}>{anniversaryDisplay.date}</Text>
+                {anniversaryDisplay.timeInfo && (
+                  <View style={styles.timeInfoContainer}>
+                    <Feather
+                      name="clock"
+                      size={14}
+                      color={theme.colors.primary}
+                      style={styles.timeIcon}
+                    />
+                    <Text style={styles.timeInfo}>
+                      {anniversaryDisplay.timeInfo}
+                    </Text>
+                  </View>
+                )}
+                {anniversaryDisplay.nextAnniversary && (
+                  <View style={styles.nextEventContainer}>
+                    <Feather
+                      name="calendar"
+                      size={12}
+                      color={theme.colors.muted}
+                    />
+                    <Text style={styles.nextEventText}>
+                      Next in {anniversaryDisplay.nextAnniversary}
+                    </Text>
+                  </View>
+                )}
+                {anniversaryDisplay.description && (
+                  <Text style={styles.descriptionText}>
+                    {anniversaryDisplay.description}
                   </Text>
-                </View>
-              )}
-              {anniversaryDisplay.nextAnniversary && (
-                <View style={styles.nextEventContainer}>
-                  <Feather
-                    name="calendar"
-                    size={12}
-                    color={theme.colors.muted}
-                  />
-                  <Text style={styles.nextEventText}>
-                    Next in {anniversaryDisplay.nextAnniversary}
-                  </Text>
-                </View>
-              )}
-              {anniversaryDisplay.description && (
-                <Text style={styles.descriptionText}>
-                  {anniversaryDisplay.description}
+                )}
+              </>
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>
+                  No anniversary date set
                 </Text>
-              )}
-            </>
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>
-                No anniversary date set
-              </Text>
-            </View>
-          )}
-        </View>
+              </View>
+            )}
+          </View>
         </Animated.View>
       </Animated.View>
 
-      {/* Day Met Card */}
-      <Animated.View entering={FadeIn.duration(400).delay(100)} style={styles.dayMetCard}>
+      <Animated.View
+        entering={FadeIn.duration(400).delay(100)}
+        style={styles.dayMetCard}
+      >
         <Animated.View style={[dayMetCardAnimatedStyle, dayMetGlowStyle]}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            <View style={[styles.iconContainer, styles.dayMetIconContainer]}>
-              <Feather name="users" size={20} color={theme.colors.primary} />
+          <View style={styles.cardHeader}>
+            <View style={styles.cardHeaderLeft}>
+              <View style={[styles.iconContainer, styles.dayMetIconContainer]}>
+                <Feather name="users" size={20} color={theme.colors.primary} />
+              </View>
+              <Text style={styles.cardTitle}>Day We Met</Text>
             </View>
-            <Text style={styles.cardTitle}>Day We Met</Text>
+            <Text style={styles.sparkleEmoji}>✨</Text>
           </View>
-          <Text style={styles.sparkleEmoji}>✨</Text>
-        </View>
 
-        <View style={styles.cardContent}>
-          {dayMetDisplay.date !== "Not set" ? (
-            <>
-              <Text style={styles.dateText}>{dayMetDisplay.date}</Text>
-              {dayMetDisplay.timeInfo && (
-                <View style={styles.timeInfoContainer}>
-                  <Feather
-                    name="clock"
-                    size={14}
-                    color={theme.colors.primary}
-                    style={styles.timeIcon}
-                  />
-                  <Text style={styles.timeInfo}>
-                    {dayMetDisplay.timeInfo}
+          <View style={styles.cardContent}>
+            {dayMetDisplay.date !== "Not set" ? (
+              <>
+                <Text style={styles.dateText}>{dayMetDisplay.date}</Text>
+                {dayMetDisplay.timeInfo && (
+                  <View style={styles.timeInfoContainer}>
+                    <Feather
+                      name="clock"
+                      size={14}
+                      color={theme.colors.primary}
+                      style={styles.timeIcon}
+                    />
+                    <Text style={styles.timeInfo}>
+                      {dayMetDisplay.timeInfo}
+                    </Text>
+                  </View>
+                )}
+                {dayMetDisplay.nextMetDay && (
+                  <View style={styles.nextEventContainer}>
+                    <Feather
+                      name="calendar"
+                      size={12}
+                      color={theme.colors.muted}
+                    />
+                    <Text style={styles.nextEventText}>
+                      Next in {dayMetDisplay.nextMetDay}
+                    </Text>
+                  </View>
+                )}
+                {dayMetDisplay.description && (
+                  <Text style={styles.descriptionText}>
+                    {dayMetDisplay.description}
                   </Text>
-                </View>
-              )}
-              {dayMetDisplay.nextMetDay && (
-                <View style={styles.nextEventContainer}>
-                  <Feather
-                    name="calendar"
-                    size={12}
-                    color={theme.colors.muted}
-                  />
-                  <Text style={styles.nextEventText}>
-                    Next in {dayMetDisplay.nextMetDay}
-                  </Text>
-                </View>
-              )}
-              {dayMetDisplay.description && (
-                <Text style={styles.descriptionText}>
-                  {dayMetDisplay.description}
-                </Text>
-              )}
-            </>
-          ) : (
-            <View style={styles.emptyState}>
-              <Text style={styles.emptyStateText}>No date set</Text>
-            </View>
-          )}
-        </View>
+                )}
+              </>
+            ) : (
+              <View style={styles.emptyState}>
+                <Text style={styles.emptyStateText}>No date set</Text>
+              </View>
+            )}
+          </View>
         </Animated.View>
       </Animated.View>
     </View>
