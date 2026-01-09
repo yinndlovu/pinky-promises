@@ -20,6 +20,11 @@ const PeriodStatusCard: React.FC<Props> = ({
 }) => {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const expectedPeriodLength =
+    status.expectedEndDay ??
+    status.cycle?.periodLength ??
+    status.lastCycle?.periodLength ??
+    5;
 
   const getStatusContent = () => {
     switch (status.status) {
@@ -28,7 +33,7 @@ const PeriodStatusCard: React.FC<Props> = ({
           emoji: "🌸",
           label: isPartnerView ? "PARTNER'S PERIOD" : "CURRENTLY ON PERIOD",
           days: (status.daysSinceStart || 0) + 1,
-          subtext: `Day ${(status.daysSinceStart || 0) + 1} of ~${status.expectedEndDay || 5}`,
+          subtext: `Day ${(status.daysSinceStart || 0) + 1} of ~${expectedPeriodLength}`,
           gradientColors: ["#ff6b9d", "#c44569"] as [string, string],
           chipText: "On Period",
           chipBg: "#ff6b9d20",
@@ -192,4 +197,3 @@ const createStyles = (theme: any) =>
   });
 
 export default PeriodStatusCard;
-
