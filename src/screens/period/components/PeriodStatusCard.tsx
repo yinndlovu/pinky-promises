@@ -192,4 +192,3 @@ const createStyles = (theme: any) =>
   });
 
 export default PeriodStatusCard;
-

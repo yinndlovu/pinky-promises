@@ -227,7 +227,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // show attentiveness insights modal when available
   useEffect(() => {
     if (attentivenessInsights && attentivenessInsights.messages?.length > 0) {
-      // Small delay to ensure other modals don't conflict
+      // small delay to ensure other modals don't conflict
       const timer = setTimeout(() => {
         setShowAttentivenessModal(true);
       }, 500);

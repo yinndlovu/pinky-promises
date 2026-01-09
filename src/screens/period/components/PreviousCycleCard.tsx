@@ -21,7 +21,7 @@ const PreviousCycleCard: React.FC<Props> = ({
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  // Limit to max 5 previous periods
+  // limit to max 5 previous periods
   const limitedCycles = cycles.slice(0, 5);
   const lastCycle = limitedCycles.find((c) => c.endDate) || null;
 
@@ -37,7 +37,9 @@ const PreviousCycleCard: React.FC<Props> = ({
   };
 
   const getPeriodLength = (cycle: PeriodCycle) => {
-    if (!cycle.endDate) return null;
+    if (!cycle.endDate) {
+      return null;
+    }
     const start = new Date(cycle.startDate);
     const end = new Date(cycle.endDate);
     return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
