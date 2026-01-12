@@ -8,15 +8,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -113,133 +110,143 @@ const PasswordScreen: React.FC<Props> = ({ navigation, route }) => {
     password.length > 0;
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ImageBackground
       source={require("../../../assets/app_background.png")}
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <Text style={styles.label}>Type matching passwords</Text>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="New password"
-            placeholderTextColor="#b0b0b0"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            maxLength={32}
-          />
-          <TouchableOpacity
-            style={styles.eyeButton}
-            onPress={() => setShowPassword((v) => !v)}
-          >
-            <Feather
-              name={showPassword ? "eye-off" : "eye"}
-              size={22}
-              color="#b0b3c6"
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={{ width: "100%", marginBottom: 8, paddingHorizontal: 8 }}>
-          <ValidationItem
-            valid={newPasswordValid.length}
-            text="At least 8 characters"
-          />
-          <ValidationItem valid={newPasswordValid.letter} text="One letter" />
-          <ValidationItem valid={newPasswordValid.number} text="One number" />
-          <ValidationItem
-            valid={newPasswordValid.special}
-            text="One special character"
-          />
-        </View>
-        <View style={styles.inputWrapper}>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm password"
-            placeholderTextColor="#b0b0b0"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry={!showConfirm}
-            maxLength={32}
-          />
-          <TouchableOpacity
-            style={styles.eyeButton}
-            onPress={() => setShowConfirm((v) => !v)}
-          >
-            <Feather
-              name={showConfirm ? "eye-off" : "eye"}
-              size={20}
-              color="#b0b3c6"
-            />
-          </TouchableOpacity>
-        </View>
-        {confirmPassword.length > 0 && (
-          <View
-            style={{ width: "100%", marginBottom: 8, paddingHorizontal: 8 }}
-          >
-            <ValidationItem
-              valid={password === confirmPassword}
-              text="Passwords match"
-            />
-          </View>
-        )}
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        <TouchableOpacity
-          style={[
-            styles.registerButton,
-            {
-              opacity: !isFormValid || loading ? 0.6 : 1,
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            },
-          ]}
-          onPress={handleRegister}
-          disabled={!isFormValid || loading}
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraScrollHeight={100}
+          showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.registerButtonText}>
-            {loading ? "Registering" : "Register"}
-          </Text>
-          {loading && (
-            <ActivityIndicator
-              size="small"
-              color="#fff"
-              style={{ marginLeft: 8 }}
-            />
-          )}
-        </TouchableOpacity>
-      </View>
+          <View style={styles.overlay}>
+            <Text style={styles.label}>Type matching passwords</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="New password"
+                placeholderTextColor="#b0b0b0"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                maxLength={32}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPassword((v) => !v)}
+              >
+                <Feather
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={22}
+                  color="#b0b3c6"
+                />
+              </TouchableOpacity>
+            </View>
+            <View
+              style={{ width: "100%", marginBottom: 8, paddingHorizontal: 8 }}
+            >
+              <ValidationItem
+                valid={newPasswordValid.length}
+                text="At least 8 characters"
+              />
+              <ValidationItem
+                valid={newPasswordValid.letter}
+                text="One letter"
+              />
+              <ValidationItem
+                valid={newPasswordValid.number}
+                text="One number"
+              />
+              <ValidationItem
+                valid={newPasswordValid.special}
+                text="One special character"
+              />
+            </View>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.input}
+                placeholder="Confirm password"
+                placeholderTextColor="#b0b0b0"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirm}
+                maxLength={32}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowConfirm((v) => !v)}
+              >
+                <Feather
+                  name={showConfirm ? "eye-off" : "eye"}
+                  size={20}
+                  color="#b0b3c6"
+                />
+              </TouchableOpacity>
+            </View>
+            {confirmPassword.length > 0 && (
+              <View
+                style={{ width: "100%", marginBottom: 8, paddingHorizontal: 8 }}
+              >
+                <ValidationItem
+                  valid={password === confirmPassword}
+                  text="Passwords match"
+                />
+              </View>
+            )}
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <TouchableOpacity
+              style={[
+                styles.registerButton,
+                {
+                  opacity: !isFormValid || loading ? 0.6 : 1,
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                },
+              ]}
+              onPress={handleRegister}
+              disabled={!isFormValid || loading}
+            >
+              <Text style={styles.registerButtonText}>
+                {loading ? "Registering" : "Register"}
+              </Text>
+              {loading && (
+                <ActivityIndicator
+                  size="small"
+                  color="#fff"
+                  style={{ marginLeft: 8 }}
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
     </ImageBackground>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 16,
-    paddingTop: 120,
-  },
   background: {
     flex: 1,
     width: "100%",
     height: "100%",
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
+  },
+  overlay: {
+    width: "100%",
+    justifyContent: "flex-start",
     alignItems: "center",
+    padding: 16,
+    paddingTop: 80,
+    paddingBottom: 40,
   },
   label: {
     fontSize: 22,

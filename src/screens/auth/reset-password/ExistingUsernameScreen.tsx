@@ -7,14 +7,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { initiatePasswordReset } from "../../../services/api/auth/resetPasswordService";
@@ -50,7 +47,7 @@ const ExistingUsernameScreen: React.FC<Props> = ({ navigation }) => {
       await AsyncStorage.setItem("resetToken", res.token);
 
       const elapsed = Date.now() - startTime;
-      
+
       if (elapsed < MIN_BIRD_TIME) {
         await new Promise((resolve) =>
           setTimeout(resolve, MIN_BIRD_TIME - elapsed)
@@ -98,71 +95,73 @@ const ExistingUsernameScreen: React.FC<Props> = ({ navigation }) => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ImageBackground
       source={require("../../../assets/app_background.png")}
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <AnimatedDialog
-          visible={true}
-          animation={sleepingBird}
-          loop={true}
-          message={
-            error
-              ? error
-              : `Forgotten our password already, have we? It's fine, give me your username.`
-          }
-          mode="inline"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          placeholderTextColor="#b0b3c6"
-          value={username}
-          maxLength={20}
-          onChangeText={(text) => {
-            setUsername(text);
-            if (error) {
-              setError("Yep, give me the correct username.");
-            }
-          }}
-          autoCapitalize="none"
-        />
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-          <Text style={styles.nextButtonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraScrollHeight={100}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.overlay}>
+            <AnimatedDialog
+              visible={true}
+              animation={sleepingBird}
+              loop={true}
+              message={
+                error
+                  ? error
+                  : `Forgotten our password already, have we? It's fine, give me your username.`
+              }
+              mode="inline"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              placeholderTextColor="#b0b3c6"
+              value={username}
+              maxLength={20}
+              onChangeText={(text) => {
+                setUsername(text);
+                if (error) {
+                  setError("Yep, give me the correct username.");
+                }
+              }}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+              <Text style={styles.nextButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
     </ImageBackground>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 16,
-    paddingTop: 50,
-  },
   background: {
     flex: 1,
     width: "100%",
     height: "100%",
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
+  },
+  overlay: {
+    width: "100%",
+    justifyContent: "flex-start",
     alignItems: "center",
+    padding: 16,
+    paddingTop: 50,
+    paddingBottom: 40,
   },
   label: {
     fontSize: 22,

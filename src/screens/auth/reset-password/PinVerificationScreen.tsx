@@ -7,14 +7,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import {
@@ -165,76 +162,78 @@ const PinVerificationScreen: React.FC<Props> = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ImageBackground
       source={require("../../../assets/app_background.png")}
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <AnimatedDialog
-          visible={true}
-          animation={goodEmoji}
-          loop={true}
-          message={
-            error
-              ? error
-              : `Great! We found "${username}" in our list. Now you just need to enter the 6-digit PIN we sent to the app admin. Tell him to give it to you!`
-          }
-          mode="inline"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="123456"
-          placeholderTextColor="#b0b3c6"
-          value={pin}
-          onChangeText={(text) => {
-            setPin(text);
-            if (error) {
-              setError("Yup! Type the correct pin in there please.");
-            }
-          }}
-          keyboardType="numeric"
-          maxLength={6}
-        />
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraScrollHeight={100}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.overlay}>
+            <AnimatedDialog
+              visible={true}
+              animation={goodEmoji}
+              loop={true}
+              message={
+                error
+                  ? error
+                  : `Great! We found "${username}" in our list. Now you just need to enter the 6-digit PIN we sent to the app admin. Tell him to give it to you!`
+              }
+              mode="inline"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="123456"
+              placeholderTextColor="#b0b3c6"
+              value={pin}
+              onChangeText={(text) => {
+                setPin(text);
+                if (error) {
+                  setError("Yup! Type the correct pin in there please.");
+                }
+              }}
+              keyboardType="numeric"
+              maxLength={6}
+            />
 
-        <TouchableOpacity style={styles.nextButton} onPress={handleVerify}>
-          <Text style={styles.nextButtonText}>Verify</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.nextButton} onPress={handleVerify}>
+              <Text style={styles.nextButtonText}>Verify</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.resendButton} onPress={handleResend}>
-          <Text style={styles.resendButtonText}>Resend PIN</Text>
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity style={styles.resendButton} onPress={handleResend}>
+              <Text style={styles.resendButtonText}>Resend PIN</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
     </ImageBackground>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 16,
-    paddingTop: 50,
-  },
   background: {
     flex: 1,
     width: "100%",
     height: "100%",
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
+  },
+  overlay: {
+    width: "100%",
+    justifyContent: "flex-start",
     alignItems: "center",
+    padding: 16,
+    paddingTop: 50,
+    paddingBottom: 40,
   },
   input: {
     width: "100%",

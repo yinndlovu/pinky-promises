@@ -8,14 +8,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -127,79 +124,81 @@ const UsernameScreen: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ImageBackground
-            source={require("../../../assets/app_background.png")}
-            style={styles.background}
-            resizeMode="cover"
-          >
-            <View style={styles.overlay}>
-              <Text style={styles.label}>Choose a username</Text>
-              <TextInput
-                style={styles.input}
-                placeholder=""
-                placeholderTextColor="#b0b3c6"
-                value={username}
-                onChangeText={setUsername}
-                maxLength={20}
-                autoCapitalize="none"
+    <ImageBackground
+      source={require("../../../assets/app_background.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraScrollHeight={100}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.overlay}>
+            <Text style={styles.label}>Choose a username</Text>
+            <TextInput
+              style={styles.input}
+              placeholder=""
+              placeholderTextColor="#b0b3c6"
+              value={username}
+              onChangeText={setUsername}
+              maxLength={20}
+              autoCapitalize="none"
+            />
+            {checking && (
+              <ActivityIndicator
+                size="small"
+                color="#e03487"
+                style={{ marginBottom: 8 }}
               />
-              {checking && (
-                <ActivityIndicator
-                  size="small"
-                  color="#e03487"
-                  style={{ marginBottom: 8 }}
-                />
-              )}
-              {!checking && available === true && username && (
-                <Text style={styles.success}>You can have this username!</Text>
-              )}
-              {!checking && available === false && username && (
-                <Text style={styles.error}>
-                  You can't have this username...
-                </Text>
-              )}
-              {!checking && error && <Text style={styles.error}>{error}</Text>}
-              <TouchableOpacity
-                style={[
-                  styles.nextButton,
-                  { opacity: checking || available === false ? 0.6 : 1 },
-                ]}
-                onPress={handleNext}
-                disabled={checking || available === false}
-              >
-                <Text style={styles.nextButtonText}>Next</Text>
-              </TouchableOpacity>
-            </View>
-          </ImageBackground>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            )}
+            {!checking && available === true && username && (
+              <Text style={styles.success}>You can have this username!</Text>
+            )}
+            {!checking && available === false && username && (
+              <Text style={styles.error}>
+                You can't have this username...
+              </Text>
+            )}
+            {!checking && error && <Text style={styles.error}>{error}</Text>}
+            <TouchableOpacity
+              style={[
+                styles.nextButton,
+                { opacity: checking || available === false ? 0.6 : 1 },
+              ]}
+              onPress={handleNext}
+              disabled={checking || available === false}
+            >
+              <Text style={styles.nextButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 16,
-    paddingTop: 120,
-  },
   background: {
     flex: 1,
     width: "100%",
     height: "100%",
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
+  },
+  overlay: {
+    width: "100%",
+    justifyContent: "flex-start",
     alignItems: "center",
+    padding: 16,
+    paddingTop: 80,
+    paddingBottom: 40,
   },
   label: {
     fontSize: 22,

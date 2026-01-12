@@ -7,13 +7,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ImageBackground,
-  TouchableWithoutFeedback,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type Props = NativeStackScreenProps<any>;
 
@@ -39,56 +36,58 @@ const NameScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <ImageBackground
       source={require("../../../assets/app_background.png")}
       style={styles.background}
       resizeMode="cover"
     >
-      <View style={styles.overlay}>
-        <Text style={styles.label}>What's your name?</Text>
-        <TextInput
-          style={styles.input}
-          placeholder=""
-          placeholderTextColor="#b0b3c6"
-          value={name}
-          onChangeText={setName}
-          maxLength={25}
-        />
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-          <Text style={styles.nextButtonText}>Next</Text>
-        </TouchableOpacity>
-      </View>
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraScrollHeight={100}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.overlay}>
+            <Text style={styles.label}>What's your name?</Text>
+            <TextInput
+              style={styles.input}
+              placeholder=""
+              placeholderTextColor="#b0b3c6"
+              value={name}
+              onChangeText={setName}
+              maxLength={25}
+            />
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+              <Text style={styles.nextButtonText}>Next</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
     </ImageBackground>
-    </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
-    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 16,
-    paddingTop: 120,
-  },  
   background: {
     flex: 1,
     width: "100%",
     height: "100%",
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
+  },
+  overlay: {
+    width: "100%",
+    justifyContent: "flex-start",
     alignItems: "center",
+    padding: 16,
+    paddingTop: 80,
+    paddingBottom: 40,
   },
   label: {
     fontSize: 22,

@@ -8,15 +8,12 @@ import {
   StyleSheet,
   ActivityIndicator,
   ImageBackground,
-  KeyboardAvoidingView,
-  TouchableWithoutFeedback,
-  Platform,
-  Keyboard,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import axios from "axios";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { BASE_URL } from "../../../configuration/config";
@@ -68,121 +65,123 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
-      >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <ImageBackground
-            source={require("../../../assets/app_background.png")}
-            style={styles.background}
-            resizeMode="cover"
-          >
-            <View style={styles.overlay}>
-              <Text style={styles.label}>Log in to your account</Text>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={[styles.input, { borderWidth: 0, marginBottom: 0 }]}
-                  placeholder="Username"
-                  placeholderTextColor="#b0b3c6"
-                  value={username}
-                  onChangeText={setUsername}
-                  autoCapitalize="none"
-                  maxLength={20}
-                />
-              </View>
-              <View style={styles.inputWrapper}>
-                <TextInput
-                  style={styles.passwordInput}
-                  placeholder="Password"
-                  placeholderTextColor="#b0b3c6"
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry={!showPassword}
-                  maxLength={32}
-                />
-                <TouchableOpacity
-                  style={styles.eyeButton}
-                  onPress={() => setShowPassword((v) => !v)}
-                >
-                  <Feather
-                    name={showPassword ? "eye-off" : "eye"}
-                    size={20}
-                    color="#b0b3c6"
-                  />
-                </TouchableOpacity>
-              </View>
-
-              {error ? <Text style={styles.error}>{error}</Text> : null}
-              <TouchableOpacity
-                style={[
-                  styles.loginButton,
-                  {
-                    opacity: loading ? 0.6 : 1,
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  },
-                ]}
-                onPress={handleLogin}
-                disabled={loading}
-              >
-                <Text style={styles.loginButtonText}>
-                  {loading ? "Logging in" : "Log in"}
-                </Text>
-                {loading && (
-                  <ActivityIndicator
-                    size="small"
-                    color="#fff"
-                    style={{ marginLeft: 8 }}
-                  />
-                )}
-              </TouchableOpacity>
-              <View style={{ flexDirection: "row", marginTop: 16 }}>
-                <Text style={{ color: "#fff", fontSize: 16 }}>
-                  Forgot password?{" "}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("ExistingUsername")}
-                >
-                  <Text
-                    style={{
-                      color: "#e03487",
-                      fontSize: 16,
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Make a new one
-                  </Text>
-                </TouchableOpacity>
-                <Text style={{ color: "#fff", fontSize: 16 }}>.</Text>
-              </View>
+    <ImageBackground
+      source={require("../../../assets/app_background.png")}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid
+          extraScrollHeight={100}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.overlay}>
+            <Text style={styles.label}>Log in to your account</Text>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={[styles.input, { borderWidth: 0, marginBottom: 0 }]}
+                placeholder="Username"
+                placeholderTextColor="#b0b3c6"
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+                maxLength={20}
+              />
             </View>
-          </ImageBackground>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <View style={styles.inputWrapper}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Password"
+                placeholderTextColor="#b0b3c6"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                maxLength={32}
+              />
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => setShowPassword((v) => !v)}
+              >
+                <Feather
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color="#b0b3c6"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <TouchableOpacity
+              style={[
+                styles.loginButton,
+                {
+                  opacity: loading ? 0.6 : 1,
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                },
+              ]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Text style={styles.loginButtonText}>
+                {loading ? "Logging in" : "Log in"}
+              </Text>
+              {loading && (
+                <ActivityIndicator
+                  size="small"
+                  color="#fff"
+                  style={{ marginLeft: 8 }}
+                />
+              )}
+            </TouchableOpacity>
+            <View style={{ flexDirection: "row", marginTop: 16 }}>
+              <Text style={{ color: "#fff", fontSize: 16 }}>
+                Forgot password?{" "}
+              </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("ExistingUsername")}
+              >
+                <Text
+                  style={{
+                    color: "#e03487",
+                    fontSize: 16,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Make a new one
+                </Text>
+              </TouchableOpacity>
+              <Text style={{ color: "#fff", fontSize: 16 }}>.</Text>
+            </View>
+          </View>
+        </KeyboardAwareScrollView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "rgba(35, 36, 58, 0.8)",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 16,
-    paddingTop: 120,
-  },
   background: {
     flex: 1,
     width: "100%",
     height: "100%",
-    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    backgroundColor: "rgba(35, 36, 58, 0.8)",
+  },
+  overlay: {
+    width: "100%",
+    justifyContent: "flex-start",
     alignItems: "center",
+    padding: 16,
+    paddingTop: 80,
+    paddingBottom: 40,
   },
   label: {
     fontSize: 22,
