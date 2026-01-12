@@ -26,6 +26,7 @@ import useToken from "../hooks/useToken";
 import LoadingAnimation from "../components/loading/LoadingAnimation";
 import VersionUpdateBanner from "../components/banners/VersionUpdateBanner";
 import RootNavigator from "../navigation/RootNavigator";
+import MandatoryUpdateChecker from "../contexts/MandatoryUpdateChecker";
 
 // variables
 const queryClient = new QueryClient();
@@ -93,26 +94,28 @@ export default function App() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <NotificationProvider>
-          <PersistQueryClientProvider
-            client={queryClient}
-            persistOptions={{
-              persister: sqlitePersistor,
-              maxAge: 1000 * 60 * 60 * 24 * 5,
-            }}
-            onSuccess={() => {}}
-          >
-            <SocketProvider>
-              <ThemeProvider>
-                <AppNavigation />
-              </ThemeProvider>
-            </SocketProvider>
-          </PersistQueryClientProvider>
-        </NotificationProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <MandatoryUpdateChecker>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <PersistQueryClientProvider
+              client={queryClient}
+              persistOptions={{
+                persister: sqlitePersistor,
+                maxAge: 1000 * 60 * 60 * 24 * 5,
+              }}
+              onSuccess={() => {}}
+            >
+              <SocketProvider>
+                <ThemeProvider>
+                  <AppNavigation />
+                </ThemeProvider>
+              </SocketProvider>
+            </PersistQueryClientProvider>
+          </NotificationProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </MandatoryUpdateChecker>
   );
 }
 

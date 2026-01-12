@@ -32,7 +32,6 @@ import { useProfilePicture } from "../../hooks/useProfilePicture";
 
 // content
 import PlatformIcon from "../../components/common/PlatformIcon";
-import LogStreakModal from "../../components/modals/streak/LogStreakModal";
 import Shimmer from "../../components/skeletons/Shimmer";
 import AlertModal from "../../components/modals/output/AlertModal";
 
@@ -60,7 +59,6 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   // states
   const [expandedPlatform, setExpandedPlatform] =
     useState<SocialMediaPlatform | null>(null);
-  const [showLogModal, setShowLogModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
   const [showErrorAlert, setShowErrorAlert] = useState(false);
@@ -85,7 +83,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const logStreakMutation = useLogEndedStreak(token);
   const stopTrackingMutation = useStopTracking(token);
 
-  // Partner profile picture
+  // partner profile picture
   const { avatarUri: partnerAvatar } = useProfilePicture(
     streakData?.partner?.id?.toString() || "",
     token
@@ -106,7 +104,6 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
         accusedUserId,
         socialMedia: platform,
       });
-      setShowLogModal(false);
 
       refetchStreakData();
       if (expandedPlatform) {
@@ -122,6 +119,24 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
       setShowErrorAlert(true);
       console.error("Error logging streak:", error);
     }
+  };
+
+  const openLogStreakScreen = () => {
+    navigation.navigate("LogStreakScreen", {
+      platforms: streakData?.platforms || [],
+      user: {
+        id: Number(user?.id) || 0,
+        name: user?.name || "You",
+        avatar: userAvatar || undefined,
+      },
+      partner: {
+        id: streakData?.partner?.id || 0,
+        name: streakData?.partner?.name || "Partner",
+        avatar: partnerAvatar || undefined,
+      },
+      onLog: handleLogStreak,
+      loading: logStreakMutation.isPending,
+    });
   };
 
   const handleStopTracking = async (platform: SocialMediaPlatform) => {
@@ -399,7 +414,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.logStreakButton}
-          onPress={() => setShowLogModal(true)}
+          onPress={openLogStreakScreen}
         >
           <LinearGradient
             colors={[
@@ -413,24 +428,6 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
           </LinearGradient>
         </TouchableOpacity>
       </ScrollView>
-
-      <LogStreakModal
-        visible={showLogModal}
-        onClose={() => setShowLogModal(false)}
-        onLog={handleLogStreak}
-        loading={logStreakMutation.isPending}
-        platforms={streakData?.platforms || []}
-        user={{
-          id: Number(user?.id) || 0,
-          name: user?.name || "You",
-          avatar: userAvatar || undefined,
-        }}
-        partner={{
-          id: streakData?.partner?.id || 0,
-          name: streakData?.partner?.name || "Partner",
-          avatar: partnerAvatar || undefined,
-        }}
-      />
 
       <AlertModal
         visible={showSuccessAlert}

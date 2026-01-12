@@ -17,6 +17,8 @@ import PortalScreen from "../../screens/portal/screens/PortalScreen";
 import SentMessagesScreen from "../../screens/portal/screens/SentMessagesScreen";
 import ReceivedMessagesScreen from "../../screens/portal/screens/ReceivedMessagesScreen";
 import StreakScreen from "../../screens/streak/StreakScreen";
+import LogStreakScreen from "../../screens/streak/LogStreakScreen";
+import AddResolutionScreen from "../../screens/home/screens/AddResolutionScreen";
 import GiftsScreen from "../../screens/gifts/screens/GiftsScreen";
 import CartScreen from "../../screens/gifts/screens/CartScreen";
 
@@ -108,6 +110,20 @@ export default function HomeStackScreen() {
       <HomeStack.Screen
         name="StreakScreen"
         component={StreakScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <HomeStack.Screen
+        name="LogStreakScreen"
+        component={LogStreakScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <HomeStack.Screen
+        name="AddResolutionScreen"
+        component={AddResolutionScreen}
         options={{
           headerShown: false,
         }}

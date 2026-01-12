@@ -1,51 +1,37 @@
 // external
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
   View,
   Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  TextInput,
-  Modal,
-  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 // internal
 import { useTheme } from "../../../theme/ThemeContext";
 import { formatTimeLeft } from "../../../utils/formatters/formatDate";
-import {
-  useCreateResolution,
-  useMarkResolutionComplete,
-} from "../../../hooks/useResolutions";
+import { useMarkResolutionComplete } from "../../../hooks/useResolutions";
 import type { Resolution } from "../../../services/api/resolutions/resolutionService";
 import useToken from "../../../hooks/useToken";
 
 interface ResolutionsProps {
   resolutions: Resolution[];
   isLoading?: boolean;
+  onAddResolution: () => void;
 }
 
 const Resolutions: React.FC<ResolutionsProps> = ({
   resolutions,
   isLoading,
+  onAddResolution,
 }) => {
   // hook variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const token = useToken();
 
-  // use states
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newDueDate, setNewDueDate] = useState(new Date());
-  const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const createResolutionMutation = useCreateResolution(token);
   const markCompleteMutation = useMarkResolutionComplete(token);
 
   // helpers
@@ -76,24 +62,6 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   };
 
   // handlers
-  const handleCreateResolution = async () => {
-    if (!newTitle.trim()) {
-      return;
-    }
-
-    try {
-      await createResolutionMutation.mutateAsync({
-        title: newTitle.trim(),
-        dueDate: newDueDate.toISOString(),
-      });
-      setNewTitle("");
-      setNewDueDate(new Date());
-      setShowAddModal(false);
-    } catch (error) {
-      console.error("Failed to create resolution:", error);
-    }
-  };
-
   const handleMarkComplete = async (resolutionId: number) => {
     try {
       await markCompleteMutation.mutateAsync(resolutionId);
@@ -141,7 +109,7 @@ const Resolutions: React.FC<ResolutionsProps> = ({
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>RESOLUTIONS</Text>
         <TouchableOpacity
-          onPress={() => setShowAddModal(true)}
+          onPress={onAddResolution}
           style={styles.addButton}
         >
           <Feather name="plus" size={20} color={theme.colors.primary} />
@@ -244,90 +212,6 @@ const Resolutions: React.FC<ResolutionsProps> = ({
           initialNumToRender={10}
         />
       )}
-
-      <Modal
-        visible={showAddModal}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setShowAddModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <SafeAreaView edges={["bottom"]} style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Add Resolution</Text>
-              <TouchableOpacity
-                onPress={() => setShowAddModal(false)}
-                style={styles.closeButton}
-              >
-                <Feather name="x" size={24} color={theme.colors.text} />
-              </TouchableOpacity>
-            </View>
-
-            <KeyboardAwareScrollView
-              style={styles.modalScrollContent}
-              contentContainerStyle={styles.modalScrollContainer}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              enableOnAndroid
-              extraScrollHeight={200}
-            >
-              <TextInput
-                style={styles.input}
-                placeholder="Resolution title"
-                placeholderTextColor={theme.colors.muted}
-                value={newTitle}
-                onChangeText={setNewTitle}
-                autoFocus
-              />
-
-              <TouchableOpacity
-                style={styles.dateButton}
-                onPress={() => setShowDatePicker(true)}
-              >
-                <Feather
-                  name="calendar"
-                  size={20}
-                  color={theme.colors.primary}
-                />
-                <Text style={styles.dateButtonText}>
-                  Due: {newDueDate.toLocaleDateString()}
-                </Text>
-              </TouchableOpacity>
-
-              {showDatePicker && (
-                <DateTimePicker
-                  value={newDueDate}
-                  mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={(event, selectedDate) => {
-                    setShowDatePicker(Platform.OS === "ios");
-                    if (selectedDate) {
-                      setNewDueDate(selectedDate);
-                    }
-                  }}
-                  minimumDate={new Date()}
-                />
-              )}
-            </KeyboardAwareScrollView>
-
-            <TouchableOpacity
-              style={[
-                styles.submitButton,
-                (!newTitle.trim() || createResolutionMutation.isPending) &&
-                  styles.submitButtonDisabled,
-              ]}
-              onPress={handleCreateResolution}
-              disabled={!newTitle.trim() || createResolutionMutation.isPending}
-            >
-              <Text style={styles.submitButtonText}>
-                {createResolutionMutation.isPending
-                  ? "Adding..."
-                  : "Add Resolution"}
-              </Text>
-            </TouchableOpacity>
-          </SafeAreaView>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -441,74 +325,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     separator: {
       height: 0,
-    },
-    modalOverlay: {
-      flex: 1,
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-      justifyContent: "flex-end",
-    },
-    modalContent: {
-      backgroundColor: theme.colors.background,
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      padding: 20,
-      paddingBottom: 20,
-    },
-    modalHeader: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: 20,
-    },
-    modalScrollContent: {
-      flexGrow: 1,
-      flexShrink: 1,
-    },
-    modalScrollContainer: {
-      paddingBottom: 20,
-    },
-    modalTitle: {
-      fontSize: 20,
-      fontWeight: "bold",
-      color: theme.colors.text,
-    },
-    closeButton: {
-      padding: 4,
-    },
-    input: {
-      backgroundColor: theme.colors.surfaceAlt,
-      borderRadius: 12,
-      padding: 16,
-      fontSize: 16,
-      color: theme.colors.text,
-      marginBottom: 16,
-    },
-    dateButton: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: theme.colors.surfaceAlt,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 20,
-    },
-    dateButtonText: {
-      marginLeft: 12,
-      fontSize: 16,
-      color: theme.colors.text,
-    },
-    submitButton: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: 12,
-      padding: 16,
-      alignItems: "center",
-    },
-    submitButtonDisabled: {
-      opacity: 0.5,
-    },
-    submitButtonText: {
-      color: theme.colors.text,
-      fontSize: 16,
-      fontWeight: "600",
     },
   });
 

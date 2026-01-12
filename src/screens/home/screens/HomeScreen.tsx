@@ -880,7 +880,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
         <PortalPreview partner={partner} navigation={navigation} />
 
-        <Resolutions resolutions={resolutions} isLoading={homeLoading} />
+        <Resolutions
+          resolutions={resolutions}
+          isLoading={homeLoading}
+          onAddResolution={() =>
+            navigation.navigate("AddResolutionScreen", {
+              onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ["home", user?.id] });
+              },
+            })
+          }
+        />
 
         {activitiesLoading ? (
           <View>

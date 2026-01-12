@@ -31,8 +31,6 @@ import Shimmer from "../../../components/skeletons/Shimmer";
 import ErrorState from "../../../components/common/ErrorState";
 
 // modals
-import AddCustomAidModal from "../../../components/modals/input/AddCustomAidModal";
-import LogIssueModal from "../../../components/modals/input/LogIssueModal";
 import AddLookoutModal from "../../../components/modals/input/AddLookoutModal";
 import IssueDetailModal from "../../../components/modals/output/IssueDetailModal";
 import AlertModal from "../../../components/modals/output/AlertModal";
@@ -57,8 +55,6 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   // modals
-  const [customAidModalVisible, setCustomAidModalVisible] = useState(false);
-  const [logIssueModalVisible, setLogIssueModalVisible] = useState(false);
   const [addLookoutModalVisible, setAddLookoutModalVisible] = useState(false);
   const [issueDetailModalVisible, setIssueDetailModalVisible] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState<any>(null);
@@ -182,7 +178,6 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleIssueLogged = () => {
-    setLogIssueModalVisible(false);
     queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
     setAlertConfig({
       type: "success",
@@ -193,9 +188,20 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleCustomAidAdded = () => {
-    setCustomAidModalVisible(false);
     queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
     setToastMessage("Your custom need has been added!");
+  };
+
+  const openAddCustomAidScreen = () => {
+    navigation.navigate("AddCustomAidScreen", {
+      onSuccess: handleCustomAidAdded,
+    });
+  };
+
+  const openLogIssueScreen = () => {
+    navigation.navigate("LogIssueScreen", {
+      onSuccess: handleIssueLogged,
+    });
   };
 
   const handleLookoutAdded = () => {
@@ -268,7 +274,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
               shadowOpacity: 0.1,
               shadowRadius: 4,
             }}
-            onPress={() => setCustomAidModalVisible(true)}
+            onPress={openAddCustomAidScreen}
           >
             <Feather name="plus" size={22} color={theme.colors.primary} />
           </TouchableOpacity>
@@ -321,9 +327,9 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
             <QuickActionsRow
               isOnPeriod={status?.status === "on_period"}
               isPartnerView={isPartnerView}
-              onAddCustomAid={() => setCustomAidModalVisible(true)}
+              onAddCustomAid={openAddCustomAidScreen}
               onViewAllAids={() => {}}
-              onLogIssue={() => setLogIssueModalVisible(true)}
+              onLogIssue={openLogIssueScreen}
               onAddLookout={() => setAddLookoutModalVisible(true)}
             />
 
@@ -333,7 +339,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
               <TodaysIssuesCard
                 issues={todaysIssues || []}
                 onViewIssue={handleViewIssue}
-                onLogIssue={() => setLogIssueModalVisible(true)}
+                onLogIssue={openLogIssueScreen}
                 isPartnerView={isPartnerView}
               />
             )}
@@ -365,18 +371,6 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       )}
-
-      <AddCustomAidModal
-        visible={customAidModalVisible}
-        onClose={() => setCustomAidModalVisible(false)}
-        onSuccess={handleCustomAidAdded}
-      />
-
-      <LogIssueModal
-        visible={logIssueModalVisible}
-        onClose={() => setLogIssueModalVisible(false)}
-        onSuccess={handleIssueLogged}
-      />
 
       <AddLookoutModal
         visible={addLookoutModalVisible}
