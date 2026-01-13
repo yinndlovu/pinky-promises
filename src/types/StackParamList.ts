@@ -65,10 +65,10 @@ export type PeriodStackParamList = {
   CycleHistoryScreen: undefined;
   AllAidsScreen: undefined;
   AddCustomAidScreen: {
-    onSuccess: () => void;
+    onSuccess?: () => void;
   };
   LogIssueScreen: {
-    onSuccess: () => void;
+    onSuccess?: () => void;
   };
 };
 

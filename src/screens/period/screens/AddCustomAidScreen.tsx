@@ -51,7 +51,7 @@ const PROBLEMS: PeriodProblem[] = [
 ];
 
 const AddCustomAidScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { onSuccess } = route.params;
+  const { onSuccess } = route.params || {};
 
   // hook variables
   const { theme } = useTheme();
@@ -89,7 +89,9 @@ const AddCustomAidScreen: React.FC<Props> = ({ navigation, route }) => {
         description: description.trim() || undefined,
       });
 
-      onSuccess();
+      if (onSuccess) {
+        onSuccess();
+      }
       navigation.goBack();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to add custom aid");

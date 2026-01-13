@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { Feather } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 // internal
@@ -177,32 +178,19 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
     setIssueDetailModalVisible(true);
   };
 
-  const handleIssueLogged = () => {
-    queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
-    setAlertConfig({
-      type: "success",
-      title: "Issue Logged",
-      message: "The issue has been recorded with helpful tips. 💝",
-    });
-    setAlertVisible(true);
-  };
-
-  const handleCustomAidAdded = () => {
-    queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
-    setToastMessage("Your custom need has been added!");
-  };
-
   const openAddCustomAidScreen = () => {
-    navigation.navigate("AddCustomAidScreen", {
-      onSuccess: handleCustomAidAdded,
-    });
+    navigation.navigate("AddCustomAidScreen");
   };
 
   const openLogIssueScreen = () => {
-    navigation.navigate("LogIssueScreen", {
-      onSuccess: handleIssueLogged,
-    });
+    navigation.navigate("LogIssueScreen");
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
+    }, [queryClient, user?.id])
+  );
 
   const handleLookoutAdded = () => {
     setAddLookoutModalVisible(false);

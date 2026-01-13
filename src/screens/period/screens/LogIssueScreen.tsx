@@ -52,7 +52,7 @@ const PROBLEMS: PeriodProblem[] = [
 ];
 
 const LogIssueScreen: React.FC<Props> = ({ navigation, route }) => {
-  const { onSuccess } = route.params;
+  const { onSuccess } = route.params || {};
 
   // hook variables
   const { theme } = useTheme();
@@ -100,7 +100,9 @@ const LogIssueScreen: React.FC<Props> = ({ navigation, route }) => {
         notes: notes.trim() || undefined,
       });
 
-      onSuccess();
+      if (onSuccess) {
+        onSuccess();
+      }
       navigation.goBack();
     } catch (err: any) {
       setError(err.response?.data?.error || "Failed to log issue");
