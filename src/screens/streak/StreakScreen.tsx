@@ -194,7 +194,9 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
           </Text>
           <TouchableOpacity
             style={styles.goToSettingsButton}
-            onPress={() => navigation.goBack()}
+            onPress={() =>
+              navigation.navigate("Profile", { screen: "Settings" })
+            }
           >
             <Text style={styles.goToSettingsText}>Go to Settings</Text>
           </TouchableOpacity>
