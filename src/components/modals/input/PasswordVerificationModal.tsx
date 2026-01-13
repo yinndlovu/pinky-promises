@@ -10,6 +10,8 @@ import {
   TouchableWithoutFeedback,
   Dimensions,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
@@ -84,7 +86,11 @@ const PasswordVerificationModal: React.FC<Props> = ({
   return (
     <Modal visible={visible} transparent animationType="slide">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.overlay}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
           <View style={[styles.container, { paddingTop: insets.top + 2 }]}>
             <View style={styles.handle} />
             <View style={styles.header}>
@@ -163,7 +169,7 @@ const PasswordVerificationModal: React.FC<Props> = ({
             buttonText="Close"
             onClose={() => setShowErrorAlert(false)}
           />
-        </View>
+        </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </Modal>
   );

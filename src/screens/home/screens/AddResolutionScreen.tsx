@@ -94,7 +94,7 @@ const AddResolutionScreen: React.FC<Props> = ({ navigation, route }) => {
 
               <Text style={styles.title}>Set a New Goal</Text>
               <Text style={styles.subtitle}>
-                Create a resolution to work towards together
+                Create a resolution you want to work towards (together)
               </Text>
 
               <Text style={styles.label}>What's your resolution?</Text>

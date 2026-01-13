@@ -9,6 +9,8 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   Keyboard,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 // internal
@@ -79,7 +81,11 @@ const MessageInputModal: React.FC<Props> = ({
   return (
     <Modal visible={visible} transparent animationType="fade">
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.overlay}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
           <View style={styles.container}>
             <Text style={styles.title}>{title}</Text>
             <TextInput
@@ -135,7 +141,7 @@ const MessageInputModal: React.FC<Props> = ({
             buttonText="Close"
             onClose={() => setShowErrorAlert(false)}
           />
-        </View>
+        </KeyboardAvoidingView>
       </TouchableWithoutFeedback>
     </Modal>
   );
