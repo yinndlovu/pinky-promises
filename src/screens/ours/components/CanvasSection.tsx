@@ -18,8 +18,8 @@ import { useTheme } from "../../../theme/ThemeContext";
 
 // helper variables
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const CANVAS_WIDTH = SCREEN_WIDTH * 0.7;
-const ADD_BUTTON_WIDTH = 72;
+const CANVAS_WIDTH = SCREEN_WIDTH * 0.65;
+const ADD_BUTTON_WIDTH = 100;
 const CANVAS_GAP = 14;
 
 // props
@@ -234,8 +234,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     canvasPreview: {
       color: theme.colors.muted,
-      fontSize: 18,
-      lineHeight: 20,
+      fontSize: 20,
+      lineHeight: 24,
       opacity: 0.9,
     },
     canvasDate: {
