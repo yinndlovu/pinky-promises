@@ -40,6 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (response.status === 200) {
         setUser(response.data.user);
+        await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
         return true;
       }
 
@@ -50,10 +51,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         (error.response.status === 401 || error.response.status === 403)
       ) {
         await AsyncStorage.removeItem("token");
+        await AsyncStorage.removeItem("user");
         return false;
       }
 
-      return true;
+      try {
+        const cachedUser = await AsyncStorage.getItem("user");
+        if (cachedUser) {
+          setUser(JSON.parse(cachedUser));
+          return true;
+        }
+      } catch {}
+      return false;
     }
   };
 
@@ -81,6 +90,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     await AsyncStorage.removeItem("token");
+    await AsyncStorage.removeItem("user");
 
     setUser(null);
     setToken(null);

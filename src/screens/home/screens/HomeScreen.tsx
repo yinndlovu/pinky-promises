@@ -845,7 +845,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         )}
         {upcomingDateLoading ? (
           <View style={styles.upcomingContainer}>
-            <Shimmer height={20} radius={14} style={{ width: "100%" }} />
+            <Shimmer height={50} radius={14} style={{ width: "100%" }} />
           </View>
         ) : upcomingDate ? (
           <View style={styles.upcomingContainer}>
@@ -894,15 +894,15 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
         {activitiesLoading ? (
           <View>
-            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <Shimmer radius={12} height={50} style={{ width: "100%" }} />
             <View style={{ height: 12 }} />
-            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <Shimmer radius={12} height={50} style={{ width: "100%" }} />
             <View style={{ height: 12 }} />
-            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <Shimmer radius={12} height={50} style={{ width: "100%" }} />
             <View style={{ height: 12 }} />
-            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <Shimmer radius={12} height={50} style={{ width: "100%" }} />
             <View style={{ height: 12 }} />
-            <Shimmer radius={12} height={16} style={{ width: "100%" }} />
+            <Shimmer radius={12} height={50} style={{ width: "100%" }} />
           </View>
         ) : (
           <RecentActivity activities={activities} />
