@@ -145,7 +145,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
     setLoading(true);
     try {
       await endPeriod(token, status.cycle.id);
-      queryClient.invalidateQueries({ queryKey: ["period", user?.id] });
+      queryClient.refetchQueries({ queryKey: ["period", user?.id] });
       setAlertConfig({
         type: "success",
         title: "Period Ended",

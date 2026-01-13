@@ -52,6 +52,30 @@ const PeriodStatusCard: React.FC<Props> = ({
           actionText: "End Period",
         };
       case "waiting":
+        // If ovulation hasn't happened yet, show ovulation info
+        if (status.daysUntilOvulation !== undefined && status.daysUntilOvulation > 0) {
+          return {
+            emoji: "🥚",
+            label: isPartnerView ? "PARTNER'S OVULATION" : "DAYS UNTIL OVULATION",
+            days: status.daysUntilOvulation,
+            subtext: status.ovulationDate
+              ? `Ovulation: ${new Date(status.ovulationDate).toLocaleDateString(
+                  "en-US",
+                  {
+                    month: "short",
+                    day: "numeric",
+                  }
+                )}`
+              : "Ovulation approaching",
+            gradientColors: ["#feca57", "#ff9ff3"] as [string, string],
+            chipText: "Ovulation Window",
+            chipBg: "#feca5720",
+            chipColor: "#feca57",
+            action: null,
+            actionText: "",
+          };
+        }
+        // After ovulation, show next period info
         return {
           emoji: "🌷",
           label: isPartnerView ? "PARTNER'S NEXT PERIOD" : "DAYS UNTIL PERIOD",

@@ -167,9 +167,11 @@ export interface PeriodStatus {
   status: PeriodStatusType;
   daysSinceStart?: number;
   daysUntilNext?: number;
+  daysUntilOvulation?: number;
   daysLate?: number;
   expectedEndDay?: number;
   expectedDate?: string;
+  ovulationDate?: string;
   cycle?: PeriodCycle;
   lastCycle?: PeriodCycle;
   message?: string;
