@@ -1,7 +1,6 @@
 // external
 import { useState, useEffect } from "react";
-import { View, StyleSheet } from "react-native";
-import LottieView from "lottie-react-native";
+import * as SplashScreen from "expo-splash-screen";
 
 // internal
 import {
@@ -12,8 +11,7 @@ import {
 import { APP_VERSION } from "../configuration/config";
 import MandatoryUpdateModal from "../components/modals/output/MandatoryUpdateModal";
 
-// animation
-import catFootprints from "../assets/animations/cat-footprints.json";
+SplashScreen.preventAutoHideAsync();
 
 interface MandatoryUpdateCheckerProps {
   children: React.ReactNode;
@@ -43,20 +41,12 @@ export default function MandatoryUpdateChecker({
       console.log("Failed to check for mandatory update:", error);
     } finally {
       setIsChecking(false);
+      await SplashScreen.hideAsync();
     }
   };
 
   if (isChecking) {
-    return (
-      <View style={styles.loadingContainer}>
-        <LottieView
-          source={catFootprints}
-          autoPlay
-          loop
-          style={styles.animation}
-        />
-      </View>
-    );
+    return null;
   }
 
   if (mandatoryUpdate) {
@@ -69,16 +59,3 @@ export default function MandatoryUpdateChecker({
 
   return <>{children}</>;
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1a1a2e",
-  },
-  animation: {
-    width: 200,
-    height: 200,
-  },
-});
