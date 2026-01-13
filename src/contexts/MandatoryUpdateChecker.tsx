@@ -1,6 +1,5 @@
 // external
 import { useState, useEffect } from "react";
-import * as SplashScreen from "expo-splash-screen";
 
 // internal
 import {
@@ -10,17 +9,16 @@ import {
 } from "../services/api/app-version/appVersionService";
 import { APP_VERSION } from "../configuration/config";
 import MandatoryUpdateModal from "../components/modals/output/MandatoryUpdateModal";
-
-SplashScreen.preventAutoHideAsync();
+import { UpdateCheckProvider, useUpdateCheck } from "./UpdateCheckContext";
 
 interface MandatoryUpdateCheckerProps {
   children: React.ReactNode;
 }
 
-export default function MandatoryUpdateChecker({
+function MandatoryUpdateCheckerContent({
   children,
 }: MandatoryUpdateCheckerProps) {
-  const [isChecking, setIsChecking] = useState(true);
+  const { isChecking, setIsChecking } = useUpdateCheck();
   const [mandatoryUpdate, setMandatoryUpdate] = useState<AppVersionInfo | null>(
     null
   );
@@ -41,7 +39,6 @@ export default function MandatoryUpdateChecker({
       console.log("Failed to check for mandatory update:", error);
     } finally {
       setIsChecking(false);
-      await SplashScreen.hideAsync();
     }
   };
 
@@ -58,4 +55,14 @@ export default function MandatoryUpdateChecker({
   }
 
   return <>{children}</>;
+}
+
+export default function MandatoryUpdateChecker({
+  children,
+}: MandatoryUpdateCheckerProps) {
+  return (
+    <UpdateCheckProvider>
+      <MandatoryUpdateCheckerContent>{children}</MandatoryUpdateCheckerContent>
+    </UpdateCheckProvider>
+  );
 }

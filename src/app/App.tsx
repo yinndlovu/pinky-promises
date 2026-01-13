@@ -9,6 +9,7 @@ import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client
 import "react-native-get-random-values";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as NavigationBar from "expo-navigation-bar";
+import * as SplashScreen from "expo-splash-screen";
 
 // internal
 import { registerForPushNotificationsAsync } from "../utils/notifications/notifications";
@@ -21,6 +22,7 @@ import { checkBatteryStatus } from "../helpers/checkBatteryStatus";
 import { useVersionCheck } from "../hooks/useVersionCheck";
 import { ThemeProvider, useTheme } from "../theme/ThemeContext";
 import useToken from "../hooks/useToken";
+import { useUpdateCheck } from "../contexts/UpdateCheckContext";
 
 // content
 import LoadingAnimation from "../components/loading/LoadingAnimation";
@@ -28,12 +30,16 @@ import VersionUpdateBanner from "../components/banners/VersionUpdateBanner";
 import RootNavigator from "../navigation/RootNavigator";
 import MandatoryUpdateChecker from "../contexts/MandatoryUpdateChecker";
 
+// keep splash screen visible while app is starting
+SplashScreen.preventAutoHideAsync();
+
 // variables
 const queryClient = new QueryClient();
 
 // screens
 function AppContent() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isChecking: updateChecking } = useUpdateCheck();
   const token = useToken();
   const { versionInfo, showBanner, dismissBanner } = useVersionCheck();
   const { theme } = useTheme();
@@ -46,10 +52,20 @@ function AppContent() {
     }
   }, [isAuthenticated, token]);
 
-  if (isLoading) {
+  useEffect(() => {
+    if (!updateChecking && !authLoading) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [updateChecking, authLoading]);
+
+  if (authLoading) {
     return (
       <View style={styles.centered}>
-        <LoadingAnimation visible={isLoading} onClose={() => {}} size="large" />
+        <LoadingAnimation
+          visible={authLoading}
+          onClose={() => {}}
+          size="large"
+        />
       </View>
     );
   }
