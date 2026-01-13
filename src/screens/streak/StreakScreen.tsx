@@ -1,5 +1,5 @@
 // external
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   View,
   Text,
@@ -34,6 +34,7 @@ import { useProfilePicture } from "../../hooks/useProfilePicture";
 import PlatformIcon from "../../components/common/PlatformIcon";
 import Shimmer from "../../components/skeletons/Shimmer";
 import AlertModal from "../../components/modals/output/AlertModal";
+import ProfileImage from "../../components/common/ProfileImage";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -63,6 +64,8 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const [alertTitle, setAlertTitle] = useState("");
   const [showErrorAlert, setShowErrorAlert] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [userAvatarFetched, setUserAvatarFetched] = useState(false);
+  const [partnerAvatarFetched, setPartnerAvatarFetched] = useState(false);
 
   // hooks
   const {
@@ -84,11 +87,33 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const stopTrackingMutation = useStopTracking(token);
 
   // partner profile picture
-  const { avatarUri: partnerAvatar } = useProfilePicture(
-    streakData?.partner?.id?.toString() || "",
-    token
-  );
-  const { avatarUri: userAvatar } = useProfilePicture(user?.id, token);
+  const {
+    avatarUri: partnerAvatar,
+    profilePicUpdatedAt: partnerProfilePicUpdatedAt,
+    fetchPicture: fetchPartnerPicture,
+  } = useProfilePicture(streakData?.partner?.id?.toString() || "", token);
+  const {
+    avatarUri: userAvatar,
+    fetchPicture: fetchUserPicture,
+    profilePicUpdatedAt: userProfilePicUpdatedAt,
+  } = useProfilePicture(user?.id, token);
+
+  // use effects
+  useEffect(() => {
+    if (user?.id && token) {
+      Promise.resolve(fetchUserPicture()).finally(() =>
+        setUserAvatarFetched(true)
+      );
+    }
+  }, [user?.id, token, fetchUserPicture]);
+
+  useEffect(() => {
+    if (streakData?.partner?.id && token) {
+      Promise.resolve(fetchPartnerPicture()).finally(() =>
+        setPartnerAvatarFetched(true)
+      );
+    }
+  }, [streakData?.partner?.id, token, fetchPartnerPicture]);
 
   // handlers
   const toggleExpand = (platform: SocialMediaPlatform) => {
@@ -244,10 +269,12 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
                     <View style={styles.userCompareCard}>
                       <View style={styles.userAvatarContainer}>
                         {userAvatar ? (
-                          <Image
-                            source={{ uri: userAvatar }}
+                          <ProfileImage
+                            avatarUri={userAvatar}
+                            avatarFetched={userAvatarFetched}
+                            updatedAt={userProfilePicUpdatedAt}
                             style={styles.userAvatar}
-                            contentFit="cover"
+                            userId={user?.id}
                           />
                         ) : (
                           <View style={styles.avatarPlaceholder}>
@@ -282,10 +309,12 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
                     <View style={styles.userCompareCard}>
                       <View style={styles.userAvatarContainer}>
                         {partnerAvatar ? (
-                          <Image
-                            source={{ uri: partnerAvatar }}
+                          <ProfileImage
+                            avatarUri={partnerAvatar}
+                            avatarFetched={partnerAvatarFetched}
+                            updatedAt={partnerProfilePicUpdatedAt}
                             style={styles.userAvatar}
-                            contentFit="cover"
+                            userId={streakData?.partner?.id}
                           />
                         ) : (
                           <View style={styles.avatarPlaceholder}>
