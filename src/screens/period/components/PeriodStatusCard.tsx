@@ -1,5 +1,11 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../../../theme/ThemeContext";
@@ -10,6 +16,7 @@ interface Props {
   onStartPeriod?: () => void;
   onEndPeriod?: () => void;
   isPartnerView?: boolean;
+  loading?: boolean;
 }
 
 const PeriodStatusCard: React.FC<Props> = ({
@@ -17,6 +24,7 @@ const PeriodStatusCard: React.FC<Props> = ({
   onStartPeriod,
   onEndPeriod,
   isPartnerView = false,
+  loading = false,
 }) => {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -33,7 +41,9 @@ const PeriodStatusCard: React.FC<Props> = ({
           emoji: "🌸",
           label: isPartnerView ? "PARTNER'S PERIOD" : "CURRENTLY ON PERIOD",
           days: (status.daysSinceStart || 0) + 1,
-          subtext: `Day ${(status.daysSinceStart || 0) + 1} of ~${expectedPeriodLength}`,
+          subtext: `Day ${
+            (status.daysSinceStart || 0) + 1
+          } of ~${expectedPeriodLength}`,
           gradientColors: ["#ff6b9d", "#c44569"] as [string, string],
           chipText: "On Period",
           chipBg: "#ff6b9d20",
@@ -47,10 +57,13 @@ const PeriodStatusCard: React.FC<Props> = ({
           label: isPartnerView ? "PARTNER'S NEXT PERIOD" : "DAYS UNTIL PERIOD",
           days: status.daysUntilNext || 0,
           subtext: status.expectedDate
-            ? `Expected: ${new Date(status.expectedDate).toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-              })}`
+            ? `Expected: ${new Date(status.expectedDate).toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                }
+              )}`
             : "Waiting",
           gradientColors: ["#a29bfe", "#6c5ce7"] as [string, string],
           chipText: "Not on Period",
@@ -64,7 +77,9 @@ const PeriodStatusCard: React.FC<Props> = ({
           emoji: "⏰",
           label: isPartnerView ? "PARTNER'S PERIOD LATE" : "PERIOD IS LATE",
           days: status.daysLate || 0,
-          subtext: `Was expected ${status.daysLate} day${(status.daysLate || 0) > 1 ? "s" : ""} ago`,
+          subtext: `Was expected ${status.daysLate} day${
+            (status.daysLate || 0) > 1 ? "s" : ""
+          } ago`,
           gradientColors: ["#fd79a8", "#e84393"] as [string, string],
           chipText: `${status.daysLate} Days Late`,
           chipBg: "#fd79a820",
@@ -114,11 +129,27 @@ const PeriodStatusCard: React.FC<Props> = ({
       </View>
       {content.action && (
         <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: content.gradientColors[0] }]}
+          style={[
+            styles.actionButton,
+            { backgroundColor: content.gradientColors[0] },
+            loading && styles.actionButtonDisabled,
+          ]}
           onPress={content.action}
+          disabled={loading}
         >
-          <Feather name="plus" size={16} color="#fff" style={{ marginRight: 6 }} />
-          <Text style={styles.actionButtonText}>{content.actionText}</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <>
+              <Feather
+                name="plus"
+                size={16}
+                color="#fff"
+                style={{ marginRight: 6 }}
+              />
+              <Text style={styles.actionButtonText}>{content.actionText}</Text>
+            </>
+          )}
         </TouchableOpacity>
       )}
     </View>
@@ -193,6 +224,9 @@ const createStyles = (theme: any) =>
       color: "#fff",
       fontSize: 15,
       fontWeight: "600",
+    },
+    actionButtonDisabled: {
+      opacity: 0.7,
     },
   });
 

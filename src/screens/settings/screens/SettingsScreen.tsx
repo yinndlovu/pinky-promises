@@ -79,10 +79,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
   const handleStreakPress = () => {
     if (trackingStatus?.isTracking) {
-      // Navigate to streak screen if already tracking
-      navigation.navigate("StreakScreen");
+      // show modal to add more platforms or view current tracking
+      setShowStreakModal(true);
     } else {
-      // Show modal to start tracking
+      // show modal to start tracking
       setShowStreakModal(true);
     }
   };
@@ -162,7 +162,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </Pressable>
           ))}
 
-          {/* Streak Tracking Option */}
           <Pressable
             style={styles.actionRow}
             onPress={handleStreakPress}
@@ -342,7 +341,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     toast: {
       position: "absolute",
-      top: StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 50,
+      bottom: 10,
       left: 20,
       right: 20,
       backgroundColor: theme.colors.primary,

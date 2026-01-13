@@ -35,6 +35,7 @@ import PlatformIcon from "../../components/common/PlatformIcon";
 import Shimmer from "../../components/skeletons/Shimmer";
 import AlertModal from "../../components/modals/output/AlertModal";
 import ProfileImage from "../../components/common/ProfileImage";
+import ConfirmationModal from "../../components/modals/selection/ConfirmationModal";
 
 // types
 type Props = NativeStackScreenProps<any>;
@@ -66,6 +67,11 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [userAvatarFetched, setUserAvatarFetched] = useState(false);
   const [partnerAvatarFetched, setPartnerAvatarFetched] = useState(false);
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [confirmationAction, setConfirmationAction] = useState<
+    (() => void) | null
+  >(null);
 
   // hooks
   const {
@@ -162,6 +168,17 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
       onLog: handleLogStreak,
       loading: logStreakMutation.isPending,
     });
+  };
+
+  const handleStopTrackingClick = (platform: SocialMediaPlatform) => {
+    setConfirmationMessage(
+      `Are you sure you want to stop tracking ${PLATFORM_NAMES[platform]} streaks?`
+    );
+    setConfirmationAction(() => () => {
+      handleStopTracking(platform);
+      setConfirmationVisible(false);
+    });
+    setConfirmationVisible(true);
   };
 
   const handleStopTracking = async (platform: SocialMediaPlatform) => {
@@ -261,7 +278,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
                     </Text>
                     <TouchableOpacity
                       style={styles.stopTrackingButton}
-                      onPress={() => handleStopTracking(platform)}
+                      onPress={() => handleStopTrackingClick(platform)}
                     >
                       <Feather name="x" size={16} color={theme.colors.muted} />
                     </TouchableOpacity>
@@ -477,6 +494,17 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
         buttonText="Close"
         onClose={() => setShowErrorAlert(false)}
       />
+
+      <ConfirmationModal
+        visible={confirmationVisible}
+        message={confirmationMessage}
+        onConfirm={() => confirmationAction?.()}
+        onCancel={() => setConfirmationVisible(false)}
+        onClose={() => setConfirmationVisible(false)}
+        confirmText="Stop Tracking"
+        cancelText="Cancel"
+        loading={stopTrackingMutation.isPending}
+      />
     </View>
   );
 };
@@ -498,7 +526,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: theme.colors.surfaceAlt,
       justifyContent: "center",
       alignItems: "center",
     },

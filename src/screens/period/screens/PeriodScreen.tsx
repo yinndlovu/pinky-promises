@@ -307,6 +307,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
             onStartPeriod={handleStartPeriod}
             onEndPeriod={handleEndPeriod}
             isPartnerView={isPartnerView}
+            loading={loading}
           />
         ) : role !== "none" ? (
           <View style={styles.emptyState}>

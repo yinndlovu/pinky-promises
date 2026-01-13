@@ -37,7 +37,7 @@ import { updateProfilePicture } from "../../../../services/api/profiles/profileS
 import { updateProfileField } from "../../../../services/api/profiles/profileService";
 import { useTheme } from "../../../../theme/ThemeContext";
 import { createModalStyles } from "../styles/ModalStyles.styles";
-import { createProfileStyles } from "../styles/ProfileScrees.styles";
+import { createProfileStyles } from "../styles/ProfileScreen.styles";
 
 // screen content
 import UpdateAboutModal from "../../../../components/modals/input/UpdateAboutModal";
