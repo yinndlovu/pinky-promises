@@ -173,7 +173,7 @@ export function useMessaging() {
         clearTimeout(typingTimeout.current);
       }
     };
-  }, [socket]);
+  }, [socket, user?.id]);
 
   // send message
   const sendMessage = useCallback(
