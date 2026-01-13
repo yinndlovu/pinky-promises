@@ -254,7 +254,7 @@ const PeriodScreen: React.FC<Props> = ({ navigation }) => {
           style={{
             fontSize: 20,
             color: theme.colors.text,
-            fontWeight: "600",
+            letterSpacing: 0,
           }}
         >
           Period Tracker
