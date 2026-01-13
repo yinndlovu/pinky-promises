@@ -344,7 +344,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       letterSpacing: 0.2,
     },
     cardPreview: {
-      fontSize: 13,
+      fontSize: 14,
       color: theme.colors.muted,
       lineHeight: 18,
     },

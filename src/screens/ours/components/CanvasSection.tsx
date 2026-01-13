@@ -234,8 +234,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     canvasPreview: {
       color: theme.colors.muted,
-      fontSize: 20,
-      lineHeight: 24,
+      fontSize: 16,
+      lineHeight: 20,
       opacity: 0.9,
     },
     canvasDate: {
