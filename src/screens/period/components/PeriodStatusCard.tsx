@@ -17,6 +17,10 @@ interface Props {
   onEndPeriod?: () => void;
   isPartnerView?: boolean;
   loading?: boolean;
+  averages?: {
+    cycleLength: number;
+    periodLength: number;
+  };
 }
 
 const PeriodStatusCard: React.FC<Props> = ({
@@ -25,6 +29,7 @@ const PeriodStatusCard: React.FC<Props> = ({
   onEndPeriod,
   isPartnerView = false,
   loading = false,
+  averages,
 }) => {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -32,6 +37,7 @@ const PeriodStatusCard: React.FC<Props> = ({
     status.expectedEndDay ??
     status.cycle?.periodLength ??
     status.lastCycle?.periodLength ??
+    averages?.periodLength ??
     5;
 
   const getStatusContent = () => {

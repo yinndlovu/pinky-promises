@@ -1,5 +1,5 @@
 // external
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,6 +15,10 @@ import { formatTimeLeft } from "../../../utils/formatters/formatDate";
 import { useMarkResolutionComplete } from "../../../hooks/useResolutions";
 import type { Resolution } from "../../../services/api/resolutions/resolutionService";
 import useToken from "../../../hooks/useToken";
+
+// content
+import Shimmer from "../../../components/skeletons/Shimmer";
+import ConfirmationModal from "../../../components/modals/selection/ConfirmationModal";
 
 interface ResolutionsProps {
   resolutions: Resolution[];
@@ -33,6 +37,27 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   const token = useToken();
 
   const markCompleteMutation = useMarkResolutionComplete(token);
+
+  // use states
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
+  const [confirmationAction, setConfirmationAction] = useState<
+    (() => void) | null
+  >(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
+
+  // auto-hide toast
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   // helpers
   const calculateTimeLeft = (dueDate: string) => {
@@ -62,12 +87,22 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   };
 
   // handlers
-  const handleMarkComplete = async (resolutionId: number) => {
-    try {
-      await markCompleteMutation.mutateAsync(resolutionId);
-    } catch (error) {
-      console.error("Failed to mark resolution complete:", error);
-    }
+  const handleMarkComplete = (resolution: Resolution) => {
+    setConfirmationMessage(
+      `Are you sure you want to mark "${resolution.title}" as complete?`
+    );
+    setConfirmationAction(() => async () => {
+      try {
+        await markCompleteMutation.mutateAsync(resolution.id);
+        setConfirmationVisible(false);
+        setToastMessage("Resolution completed! 🎉");
+      } catch (error) {
+        console.error("Failed to mark resolution complete:", error);
+        setConfirmationVisible(false);
+        setToastMessage("Failed to complete resolution. Please try again.");
+      }
+    });
+    setConfirmationVisible(true);
   };
 
   const sortedResolutions = useMemo(() => {
@@ -97,9 +132,16 @@ const Resolutions: React.FC<ResolutionsProps> = ({
     return (
       <View style={styles.container}>
         <Text style={styles.sectionTitle}>RESOLUTIONS</Text>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading resolutions...</Text>
-        </View>
+        <Shimmer
+          radius={16}
+          height={80}
+          style={{ width: "100%", marginBottom: 8 }}
+        />
+        <Shimmer
+          radius={16}
+          height={80}
+          style={{ width: "100%", marginBottom: 32 }}
+        />
       </View>
     );
   }
@@ -108,10 +150,7 @@ const Resolutions: React.FC<ResolutionsProps> = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.sectionTitle}>RESOLUTIONS</Text>
-        <TouchableOpacity
-          onPress={onAddResolution}
-          style={styles.addButton}
-        >
+        <TouchableOpacity onPress={onAddResolution} style={styles.addButton}>
           <Feather name="plus" size={20} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
@@ -137,7 +176,7 @@ const Resolutions: React.FC<ResolutionsProps> = ({
                     !item.completed &&
                     styles.resolutionItemOverdue,
                 ]}
-                onPress={() => !item.completed && handleMarkComplete(item.id)}
+                onPress={() => !item.completed && handleMarkComplete(item)}
                 disabled={item.completed || markCompleteMutation.isPending}
               >
                 <View style={styles.resolutionContent}>
@@ -182,7 +221,7 @@ const Resolutions: React.FC<ResolutionsProps> = ({
                     {!item.completed && (
                       <TouchableOpacity
                         style={styles.checkButton}
-                        onPress={() => handleMarkComplete(item.id)}
+                        onPress={() => handleMarkComplete(item)}
                         disabled={markCompleteMutation.isPending}
                       >
                         <Feather
@@ -211,6 +250,21 @@ const Resolutions: React.FC<ResolutionsProps> = ({
           windowSize={5}
           initialNumToRender={10}
         />
+      )}
+
+      <ConfirmationModal
+        visible={confirmationVisible}
+        message={confirmationMessage}
+        onConfirm={() => confirmationAction?.()}
+        onCancel={() => setConfirmationVisible(false)}
+        onClose={() => setConfirmationVisible(false)}
+        loading={markCompleteMutation.isPending}
+      />
+
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
       )}
     </View>
   );
@@ -325,6 +379,27 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
     },
     separator: {
       height: 0,
+    },
+    // Toast
+    toast: {
+      position: "absolute",
+      bottom: 10,
+      left: 20,
+      right: 20,
+      backgroundColor: theme.colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      zIndex: 100,
+      shadowColor: theme.colors.shadow,
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    toastText: {
+      color: "#fff",
+      fontWeight: "bold",
+      fontSize: 14,
     },
   });
 

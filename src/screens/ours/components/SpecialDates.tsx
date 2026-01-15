@@ -11,7 +11,7 @@ import {
 // internal
 import { SpecialDateProps } from "../../../types/SpecialDate";
 import { STANDARD_FIELDS } from "../../../constants/specialDate";
-import { formatDateDMY } from "../../../utils/formatters/formatDate";
+import { formatDateDMonY } from "../../../utils/formatters/formatDate";
 import { useTheme } from "../../../theme/ThemeContext";
 
 // helpers
@@ -50,7 +50,7 @@ const SpecialDates: React.FC<SpecialDateProps> = ({
                   <View style={{ flex: 1 }}>
                     <Text style={styles.dateLabel}>{item.title}</Text>
                     <Text style={styles.dateValue}>
-                      {formatDateDMY(item.date)}
+                      {formatDateDMonY(item.date)}
                     </Text>
                     {item.description ? (
                       <Text style={styles.dateDescription}>

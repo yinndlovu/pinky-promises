@@ -62,6 +62,20 @@ export const formatDateDMY = (dateStr: string) => {
   });
 };
 
+// format the date to DD Month YYYY
+export const formatDateDMonY = (dateStr: string) => {
+  if (!dateStr) {
+    return "Unknown date";
+  }
+
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
+
 // format the date displayed on profile screen
 export const formatProfileDisplayDate = (
   dateString: string,
@@ -76,7 +90,7 @@ export const formatProfileDisplayDate = (
   try {
     const date = new Date(dateString);
     const day = date.getDate();
-    const month = date.toLocaleDateString("en-US", { month: "short" });
+    const month = date.toLocaleDateString("en-US", { month: "long" });
     const year = date.getFullYear();
     const formattedDate = `${day} ${month} ${year}`;
 

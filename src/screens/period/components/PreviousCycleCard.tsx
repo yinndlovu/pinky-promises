@@ -42,7 +42,9 @@ const PreviousCycleCard: React.FC<Props> = ({
     }
     const start = new Date(cycle.startDate);
     const end = new Date(cycle.endDate);
-    return Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    return (
+      Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1
+    );
   };
 
   return (
@@ -85,12 +87,13 @@ const PreviousCycleCard: React.FC<Props> = ({
 
         {lastCycle && (
           <View style={styles.lastCycleSection}>
-            <Text style={styles.lastCycleTitle}>Previous Period</Text>
+            <Text style={styles.lastCycleTitle}>Previous Cycle</Text>
             <View style={styles.lastCycleRow}>
               <View style={styles.lastCycleInfo}>
                 <Feather name="calendar" size={14} color={theme.colors.muted} />
                 <Text style={styles.lastCycleText}>
-                  {formatDate(lastCycle.startDate)} - {formatDate(lastCycle.endDate!)}
+                  {formatDate(lastCycle.startDate)} -{" "}
+                  {formatDate(lastCycle.endDate!)}
                 </Text>
               </View>
               <View style={styles.lastCycleBadge}>
@@ -110,6 +113,7 @@ const createStyles = (theme: any) =>
   StyleSheet.create({
     container: {
       marginBottom: 16,
+      marginTop: 16,
     },
     header: {
       flexDirection: "row",
@@ -209,4 +213,3 @@ const createStyles = (theme: any) =>
   });
 
 export default PreviousCycleCard;
-

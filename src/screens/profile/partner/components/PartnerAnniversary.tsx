@@ -113,7 +113,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
     try {
       const date = new Date(dateString);
       const day = date.getDate();
-      const month = date.toLocaleDateString("en-US", { month: "short" });
+      const month = date.toLocaleDateString("en-US", { month: "long" });
       const year = date.getFullYear();
       const formattedDate = `${day} ${month} ${year}`;
 

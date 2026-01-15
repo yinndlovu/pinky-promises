@@ -139,16 +139,16 @@ const OursScreen = ({ navigation }: Props) => {
       setAddModalVisible(false);
       setSelectedDate(null);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["ours", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.partnerId],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["home", user?.id],
       });
     } catch (err: any) {
@@ -207,16 +207,16 @@ const OursScreen = ({ navigation }: Props) => {
       setSelectedDate(null);
       setShowSuccess(true);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["ours", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.partnerId],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["home", user?.id],
       });
     } catch (err: any) {
@@ -253,16 +253,16 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertTitle("Special Date Deleted");
       setShowSuccess(true);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["ours", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["profile", user?.partnerId],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["home", user?.id],
       });
     } catch (err: any) {
@@ -299,10 +299,10 @@ const OursScreen = ({ navigation }: Props) => {
       setAlertTitle("Memory Deleted");
       setShowSuccess(true);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["ours", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["allFavoriteMemories", user?.id],
       });
     } catch (err: any) {
@@ -334,10 +334,10 @@ const OursScreen = ({ navigation }: Props) => {
       setMemoryModalVisible(false);
       setShowSuccess(true);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["ours", user?.id],
       });
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: ["allFavoriteMemories", user?.id],
       });
     } catch (err: any) {
@@ -382,7 +382,7 @@ const OursScreen = ({ navigation }: Props) => {
         socket.emit("canvas:created", { canvas: newCanvas });
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["ours", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["ours", user?.id] });
       setCreateCanvasModalVisible(false);
 
       navigation.navigate("CanvasEditorScreen", { canvasId: newCanvas.id });
