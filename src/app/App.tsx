@@ -47,7 +47,7 @@ function AppContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      registerForPushNotificationsAsync(token);
+      // registerForPushNotificationsAsync(token);
       checkBatteryStatus(token);
     }
   }, [isAuthenticated, token]);
@@ -88,16 +88,13 @@ function AppNavigation() {
   const { theme } = useTheme();
 
   useEffect(() => {
-    NavigationBar.setButtonStyleAsync(theme.dark ? "light" : "dark");
+    NavigationBar.setStyle(theme.dark ? "light" : "dark");
   }, [theme]);
 
   return (
     <NavigationContainer ref={navigationRef} theme={useTheme().theme}>
       <AppContent />
-      <StatusBar
-        style={useTheme().theme.dark ? "light" : "dark"}
-        backgroundColor={theme.colors.background}
-      />
+      <StatusBar style={useTheme().theme.dark ? "light" : "dark"} />
     </NavigationContainer>
   );
 }
