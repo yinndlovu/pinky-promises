@@ -1,5 +1,11 @@
 import React, { useMemo } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../../../theme/ThemeContext";
 import {
@@ -43,7 +49,10 @@ const categoryIcons: Record<PeriodAidCategory, string> = {
   general_tip: "info",
 };
 
-const PeriodAidsSection: React.FC<Props> = ({ aidsForToday, onViewAllAids }) => {
+const PeriodAidsSection: React.FC<Props> = ({
+  aidsForToday,
+  onViewAllAids,
+}) => {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -92,7 +101,12 @@ const PeriodAidsSection: React.FC<Props> = ({ aidsForToday, onViewAllAids }) => 
                   style={[styles.aidCard, { borderLeftColor: color }]}
                 >
                   <View style={styles.aidHeader}>
-                    <View style={[styles.aidIcon, { backgroundColor: color + "20" }]}>
+                    <View
+                      style={[
+                        styles.aidIcon,
+                        { backgroundColor: color + "20" },
+                      ]}
+                    >
                       <Feather name={icon as any} size={16} color={color} />
                     </View>
                     {isPeriodAid && (
@@ -222,4 +236,3 @@ const createStyles = (theme: any) =>
   });
 
 export default PeriodAidsSection;
-

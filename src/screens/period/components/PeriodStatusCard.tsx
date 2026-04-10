@@ -59,10 +59,15 @@ const PeriodStatusCard: React.FC<Props> = ({
         };
       case "waiting":
         // If ovulation hasn't happened yet, show ovulation info
-        if (status.daysUntilOvulation !== undefined && status.daysUntilOvulation > 0) {
+        if (
+          status.daysUntilOvulation !== undefined &&
+          status.daysUntilOvulation > 0
+        ) {
           return {
             emoji: "🥚",
-            label: isPartnerView ? "PARTNER'S OVULATION" : "DAYS UNTIL OVULATION",
+            label: isPartnerView
+              ? "PARTNER'S OVULATION"
+              : "DAYS UNTIL OVULATION",
             days: status.daysUntilOvulation,
             subtext: status.ovulationDate
               ? `Ovulation: ${new Date(status.ovulationDate).toLocaleDateString(
@@ -70,7 +75,7 @@ const PeriodStatusCard: React.FC<Props> = ({
                   {
                     month: "short",
                     day: "numeric",
-                  }
+                  },
                 )}`
               : "Ovulation approaching",
             gradientColors: ["#feca57", "#ff9ff3"] as [string, string],
@@ -92,7 +97,7 @@ const PeriodStatusCard: React.FC<Props> = ({
                 {
                   month: "short",
                   day: "numeric",
-                }
+                },
               )}`
             : "Waiting",
           gradientColors: ["#a29bfe", "#6c5ce7"] as [string, string],

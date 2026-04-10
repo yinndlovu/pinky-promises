@@ -2,7 +2,11 @@ import React, { useMemo } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "../../../theme/ThemeContext";
-import { UserIssue, PeriodProblemLabels, PeriodProblemEmojis } from "../../../types/Period";
+import {
+  UserIssue,
+  PeriodProblemLabels,
+  PeriodProblemEmojis,
+} from "../../../types/Period";
 
 interface Props {
   issues: UserIssue[];
@@ -81,8 +85,8 @@ const TodaysIssuesCard: React.FC<Props> = ({
                             issue.severity <= 3
                               ? "#4caf50"
                               : issue.severity <= 6
-                              ? "#ff9800"
-                              : "#f44336",
+                                ? "#ff9800"
+                                : "#f44336",
                         },
                       ]}
                     />
@@ -227,4 +231,3 @@ const createStyles = (theme: any) =>
   });
 
 export default TodaysIssuesCard;
-

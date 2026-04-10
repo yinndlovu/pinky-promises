@@ -135,4 +135,3 @@ const createStyles = (theme: any) =>
   });
 
 export default QuickActionsRow;
-
