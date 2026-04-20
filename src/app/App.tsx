@@ -47,7 +47,7 @@ function AppContent() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // registerForPushNotificationsAsync(token);
+      registerForPushNotificationsAsync(token);
       checkBatteryStatus(token);
     }
   }, [isAuthenticated, token]);

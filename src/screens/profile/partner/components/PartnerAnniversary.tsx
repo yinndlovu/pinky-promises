@@ -58,7 +58,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
       withSpring(1, {
         damping: 12,
         stiffness: 150,
-      })
+      }),
     );
 
     // glow animations
@@ -72,7 +72,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
       withTiming(1, {
         duration: 2000,
         easing: Easing.inOut(Easing.sin),
-      })
+      }),
     );
   }, []);
 
@@ -102,7 +102,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
   // helpers
   const formatDisplayDate = (
     dateString: string,
-    timeInfo?: string
+    timeInfo?: string,
   ): { date: string; timeInfo?: string } => {
     if (!dateString || dateString === "Not set") {
       return {
@@ -133,13 +133,13 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
     description?: string;
   } => {
     const anniversary = specialDates.find((date: SpecialDate) =>
-      date.title.toLowerCase().includes("anniversary")
+      date.title.toLowerCase().includes("anniversary"),
     );
 
     if (anniversary) {
       const formatted = formatDisplayDate(
         anniversary.date,
-        anniversary.togetherFor
+        anniversary.togetherFor,
       );
       return {
         date: formatted.date,
@@ -160,7 +160,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
     description?: string;
   } => {
     const dayMet = specialDates.find((date: SpecialDate) =>
-      date.title.toLowerCase().includes("met")
+      date.title.toLowerCase().includes("met"),
     );
 
     if (dayMet) {

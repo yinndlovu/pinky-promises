@@ -5,10 +5,7 @@ import { Feather } from "@expo/vector-icons";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withSpring,
-  withDelay,
   withTiming,
-  interpolate,
   Easing,
   FadeIn,
 } from "react-native-reanimated";
@@ -38,7 +35,7 @@ const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
     opacity: cardFadeIn.value,
   }));
 
-  // Helper to get icon for favorite type
+  // helper to get icon for favorite type
   const getFavoriteIcon = (label: string): string => {
     const lowerLabel = label.toLowerCase();
     if (lowerLabel.includes("color")) return "image";
@@ -55,7 +52,7 @@ const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
     return "star";
   };
 
-  // Helper to get emoji for favorite type
+  // helper to get emoji for favorite type
   const getFavoriteEmoji = (label: string): string => {
     const lowerLabel = label.toLowerCase();
     if (lowerLabel.includes("color")) return "🎨";
@@ -139,7 +136,9 @@ const PartnerFavorites: React.FC<PartnerFavoritesProps> = ({ favorites }) => {
                           color={theme.colors.primary}
                         />
                       </View>
-                      <Text style={styles.emoji}>{getFavoriteEmoji(item.label)}</Text>
+                      <Text style={styles.emoji}>
+                        {getFavoriteEmoji(item.label)}
+                      </Text>
                     </View>
                     <View style={styles.cardContent}>
                       <Text style={styles.label} numberOfLines={1}>

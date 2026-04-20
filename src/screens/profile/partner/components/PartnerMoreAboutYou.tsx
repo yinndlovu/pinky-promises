@@ -43,7 +43,7 @@ const PartnerMoreAboutYou: React.FC<PartnerAboutProps> = ({ about = "" }) => {
       withSpring(1, {
         damping: 10,
         stiffness: 200,
-      })
+      }),
     );
   }, []);
 

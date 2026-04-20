@@ -17,18 +17,17 @@ Notifications.setNotificationHandler({
 });
 
 export async function registerForPushNotificationsAsync(
-  authToken: string | null
+  authToken: string | null,
 ) {
   let token;
 
   if (Device.isDevice) {
     const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
+      (await Notifications.getPermissionsAsync()) as any;
 
     let finalStatus = existingStatus;
-
     if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
+      const { status } = (await Notifications.requestPermissionsAsync()) as any;
 
       finalStatus = status;
     }
@@ -69,11 +68,13 @@ export async function registerForPushNotificationsAsync(
 }
 
 export function setupNotificationListeners(
-  onNotificationResponse: (response: Notifications.NotificationResponse) => void
+  onNotificationResponse: (
+    response: Notifications.NotificationResponse,
+  ) => void,
 ) {
   const responseListener =
     Notifications.addNotificationResponseReceivedListener(
-      onNotificationResponse
+      onNotificationResponse,
     );
 
   return () => {

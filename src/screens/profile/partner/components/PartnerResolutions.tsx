@@ -6,8 +6,12 @@ import Animated, { FadeIn } from "react-native-reanimated";
 
 // internal
 import { useTheme } from "../../../../theme/ThemeContext";
-import { formatTimeLeft, formatDateDMY } from "../../../../utils/formatters/formatDate";
+import {
+  formatTimeLeft,
+  formatDateDMY,
+} from "../../../../utils/formatters/formatDate";
 import type { Resolution } from "../../../../services/api/resolutions/resolutionService";
+import { calculateTimeLeft } from "../../../../utils/common/calculateTimeLeft";
 
 interface PartnerResolutionsProps {
   resolutions: Resolution[];
@@ -20,22 +24,6 @@ const PartnerResolutions: React.FC<PartnerResolutionsProps> = ({
 }) => {
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-
-  const calculateTimeLeft = (dueDate: string) => {
-    const now = new Date();
-    const due = new Date(dueDate);
-    const diffMs = due.getTime() - now.getTime();
-
-    if (diffMs <= 0) {
-      return { days: 0, hours: 0, minutes: 0 };
-    }
-
-    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-
-    return { days, hours, minutes };
-  };
 
   const sortedResolutions = useMemo(() => {
     return [...resolutions].sort((a, b) => {
@@ -159,7 +147,7 @@ const PartnerResolutions: React.FC<PartnerResolutionsProps> = ({
                       {formatTimeLeft(
                         timeLeft.days,
                         timeLeft.hours,
-                        timeLeft.minutes
+                        timeLeft.minutes,
                       )}
                     </Text>
                   )}
@@ -325,4 +313,3 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
   });
 
 export default PartnerResolutions;
-

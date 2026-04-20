@@ -49,7 +49,7 @@ const PartnerLoveLanguage: React.FC<PartnerLoveLanguageProps> = ({
         easing: Easing.inOut(Easing.sin),
       }),
       -1,
-      true
+      true,
     );
 
     // Glow animation
@@ -59,7 +59,7 @@ const PartnerLoveLanguage: React.FC<PartnerLoveLanguageProps> = ({
         easing: Easing.inOut(Easing.sin),
       }),
       -1,
-      true
+      true,
     );
   }, []);
 
@@ -119,34 +119,34 @@ const PartnerLoveLanguage: React.FC<PartnerLoveLanguageProps> = ({
   return (
     <Animated.View entering={FadeIn.duration(400)} style={styles.card}>
       <Animated.View style={[cardAnimatedStyle, glowStyle]}>
-      <View style={styles.cardHeader}>
-        <View style={styles.cardHeaderLeft}>
-          <View style={styles.iconContainer}>
-            <Animated.View style={heartPulseStyle}>
-              <Feather name="heart" size={20} color="#ff6b9d" />
-            </Animated.View>
+        <View style={styles.cardHeader}>
+          <View style={styles.cardHeaderLeft}>
+            <View style={styles.iconContainer}>
+              <Animated.View style={heartPulseStyle}>
+                <Feather name="heart" size={20} color="#ff6b9d" />
+              </Animated.View>
+            </View>
+            <Text style={styles.cardTitle}>Love Language</Text>
           </View>
-          <Text style={styles.cardTitle}>Love Language</Text>
+          <Text style={styles.emoji}>{getLoveLanguageEmoji(loveLanguage)}</Text>
         </View>
-        <Text style={styles.emoji}>{getLoveLanguageEmoji(loveLanguage)}</Text>
-      </View>
 
-      <View style={styles.cardContent}>
-        <Text style={styles.loveLanguageText}>
-          {getLoveLanguageDescription(loveLanguage)}
-        </Text>
-        <View style={styles.descriptionContainer}>
-          <Feather
-            name="info"
-            size={14}
-            color={theme.colors.muted}
-            style={styles.infoIcon}
-          />
-          <Text style={styles.descriptionText}>
-            This is how your partner feels most loved
+        <View style={styles.cardContent}>
+          <Text style={styles.loveLanguageText}>
+            {getLoveLanguageDescription(loveLanguage)}
           </Text>
+          <View style={styles.descriptionContainer}>
+            <Feather
+              name="info"
+              size={14}
+              color={theme.colors.muted}
+              style={styles.infoIcon}
+            />
+            <Text style={styles.descriptionText}>
+              This is how your partner feels most loved
+            </Text>
+          </View>
         </View>
-      </View>
       </Animated.View>
     </Animated.View>
   );

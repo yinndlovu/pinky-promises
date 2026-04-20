@@ -3,8 +3,12 @@
 # dependencies
 node_modules/
 
+# remove in eas build
 src/configuration/config.ts
 src/configuration/aboutText.ts
+src/utils/weather/weatherIcons.ts
+google-services.json
+.easignore
 
 # Expo
 .expo/
@@ -39,9 +43,6 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-google-services.json
 /ios
 /android
-.easignore
 .vscode
-src/utils/weather/weatherIcons.ts
