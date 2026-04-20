@@ -11,7 +11,9 @@ export function useAttentivenessInsights(
   return useQuery({
     queryKey: ["attentiveness", "insights", userId],
     queryFn: async () => {
-      if (!token) throw new Error("No token");
+      if (!token) {
+        throw new Error("No token");
+      }
       return await getAttentivenessInsights(token);
     },
     enabled: !!token && !!userId,
