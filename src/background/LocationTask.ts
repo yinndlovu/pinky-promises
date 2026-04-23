@@ -37,7 +37,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
         location.coords.latitude,
         location.coords.longitude,
         home.latitude,
-        home.longitude
+        home.longitude,
       );
       const isAtHome = distance < 150;
 
@@ -45,7 +45,7 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
       await updateGeoInfo(
         token,
         location.coords.latitude,
-        location.coords.longitude
+        location.coords.longitude,
       );
     } catch (err) {}
   }
