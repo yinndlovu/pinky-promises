@@ -106,7 +106,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // attentiveness hooks
   const { data: attentivenessInsights } = useAttentivenessInsights(
     token,
-    user?.id
+    user?.id,
   );
   const markAttentivenessAsShownMutation = useMarkAttentivenessAsShown(token);
 
@@ -176,10 +176,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     useCallback(() => {
       if (partner?.id && token) {
         Promise.resolve(fetchPartnerPicture()).finally(() =>
-          setAvatarFetched(true)
+          setAvatarFetched(true),
         );
       }
-    }, [partner?.id, token])
+    }, [partner?.id, token]),
   );
 
   useFocusEffect(
@@ -196,7 +196,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       const interval = setInterval(run, 5 * 60 * 1000);
       return () => clearInterval(interval);
-    }, [token, user?.id])
+    }, [token, user?.id]),
   );
 
   useEffect(() => {
@@ -244,7 +244,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       const unseen = optimisticNotifications.filter((n) => !n.seen);
 
       setOptimisticNotifications((prev) =>
-        prev.map((n) => ({ ...n, seen: true }))
+        prev.map((n) => ({ ...n, seen: true })),
       );
 
       if (unseen.length > 0) {
@@ -290,7 +290,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       });
 
       setAnimationMessage(
-        getInteractionFeedback(action, partner?.name || "your partner")
+        getInteractionFeedback(action, partner?.name || "your partner"),
       );
       setAnimationModalVisible(true);
       setCurrentAction(action);
@@ -337,11 +337,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const renderPartnerImage = () => {
     if (avatarUri && profilePicUpdatedAt && partner) {
       const timestamp = Math.floor(
-        new Date(profilePicUpdatedAt).getTime() / 1000
+        new Date(profilePicUpdatedAt).getTime() / 1000,
       );
       const cachedImageUrl = buildCachedImageUrl(
         partner.id.toString(),
-        timestamp
+        timestamp,
       );
 
       return (
@@ -402,10 +402,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const status = partnerStatus?.unreachable
     ? "Unreachable"
     : partnerStatus?.isAtHome
-    ? "Home"
-    : partnerStatus?.isAtHome === false
-    ? "Away"
-    : "Unavailable";
+      ? "Home"
+      : partnerStatus?.isAtHome === false
+        ? "Away"
+        : "Unavailable";
 
   const isActive = status === "Home" || status === "Unavailable";
 
@@ -413,18 +413,23 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     status === "Home"
       ? "#4caf50"
       : status === "Away"
-      ? "#e03487"
-      : status === "Unreachable"
-      ? "#db8a47"
-      : theme.colors.muted;
+        ? "#e03487"
+        : status === "Unreachable"
+          ? "#db8a47"
+          : theme.colors.muted;
 
   const mood = partnerMood?.mood || null;
   const batteryLevel = partnerStatus?.batteryLevel ?? null;
   const distanceFromHome = partnerStatus?.distance ?? null;
 
   const lastSeen = partnerStatus?.updatedAt ?? null;
-  const userLocation = partnerStatus?.userSuburb ?? null;
-  const userTimezone = partnerStatus?.timezoneOffset ?? null;
+  const userLocation = partnerStatus?.userLocation ?? null;
+  const userSuburb = partnerStatus?.userSuburb ?? null;
+  const userTimezone = partnerStatus?.userTimezone ?? null;
+  const currentWeather = partnerStatus?.currentWeather ?? null;
+  const weatherType = partnerStatus?.weatherType ?? null;
+  const weatherDescription = partnerStatus?.weatherDescription ?? null;
+  const isDaytime = partnerStatus?.isDaytime ?? true;
 
   if (homeError) {
     return (
@@ -593,7 +598,12 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
             }
             renderPartnerImage={renderPartnerImage}
             userLocation={userLocation}
+            userSuburb={userSuburb}
             userTimezone={userTimezone}
+            currentWeather={currentWeather}
+            weatherType={weatherType}
+            weatherDescription={weatherDescription}
+            isDaytime={isDaytime}
           />
         )}
 
@@ -651,10 +661,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   streakPreview.type === "warning"
                     ? "#FF6B6B"
                     : streakPreview.type === "achievement"
-                    ? "#4CAF50"
-                    : streakPreview.type === "positive"
-                    ? "#FFD93D"
-                    : theme.colors.primary,
+                      ? "#4CAF50"
+                      : streakPreview.type === "positive"
+                        ? "#FFD93D"
+                        : theme.colors.primary,
                 justifyContent: "center",
                 alignItems: "center",
                 marginRight: 14,
@@ -665,10 +675,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   streakPreview.type === "warning"
                     ? "alert-triangle"
                     : streakPreview.type === "achievement"
-                    ? "award"
-                    : streakPreview.type === "scoreboard"
-                    ? "bar-chart-2"
-                    : "zap"
+                      ? "award"
+                      : streakPreview.type === "scoreboard"
+                        ? "bar-chart-2"
+                        : "zap"
                 }
                 size={22}
                 color="#fff"
@@ -744,8 +754,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
               {unclaimedGift
                 ? "You have a present waiting! 🎁"
                 : setMonthlyGift?.setMonthlyGift
-                ? `Favorite: ${setMonthlyGift.setMonthlyGift}`
-                : "View your presents"}
+                  ? `Favorite: ${setMonthlyGift.setMonthlyGift}`
+                  : "View your presents"}
             </Text>
             <Text
               style={{
@@ -864,14 +874,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                   {formatTimeLeft(
                     upcomingDate.timeLeft.days,
                     upcomingDate.timeLeft.hours,
-                    upcomingDate.timeLeft.minutes
+                    upcomingDate.timeLeft.minutes,
                   )}
                 </Text>
               </View>
               <Text style={styles.eventDescription}>
                 {upcomingDate.description ||
                   `${upcomingDate.title} on ${formatDateDMY(
-                    upcomingDate.nextOccurrence
+                    upcomingDate.nextOccurrence,
                   )}`}
               </Text>
             </View>

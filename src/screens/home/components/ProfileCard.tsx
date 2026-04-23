@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
+  Image,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -13,6 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatRelativeTime } from "../../../utils/formatters/formatRelativeTime";
 import { formatDistance } from "../../../utils/formatters/formatDistance";
 import { getBatteryIcon } from "../../../utils/icons/getBatteryIcon";
+import { getWeatherIcon } from "../../../utils/weather/getWeatherIcon";
 import { useClockTick } from "../../../hooks/clockTick";
 import { useTheme } from "../../../theme/ThemeContext";
 
@@ -30,7 +32,12 @@ type ProfileCardProps = {
   onPress: () => void;
   renderPartnerImage: () => React.ReactNode;
   userLocation?: string | null;
-  userTimezone?: number | null;
+  userSuburb?: string | null;
+  userTimezone?: string | null;
+  currentWeather?: number | null;
+  weatherType?: string | null;
+  weatherDescription?: string | null;
+  isDaytime?: boolean;
 };
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
@@ -45,7 +52,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onPress,
   renderPartnerImage,
   userLocation,
+  userSuburb,
   userTimezone,
+  currentWeather,
+  weatherType,
+  weatherDescription,
+  isDaytime = true,
 }) => {
   // animation variables
   const breatheAnim = useRef(new Animated.Value(1)).current;
@@ -63,35 +75,38 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   // variables
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const weatherIcon = getWeatherIcon(weatherType, isDaytime);
+  // "Suburb, City" — show suburb prefix only when available
+  const locationDisplay = userSuburb
+    ? `${userSuburb}, ${userLocation || "Unknown"}`
+    : userLocation || "Unknown";
 
   // hook
   useClockTick(30 * 1000);
 
   // use effects
   useEffect(() => {
-    if (userTimezone == null) {
+    if (!userTimezone) {
       setCurrentTime("Unknown");
       return;
     }
 
     const updateTime = () => {
-      const now = new Date();
-      const utcTimestamp = now.getTime() + now.getTimezoneOffset() * 60 * 1000;
-
-      const userLocalTime = new Date(utcTimestamp + userTimezone * 1000);
-
-      const formatted = userLocalTime.toLocaleTimeString("en-US", {
-        hour: "numeric",
-        minute: "numeric",
-        hour12: true,
-      });
-
-      setCurrentTime(formatted);
+      try {
+        const formatter = new Intl.DateTimeFormat("en-US", {
+          timeZone: userTimezone,
+          hour: "numeric",
+          minute: "numeric",
+          hour12: true,
+        });
+        setCurrentTime(formatter.format(new Date()));
+      } catch {
+        setCurrentTime("Unknown");
+      }
     };
 
     updateTime();
     const interval = setInterval(updateTime, 30 * 1000);
-
     return () => clearInterval(interval);
   }, [userTimezone]);
 
@@ -109,7 +124,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             duration: 3000,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       );
 
       // animations
@@ -125,7 +140,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             duration: 4000,
             useNativeDriver: false,
           }),
-        ])
+        ]),
       );
 
       const statusPulseAnimation = Animated.loop(
@@ -140,7 +155,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             duration: 2000,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       );
 
       const heartBeatAnimation = Animated.loop(
@@ -155,7 +170,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             duration: 1000,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       );
 
       const particle1Animation = Animated.loop(
@@ -170,7 +185,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             duration: 3000,
             useNativeDriver: false,
           }),
-        ])
+        ]),
       );
 
       const particle2Animation = Animated.loop(
@@ -185,7 +200,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             duration: 4000,
             useNativeDriver: false,
           }),
-        ])
+        ]),
       );
 
       const particle3Animation = Animated.loop(
@@ -200,7 +215,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             duration: 5000,
             useNativeDriver: false,
           }),
-        ])
+        ]),
       );
 
       breatheAnimation.start();
@@ -312,35 +327,74 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             </Text>
           </View>
 
-          <View style={{ flexDirection: "column", alignItems: "flex-start" }}>
+          <View style={{ flexDirection: "column", alignItems: "flex-end" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 4,
+              }}
+            >
+              <Image
+                source={weatherIcon}
+                style={{ width: 44, height: 44, marginRight: 8 }}
+              />
+              <Text
+                style={{
+                  fontSize: 20,
+                  color: theme.colors.text,
+                  fontWeight: "700",
+                }}
+              >
+                {currentWeather != null ? `${currentWeather}°C` : "—"}
+              </Text>
+            </View>
+
             <Text
               style={{
                 fontSize: 11,
                 color: theme.colors.mutedAlt,
                 fontWeight: "600",
                 letterSpacing: 1,
+                textAlign: "right",
               }}
             >
               CURRENTLY IN
             </Text>
+
             <Text
               style={{
-                fontSize: 26,
+                fontSize: 22,
                 color: theme.colors.text,
                 fontWeight: "800",
                 marginTop: 2,
+                textAlign: "right",
               }}
               numberOfLines={2}
               adjustsFontSizeToFit
               minimumFontScale={0.6}
             >
-              {userLocation || "Unknown"}
+              {locationDisplay}
             </Text>
+
             <Text
               style={{ fontSize: 12, color: theme.colors.muted, marginTop: 2 }}
             >
               {currentTime}
             </Text>
+
+            {weatherDescription ? (
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme.colors.mutedAlt,
+                  marginTop: 2,
+                  textAlign: "right",
+                }}
+              >
+                {weatherDescription}
+              </Text>
+            ) : null}
           </View>
         </View>
 
