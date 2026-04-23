@@ -11,7 +11,6 @@ export const useHomeSelector = <T>(
   }
 
   const homeData = qc.getQueryData(["home", userId]);
-
   if (!homeData) {
     return undefined;
   }

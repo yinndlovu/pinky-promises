@@ -119,7 +119,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   } = useHome(token, user?.id);
 
   const rawActivities =
-    useHomeSelector(user?.id, (h) => h?.recentActivities || []) || [];
+    useHomeSelector(user?.id, (h) => h?.recentActivities) ?? [];
   const activities = useMemo(() => {
     return rawActivities.map((activity: any) => ({
       id: activity.id,
@@ -129,18 +129,18 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
     }));
   }, [rawActivities]);
 
-  const partner = useHomeSelector(user?.id, (home) => home?.partner) || null;
+  const partner = useHomeSelector(user?.id, (home) => home?.partner) ?? null;
   const notificationsData =
-    useHomeSelector(user?.id, (home) => home?.notifications || []) || [];
+    useHomeSelector(user?.id, (home) => home?.notifications) ?? [];
   const unseenInteractions =
-    useHomeSelector(user?.id, (home) => home?.unseenInteractions || []) || [];
+    useHomeSelector(user?.id, (home) => home?.unseenInteractions) ?? [];
   const upcomingDate =
-    useHomeSelector(user?.id, (home) => home?.upcomingSpecialDate) || null;
-  const partnerMood = useHomeSelector(user?.id, (m) => m?.partnerMood) || null;
+    useHomeSelector(user?.id, (home) => home?.upcomingSpecialDate) ?? null;
+  const partnerMood = useHomeSelector(user?.id, (m) => m?.partnerMood) ?? null;
   const partnerStatus =
-    useHomeSelector(user?.id, (home) => home?.partnerStatus) || null;
+    useHomeSelector(user?.id, (home) => home?.partnerStatus) ?? null;
   const resolutions =
-    useHomeSelector(user?.id, (home) => home?.resolutions || []) || [];
+    useHomeSelector(user?.id, (home) => home?.resolutions) ?? [];
 
   const partnerLoading = homeLoading;
   const activitiesLoading = homeLoading;
@@ -151,9 +151,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // gifts data for presents card
   const { data: _giftsData } = useGifts(token, user?.id);
   const unclaimedGift =
-    useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) || null;
+    useGiftsSelector(user?.id, (gifts) => gifts?.unclaimedGift) ?? null;
   const setMonthlyGift =
-    useGiftsSelector(user?.id, (gifts) => gifts?.setMonthlyGift) || null;
+    useGiftsSelector(user?.id, (gifts) => gifts?.setMonthlyGift) ?? null;
 
   const {
     avatarUri,
@@ -167,7 +167,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
   // use effects
   useEffect(() => {
-    if (token && notificationsData) {
+    if (token && notificationsData.length > 0) {
       setOptimisticNotifications(notificationsData);
     }
   }, [token, notificationsData]);

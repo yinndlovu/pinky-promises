@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export const useGiftsSelector = <T>(
   userId: string | undefined,
-  selector: (gifts: any) => T
+  selector: (gifts: any) => T,
 ): T | undefined => {
   const qc = useQueryClient();
 
@@ -11,7 +11,6 @@ export const useGiftsSelector = <T>(
   }
 
   const giftsData = qc.getQueryData(["gifts", userId]);
-
   if (!giftsData) {
     return undefined;
   }

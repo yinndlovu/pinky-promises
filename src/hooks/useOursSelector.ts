@@ -11,7 +11,6 @@ export const useOursSelector = <T>(
   }
 
   const oursData = qc.getQueryData(["ours", userId]);
-
   if (!oursData) {
     return undefined;
   }
