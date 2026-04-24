@@ -1,5 +1,5 @@
 // external
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -24,12 +24,14 @@ interface ResolutionsProps {
   resolutions: Resolution[];
   isLoading?: boolean;
   onAddResolution: () => void;
+  onToast?: (message: string) => void;
 }
 
 const Resolutions: React.FC<ResolutionsProps> = ({
   resolutions,
   isLoading,
   onAddResolution,
+  onToast,
 }) => {
   // hook variables
   const { theme } = useTheme();
@@ -44,20 +46,6 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   const [confirmationAction, setConfirmationAction] = useState<
     (() => void) | null
   >(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [showToast, setShowToast] = useState(false);
-
-  // auto-hide toast
-  useEffect(() => {
-    if (toastMessage) {
-      setShowToast(true);
-      const timer = setTimeout(() => {
-        setShowToast(false);
-        setToastMessage(null);
-      }, 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [toastMessage]);
 
   // helpers
   const calculateTimeLeft = (dueDate: string) => {
@@ -75,7 +63,7 @@ const Resolutions: React.FC<ResolutionsProps> = ({
 
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     const hours = Math.floor(
-      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+      (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
     );
     const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -89,17 +77,17 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   // handlers
   const handleMarkComplete = (resolution: Resolution) => {
     setConfirmationMessage(
-      `Are you sure you want to mark "${resolution.title}" as complete?`
+      `Are you sure you want to mark "${resolution.title}" as complete?`,
     );
     setConfirmationAction(() => async () => {
       try {
         await markCompleteMutation.mutateAsync(resolution.id);
         setConfirmationVisible(false);
-        setToastMessage("Resolution completed! 🎉");
+        onToast?.("Resolution completed! 🎉");
       } catch (error) {
         console.error("Failed to mark resolution complete:", error);
         setConfirmationVisible(false);
-        setToastMessage("Failed to complete resolution. Please try again.");
+        onToast?.("Failed to complete resolution. Please try again.");
       }
     });
     setConfirmationVisible(true);
@@ -211,12 +199,12 @@ const Resolutions: React.FC<ResolutionsProps> = ({
                       {item.completed
                         ? "Completed"
                         : item.isOverdue
-                        ? "Overdue"
-                        : formatTimeLeft(
-                            item.timeLeft.days,
-                            item.timeLeft.hours,
-                            item.timeLeft.minutes
-                          )}
+                          ? "Overdue"
+                          : formatTimeLeft(
+                              item.timeLeft.days,
+                              item.timeLeft.hours,
+                              item.timeLeft.minutes,
+                            )}
                     </Text>
                     {!item.completed && (
                       <TouchableOpacity
@@ -260,12 +248,6 @@ const Resolutions: React.FC<ResolutionsProps> = ({
         onClose={() => setConfirmationVisible(false)}
         loading={markCompleteMutation.isPending}
       />
-
-      {showToast && (
-        <View style={styles.toast}>
-          <Text style={styles.toastText}>{toastMessage}</Text>
-        </View>
-      )}
     </View>
   );
 };

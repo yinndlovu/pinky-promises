@@ -35,7 +35,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [editingDate, setEditingDate] = useState<SpecialDate | null>(null);
   const [modalType, setModalType] = useState<"anniversary" | "dayMet">(
-    "anniversary"
+    "anniversary",
   );
   const [alertMessage, setAlertMessage] = useState("");
   const [alertTitle, setAlertTitle] = useState("");
@@ -46,13 +46,13 @@ const Anniversary: React.FC<AnniversaryProps> = ({
   // helpers
   const getAnniversaryDisplay = () => {
     const anniversary = specialDates.find((date: SpecialDate) =>
-      date.title.toLowerCase().includes("anniversary")
+      date.title.toLowerCase().includes("anniversary"),
     );
 
     if (anniversary) {
       return formatProfileDisplayDate(
         anniversary.date,
-        anniversary.togetherFor
+        anniversary.togetherFor,
       );
     }
     return {
@@ -64,7 +64,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
     const dayMet = specialDates.find(
       (date: SpecialDate) =>
         date.title.toLowerCase().includes("met") ||
-        date.title.toLowerCase().includes("meet")
+        date.title.toLowerCase().includes("meet"),
     );
 
     if (dayMet) {
@@ -78,7 +78,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
   // handlers
   const handleEditAnniversary = () => {
     const anniversary = specialDates.find((date: SpecialDate) =>
-      date.title.toLowerCase().includes("anniversary")
+      date.title.toLowerCase().includes("anniversary"),
     );
 
     if (anniversary) {
@@ -92,7 +92,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
 
   const handleEditDayMet = () => {
     const dayMet = specialDates.find((date: SpecialDate) =>
-      date.title.toLowerCase().includes("met")
+      date.title.toLowerCase().includes("met"),
     );
 
     if (dayMet) {
@@ -107,7 +107,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
   const handleSave = async (
     date: string,
     title: string,
-    description?: string
+    description?: string,
   ) => {
     setLoading(true);
 
@@ -116,7 +116,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
         if (!token) {
           setAlertTitle("Couldn't Update");
           setAlertMessage(
-            "Your session seems to have expired. Log in again and retry."
+            "Your session seems to have expired. Log in again and retry.",
           );
           setShowErrorAlert(true);
           return;
@@ -126,17 +126,17 @@ const Anniversary: React.FC<AnniversaryProps> = ({
           editingDate.id,
           date,
           title,
-          description
+          description,
         );
         setAlertTitle(
           modalType === "anniversary"
             ? "Anniversary Day Updated"
-            : "Meetversary Updated"
+            : "Meetversary Updated",
         );
         setAlertMessage(
           modalType === "anniversary"
             ? "You have updated your anniversary day."
-            : "You have updated your meetversary."
+            : "You have updated your meetversary.",
         );
         setLoading(false);
         setModalVisible(false);
@@ -144,7 +144,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
       } catch (error: any) {
         setAlertTitle("Failed");
         setAlertMessage(
-          error.response.data?.error || "Failed to update special date"
+          error.response.data?.error || "Failed to update special date",
         );
         setLoading(false);
         setModalVisible(false);
@@ -155,7 +155,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
         if (!token) {
           setAlertTitle("Couldn't Add");
           setAlertMessage(
-            "Your session seems to have expired. Log in again and retry."
+            "Your session seems to have expired. Log in again and retry.",
           );
           setShowErrorAlert(true);
           return;
@@ -164,12 +164,12 @@ const Anniversary: React.FC<AnniversaryProps> = ({
         setAlertTitle(
           modalType === "anniversary"
             ? "Anniversary Day Added"
-            : "Meetversary Added"
+            : "Meetversary Added",
         );
         setAlertMessage(
           modalType === "anniversary"
             ? "You have added a new anniversary day."
-            : "You have added the day you first met your baby."
+            : "You have added the day you first met your baby.",
         );
         setLoading(false);
         setModalVisible(false);
@@ -177,7 +177,7 @@ const Anniversary: React.FC<AnniversaryProps> = ({
       } catch (error: any) {
         setAlertTitle("Failed");
         setAlertMessage(
-          error.response.data?.error || "Failed to create special date"
+          error.response.data?.error || "Failed to create special date",
         );
         setLoading(false);
         setModalVisible(false);
@@ -186,16 +186,16 @@ const Anniversary: React.FC<AnniversaryProps> = ({
     }
 
     queryClient.invalidateQueries({
-      queryKey: ["specialDates", user?.id],
+      queryKey: ["profile", user?.id],
     });
     queryClient.invalidateQueries({
-      queryKey: ["recentActivities", user?.id],
+      queryKey: ["profile", user?.partnerId],
     });
     queryClient.invalidateQueries({
-      queryKey: ["upcomingSpecialDate", user?.id],
+      queryKey: ["ours", user?.id],
     });
     queryClient.invalidateQueries({
-      queryKey: ["aiContext", user?.id],
+      queryKey: ["home", user?.id],
     });
   };
 

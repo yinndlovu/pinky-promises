@@ -12,7 +12,6 @@ import Animated, {
   interpolate,
   Easing,
   FadeIn,
-  FadeOut,
 } from "react-native-reanimated";
 
 // internal
@@ -71,7 +70,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
       withSpring(1, {
         damping: 12,
         stiffness: 150,
-      })
+      }),
     );
   }, []);
 
@@ -83,7 +82,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
         easing: Easing.inOut(Easing.sin),
       }),
       -1,
-      true
+      true,
     );
 
     // Status glow animation
@@ -93,7 +92,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
         easing: Easing.inOut(Easing.sin),
       }),
       -1,
-      true
+      true,
     );
   }, [status]);
 
@@ -105,7 +104,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
         easing: Easing.inOut(Easing.sin),
       }),
       -1,
-      true
+      true,
     );
 
     // Mood glow animation
@@ -115,7 +114,7 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
         easing: Easing.inOut(Easing.sin),
       }),
       -1,
-      true
+      true,
     );
   }, [mood]);
 
@@ -232,73 +231,76 @@ const PartnerStatusMood: React.FC<PartnerStatusMoodProps> = ({
       {/* Status Card */}
       <Animated.View entering={FadeIn.duration(400)} style={styles.statusCard}>
         <Animated.View style={[statusCardAnimatedStyle, statusGlowStyle]}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            <Animated.View style={[styles.statusIndicator, statusPulseStyle]}>
-              <View
-                style={[
-                  styles.statusDot,
-                  { backgroundColor: getStatusColor() },
-                ]}
-              />
-            </Animated.View>
-            <Text style={styles.cardTitle}>Status</Text>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardHeaderLeft}>
+              <Animated.View style={[styles.statusIndicator, statusPulseStyle]}>
+                <View
+                  style={[
+                    styles.statusDot,
+                    { backgroundColor: getStatusColor() },
+                  ]}
+                />
+              </Animated.View>
+              <Text style={styles.cardTitle}>Status</Text>
+            </View>
+            <Text style={styles.statusEmoji}>{getStatusEmoji(status)}</Text>
           </View>
-          <Text style={styles.statusEmoji}>{getStatusEmoji(status)}</Text>
-        </View>
 
-        <View style={styles.cardContent}>
-          <Text style={[styles.statusText, { color: getStatusColor() }]}>
-            {getStatusText()}
-          </Text>
-          {displayLocation && (
-            <View style={styles.locationContainer}>
-              <Feather
-                name="map-pin"
-                size={14}
-                color={theme.colors.muted}
-                style={styles.locationIcon}
-              />
-              <Text style={styles.locationText}>{displayLocation}</Text>
-            </View>
-          )}
-          {statusDescription && (
-            <Text style={styles.statusDescription}>{statusDescription}</Text>
-          )}
-          {status === "away" && statusDistance && (
-            <View style={styles.distanceContainer}>
-              <Feather
-                name="navigation"
-                size={12}
-                color={theme.colors.primary}
-              />
-              <Text style={styles.distanceText}>
-                {formatDistance(statusDistance)} away
-              </Text>
-            </View>
-          )}
-        </View>
+          <View style={styles.cardContent}>
+            <Text style={[styles.statusText, { color: getStatusColor() }]}>
+              {getStatusText()}
+            </Text>
+            {displayLocation && (
+              <View style={styles.locationContainer}>
+                <Feather
+                  name="map-pin"
+                  size={14}
+                  color={theme.colors.muted}
+                  style={styles.locationIcon}
+                />
+                <Text style={styles.locationText}>{displayLocation}</Text>
+              </View>
+            )}
+            {statusDescription && (
+              <Text style={styles.statusDescription}>{statusDescription}</Text>
+            )}
+            {status === "away" && statusDistance && (
+              <View style={styles.distanceContainer}>
+                <Feather
+                  name="navigation"
+                  size={12}
+                  color={theme.colors.primary}
+                />
+                <Text style={styles.distanceText}>
+                  {formatDistance(statusDistance)} away
+                </Text>
+              </View>
+            )}
+          </View>
         </Animated.View>
       </Animated.View>
 
       {/* Mood Card */}
-      <Animated.View entering={FadeIn.duration(400).delay(100)} style={styles.moodCard}>
+      <Animated.View
+        entering={FadeIn.duration(400).delay(100)}
+        style={styles.moodCard}
+      >
         <Animated.View style={[moodCardAnimatedStyle, moodGlowStyle]}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardHeaderLeft}>
-            <Text style={styles.moodEmoji}>{getMoodEmoji(mood)}</Text>
-            <Text style={styles.cardTitle}>Mood</Text>
+          <View style={styles.cardHeader}>
+            <View style={styles.cardHeaderLeft}>
+              <Text style={styles.moodEmoji}>{getMoodEmoji(mood)}</Text>
+              <Text style={styles.cardTitle}>Mood</Text>
+            </View>
           </View>
-        </View>
 
-        <View style={styles.cardContent}>
-          <Text style={styles.moodText}>
-            {mood && mood !== "No mood" ? mood : "No mood"}
-          </Text>
-          {moodDescription && (
-            <Text style={styles.moodDescription}>{moodDescription}</Text>
-          )}
-        </View>
+          <View style={styles.cardContent}>
+            <Text style={styles.moodText}>
+              {mood && mood !== "No mood" ? mood : "No mood"}
+            </Text>
+            {moodDescription && (
+              <Text style={styles.moodDescription}>{moodDescription}</Text>
+            )}
+          </View>
         </Animated.View>
       </Animated.View>
     </View>

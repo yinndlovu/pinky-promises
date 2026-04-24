@@ -82,6 +82,8 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
   // use states
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showToast, setShowToast] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
@@ -209,6 +211,17 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       return () => clearTimeout(timer);
     }
   }, [error]);
+
+  useEffect(() => {
+    if (toastMessage) {
+      setShowToast(true);
+      const timer = setTimeout(() => {
+        setShowToast(false);
+        setToastMessage(null);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -893,6 +906,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
         <Resolutions
           resolutions={resolutions}
           isLoading={homeLoading}
+          onToast={setToastMessage}
           onAddResolution={() =>
             navigation.navigate("AddResolutionScreen", {
               onSuccess: () => {
@@ -921,6 +935,11 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       {showError && (
         <View style={styles.toast}>
           <Text style={styles.toastText}>{error}</Text>
+        </View>
+      )}
+      {showToast && (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       )}
 

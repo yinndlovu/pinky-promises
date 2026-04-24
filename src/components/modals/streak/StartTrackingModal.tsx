@@ -48,7 +48,7 @@ const StartTrackingModal: React.FC<StartTrackingModalProps> = ({
     setSelected((prev) =>
       prev.includes(platform)
         ? prev.filter((p) => p !== platform)
-        : [...prev, platform]
+        : [...prev, platform],
     );
   };
 
@@ -65,7 +65,7 @@ const StartTrackingModal: React.FC<StartTrackingModalProps> = ({
   };
 
   const availablePlatforms = PLATFORMS.filter(
-    (p) => !currentlyTracking.includes(p)
+    (p) => !currentlyTracking.includes(p),
   );
 
   return (
@@ -202,7 +202,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       backgroundColor: theme.colors.modalOverlay,
       justifyContent: "center",
       alignItems: "center",
-      zIndex: 1000,
     },
     container: {
       backgroundColor: theme.colors.background,
@@ -356,4 +355,3 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
   });
 
 export default StartTrackingModal;
-
