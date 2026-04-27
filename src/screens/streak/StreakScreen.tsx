@@ -86,7 +86,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   } = useStreakHistory(
     token,
     user?.id,
-    expandedPlatform as SocialMediaPlatform
+    expandedPlatform as SocialMediaPlatform,
   );
 
   const logStreakMutation = useLogEndedStreak(token);
@@ -108,7 +108,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     if (user?.id && token) {
       Promise.resolve(fetchUserPicture()).finally(() =>
-        setUserAvatarFetched(true)
+        setUserAvatarFetched(true),
       );
     }
   }, [user?.id, token, fetchUserPicture]);
@@ -116,7 +116,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     if (streakData?.partner?.id && token) {
       Promise.resolve(fetchPartnerPicture()).finally(() =>
-        setPartnerAvatarFetched(true)
+        setPartnerAvatarFetched(true),
       );
     }
   }, [streakData?.partner?.id, token, fetchPartnerPicture]);
@@ -128,7 +128,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleLogStreak = async (
     accusedUserId: number,
-    platform: SocialMediaPlatform
+    platform: SocialMediaPlatform,
   ) => {
     try {
       await logStreakMutation.mutateAsync({
@@ -145,7 +145,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
       setAlertMessage(
         error.response?.data?.err ||
           error.message ||
-          "For some weird reason, you couldn't record this detail."
+          "For some weird reason, you couldn't record this detail.",
       );
       setShowErrorAlert(true);
       console.error("Error logging streak:", error);
@@ -172,7 +172,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
 
   const handleStopTrackingClick = (platform: SocialMediaPlatform) => {
     setConfirmationMessage(
-      `Are you sure you want to stop tracking ${PLATFORM_NAMES[platform]} streaks?`
+      `Are you sure you want to stop tracking ${PLATFORM_NAMES[platform]} streaks?`,
     );
     setConfirmationAction(() => () => {
       handleStopTracking(platform);
@@ -193,7 +193,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
       setAlertMessage(
         error.response?.data?.err ||
           error.message ||
-          "For some weird reason, you couldn't stop tracking."
+          "For some weird reason, you couldn't stop tracking.",
       );
       setShowErrorAlert(true);
       console.error("Error stopping tracking:", error);
@@ -309,7 +309,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
                       <Text style={styles.lastEndedText}>
                         {platformData?.user?.lastEnded
                           ? `Last: ${formatTimeAgo(
-                              platformData.user.lastEnded
+                              platformData.user.lastEnded,
                             )}`
                           : "Never ended"}
                       </Text>
@@ -351,7 +351,7 @@ const StreakScreen: React.FC<Props> = ({ navigation }) => {
                       <Text style={styles.lastEndedText}>
                         {platformData?.partner?.lastEnded
                           ? `Last: ${formatTimeAgo(
-                              platformData.partner.lastEnded
+                              platformData.partner.lastEnded,
                             )}`
                           : "Never ended"}
                       </Text>
