@@ -10,7 +10,7 @@ import { navigationRef } from "../utils/navigation/navigation";
 interface NotificationContextProps {}
 
 const NotificationContext = createContext<NotificationContextProps | undefined>(
-  undefined
+  undefined,
 );
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
@@ -22,34 +22,45 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
       const cleanup = setupNotificationListeners((response) => {
         const data = response.notification.request.content.data;
 
+        if (!navigationRef.isReady()) {
+          return;
+        }
+
+        const navigateTo = (tab: string, screen: string) => {
+          (navigationRef as any).navigate("Main", {
+            screen: tab,
+            params: { screen },
+          });
+        };
+
         if (data?.type === "vent_message_received") {
-          navigationRef.navigate("PortalScreen" as never);
+          navigateTo("Home", "PortalScreen");
         } else if (data?.type === "sweet_message_received") {
-          navigationRef.navigate("PortalScreen" as never);
+          navigateTo("Home", "PortalScreen");
         } else if (data?.type === "user_status_update") {
-          navigationRef.navigate("PartnerProfile" as never);
+          navigateTo("Home", "PartnerProfile");
         } else if (data?.type === "favorites_updated") {
-          navigationRef.navigate("PartnerProfile" as never);
+          navigateTo("Home", "PartnerProfile");
         } else if (data?.type === "timeline_update") {
-          navigationRef.navigate("TimelineScreen" as never);
+          navigateTo("Ours", "TimelineScreen");
         } else if (data?.type === "mood_update") {
-          navigationRef.navigate("PartnerProfile" as never);
+          navigateTo("Home", "PartnerProfile");
         } else if (data?.type === "love_language_update") {
-          navigationRef.navigate("PartnerProfile" as never);
+          navigateTo("Home", "PartnerProfile");
         } else if (data?.type === "home_location_update") {
-          navigationRef.navigate("PartnerProfile" as never);
+          navigateTo("Home", "PartnerProfile");
         } else if (data?.type === "about_details_update") {
-          navigationRef.navigate("PartnerProfile" as never);
+          navigateTo("Home", "PartnerProfile");
         } else if (data?.type === "gift_received") {
-          navigationRef.navigate("Presents" as never);
+          navigateTo("Home", "PresentsScreen");
         } else if (data?.type === "special_date_created") {
-          navigationRef.navigate("Ours" as never);
+          navigateTo("Ours", "OursScreen");
         } else if (data?.type === "special_date_updated") {
-          navigationRef.navigate("Ours" as never);
+          navigateTo("Ours", "OursScreen");
         } else if (data?.type === "special_date_deleted") {
-          navigationRef.navigate("Ours" as never);
+          navigateTo("Ours", "OursScreen");
         } else if (data?.type === "special_date_arrived") {
-          navigationRef.navigate("Home" as never);
+          navigateTo("Home", "HomeScreen");
         }
       });
 
@@ -68,7 +79,7 @@ export const useNotification = () => {
   const context = useContext(NotificationContext);
   if (!context) {
     throw new Error(
-      "useNotification must be used within a NotificationProvider"
+      "useNotification must be used within a NotificationProvider",
     );
   }
   return context;

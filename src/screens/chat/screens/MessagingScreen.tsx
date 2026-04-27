@@ -87,13 +87,6 @@ export default function PartnerChatScreen() {
     }
   }, [partnerId, token]);
 
-  useEffect(() => {
-    if ((route.params as any)?.showOptions) {
-      setShowOptions(true);
-      navigation.setParams({ showOptions: false } as any);
-    }
-  }, [route.params, navigation]);
-
   // handlers
   const handleSend = useCallback(async () => {
     if (inputText.trim() === "") {
@@ -203,9 +196,10 @@ export default function PartnerChatScreen() {
           data={messages}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.messagesContainer}
+          inverted
           renderItem={({ item, index }) => {
             const currentDay = getDayLabel(item.timestamp);
-            const prevMsg = index > 0 ? messages[index - 1] : null;
+            const prevMsg = index < messages.length - 1 ? messages[index + 1] : null;
             const prevDay = prevMsg ? getDayLabel(prevMsg.timestamp) : null;
             const showDayLabel = currentDay !== prevDay;
             const isUser = item.senderId === user?.id;

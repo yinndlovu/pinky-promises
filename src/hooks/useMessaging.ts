@@ -32,7 +32,7 @@ export function useMessaging() {
   const [error, setError] = useState<string | null>(null);
 
   // use refs
-  const typingTimeout = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingEmit = useRef<number>(0);
 
   // fetch messages from backend
@@ -62,16 +62,32 @@ export function useMessaging() {
     fetchMessages();
   }, [fetchMessages]);
 
-  // focus effects
+  // focus effects — emit activeInChat when screen is focused,
+  // and also re-emit if the socket connects while already focused
   useFocusEffect(
     useCallback(() => {
-      if (socket?.connected) {
-        socket.emit("messaging:activeInChat", { active: true });
-
-        return () => {
-          socket.emit("messaging:activeInChat", { active: false });
-        };
+      if (!socket) {
+        return;
       }
+
+      const emitActive = () => {
+        if (socket.connected) {
+          socket.emit("messaging:activeInChat", { active: true });
+        }
+      };
+
+      // emit immediately if already connected
+      emitActive();
+
+      // re-emit if socket connects while this screen is focused
+      socket.on("connect", emitActive);
+
+      return () => {
+        socket.off("connect", emitActive);
+        if (socket.connected) {
+          socket.emit("messaging:activeInChat", { active: false });
+        }
+      };
     }, [socket])
   );
 
