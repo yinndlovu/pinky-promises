@@ -69,7 +69,13 @@ export interface RecentStreakMessage {
 
 export interface StreakPreview {
   message: string;
-  type: "neutral" | "warning" | "recent" | "achievement" | "positive" | "scoreboard";
+  type:
+    | "neutral"
+    | "warning"
+    | "recent"
+    | "achievement"
+    | "positive"
+    | "scoreboard";
   userId?: number;
   countA?: number;
   countB?: number;
@@ -93,4 +99,3 @@ export const PLATFORM_COLORS: { [key in SocialMediaPlatform]: string } = {
   tiktok: "#000000",
   snapchat: "#FFFC00",
 };
-
