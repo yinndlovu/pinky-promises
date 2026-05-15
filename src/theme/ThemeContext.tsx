@@ -32,8 +32,16 @@ type Ctx = {
 
 const ThemeContext = createContext<Ctx | null>(null);
 
+// constants
 const ACCENT_STORAGE_KEY = "serverAccentTheme_v1";
 const MODE_STORAGE_KEY = "themeMode";
+
+// utils
+const normalizeColorScheme = (
+  scheme: ReturnType<typeof Appearance.getColorScheme>,
+): "light" | "dark" => {
+  return scheme === "dark" ? "dark" : "light";
+};
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   // hook variables
@@ -43,8 +51,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [mode, setModeState] = useState<Mode>("system");
   const [accent, setAccent] = useState<AccentThemeName>("default");
   // resolver for system mode
-  const [systemScheme, setSystemScheme] = useState<"light" | "dark">(
-    () => Appearance.getColorScheme() ?? "light"
+  const [systemScheme, setSystemScheme] = useState<"light" | "dark">(() =>
+    normalizeColorScheme(Appearance.getColorScheme()),
   );
 
   // load cached accent and cached mode
@@ -83,7 +91,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   // listen to system changes
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setSystemScheme(colorScheme ?? "light");
+      setSystemScheme(normalizeColorScheme(colorScheme));
     });
 
     return () => {
@@ -126,7 +134,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   // derived active mode
   const activeMode: "light" | "dark" = useMemo(
     () => (mode === "system" ? systemScheme : mode),
-    [mode, systemScheme]
+    [mode, systemScheme],
   );
 
   // pick accent colors for the active mode
@@ -161,7 +169,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       accent,
       theme,
     }),
-    [mode, accent, theme]
+    [mode, accent, theme],
   );
 
   return (
