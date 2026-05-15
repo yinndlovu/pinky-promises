@@ -7,7 +7,7 @@ export interface CachedImageInfo {
 
 export const buildCachedImageUrl = (
   userId: string,
-  updatedAt: string | number
+  updatedAt: string | number,
 ): string => {
   const version =
     typeof updatedAt === "number"

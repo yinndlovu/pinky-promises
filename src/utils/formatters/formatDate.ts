@@ -79,7 +79,7 @@ export const formatDateDMonY = (dateStr: string) => {
 // format the date displayed on profile screen
 export const formatProfileDisplayDate = (
   dateString: string,
-  timeInfo?: string
+  timeInfo?: string,
 ): { date: string; timeInfo?: string } => {
   if (!dateString || dateString === "Not set") {
     return {
@@ -124,7 +124,7 @@ export const formatTime = (dateString: string): string => {
 export const formatTimeLeft = (
   daysUntil: number,
   hoursUntil?: number,
-  minutesUntil?: number
+  minutesUntil?: number,
 ): string => {
   if (daysUntil === 0) {
     if (hoursUntil != null) {

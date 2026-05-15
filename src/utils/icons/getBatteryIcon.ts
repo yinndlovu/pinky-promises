@@ -1,5 +1,5 @@
 export const getBatteryIcon = (
-  level: number
+  level: number,
 ): "battery" | "battery-70" | "battery-30" | "battery-outline" => {
   if (level >= 80) {
     return "battery";
