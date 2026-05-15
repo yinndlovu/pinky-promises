@@ -9,7 +9,7 @@ export async function saveToken(authToken: string, token: string) {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
-    }
+    },
   );
 
   return response.data;

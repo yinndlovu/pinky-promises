@@ -9,7 +9,7 @@ export async function sendPartnerRequest(token: string, partnerId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -22,7 +22,7 @@ export async function checkPendingRequest(token: string, partnerId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -35,7 +35,7 @@ export async function cancelPartnerRequest(token: string, partnerId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -48,7 +48,7 @@ export async function getIncomingRequest(token: string, fromUserId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -62,7 +62,7 @@ export async function acceptPartnerRequest(token: string, requestId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -96,7 +96,7 @@ export async function rejectPartnerRequest(token: string, requestId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -110,7 +110,7 @@ export async function removePartner(token: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;

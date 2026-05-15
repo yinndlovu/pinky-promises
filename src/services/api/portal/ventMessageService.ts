@@ -9,7 +9,7 @@ export async function ventToPartner(token: string, message: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -26,11 +26,14 @@ export async function viewVentMessage(token: string, ventId: string) {
 }
 
 export async function deleteVentMessage(token: string, ventId: string) {
-  const response = await axios.delete(`${BASE_URL}/vent-message/${ventId}/delete`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const response = await axios.delete(
+    `${BASE_URL}/vent-message/${ventId}/delete`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 
   return response.data;
 }

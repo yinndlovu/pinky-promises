@@ -10,7 +10,7 @@ export const sendChatMessage = async (token: string, inputText: string) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -28,7 +28,7 @@ export const getChatMessages = async (token: string) => {
   } catch (error: any) {
     throw new Error(
       "Failed to fetch messages: " +
-        (error.response?.data?.error || error.message)
+        (error.response?.data?.error || error.message),
     );
   }
 };
@@ -45,7 +45,7 @@ export const deleteAllChatMessages = async (token: string) => {
   } catch (error: any) {
     throw new Error(
       "Failed to delete messages: " +
-        (error.response?.data?.error || error.message)
+        (error.response?.data?.error || error.message),
     );
   }
 };

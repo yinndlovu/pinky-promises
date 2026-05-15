@@ -9,7 +9,7 @@ export async function sendSweetMessage(token: string, message: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -32,7 +32,7 @@ export async function deleteSweetMessage(token: string, sweetId: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;

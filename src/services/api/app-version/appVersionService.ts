@@ -17,7 +17,7 @@ export async function getLatestVersion(): Promise<AppVersionInfo> {
 
 export function compareVersions(
   currentVersion: string,
-  latestVersion: string
+  latestVersion: string,
 ): number {
   const current = currentVersion.split(".").map(Number);
   const latest = latestVersion.split(".").map(Number);
@@ -40,7 +40,7 @@ export function compareVersions(
 
 export function shouldShowUpdate(
   currentVersion: string,
-  latestVersion: string
+  latestVersion: string,
 ): boolean {
   return compareVersions(currentVersion, latestVersion) < 0;
 }

@@ -9,7 +9,7 @@ export async function updateBatteryStatus(token: string, batteryLevel: number) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;

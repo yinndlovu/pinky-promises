@@ -27,7 +27,7 @@ export async function getResolutions(token: string): Promise<Resolution[]> {
 export async function createResolution(
   token: string,
   title: string,
-  dueDate: string
+  dueDate: string,
 ): Promise<Resolution> {
   const response = await axios.post(
     `${BASE_URL}/resolutions`,
@@ -36,7 +36,7 @@ export async function createResolution(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -44,7 +44,7 @@ export async function createResolution(
 
 export async function markResolutionComplete(
   token: string,
-  resolutionId: number
+  resolutionId: number,
 ): Promise<Resolution> {
   const response = await axios.patch(
     `${BASE_URL}/resolutions/${resolutionId}/complete`,
@@ -53,14 +53,14 @@ export async function markResolutionComplete(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
 }
 
 export async function getPartnerResolutions(
-  token: string
+  token: string,
 ): Promise<Resolution[]> {
   const response = await axios.get(`${BASE_URL}/resolutions/partner`, {
     headers: {

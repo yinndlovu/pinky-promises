@@ -125,7 +125,7 @@ export interface StreakPreview {
 // start tracking streaks
 export async function startTracking(
   token: string,
-  platforms: SocialMediaPlatform[]
+  platforms: SocialMediaPlatform[],
 ): Promise<StartTrackingResponse> {
   const response = await axios.post(
     `${BASE_URL}/streak/start`,
@@ -134,7 +134,7 @@ export async function startTracking(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   return response.data;
 }
@@ -142,7 +142,7 @@ export async function startTracking(
 // stop tracking a platform
 export async function stopTracking(
   token: string,
-  platform: SocialMediaPlatform
+  platform: SocialMediaPlatform,
 ): Promise<StopTrackingResponse> {
   const response = await axios.post(
     `${BASE_URL}/streak/stop`,
@@ -151,14 +151,14 @@ export async function stopTracking(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   return response.data;
 }
 
 // get tracking status
 export async function getTrackingStatus(
-  token: string
+  token: string,
 ): Promise<TrackingStatus> {
   const response = await axios.get(`${BASE_URL}/streak/status`, {
     headers: {
@@ -172,7 +172,7 @@ export async function getTrackingStatus(
 export async function logEndedStreak(
   token: string,
   accusedUserId: number,
-  socialMedia: SocialMediaPlatform
+  socialMedia: SocialMediaPlatform,
 ): Promise<LogEndedStreakResponse> {
   const response = await axios.post(
     `${BASE_URL}/streak/log`,
@@ -181,14 +181,14 @@ export async function logEndedStreak(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   return response.data;
 }
 
 // get pending ended streak (single)
 export async function getPendingEndedStreak(
-  token: string
+  token: string,
 ): Promise<PendingEndedStreakResponse> {
   const response = await axios.get(`${BASE_URL}/streak/pending`, {
     headers: {
@@ -200,7 +200,7 @@ export async function getPendingEndedStreak(
 
 // get all pending ended streaks
 export async function getAllPendingEndedStreaks(
-  token: string
+  token: string,
 ): Promise<PendingStreak[]> {
   const response = await axios.get(`${BASE_URL}/streak/pending/all`, {
     headers: {
@@ -214,7 +214,7 @@ export async function getAllPendingEndedStreaks(
 export async function confirmEndedStreak(
   token: string,
   streakId: number,
-  confirmed: boolean
+  confirmed: boolean,
 ): Promise<ConfirmStreakResponse> {
   const response = await axios.post(
     `${BASE_URL}/streak/confirm`,
@@ -223,7 +223,7 @@ export async function confirmEndedStreak(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
   return response.data;
 }
@@ -241,7 +241,7 @@ export async function getStreakData(token: string): Promise<StreakData> {
 // get streak history for a platform
 export async function getStreakHistory(
   token: string,
-  platform: SocialMediaPlatform
+  platform: SocialMediaPlatform,
 ): Promise<StreakHistory> {
   const response = await axios.get(`${BASE_URL}/streak/history/${platform}`, {
     headers: {
@@ -253,7 +253,7 @@ export async function getStreakHistory(
 
 // get recent streak message for home screen
 export async function getRecentStreakMessage(
-  token: string
+  token: string,
 ): Promise<RecentStreakMessage | null> {
   const response = await axios.get(`${BASE_URL}/streak/recent`, {
     headers: {
@@ -265,7 +265,7 @@ export async function getRecentStreakMessage(
 
 // get streak preview message from Redis (fast, cached by job)
 export async function getStreakPreview(
-  token: string
+  token: string,
 ): Promise<StreakPreview | null> {
   const response = await axios.get(`${BASE_URL}/streak/preview`, {
     headers: {

@@ -31,7 +31,7 @@ export interface AttentivenessInsights {
 
 // get attentiveness insights for the current user
 export async function getAttentivenessInsights(
-  token: string
+  token: string,
 ): Promise<AttentivenessInsights | null> {
   const response = await axios.get(`${BASE_URL}/attentiveness/insights`, {
     headers: {
@@ -44,7 +44,7 @@ export async function getAttentivenessInsights(
 // mark attentiveness insights as shown
 export async function markAttentivenessInsightsAsShown(
   token: string,
-  weekKey: string
+  weekKey: string,
 ): Promise<void> {
   await axios.post(
     `${BASE_URL}/attentiveness/insights/mark-shown`,
@@ -53,7 +53,6 @@ export async function markAttentivenessInsightsAsShown(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 }
-

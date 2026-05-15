@@ -7,5 +7,6 @@ export async function getServerTheme(token: string) {
       Authorization: `Bearer ${token}`,
     },
   });
+  
   return response.data;
 }

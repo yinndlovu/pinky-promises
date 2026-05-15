@@ -3,7 +3,7 @@ import axios from "axios";
 
 export async function markNotificationSeen(
   token: string,
-  notificationId: string
+  notificationId: string,
 ) {
   const response = await axios.patch(
     `${BASE_URL}/notifications/${notificationId}/seen`,
@@ -12,7 +12,7 @@ export async function markNotificationSeen(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;

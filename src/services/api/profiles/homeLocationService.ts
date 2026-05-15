@@ -5,7 +5,7 @@ import { BASE_URL } from "../../../configuration/config";
 export async function addHomeLocation(
   token: string,
   latitude: number,
-  longitude: number
+  longitude: number,
 ) {
   const response = await axios.put(
     `${BASE_URL}/home-location/add`,
@@ -14,7 +14,7 @@ export async function addHomeLocation(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;

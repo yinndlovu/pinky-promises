@@ -23,7 +23,7 @@ export async function verifyPin(token: string | null, pin: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;
@@ -43,7 +43,7 @@ export async function resetPassword(token: string | null, newPassword: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;
@@ -61,7 +61,7 @@ export async function resendPin(token: string | null) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;

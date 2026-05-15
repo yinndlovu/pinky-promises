@@ -9,7 +9,7 @@ export async function addItem(token: string, item: string, value: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -46,11 +46,14 @@ export async function clearCart(token: string) {
 }
 
 export async function deleteItem(token: string, itemId: string) {
-  const response = await axios.delete(`${BASE_URL}/cart/item/${itemId}/delete`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
+  const response = await axios.delete(
+    `${BASE_URL}/cart/item/${itemId}/delete`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 
   return response.data;
 }

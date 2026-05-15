@@ -14,7 +14,7 @@ export async function getNotificationPreferences(token: string) {
 export async function setNotificationPreference(
   token: string,
   type: string,
-  value: boolean
+  value: boolean,
 ) {
   const response = await axios.post(
     `${BASE_URL}/notifications/preference/set`,
@@ -23,7 +23,7 @@ export async function setNotificationPreference(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data.value;
@@ -47,7 +47,7 @@ export async function setReminderInterval(token: string, hours: number) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data.hours;

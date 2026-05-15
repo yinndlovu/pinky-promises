@@ -24,7 +24,7 @@ export async function getAllFavoriteMemories(token: string) {
 export async function createFavoriteMemory(
   token: string,
   memory: string,
-  date: string
+  date: string,
 ) {
   const res = await axios.post(
     `${BASE_URL}/favorite-memories/add`,
@@ -33,7 +33,7 @@ export async function createFavoriteMemory(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data.memoryRecord;
@@ -43,7 +43,7 @@ export async function updateFavoriteMemory(
   token: string,
   memoryId: string,
   memory: string,
-  date: string
+  date: string,
 ) {
   const res = await axios.put(
     `${BASE_URL}/favorite-memories/${memoryId}/update`,
@@ -52,7 +52,7 @@ export async function updateFavoriteMemory(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data.memory;

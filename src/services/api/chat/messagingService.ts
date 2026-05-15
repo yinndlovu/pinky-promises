@@ -11,7 +11,7 @@ export interface PartnerMessage {
 
 export const sendPartnerMessage = async (
   token: string | null,
-  message: string
+  message: string,
 ) => {
   if (!token) {
     return;
@@ -25,7 +25,7 @@ export const sendPartnerMessage = async (
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;
@@ -42,7 +42,7 @@ export const getPartnerMessages = async (token: string) => {
     return response.data;
   } catch (error: any) {
     throw new Error(
-      "Failed to fetch messages: " + (error.response?.data || error.message)
+      "Failed to fetch messages: " + (error.response?.data || error.message),
     );
   }
 };
@@ -55,13 +55,13 @@ export const deleteAllPartnerMessages = async (token: string) => {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     return response.data;
   } catch (error: any) {
     throw new Error(
-      "Failed to delete messages: " + (error.response?.data || error.message)
+      "Failed to delete messages: " + (error.response?.data || error.message),
     );
   }
 };

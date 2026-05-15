@@ -19,7 +19,7 @@ export async function updateNotes(token: string, content: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data.notes;

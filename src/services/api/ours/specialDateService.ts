@@ -5,7 +5,7 @@ export async function createSpecialDate(
   token: string,
   date: string,
   title: string,
-  description?: string
+  description?: string,
 ) {
   const res = await axios.post(
     `${BASE_URL}/special-date/add`,
@@ -14,7 +14,7 @@ export async function createSpecialDate(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;
@@ -25,7 +25,7 @@ export async function updateSpecialDate(
   dateId: string,
   date: string,
   title: string,
-  description?: string
+  description?: string,
 ) {
   const res = await axios.put(
     `${BASE_URL}/special-date/${dateId}/update`,
@@ -34,7 +34,7 @@ export async function updateSpecialDate(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;

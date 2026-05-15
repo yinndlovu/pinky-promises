@@ -17,7 +17,7 @@ export async function claimMonthlyGift(token: string, giftId: string) {
     {},
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   );
 
   return response.data;
@@ -25,15 +25,15 @@ export async function claimMonthlyGift(token: string, giftId: string) {
 
 export async function updateSetMonthlyGift(
   token: string,
-  setMonthlyGift: string
+  setMonthlyGift: string,
 ) {
   const res = await axios.put(
     `${BASE_URL}/gift/monthly-gift/update`,
     { setMonthlyGift },
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   );
-  
+
   return res.data;
 }

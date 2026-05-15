@@ -8,7 +8,7 @@ export async function searchUsers(token: string, query: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data.users;

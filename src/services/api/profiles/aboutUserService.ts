@@ -9,7 +9,7 @@ export async function updateAboutUser(token: string, about: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data.about;

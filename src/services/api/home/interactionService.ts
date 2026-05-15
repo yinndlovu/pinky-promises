@@ -9,7 +9,7 @@ export async function interactWithPartner(token: string, action: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return res.data;

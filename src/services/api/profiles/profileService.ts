@@ -31,7 +31,7 @@ export async function fetchProfilePicture(userId: string, token: string) {
     {
       headers: { Authorization: `Bearer ${token}` },
       responseType: "arraybuffer",
-    }
+    },
   );
 
   const mime = response.headers["content-type"] || "image/jpeg";
@@ -48,21 +48,21 @@ export async function fetchProfilePicture(userId: string, token: string) {
 
 export async function updateProfilePicture(
   token: string,
-  base64String: string
+  base64String: string,
 ) {
   return axios.put(
     `${BASE_URL}/user/profile-picture/update`,
     { image: base64String },
     {
       headers: { Authorization: `Bearer ${token}` },
-    }
+    },
   );
 }
 
 export async function updateProfileField(
   field: "name" | "username" | "bio",
   value: string,
-  token: string
+  token: string,
 ) {
   let url = "";
   let body: Record<string, string> = {};

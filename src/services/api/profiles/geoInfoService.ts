@@ -4,7 +4,7 @@ import { BASE_URL } from "../../../configuration/config";
 export async function updateGeoInfo(
   token: string,
   latitude: number,
-  longitude: number
+  longitude: number,
 ) {
   const response = await axios.put(
     `${BASE_URL}/user-geo/update`,
@@ -13,7 +13,7 @@ export async function updateGeoInfo(
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data;

@@ -31,14 +31,18 @@ export async function getPeriodStatus(token: string): Promise<PeriodStatus> {
   return response.data;
 }
 
-export async function getPartnerPeriodStatus(token: string): Promise<PeriodStatus> {
+export async function getPartnerPeriodStatus(
+  token: string,
+): Promise<PeriodStatus> {
   const response = await axios.get(`${BASE_URL}/period/partner-status`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
 }
 
-export async function getPeriodOverview(token: string): Promise<PeriodOverview> {
+export async function getPeriodOverview(
+  token: string,
+): Promise<PeriodOverview> {
   const response = await axios.get(`${BASE_URL}/period/overview`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -47,23 +51,26 @@ export async function getPeriodOverview(token: string): Promise<PeriodOverview> 
 
 export async function getCycleHistory(
   token: string,
-  limit: number = 12
+  limit: number = 12,
 ): Promise<PeriodCycle[]> {
-  const response = await axios.get(`${BASE_URL}/period/history?limit=${limit}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.get(
+    `${BASE_URL}/period/history?limit=${limit}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
   return response.data;
 }
 
 export async function startPeriod(
   token: string,
   userId: number,
-  startDate?: string
+  startDate?: string,
 ): Promise<{ message: string; cycle: PeriodCycle }> {
   const response = await axios.post(
     `${BASE_URL}/period/start`,
     { userId, startDate },
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
@@ -71,12 +78,12 @@ export async function startPeriod(
 export async function endPeriod(
   token: string,
   cycleId: number,
-  endDate?: string
+  endDate?: string,
 ): Promise<{ message: string; cycle: PeriodCycle }> {
   const response = await axios.put(
     `${BASE_URL}/period/cycle/${cycleId}/end`,
     { endDate },
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
@@ -84,12 +91,12 @@ export async function endPeriod(
 export async function updateCycleSettings(
   token: string,
   cycleId: number,
-  updates: Partial<PeriodCycle>
+  updates: Partial<PeriodCycle>,
 ): Promise<{ message: string; cycle: PeriodCycle }> {
   const response = await axios.put(
     `${BASE_URL}/period/cycle/${cycleId}`,
     updates,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
@@ -97,12 +104,12 @@ export async function updateCycleSettings(
 export async function updateNextPredictedDate(
   token: string,
   cycleId: number,
-  nextPredictedDate: string
+  nextPredictedDate: string,
 ): Promise<{ message: string; cycle: PeriodCycle }> {
   const response = await axios.put(
     `${BASE_URL}/period/cycle/${cycleId}/predict`,
     { nextPredictedDate },
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
@@ -117,7 +124,7 @@ export async function logIssue(
     notes?: string;
     logDate?: string;
     cycleId?: number;
-  }
+  },
 ): Promise<{ message: string; issue: UserIssue; helpfulAids: PeriodAid[] }> {
   const response = await axios.post(`${BASE_URL}/period/issue`, data, {
     headers: { Authorization: `Bearer ${token}` },
@@ -134,16 +141,23 @@ export async function getTodaysIssues(token: string): Promise<UserIssue[]> {
 
 export async function getIssuesForCycle(
   token: string,
-  cycleId: number
+  cycleId: number,
 ): Promise<UserIssue[]> {
-  const response = await axios.get(`${BASE_URL}/period/cycle/${cycleId}/issues`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.get(
+    `${BASE_URL}/period/cycle/${cycleId}/issues`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
   return response.data;
 }
 
 export async function getIssueAnalytics(token: string): Promise<{
-  commonIssues: { problem: PeriodProblem; count: number; avgSeverity: string }[];
+  commonIssues: {
+    problem: PeriodProblem;
+    count: number;
+    avgSeverity: string;
+  }[];
   recentIssues: UserIssue[];
   issuesByDay: Record<string, UserIssue[]>;
   totalIssuesLastMonth: number;
@@ -157,19 +171,19 @@ export async function getIssueAnalytics(token: string): Promise<{
 export async function updateIssue(
   token: string,
   issueId: number,
-  updates: Partial<UserIssue>
+  updates: Partial<UserIssue>,
 ): Promise<{ message: string; issue: UserIssue }> {
   const response = await axios.put(
     `${BASE_URL}/period/issue/${issueId}`,
     updates,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
 
 export async function deleteIssue(
   token: string,
-  issueId: number
+  issueId: number,
 ): Promise<{ message: string }> {
   const response = await axios.delete(`${BASE_URL}/period/issue/${issueId}`, {
     headers: { Authorization: `Bearer ${token}` },
@@ -191,21 +205,27 @@ export async function getAllAids(token: string): Promise<{
 
 export async function getAidsForProblem(
   token: string,
-  problem: PeriodProblem
+  problem: PeriodProblem,
 ): Promise<PeriodAid[]> {
-  const response = await axios.get(`${BASE_URL}/period/aids/problem/${problem}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.get(
+    `${BASE_URL}/period/aids/problem/${problem}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
   return response.data;
 }
 
 export async function getAidsByCategory(
   token: string,
-  category: PeriodAidCategory
+  category: PeriodAidCategory,
 ): Promise<PeriodAid[]> {
-  const response = await axios.get(`${BASE_URL}/period/aids/category/${category}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.get(
+    `${BASE_URL}/period/aids/category/${category}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
   return response.data;
 }
 
@@ -218,7 +238,7 @@ export async function createPartnerAid(
     title: string;
     description?: string;
     priority?: number;
-  }
+  },
 ): Promise<{ message: string; aid: PeriodAid }> {
   const response = await axios.post(`${BASE_URL}/period/aid`, data, {
     headers: { Authorization: `Bearer ${token}` },
@@ -230,11 +250,14 @@ export async function createPartnerAid(
 
 export async function getCustomAids(
   token: string,
-  activeOnly: boolean = true
-): Promise<{ aids: CustomPeriodAid[]; grouped: Record<PeriodProblem, CustomPeriodAid[]> }> {
+  activeOnly: boolean = true,
+): Promise<{
+  aids: CustomPeriodAid[];
+  grouped: Record<PeriodProblem, CustomPeriodAid[]>;
+}> {
   const response = await axios.get(
     `${BASE_URL}/period/custom-aids?activeOnly=${activeOnly}`,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
@@ -245,7 +268,7 @@ export async function createCustomAid(
     problem: PeriodProblem;
     title: string;
     description?: string;
-  }
+  },
 ): Promise<{ message: string; aid: CustomPeriodAid }> {
   const response = await axios.post(`${BASE_URL}/period/custom-aid`, data, {
     headers: { Authorization: `Bearer ${token}` },
@@ -256,35 +279,38 @@ export async function createCustomAid(
 export async function updateCustomAid(
   token: string,
   aidId: number,
-  updates: Partial<CustomPeriodAid>
+  updates: Partial<CustomPeriodAid>,
 ): Promise<{ message: string; aid: CustomPeriodAid }> {
   const response = await axios.put(
     `${BASE_URL}/period/custom-aid/${aidId}`,
     updates,
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
 
 export async function toggleCustomAid(
   token: string,
-  aidId: number
+  aidId: number,
 ): Promise<{ message: string; aid: CustomPeriodAid }> {
   const response = await axios.put(
     `${BASE_URL}/period/custom-aid/${aidId}/toggle`,
     {},
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
 
 export async function deleteCustomAid(
   token: string,
-  aidId: number
+  aidId: number,
 ): Promise<{ message: string }> {
-  const response = await axios.delete(`${BASE_URL}/period/custom-aid/${aidId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.delete(
+    `${BASE_URL}/period/custom-aid/${aidId}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
   return response.data;
 }
 
@@ -297,7 +323,9 @@ export async function getLookouts(token: string): Promise<PeriodLookout[]> {
   return response.data;
 }
 
-export async function getUnseenLookouts(token: string): Promise<PeriodLookout[]> {
+export async function getUnseenLookouts(
+  token: string,
+): Promise<PeriodLookout[]> {
   const response = await axios.get(`${BASE_URL}/period/lookouts/unseen`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -313,7 +341,7 @@ export async function createLookout(
     showOnDate: string;
     showUntilDate?: string;
     priority?: number;
-  }
+  },
 ): Promise<{ message: string; lookout: PeriodLookout }> {
   const response = await axios.post(`${BASE_URL}/period/lookout`, data, {
     headers: { Authorization: `Bearer ${token}` },
@@ -323,34 +351,37 @@ export async function createLookout(
 
 export async function markLookoutSeen(
   token: string,
-  lookoutId: number
+  lookoutId: number,
 ): Promise<{ message: string; lookout: PeriodLookout }> {
   const response = await axios.put(
     `${BASE_URL}/period/lookout/${lookoutId}/seen`,
     {},
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
 
 export async function markAllLookoutsSeen(
-  token: string
+  token: string,
 ): Promise<{ message: string }> {
   const response = await axios.put(
     `${BASE_URL}/period/lookouts/seen-all`,
     {},
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 }
 
 export async function deleteLookout(
   token: string,
-  lookoutId: number
+  lookoutId: number,
 ): Promise<{ message: string }> {
-  const response = await axios.delete(`${BASE_URL}/period/lookout/${lookoutId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.delete(
+    `${BASE_URL}/period/lookout/${lookoutId}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    },
+  );
   return response.data;
 }
 
@@ -365,4 +396,3 @@ export async function getEnums(token: string): Promise<{
   });
   return response.data;
 }
-

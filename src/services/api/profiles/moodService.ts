@@ -9,7 +9,7 @@ export async function updateMood(token: string, mood: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data.mood;

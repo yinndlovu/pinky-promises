@@ -9,7 +9,7 @@ export async function updateUserFavorites(token: string, favorites: any) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data.favorites;

@@ -9,7 +9,7 @@ export async function updateLoveLanguage(token: string, loveLanguage: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data.loveLanguage;

@@ -19,7 +19,7 @@ export async function createTimelineRecord(token: string, record: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }
+    },
   );
 
   return response.data.timelineRecord;
