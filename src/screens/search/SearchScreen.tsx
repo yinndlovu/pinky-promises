@@ -41,7 +41,7 @@ export default function SearchScreen({ navigation }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
   const [profilePictures, setProfilePictures] = useState<ProfilePictureInfo>(
-    {}
+    {},
   );
   const [isOnline, setIsOnline] = useState(true);
 
@@ -82,6 +82,12 @@ export default function SearchScreen({ navigation }: Props) {
       setProfilePictures({});
       return;
     }
+
+    if (!token) {
+      setError("Session expired. Please log in again.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -92,11 +98,13 @@ export default function SearchScreen({ navigation }: Props) {
       const pics: ProfilePictureInfo = {};
       await Promise.all(
         results.map(async (user: User) => {
-          const pic = await fetchProfilePicture(user.id, token);
-          if (pic) {
-            pics[user.id] = pic;
+          try {
+            const pic = await fetchProfilePicture(user.id, token);
+            if (pic) pics[user.id] = pic;
+          } catch {
+            // skip
           }
-        })
+        }),
       );
       setProfilePictures(pics);
     } catch (err: any) {
@@ -116,7 +124,13 @@ export default function SearchScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background, paddingTop: 0 }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: theme.colors.background,
+        paddingTop: 0,
+      }}
+    >
       {!isOnline && (
         <View
           style={{
