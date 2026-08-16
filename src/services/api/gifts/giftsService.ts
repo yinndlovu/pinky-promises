@@ -16,7 +16,9 @@ export async function claimMonthlyGift(token: string, giftId: string) {
     `${BASE_URL}/gift/${giftId}/claim`,
     {},
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
   );
 
@@ -31,7 +33,9 @@ export async function updateSetMonthlyGift(
     `${BASE_URL}/gift/monthly-gift/update`,
     { setMonthlyGift },
     {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     },
   );
 
