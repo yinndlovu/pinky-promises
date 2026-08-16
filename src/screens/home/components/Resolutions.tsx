@@ -119,7 +119,6 @@ const Resolutions: React.FC<ResolutionsProps> = ({
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <Text style={styles.sectionTitle}>RESOLUTIONS</Text>
         <Shimmer
           radius={16}
           height={80}
