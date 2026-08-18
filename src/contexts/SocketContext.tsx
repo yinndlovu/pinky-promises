@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { BASE_URL } from "../configuration/config";
 import { useAuth } from "./AuthContext";
 import useToken from "../hooks/useToken";
+import { useHomeStore, HomeState } from "../stores/homeStore";
 
 // types
 type SocketCtx = {
@@ -52,6 +53,60 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const queryClient = useQueryClient();
   const userIdKey = user?.id;
 
+  /** socket events can arrive in fast bursts
+   * (partner opening the app, catching up on missed events, etc)
+   * writing straight to React Query on every single event means:
+   * cache clone -> selector re-eval ->
+   * re-render, once per event. Instead we collect the pending cache
+   * writes and flush them all at once on a short timer, so a burst of
+   * 10 events costs 1 render pass instead of 10
+   **/
+  const pendingUpdates = useRef<(() => void)[]>([]);
+  const flushHandle = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const FLUSH_INTERVAL_MS = 150;
+
+  const queueUpdate = (fn: () => void) => {
+    pendingUpdates.current.push(fn);
+
+    if (!flushHandle.current) {
+      flushHandle.current = setTimeout(() => {
+        const batch = pendingUpdates.current;
+        pendingUpdates.current = [];
+        flushHandle.current = null;
+
+        batch.forEach((apply) => apply());
+      }, FLUSH_INTERVAL_MS);
+    }
+  };
+
+  const queueSetQueryData = (
+    key: readonly unknown[],
+    updater: (old: any) => any,
+  ) => {
+    queueUpdate(() => queryClient.setQueryData(key, updater));
+  };
+
+  const queueHomeUpdate = (updater: (old: HomeState) => Partial<HomeState>) => {
+    queueUpdate(() => {
+      useHomeStore.setState((old) => {
+        if (!old.hydrated) {
+          return old;
+        }
+        return updater(old);
+      });
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      if (flushHandle.current) {
+        clearTimeout(flushHandle.current);
+        flushHandle.current = null;
+      }
+      pendingUpdates.current = [];
+    };
+  }, []);
+
   const arrayify = (value: any) => (Array.isArray(value) ? value : []);
 
   const withPossibleKeys = (value: string | number | undefined | null) => {
@@ -75,10 +130,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const setProfileData = (
     targetId: string | number | undefined | null,
-    updater: (old: any) => any
+    updater: (old: any) => any,
   ) => {
     withPossibleKeys(targetId).forEach((key) => {
-      queryClient.setQueryData(["profile", key], (old: any) => {
+      queueSetQueryData(["profile", key], (old: any) => {
         if (!old) {
           return old;
         }
@@ -88,16 +143,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const setHomeData = (updater: (old: any) => any) => {
-    if (userIdKey === undefined || userIdKey === null) {
-      return;
-    }
-
-    queryClient.setQueryData(["home", userIdKey], (old: any) => {
-      if (!old) {
-        return old;
-      }
-
-      return updater(old);
+    queueHomeUpdate((old) => {
+      const result = updater(old);
+      return result ?? old;
     });
   };
 
@@ -106,7 +154,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    queryClient.setQueryData(["portal", userIdKey], (old: any) => {
+    queueSetQueryData(["portal", userIdKey], (old: any) => {
       if (!old) {
         return old;
       }
@@ -120,7 +168,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    queryClient.setQueryData(["ours", userIdKey], (old: any) => {
+    queueSetQueryData(["ours", userIdKey], (old: any) => {
       if (!old) {
         return old;
       }
@@ -134,7 +182,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    queryClient.setQueryData(["allFavoriteMemories", userIdKey], (old: any) => {
+    queueSetQueryData(["allFavoriteMemories", userIdKey], (old: any) => {
       if (!old) {
         return old;
       }
@@ -148,22 +196,19 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    queryClient.setQueryData(
-      ["receivedSweetMessages", userIdKey],
-      (old: any) => {
-        if (!old) {
-          return old;
-        }
-
-        return updater(old);
+    queueSetQueryData(["receivedSweetMessages", userIdKey], (old: any) => {
+      if (!old) {
+        return old;
       }
-    );
+
+      return updater(old);
+    });
   };
 
   const mergeCounts = (
     current: any,
     next?: any,
-    delta?: { sweet?: number; vent?: number }
+    delta?: { sweet?: number; vent?: number },
   ) => {
     if (next) {
       return next;
@@ -197,7 +242,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     setHomeData((old: any) => {
       const existing = arrayify(old.recentActivities);
       const filtered = existing.filter(
-        (entry) => entry && String(entry.id) !== String(normalized.id)
+        (entry) => entry && String(entry.id) !== String(normalized.id),
       );
 
       return {
@@ -210,14 +255,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const upsertById = (
     list: any,
     item: any,
-    options?: { limit?: number; preserveExtras?: boolean }
+    options?: { limit?: number; preserveExtras?: boolean },
   ) => {
     const arr = arrayify(list);
     const existing = arr.find(
-      (entry) => entry && String(entry.id) === String(item.id)
+      (entry) => entry && String(entry.id) === String(item.id),
     );
     const filtered = arr.filter(
-      (entry) => entry && String(entry.id) !== String(item.id)
+      (entry) => entry && String(entry.id) !== String(item.id),
     );
 
     const nextItem =
@@ -235,7 +280,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const replaceById = (list: any, item: any) => {
     const arr = arrayify(list);
     const idx = arr.findIndex(
-      (entry) => entry && String(entry.id) === String(item.id)
+      (entry) => entry && String(entry.id) === String(item.id),
     );
 
     if (idx === -1) {
@@ -254,7 +299,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const sortSpecialDates = (dates: any[]) =>
     [...dates].sort(
-      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
 
   const connect = () => {
@@ -296,45 +341,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         };
       }) => {
         if (partnerId && String(partnerId) === String(data.userId)) {
-          queryClient.setQueryData(["home", user?.id], (old: any) => {
-            if (!old) {
-              return old;
-            }
-            return {
-              ...old,
-              partnerMood: {
-                mood: data.mood,
-                description: data.description,
-                userId: data.userId,
-              },
-            };
-          });
+          setHomeData((old: any) => ({
+            ...old,
+            partnerMood: {
+              mood: data.mood,
+              description: data.description,
+              userId: data.userId,
+            },
+          }));
         }
 
-        queryClient.setQueryData(["home", user?.id], (old: any) => {
-          if (!old) {
-            return old;
-          }
-
-          const existingActivities = Array.isArray(old.recentActivities)
-            ? old.recentActivities
-            : [];
-
-          const updatedActivities = data.recentActivity
-            ? [
-                data.recentActivity,
-                ...existingActivities.filter(
-                  (activity: any) => activity.id !== data.recentActivity?.id
-                ),
-              ]
-            : existingActivities;
-
-          return {
-            ...old,
-            recentActivities: updatedActivities,
-          };
-        });
-      }
+        pushRecentActivity(data.recentActivity);
+      },
     );
 
     s.on(
@@ -360,32 +378,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         const { statusData, recentActivity } = data;
 
         if (partnerId && String(partnerId) === String(statusData.userId)) {
-          queryClient.setQueryData(["home", user?.id], (old: any) => {
-            if (!old) {
-              return old;
-            }
+          setHomeData((old: any) => ({
+            ...old,
+            partnerStatus: statusData,
+          }));
 
-            const existingActivities = Array.isArray(old.recentActivities)
-              ? old.recentActivities
-              : [];
-
-            const updatedActivities = recentActivity
-              ? [
-                  recentActivity,
-                  ...existingActivities.filter(
-                    (activity: any) => activity.id !== recentActivity.id
-                  ),
-                ]
-              : existingActivities;
-
-            return {
-              ...old,
-              partnerStatus: statusData,
-              recentActivities: updatedActivities,
-            };
-          });
+          pushRecentActivity(recentActivity);
         }
-      }
+      },
     );
 
     s.on(
@@ -409,30 +409,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
         const recentActivity = data.recentActivity;
 
-        queryClient.setQueryData(["home", user?.id], (old: any) => {
-          if (!old) {
-            return old;
-          }
-
-          const existingActivities = Array.isArray(old.recentActivities)
-            ? old.recentActivities
-            : [];
-
-          const updatedActivities = recentActivity
-            ? [
-                recentActivity,
-                ...existingActivities.filter(
-                  (activity: any) => activity.id !== recentActivity.id
-                ),
-              ]
-            : existingActivities;
-
+        setHomeData((old: any) => {
           const unseenInteractions = Array.isArray(old.unseenInteractions)
             ? old.unseenInteractions
             : [];
 
           const updatedUnseen = unseenInteractions.some(
-            (interaction: any) => interaction.id === data.id
+            (interaction: any) => interaction.id === data.id,
           )
             ? unseenInteractions
             : [data, ...unseenInteractions];
@@ -440,10 +423,11 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return {
             ...old,
             unseenInteractions: updatedUnseen,
-            recentActivities: updatedActivities,
           };
         });
-      }
+
+        pushRecentActivity(recentActivity);
+      },
     );
 
     s.on(
@@ -494,7 +478,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             counts: mergeCounts(old.counts, data.count, { vent: 1 }),
           };
         });
-      }
+      },
     );
 
     s.on(
@@ -534,14 +518,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             receivedSweetMessages: upsertById(
               old.receivedSweetMessages,
               normalizedMessage,
-              { limit: 6, preserveExtras: true }
+              { limit: 6, preserveExtras: true },
             ),
             unseenSweetMessage: normalizedMessage,
           };
         });
 
         setReceivedSweetMessages((old: any) =>
-          upsertById(old, normalizedMessage)
+          upsertById(old, normalizedMessage),
         );
 
         setHomeData((old: any) => {
@@ -556,7 +540,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on("addTimelineRecord", (data: { newRecord: any }) => {
@@ -564,7 +548,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      queryClient.setQueryData<any[]>(["timeline", user.id], (old) => {
+      queueSetQueryData(["timeline", user.id], (old) => {
         if (!old || !Array.isArray(old)) {
           return [data.newRecord];
         }
@@ -592,11 +576,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           return;
         }
 
-        queryClient.setQueryData(["home", user.id], (old: any) => {
-          if (!old) {
-            return old;
-          }
-
+        setHomeData((old: any) => {
           const existingNotifications = Array.isArray(old.notifications)
             ? old.notifications
             : [];
@@ -610,7 +590,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             notifications: [n, ...existingNotifications],
           };
         });
-      }
+      },
     );
 
     s.on("favoritesUpdate", (data: { updated: any; recentActivity?: any }) => {
@@ -688,7 +668,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
               ...old,
               specialDates: sortSpecialDates(dates),
             };
-          })
+          }),
         );
 
         setHomeData((old: any) => {
@@ -704,7 +684,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -759,7 +739,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
               ...old,
               specialDates: sortSpecialDates(dates),
             };
-          })
+          }),
         );
 
         setHomeData((old: any) => {
@@ -775,7 +755,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -821,7 +801,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
               ...old,
               specialDates: sortSpecialDates(dates),
             };
-          })
+          }),
         );
 
         setHomeData((old: any) => {
@@ -837,7 +817,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -882,7 +862,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -927,7 +907,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -962,7 +942,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -988,7 +968,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         });
 
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -1033,14 +1013,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             recentFavoriteMemories: upsertById(
               old.recentFavoriteMemories,
               memory,
-              { limit: 6, preserveExtras: true }
+              { limit: 6, preserveExtras: true },
             ),
           };
         });
 
         setAllFavoriteMemories((old: any) => upsertById(old, memory));
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -1073,14 +1053,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             ...old,
             recentFavoriteMemories: removeById(
               old.recentFavoriteMemories,
-              data.id
+              data.id,
             ),
           };
         });
 
         setAllFavoriteMemories((old: any) => removeById(old, data.id));
         pushRecentActivity(data.recentActivity);
-      }
+      },
     );
 
     s.on(
@@ -1119,13 +1099,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             ...old,
             recentFavoriteMemories: replaceById(
               old.recentFavoriteMemories,
-              memory
+              memory,
             ),
           };
         });
 
         setAllFavoriteMemories((old: any) => replaceById(old, memory));
-      }
+      },
     );
 
     s.on("updateAbout", (data: { aboutUser: any; recentActivity?: any }) => {
@@ -1169,7 +1149,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
           const existingCanvases = arrayify(old.canvases);
           const exists = existingCanvases.some(
-            (c: any) => c.id === data.canvas.id
+            (c: any) => c.id === data.canvas.id,
           );
           if (exists) return old;
 
@@ -1178,7 +1158,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
             canvases: [data.canvas, ...existingCanvases],
           };
         });
-      }
+      },
     );
 
     s.on(
@@ -1196,12 +1176,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
                   content: data.content,
                   updatedAt: new Date().toISOString(),
                 }
-              : c
+              : c,
           );
 
           return { ...old, canvases };
         });
-      }
+      },
     );
 
     s.on(
@@ -1215,12 +1195,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
           const canvases = arrayify(old.canvases).map((c: any) =>
             c.id === data.canvasId
               ? { ...c, title: data.title, updatedAt: new Date().toISOString() }
-              : c
+              : c,
           );
 
           return { ...old, canvases };
         });
-      }
+      },
     );
 
     s.on("canvas:removed", (data: { by: number; canvasId: number }) => {
@@ -1230,7 +1210,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!old) return old;
 
         const canvases = arrayify(old.canvases).filter(
-          (c: any) => c.id !== data.canvasId
+          (c: any) => c.id !== data.canvasId,
         );
 
         return { ...old, canvases };
@@ -1271,14 +1251,14 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         queryClient.invalidateQueries({ queryKey: ["profile", partnerId] }),
         queryClient.invalidateQueries({ queryKey: ["ours", user?.id] }),
         queryClient.invalidateQueries({ queryKey: ["timeline", user?.id] }),
-        queryClient.invalidateQueries({ queryKey: ["partnerPeriodStatus"] })
+        queryClient.invalidateQueries({ queryKey: ["partnerPeriodStatus"] }),
       );
     }
 
     tasks.push(
       queryClient.invalidateQueries({
         queryKey: ["gifts", user.id],
-      })
+      }),
     );
     Promise.allSettled(tasks);
   };

@@ -6,6 +6,7 @@ import axios from "axios";
 // internal
 import { BASE_URL } from "../configuration/config";
 import { AuthContextType } from "../interfaces/AuthContextType";
+import { useHomeStore } from "../stores/homeStore";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -95,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setToken(null);
     setIsAuthenticated(false);
+    useHomeStore.getState().reset();
   };
 
   return (

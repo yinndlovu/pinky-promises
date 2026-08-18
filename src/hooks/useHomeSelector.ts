@@ -1,19 +1,11 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useHomeStore, HomeState } from "../stores/homeStore";
 
+/** thin wrapper kept so every existing call site
+(useHomeSelector(userId, selector)) keeps working unchanged
+**/
 export const useHomeSelector = <T>(
-  userId: string | undefined,
-  selector: (home: any) => T
+  _userId: string | undefined,
+  selector: (home: HomeState) => T,
 ): T | undefined => {
-  const qc = useQueryClient();
-
-  if (!userId) {
-    return undefined;
-  }
-
-  const homeData = qc.getQueryData(["home", userId]);
-  if (!homeData) {
-    return undefined;
-  }
-
-  return selector(homeData);
+  return useHomeStore(selector);
 };

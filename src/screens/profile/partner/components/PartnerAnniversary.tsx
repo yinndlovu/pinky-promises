@@ -269,7 +269,7 @@ const PartnerAnniversary: React.FC<PartnerAnniversaryProps> = ({
               <View style={[styles.iconContainer, styles.dayMetIconContainer]}>
                 <Feather name="users" size={20} color={theme.colors.primary} />
               </View>
-              <Text style={styles.cardTitle}>Day We Met</Text>
+              <Text style={styles.cardTitle}>Day we met</Text>
             </View>
             <Text style={styles.sparkleEmoji}>✨</Text>
           </View>
@@ -333,24 +333,30 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       borderRadius: 20,
       padding: 20,
       shadowColor: theme.colors.shadow,
-      shadowOffset: { width: 0, height: 4 },
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
       shadowOpacity: 0.1,
       shadowRadius: 12,
       elevation: 4,
       borderWidth: 1,
-      borderColor: "#ff6b9d" + "30",
+      borderColor: "#ff6b9d",
     },
     dayMetCard: {
       backgroundColor: theme.colors.surfaceAlt,
       borderRadius: 20,
       padding: 20,
       shadowColor: theme.colors.shadow,
-      shadowOffset: { width: 0, height: 4 },
+      shadowOffset: {
+        width: 0,
+        height: 4,
+      },
       shadowOpacity: 0.1,
       shadowRadius: 12,
       elevation: 4,
       borderWidth: 1,
-      borderColor: theme.colors.primary + "30",
+      borderColor: theme.colors.primary,
     },
     cardHeader: {
       flexDirection: "row",
@@ -367,12 +373,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: "#ff6b9d" + "20",
+      backgroundColor: "#ff6b9d",
       alignItems: "center",
       justifyContent: "center",
     },
     dayMetIconContainer: {
-      backgroundColor: theme.colors.primary + "20",
+      backgroundColor: theme.colors.primary,
     },
     cardTitle: {
       fontSize: 16,
@@ -415,7 +421,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>["theme"]) =>
       gap: 6,
       paddingTop: 8,
       borderTopWidth: 1,
-      borderTopColor: theme.colors.separator + "30",
+      borderTopColor: theme.colors.separator,
     },
     nextEventText: {
       fontSize: 12,
